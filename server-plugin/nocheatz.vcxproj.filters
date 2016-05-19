@@ -1,0 +1,524 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Link Libraries">
+      <UniqueIdentifier>{48b933d1-0ee3-49bd-a210-302a0fd62f0b}</UniqueIdentifier>
+      <Extensions>lib</Extensions>
+    </Filter>
+    <Filter Include="Resources">
+      <UniqueIdentifier>{a49b0cc0-9e3e-4df1-99eb-450d891a9828}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Code">
+      <UniqueIdentifier>{494a2659-d50f-4a89-b00a-ba4eb0303ccd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Code\Players">
+      <UniqueIdentifier>{1e5072cd-4189-4a38-b1ba-98cb02c32964}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Code\Systems">
+      <UniqueIdentifier>{f7d33d2a-d95c-42c0-aa21-cf26f6f4680c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Code\Hooks">
+      <UniqueIdentifier>{0b158ab4-982f-4a7f-a96b-a346fea5301a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Code\Misc">
+      <UniqueIdentifier>{535eff60-6da9-4b19-bef4-15585a3e84d6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Code\Systems\Testers">
+      <UniqueIdentifier>{f556038f-1c52-4c3d-ab6a-abea9fd5eabe}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Code\Systems\Blockers">
+      <UniqueIdentifier>{33627553-c9e1-427b-b2a1-8655537917bf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\Config Files">
+      <UniqueIdentifier>{6faf0c14-8252-494a-8aef-6ead1c48e003}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scripts">
+      <UniqueIdentifier>{43b25593-86c6-49ca-adb3-7e116cdf7407}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Code\SourceSdk">
+      <UniqueIdentifier>{39638cde-e266-443f-b18e-0d7f2b426294}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Code\SourceSdk\Console">
+      <UniqueIdentifier>{54834af0-fc6b-44ea-99b6-ba54328ce3c4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Code\SourceSdk\Containers">
+      <UniqueIdentifier>{4a9b253d-6cb2-4671-adba-f3e305512bc3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Code\SourceSdk\Interfaces">
+      <UniqueIdentifier>{51f5bb99-3ab6-4252-aff9-87c300dc3813}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Code\SourceSdk\Interfaces\IEngineTrace">
+      <UniqueIdentifier>{4234f10b-2418-4219-a016-4f3c6093e297}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Code\SourceSdk\Interfaces\IGameEventManager">
+      <UniqueIdentifier>{77f49292-b26b-47e9-a599-8f21bb58bd99}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Code\SourceSdk\Interfaces\IPlayerInfoManager">
+      <UniqueIdentifier>{ea891409-01ba-46b1-ac47-164efc09f04d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Code\SourceSdk\Interfaces\IServerGameClients">
+      <UniqueIdentifier>{f44c6485-4aa5-4a52-8251-8b95dfa67118}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Code\SourceSdk\Interfaces\IServerGameDLL">
+      <UniqueIdentifier>{38d6b46b-0157-4cb7-989f-e3e4b5176481}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Code\SourceSdk\Interfaces\IServerGameEnts">
+      <UniqueIdentifier>{1e2436b6-0eb3-43b2-af84-59245dc7ff76}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Code\SourceSdk\Interfaces\IServerPluginHelpers">
+      <UniqueIdentifier>{5513c120-f01e-4291-9e25-3f50272ef1de}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Code\SourceSdk\Interfaces\IVEngineServer">
+      <UniqueIdentifier>{13b3f599-6ce2-438c-b47d-44c04004490c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Code\SourceSdk\Interfaces\Protobuf">
+      <UniqueIdentifier>{b6101e25-8ecd-4ede-8627-5510bf2035f7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Code\SourceSdk\Maths">
+      <UniqueIdentifier>{1f30f076-7cdc-4f98-8280-beabb85d618f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Link Libraries\Debug">
+      <UniqueIdentifier>{f7ee2975-592c-416e-8ac0-66653cdf4853}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Link Libraries\Release">
+      <UniqueIdentifier>{79efeca6-bba5-4b31-bf75-4bc114130d82}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Res\nocheatz.vdf">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="Makefile">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="Res\nocheatz-CSS.cfg">
+      <Filter>Resources\Config Files</Filter>
+    </None>
+    <None Include="Res\nocheatz-CSGO.cfg">
+      <Filter>Resources\Config Files</Filter>
+    </None>
+    <None Include="..\scripts\prepare-build.bat">
+      <Filter>Scripts</Filter>
+    </None>
+    <None Include="..\scripts\prepare-test.bat">
+      <Filter>Scripts</Filter>
+    </None>
+    <None Include="..\scripts\make-protobuf.sh">
+      <Filter>Scripts</Filter>
+    </None>
+    <None Include="SourceSdk\Interfaces\Protobuf\cstrike15_usermessages.proto">
+      <Filter>Code\SourceSdk\Interfaces\Protobuf</Filter>
+    </None>
+    <None Include="SourceSdk\Interfaces\Protobuf\netmessages.proto">
+      <Filter>Code\SourceSdk\Interfaces\Protobuf</Filter>
+    </None>
+    <None Include="Res\config.ini">
+      <Filter>Resources</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Code\plugin.cpp">
+      <Filter>Code</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Hooks\Hook.cpp">
+      <Filter>Code\Hooks</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Hooks\OnGroundHookListener.cpp">
+      <Filter>Code\Hooks</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Hooks\PlayerRunCommandHookListener.cpp">
+      <Filter>Code\Hooks</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Misc\Helpers.cpp">
+      <Filter>Code\Misc</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Players\NczFilteredPlayersList.cpp">
+      <Filter>Code\Players</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Players\NczPlayer.cpp">
+      <Filter>Code\Players</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Players\NczPlayerManager.cpp">
+      <Filter>Code\Players</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Systems\Testers\EyeAnglesTester.cpp">
+      <Filter>Code\Systems\Testers</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Systems\Testers\ValidationTester.cpp">
+      <Filter>Code\Systems\Testers</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Systems\BaseSystem.cpp">
+      <Filter>Code\Systems</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Misc\MRecipientFilter.cpp">
+      <Filter>Code\Misc</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Systems\BanRequest.cpp">
+      <Filter>Code\Systems</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Systems\Testers\ConVarTester.cpp">
+      <Filter>Code\Systems\Testers</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Systems\Logger.cpp">
+      <Filter>Code\Systems</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Systems\Testers\ShotTester.cpp">
+      <Filter>Code\Systems\Testers</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Systems\Testers\JumpTester.cpp">
+      <Filter>Code\Systems\Testers</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Systems\Testers\SpeedTester.cpp">
+      <Filter>Code\Systems\Testers</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Hooks\ConCommandHookListener.cpp">
+      <Filter>Code\Hooks</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Systems\Testers\ConCommandTester.cpp">
+      <Filter>Code\Systems\Testers</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Hooks\SetTransmitHookListener.cpp">
+      <Filter>Code\Hooks</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Systems\Blockers\AntiFlashbangBlocker.cpp">
+      <Filter>Code\Systems\Blockers</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Systems\Blockers\AntiSmokeBlocker.cpp">
+      <Filter>Code\Systems\Blockers</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Systems\Blockers\BadUserCmdBlocker.cpp">
+      <Filter>Code\Systems\Blockers</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Systems\Blockers\WallhackBlocker.cpp">
+      <Filter>Code\Systems\Blockers</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Hooks\WeaponHookListener.cpp">
+      <Filter>Code\Hooks</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Misc\EntityProps.cpp">
+      <Filter>Code\Misc</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Systems\Testers\SpamConnectTester.cpp">
+      <Filter>Code\Systems\Testers</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Systems\Testers\SpamChangeNameTester.cpp">
+      <Filter>Code\Systems\Testers</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Hooks\RayTraceCache.cpp">
+      <Filter>Code\Hooks</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Systems\TimerListener.cpp">
+      <Filter>Code\Systems</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Systems\OnFrameListener.cpp">
+      <Filter>Code\Systems</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Systems\OnTickListener.cpp">
+      <Filter>Code\Systems</Filter>
+    </ClCompile>
+    <ClCompile Include="SourceSdk\Interfaces\Protobuf\cstrike15_usermessage_helpers.cpp">
+      <Filter>Code\SourceSdk\Interfaces\Protobuf</Filter>
+    </ClCompile>
+    <ClCompile Include="SourceSdk\Interfaces\Protobuf\cstrike15_usermessages.pb.cc">
+      <Filter>Code\SourceSdk\Interfaces\Protobuf</Filter>
+    </ClCompile>
+    <ClCompile Include="SourceSdk\Interfaces\Protobuf\netmessages.pb.cc">
+      <Filter>Code\SourceSdk\Interfaces\Protobuf</Filter>
+    </ClCompile>
+    <ClCompile Include="SourceSdk\SourceSdk.cpp">
+      <Filter>Code\SourceSdk</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Systems\ConfigManager.cpp">
+      <Filter>Code\Systems</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Code\plugin.h">
+      <Filter>Code</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Hooks\Hook.h">
+      <Filter>Code\Hooks</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Hooks\OnGroundHookListener.h">
+      <Filter>Code\Hooks</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Hooks\PlayerRunCommandHookListener.h">
+      <Filter>Code\Hooks</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Misc\Helpers.h">
+      <Filter>Code\Misc</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Players\NczFilteredPlayersList.h">
+      <Filter>Code\Players</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Players\NczPlayer.h">
+      <Filter>Code\Players</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Players\NczPlayerManager.h">
+      <Filter>Code\Players</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Systems\Testers\EyeAnglesTester.h">
+      <Filter>Code\Systems\Testers</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Systems\Testers\ValidationTester.h">
+      <Filter>Code\Systems\Testers</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Players\temp_PlayerDataStruct.h">
+      <Filter>Code\Players</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Misc\temp_BaseDataStruct.h">
+      <Filter>Code\Misc</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Systems\BaseSystem.h">
+      <Filter>Code\Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Systems\Testers\Detections\temp_BaseDetection.h">
+      <Filter>Code\Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Misc\MRecipientFilter.h">
+      <Filter>Code\Misc</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Systems\BanRequest.h">
+      <Filter>Code\Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Misc\include_windows_headers.h">
+      <Filter>Code\Misc</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Preprocessors.h">
+      <Filter>Code</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Systems\Testers\ConVarTester.h">
+      <Filter>Code\Systems\Testers</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Systems\Logger.h">
+      <Filter>Code\Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Systems\Testers\ShotTester.h">
+      <Filter>Code\Systems\Testers</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Systems\Testers\JumpTester.h">
+      <Filter>Code\Systems\Testers</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Systems\Testers\SpeedTester.h">
+      <Filter>Code\Systems\Testers</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Hooks\ConCommandHookListener.h">
+      <Filter>Code\Hooks</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Systems\Testers\ConCommandTester.h">
+      <Filter>Code\Systems\Testers</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Hooks\SetTransmitHookListener.h">
+      <Filter>Code\Hooks</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Misc\EntityProps.h">
+      <Filter>Code\Misc</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Systems\Blockers\AntiFlashbangBlocker.h">
+      <Filter>Code\Systems\Blockers</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Misc\UserMsg.h">
+      <Filter>Code\Misc</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Systems\Blockers\AntiSmokeBlocker.h">
+      <Filter>Code\Systems\Blockers</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Systems\Blockers\BadUserCmdBlocker.h">
+      <Filter>Code\Systems\Blockers</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Systems\Blockers\WallhackBlocker.h">
+      <Filter>Code\Systems\Blockers</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Hooks\WeaponHookListener.h">
+      <Filter>Code\Hooks</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Systems\Testers\SpamConnectTester.h">
+      <Filter>Code\Systems\Testers</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Systems\Testers\SpamChangeNameTester.h">
+      <Filter>Code\Systems\Testers</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Hooks\RayTraceCache.h">
+      <Filter>Code\Hooks</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Misc\temp_Metrics.h">
+      <Filter>Code\Misc</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Systems\TimerListener.h">
+      <Filter>Code\Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Systems\OnFrameListener.h">
+      <Filter>Code\Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Systems\OnTickListener.h">
+      <Filter>Code\Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\MagicValues.h">
+      <Filter>Code</Filter>
+    </ClInclude>
+    <ClInclude Include="SourceSdk\Maths\asm.h">
+      <Filter>Code\SourceSdk\Maths</Filter>
+    </ClInclude>
+    <ClInclude Include="SourceSdk\Containers\bitbuf.h">
+      <Filter>Code\SourceSdk\Containers</Filter>
+    </ClInclude>
+    <ClInclude Include="SourceSdk\Containers\bitvec.h">
+      <Filter>Code\SourceSdk\Containers</Filter>
+    </ClInclude>
+    <ClInclude Include="SourceSdk\Interfaces\bspflags.h">
+      <Filter>Code\SourceSdk\Interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="SourceSdk\Console\color.h">
+      <Filter>Code\SourceSdk\Console</Filter>
+    </ClInclude>
+    <ClInclude Include="SourceSdk\Console\convar.h">
+      <Filter>Code\SourceSdk\Console</Filter>
+    </ClInclude>
+    <ClInclude Include="SourceSdk\Interfaces\Protobuf\cstrike15_usermessage_helpers.h">
+      <Filter>Code\SourceSdk\Interfaces\Protobuf</Filter>
+    </ClInclude>
+    <ClInclude Include="SourceSdk\Interfaces\Protobuf\cstrike15_usermessages.pb.h">
+      <Filter>Code\SourceSdk\Interfaces\Protobuf</Filter>
+    </ClInclude>
+    <ClInclude Include="SourceSdk\Interfaces\datamap.h">
+      <Filter>Code\SourceSdk\Interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="SourceSdk\Interfaces\dt_send.h">
+      <Filter>Code\SourceSdk\Interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="SourceSdk\Interfaces\edict.h">
+      <Filter>Code\SourceSdk\Interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="SourceSdk\Interfaces\IAppSystem.h">
+      <Filter>Code\SourceSdk\Interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="SourceSdk\Interfaces\interface.h">
+      <Filter>Code\SourceSdk\Interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="SourceSdk\Interfaces\inetchannelinfo.h">
+      <Filter>Code\SourceSdk\Interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="SourceSdk\Interfaces\InterfacesProxy.h">
+      <Filter>Code\SourceSdk\Interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="SourceSdk\Interfaces\irecipientfilter.h">
+      <Filter>Code\SourceSdk\Interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="SourceSdk\Interfaces\iserverplugin.h">
+      <Filter>Code\SourceSdk\Interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="SourceSdk\Interfaces\iserverunknown.h">
+      <Filter>Code\SourceSdk\Interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="SourceSdk\Interfaces\server_class.h">
+      <Filter>Code\SourceSdk\Interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="SourceSdk\Interfaces\usercmd.h">
+      <Filter>Code\SourceSdk\Interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="SourceSdk\Console\iconvar.h">
+      <Filter>Code\SourceSdk\Console</Filter>
+    </ClInclude>
+    <ClInclude Include="SourceSdk\Console\icvar.h">
+      <Filter>Code\SourceSdk\Console</Filter>
+    </ClInclude>
+    <ClInclude Include="SourceSdk\Interfaces\IEngineTrace\ienginetrace.h">
+      <Filter>Code\SourceSdk\Interfaces\IEngineTrace</Filter>
+    </ClInclude>
+    <ClInclude Include="SourceSdk\Interfaces\IEngineTrace\IEngineTrace003.h">
+      <Filter>Code\SourceSdk\Interfaces\IEngineTrace</Filter>
+    </ClInclude>
+    <ClInclude Include="SourceSdk\Interfaces\IEngineTrace\IEngineTrace004.h">
+      <Filter>Code\SourceSdk\Interfaces\IEngineTrace</Filter>
+    </ClInclude>
+    <ClInclude Include="SourceSdk\Interfaces\IGameEventManager\IGameEventManager.h">
+      <Filter>Code\SourceSdk\Interfaces\IGameEventManager</Filter>
+    </ClInclude>
+    <ClInclude Include="SourceSdk\Interfaces\IGameEventManager\IGameEventManager001.h">
+      <Filter>Code\SourceSdk\Interfaces\IGameEventManager</Filter>
+    </ClInclude>
+    <ClInclude Include="SourceSdk\Interfaces\IGameEventManager\IGameEventManager002.h">
+      <Filter>Code\SourceSdk\Interfaces\IGameEventManager</Filter>
+    </ClInclude>
+    <ClInclude Include="SourceSdk\Interfaces\IPlayerInfoManager\IPlayerInfoManager.h">
+      <Filter>Code\SourceSdk\Interfaces\IPlayerInfoManager</Filter>
+    </ClInclude>
+    <ClInclude Include="SourceSdk\Interfaces\IPlayerInfoManager\IPlayerInfoManager002.h">
+      <Filter>Code\SourceSdk\Interfaces\IPlayerInfoManager</Filter>
+    </ClInclude>
+    <ClInclude Include="SourceSdk\Interfaces\IServerGameClients\IServerGameClients.h">
+      <Filter>Code\SourceSdk\Interfaces\IServerGameClients</Filter>
+    </ClInclude>
+    <ClInclude Include="SourceSdk\Interfaces\IServerGameClients\IServerGameClients003.h">
+      <Filter>Code\SourceSdk\Interfaces\IServerGameClients</Filter>
+    </ClInclude>
+    <ClInclude Include="SourceSdk\Interfaces\IServerGameClients\IServerGameClients004.h">
+      <Filter>Code\SourceSdk\Interfaces\IServerGameClients</Filter>
+    </ClInclude>
+    <ClInclude Include="SourceSdk\Interfaces\IServerGameDLL\IServerGameDLL.h">
+      <Filter>Code\SourceSdk\Interfaces\IServerGameDLL</Filter>
+    </ClInclude>
+    <ClInclude Include="SourceSdk\Interfaces\IServerGameDLL\IServerGameDLL005.h">
+      <Filter>Code\SourceSdk\Interfaces\IServerGameDLL</Filter>
+    </ClInclude>
+    <ClInclude Include="SourceSdk\Interfaces\IServerGameDLL\IServerGameDLL006.h">
+      <Filter>Code\SourceSdk\Interfaces\IServerGameDLL</Filter>
+    </ClInclude>
+    <ClInclude Include="SourceSdk\Interfaces\IServerGameDLL\IServerGameDLL009.h">
+      <Filter>Code\SourceSdk\Interfaces\IServerGameDLL</Filter>
+    </ClInclude>
+    <ClInclude Include="SourceSdk\Interfaces\IServerGameEnts\IServerGameEnts.h">
+      <Filter>Code\SourceSdk\Interfaces\IServerGameEnts</Filter>
+    </ClInclude>
+    <ClInclude Include="SourceSdk\Interfaces\IServerGameEnts\IServerGameEnts001.h">
+      <Filter>Code\SourceSdk\Interfaces\IServerGameEnts</Filter>
+    </ClInclude>
+    <ClInclude Include="SourceSdk\Interfaces\IServerPluginHelpers\IServerPluginHelpers.h">
+      <Filter>Code\SourceSdk\Interfaces\IServerPluginHelpers</Filter>
+    </ClInclude>
+    <ClInclude Include="SourceSdk\Interfaces\IServerPluginHelpers\IServerPluginHelpers001.h">
+      <Filter>Code\SourceSdk\Interfaces\IServerPluginHelpers</Filter>
+    </ClInclude>
+    <ClInclude Include="SourceSdk\Interfaces\IVEngineServer\IVEngineServer.h">
+      <Filter>Code\SourceSdk\Interfaces\IVEngineServer</Filter>
+    </ClInclude>
+    <ClInclude Include="SourceSdk\Interfaces\IVEngineServer\ivengineserver021.h">
+      <Filter>Code\SourceSdk\Interfaces\IVEngineServer</Filter>
+    </ClInclude>
+    <ClInclude Include="SourceSdk\Interfaces\IVEngineServer\IVEngineServer023.h">
+      <Filter>Code\SourceSdk\Interfaces\IVEngineServer</Filter>
+    </ClInclude>
+    <ClInclude Include="SourceSdk\Interfaces\Protobuf\netmessages.pb.h">
+      <Filter>Code\SourceSdk\Interfaces\Protobuf</Filter>
+    </ClInclude>
+    <ClInclude Include="SourceSdk\SdkPreprocessors.h">
+      <Filter>Code\SourceSdk</Filter>
+    </ClInclude>
+    <ClInclude Include="SourceSdk\Containers\utlvector.h">
+      <Filter>Code\SourceSdk\Containers</Filter>
+    </ClInclude>
+    <ClInclude Include="SourceSdk\Maths\Vector.h">
+      <Filter>Code\SourceSdk\Maths</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Misc\temp_basicstring.h">
+      <Filter>Code\Misc</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Systems\ConfigManager.h">
+      <Filter>Code\Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Misc\temp_basiclist.h">
+      <Filter>Code\Misc</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Systems\AutoTVRecord.h">
+      <Filter>Code\Systems</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="SourceSdk\Interfaces\Protobuf\protobuf-2.5.0\vsprojects\Debug\libprotobuf.lib">
+      <Filter>Link Libraries\Debug</Filter>
+    </Library>
+    <Library Include="SourceSdk\Interfaces\Protobuf\protobuf-2.5.0\vsprojects\Release\libprotobuf.lib">
+      <Filter>Link Libraries\Release</Filter>
+    </Library>
+  </ItemGroup>
+</Project>

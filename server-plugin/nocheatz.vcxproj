@@ -1,0 +1,401 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectName>nocheatzX</ProjectName>
+    <ProjectGuid>{B6572CBE-7C7F-4FFF-94DE-AFBBBAB11C64}</ProjectGuid>
+    <RootNamespace>Serverplugin_empty</RootNamespace>
+    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v140</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v140</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>11.0.50727.1</_ProjectFileVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>..\Builds\Debug\addons\NoCheatZ\</OutDir>
+    <IntDir>Debug\</IntDir>
+    <PreBuildEventUseInBuild>true</PreBuildEventUseInBuild>
+    <PreLinkEventUseInBuild>true</PreLinkEventUseInBuild>
+    <LinkIncremental>true</LinkIncremental>
+    <GenerateManifest>false</GenerateManifest>
+    <PostBuildEventUseInBuild>true</PostBuildEventUseInBuild>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>..\Builds\Release\addons\NoCheatZ\</OutDir>
+    <IntDir>Release\</IntDir>
+    <PreBuildEventUseInBuild>true</PreBuildEventUseInBuild>
+    <PreLinkEventUseInBuild>true</PreLinkEventUseInBuild>
+    <LinkIncremental>false</LinkIncremental>
+    <GenerateManifest>false</GenerateManifest>
+    <PostBuildEventUseInBuild>true</PostBuildEventUseInBuild>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <PreBuildEvent>
+      <Command>..\scripts\prepare-build.bat Debug</Command>
+    </PreBuildEvent>
+    <CustomBuildStep>
+      <Command>
+      </Command>
+      <Outputs>
+      </Outputs>
+    </CustomBuildStep>
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>.\SourceSdk\Interfaces\Protobuf\protobuf-2.5.0\src;.\Code;.\SourceSdk;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_WIN32;_DEBUG;DEBUG;_WINDOWS;_USRDLL;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_MBCS;_HAS_ITERATOR_DEBUGGING=0;NCZ_CSS;PLATFORM_WINDOWS_PC;WIN32_LEAN_AND_MEAN;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <StringPooling>true</StringPooling>
+      <MinimalRebuild>true</MinimalRebuild>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <ForceConformanceInForLoopScope>true</ForceConformanceInForLoopScope>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <PrecompiledHeader />
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <ProgramDataBaseFileName>$(IntDir)</ProgramDataBaseFileName>
+      <GenerateXMLDocumentationFiles>false</GenerateXMLDocumentationFiles>
+      <BrowseInformation>true</BrowseInformation>
+      <BrowseInformationFile>$(IntDir)</BrowseInformationFile>
+      <WarningLevel>Level4</WarningLevel>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <CompileAs>CompileAsCpp</CompileAs>
+      <ErrorReporting>Prompt</ErrorReporting>
+      <ShowIncludes>false</ShowIncludes>
+      <MultiProcessorCompilation>false</MultiProcessorCompilation>
+      <DisableSpecificWarnings>4100;4324</DisableSpecificWarnings>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>_DEBUG;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Culture>0x0409</Culture>
+    </ResourceCompile>
+    <Link>
+      <AdditionalDependencies>odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <ShowProgress>NotSet</ShowProgress>
+      <OutputFile>$(TargetPath)</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <AdditionalLibraryDirectories>../SourceSdk\Libs;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <IgnoreSpecificDefaultLibraries>libc;libcd;libcmt;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ProgramDatabaseFile>$(OutDir)$(TargetName).pdb</ProgramDatabaseFile>
+      <GenerateMapFile>true</GenerateMapFile>
+      <MapFileName>$(IntDir)$(TargetName).map</MapFileName>
+      <SubSystem>Windows</SubSystem>
+      <BaseAddress>
+      </BaseAddress>
+      <TargetMachine>MachineX86</TargetMachine>
+      <LinkErrorReporting>PromptImmediately</LinkErrorReporting>
+      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
+    </Link>
+    <Manifest>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+    </Manifest>
+    <Xdcmake>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+    </Xdcmake>
+    <Bscmake>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <OutputFile>$(OutDir)serverplugin_empty.bsc</OutputFile>
+      <PreserveSbr>true</PreserveSbr>
+    </Bscmake>
+    <PostBuildEvent>
+      <Command>..\scripts\prepare-test.bat CSGO Debug 740 csgo</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <PreBuildEvent>
+      <Command>..\scripts\prepare-build.bat Release</Command>
+      <Message>Prepare Build</Message>
+    </PreBuildEvent>
+    <CustomBuildStep>
+      <Command>if exist ..\..\..\game\bin\"$(TargetName)".dll attrib -r ..\..\..\game\bin\"$(TargetName)".dll
+copy "$(TargetPath)" ..\..\..\game\bin\"$(TargetName)".dll
+if exist ..\..\..\game\bin\"$(TargetName)".pdb attrib -r ..\..\..\game\bin\"$(TargetName)".pdb
+copy "$(TargetPath)" ..\..\..\game\bin\"$(TargetName)".pdb
+</Command>
+      <Outputs>..\..\..\game\bin\serverplugin_empty.dll;..\..\..\game\bin\serverplugin_empty.pdb;%(Outputs)</Outputs>
+    </CustomBuildStep>
+    <ClCompile>
+      <Optimization>MaxSpeed</Optimization>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <AdditionalIncludeDirectories>.\SourceSdk\Interfaces\Protobuf\protobuf-2.5.0\src;.\Code;.\SourceSdk;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_WIN32;NDEBUG;_WINDOWS;_USRDLL;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_MBCS;NCZ_CSS;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <StringPooling>true</StringPooling>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
+      <FunctionLevelLinking>false</FunctionLevelLinking>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <ForceConformanceInForLoopScope>true</ForceConformanceInForLoopScope>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <PrecompiledHeader />
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <ProgramDataBaseFileName>$(IntDir)</ProgramDataBaseFileName>
+      <GenerateXMLDocumentationFiles>false</GenerateXMLDocumentationFiles>
+      <BrowseInformation />
+      <BrowseInformationFile>$(IntDir)</BrowseInformationFile>
+      <WarningLevel>Level4</WarningLevel>
+      <DebugInformationFormat>None</DebugInformationFormat>
+      <CompileAs>CompileAsCpp</CompileAs>
+      <ErrorReporting>Prompt</ErrorReporting>
+      <CompileAsWinRT>false</CompileAsWinRT>
+      <SDLCheck>false</SDLCheck>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <OmitFramePointers>true</OmitFramePointers>
+      <WholeProgramOptimization>true</WholeProgramOptimization>
+      <EnableParallelCodeGeneration>true</EnableParallelCodeGeneration>
+      <EnableEnhancedInstructionSet>StreamingSIMDExtensions</EnableEnhancedInstructionSet>
+      <FloatingPointExceptions>false</FloatingPointExceptions>
+      <DisableSpecificWarnings>4100;4324</DisableSpecificWarnings>
+      <CompileAsManaged>false</CompileAsManaged>
+      <EnableFiberSafeOptimizations>true</EnableFiberSafeOptimizations>
+      <ControlFlowGuard>false</ControlFlowGuard>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>NDEBUG;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Culture>0x0409</Culture>
+    </ResourceCompile>
+    <Link>
+      <AdditionalDependencies>odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <ShowProgress>NotSet</ShowProgress>
+      <OutputFile>$(TargetPath)</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <AdditionalLibraryDirectories>..\Tiers\Source Engine SDKs\css-sdk\lib\public;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <IgnoreSpecificDefaultLibraries>libc;libcd;libcmtd;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <GenerateDebugInformation>DebugFastLink</GenerateDebugInformation>
+      <ProgramDatabaseFile>$(IntDir)$(TargetName).pdb</ProgramDatabaseFile>
+      <GenerateMapFile>true</GenerateMapFile>
+      <MapFileName>$(IntDir)$(TargetName).map</MapFileName>
+      <SubSystem>Windows</SubSystem>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <BaseAddress>
+      </BaseAddress>
+      <TargetMachine>MachineX86</TargetMachine>
+      <LinkErrorReporting>PromptImmediately</LinkErrorReporting>
+      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
+      <FullProgramDatabaseFile>true</FullProgramDatabaseFile>
+      <AssemblyDebug>false</AssemblyDebug>
+      <TurnOffAssemblyGeneration>true</TurnOffAssemblyGeneration>
+      <SectionAlignment>32</SectionAlignment>
+      <MapExports>true</MapExports>
+    </Link>
+    <Manifest>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+    </Manifest>
+    <Xdcmake>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+    </Xdcmake>
+    <Bscmake>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <OutputFile>$(OutDir)serverplugin_empty.bsc</OutputFile>
+    </Bscmake>
+    <PostBuildEvent>
+      <Command>..\scripts\prepare-test.bat CSS Release 232330 cstrike</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <None Include="..\scripts\make-protobuf.sh" />
+    <None Include="..\scripts\prepare-build.bat" />
+    <None Include="..\scripts\prepare-test.bat" />
+    <None Include="SourceSdk\Interfaces\Protobuf\cstrike15_usermessages.proto" />
+    <None Include="SourceSdk\Interfaces\Protobuf\netmessages.proto" />
+    <None Include="Makefile" />
+    <None Include="Res\nocheatz-CSGO.cfg" />
+    <None Include="Res\nocheatz-CSS.cfg" />
+    <None Include="Res\nocheatz.vdf" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Code\Systems\ConfigManager.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="SourceSdk\Interfaces\Protobuf\cstrike15_usermessages.pb.cc" />
+    <ClCompile Include="SourceSdk\Interfaces\Protobuf\cstrike15_usermessage_helpers.cpp" />
+    <ClCompile Include="SourceSdk\Interfaces\Protobuf\netmessages.pb.cc" />
+    <ClCompile Include="SourceSdk\SourceSdk.cpp" />
+    <ClCompile Include="Code\Hooks\ConCommandHookListener.cpp" />
+    <ClCompile Include="Code\Hooks\Hook.cpp" />
+    <ClCompile Include="Code\Hooks\OnGroundHookListener.cpp" />
+    <ClCompile Include="Code\Hooks\PlayerRunCommandHookListener.cpp" />
+    <ClCompile Include="Code\Hooks\RayTraceCache.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="Code\Hooks\SetTransmitHookListener.cpp" />
+    <ClCompile Include="Code\Hooks\WeaponHookListener.cpp" />
+    <ClCompile Include="Code\Misc\EntityProps.cpp" />
+    <ClCompile Include="Code\Misc\Helpers.cpp" />
+    <ClCompile Include="Code\Misc\MRecipientFilter.cpp" />
+    <ClCompile Include="Code\Players\NczFilteredPlayersList.cpp" />
+    <ClCompile Include="Code\Players\NczPlayer.cpp" />
+    <ClCompile Include="Code\Players\NczPlayerManager.cpp" />
+    <ClCompile Include="Code\plugin.cpp" />
+    <ClCompile Include="Code\Systems\BanRequest.cpp" />
+    <ClCompile Include="Code\Systems\BaseSystem.cpp" />
+    <ClCompile Include="Code\Systems\Blockers\AntiFlashbangBlocker.cpp" />
+    <ClCompile Include="Code\Systems\Blockers\AntiSmokeBlocker.cpp" />
+    <ClCompile Include="Code\Systems\Blockers\BadUserCmdBlocker.cpp" />
+    <ClCompile Include="Code\Systems\Blockers\WallhackBlocker.cpp" />
+    <ClCompile Include="Code\Systems\Logger.cpp" />
+    <ClCompile Include="Code\Systems\OnFrameListener.cpp" />
+    <ClCompile Include="Code\Systems\OnTickListener.cpp" />
+    <ClCompile Include="Code\Systems\Testers\ConCommandTester.cpp" />
+    <ClCompile Include="Code\Systems\Testers\ShotTester.cpp" />
+    <ClCompile Include="Code\Systems\Testers\JumpTester.cpp" />
+    <ClCompile Include="Code\Systems\Testers\ConVarTester.cpp" />
+    <ClCompile Include="Code\Systems\Testers\EyeAnglesTester.cpp" />
+    <ClCompile Include="Code\Systems\Testers\SpamChangeNameTester.cpp" />
+    <ClCompile Include="Code\Systems\Testers\SpamConnectTester.cpp" />
+    <ClCompile Include="Code\Systems\Testers\SpeedTester.cpp" />
+    <ClCompile Include="Code\Systems\Testers\ValidationTester.cpp" />
+    <ClCompile Include="Code\Systems\TimerListener.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Code\Misc\temp_basiclist.h" />
+    <ClInclude Include="Code\Misc\temp_basicstring.h" />
+    <ClInclude Include="Code\Systems\AutoTVRecord.h" />
+    <ClInclude Include="Code\Systems\ConfigManager.h" />
+    <ClInclude Include="SourceSdk\Console\color.h" />
+    <ClInclude Include="SourceSdk\Console\convar.h" />
+    <ClInclude Include="SourceSdk\Console\iconvar.h" />
+    <ClInclude Include="SourceSdk\Console\icvar.h" />
+    <ClInclude Include="SourceSdk\Containers\bitbuf.h" />
+    <ClInclude Include="SourceSdk\Containers\bitvec.h" />
+    <ClInclude Include="SourceSdk\Containers\utlvector.h" />
+    <ClInclude Include="SourceSdk\Interfaces\bspflags.h" />
+    <ClInclude Include="SourceSdk\Interfaces\datamap.h" />
+    <ClInclude Include="SourceSdk\Interfaces\dt_send.h" />
+    <ClInclude Include="SourceSdk\Interfaces\edict.h" />
+    <ClInclude Include="SourceSdk\Interfaces\IAppSystem.h" />
+    <ClInclude Include="SourceSdk\Interfaces\IEngineTrace\ienginetrace.h" />
+    <ClInclude Include="SourceSdk\Interfaces\IEngineTrace\IEngineTrace003.h" />
+    <ClInclude Include="SourceSdk\Interfaces\IEngineTrace\IEngineTrace004.h" />
+    <ClInclude Include="SourceSdk\Interfaces\IGameEventManager\IGameEventManager.h" />
+    <ClInclude Include="SourceSdk\Interfaces\IGameEventManager\IGameEventManager001.h" />
+    <ClInclude Include="SourceSdk\Interfaces\IGameEventManager\IGameEventManager002.h" />
+    <ClInclude Include="SourceSdk\Interfaces\inetchannelinfo.h" />
+    <ClInclude Include="SourceSdk\Interfaces\interface.h" />
+    <ClInclude Include="SourceSdk\Interfaces\InterfacesProxy.h" />
+    <ClInclude Include="SourceSdk\Interfaces\IPlayerInfoManager\IPlayerInfoManager.h" />
+    <ClInclude Include="SourceSdk\Interfaces\IPlayerInfoManager\IPlayerInfoManager002.h" />
+    <ClInclude Include="SourceSdk\Interfaces\irecipientfilter.h" />
+    <ClInclude Include="SourceSdk\Interfaces\IServerGameClients\IServerGameClients.h" />
+    <ClInclude Include="SourceSdk\Interfaces\IServerGameClients\IServerGameClients003.h" />
+    <ClInclude Include="SourceSdk\Interfaces\IServerGameClients\IServerGameClients004.h" />
+    <ClInclude Include="SourceSdk\Interfaces\IServerGameDLL\IServerGameDLL.h" />
+    <ClInclude Include="SourceSdk\Interfaces\IServerGameDLL\IServerGameDLL005.h" />
+    <ClInclude Include="SourceSdk\Interfaces\IServerGameDLL\IServerGameDLL006.h" />
+    <ClInclude Include="SourceSdk\Interfaces\IServerGameDLL\IServerGameDLL009.h" />
+    <ClInclude Include="SourceSdk\Interfaces\IServerGameEnts\IServerGameEnts.h" />
+    <ClInclude Include="SourceSdk\Interfaces\IServerGameEnts\IServerGameEnts001.h" />
+    <ClInclude Include="SourceSdk\Interfaces\iserverplugin.h" />
+    <ClInclude Include="SourceSdk\Interfaces\IServerPluginHelpers\IServerPluginHelpers.h" />
+    <ClInclude Include="SourceSdk\Interfaces\IServerPluginHelpers\IServerPluginHelpers001.h" />
+    <ClInclude Include="SourceSdk\Interfaces\iserverunknown.h" />
+    <ClInclude Include="SourceSdk\Interfaces\IVEngineServer\IVEngineServer.h" />
+    <ClInclude Include="SourceSdk\Interfaces\IVEngineServer\ivengineserver021.h" />
+    <ClInclude Include="SourceSdk\Interfaces\IVEngineServer\IVEngineServer023.h" />
+    <ClInclude Include="SourceSdk\Interfaces\Protobuf\cstrike15_usermessages.pb.h" />
+    <ClInclude Include="SourceSdk\Interfaces\Protobuf\cstrike15_usermessage_helpers.h" />
+    <ClInclude Include="SourceSdk\Interfaces\Protobuf\netmessages.pb.h" />
+    <ClInclude Include="SourceSdk\Interfaces\server_class.h" />
+    <ClInclude Include="SourceSdk\Interfaces\usercmd.h" />
+    <ClInclude Include="SourceSdk\Maths\asm.h" />
+    <ClInclude Include="SourceSdk\Maths\Vector.h" />
+    <ClInclude Include="SourceSdk\SdkPreprocessors.h" />
+    <ClInclude Include="Code\Hooks\ConCommandHookListener.h" />
+    <ClInclude Include="Code\Hooks\Hook.h" />
+    <ClInclude Include="Code\Hooks\OnGroundHookListener.h" />
+    <ClInclude Include="Code\Hooks\PlayerRunCommandHookListener.h" />
+    <ClInclude Include="Code\Hooks\RayTraceCache.h" />
+    <ClInclude Include="Code\Hooks\SetTransmitHookListener.h" />
+    <ClInclude Include="Code\Hooks\WeaponHookListener.h" />
+    <ClInclude Include="Code\MagicValues.h" />
+    <ClInclude Include="Code\Misc\EntityProps.h" />
+    <ClInclude Include="Code\Misc\Helpers.h" />
+    <ClInclude Include="Code\Misc\include_windows_headers.h" />
+    <ClInclude Include="Code\Misc\temp_Metrics.h" />
+    <ClInclude Include="Code\Misc\MRecipientFilter.h" />
+    <ClInclude Include="Code\Misc\temp_BaseDataStruct.h" />
+    <ClInclude Include="Code\Misc\UserMsg.h" />
+    <ClInclude Include="Code\Players\NczFilteredPlayersList.h" />
+    <ClInclude Include="Code\Players\NczPlayer.h" />
+    <ClInclude Include="Code\Players\NczPlayerManager.h" />
+    <ClInclude Include="Code\Players\temp_PlayerDataStruct.h" />
+    <ClInclude Include="Code\plugin.h" />
+    <ClInclude Include="Code\Preprocessors.h" />
+    <ClInclude Include="Code\Systems\BanRequest.h" />
+    <ClInclude Include="Code\Systems\BaseSystem.h" />
+    <ClInclude Include="Code\Systems\Blockers\AntiFlashbangBlocker.h" />
+    <ClInclude Include="Code\Systems\Blockers\AntiSmokeBlocker.h" />
+    <ClInclude Include="Code\Systems\Blockers\BadUserCmdBlocker.h" />
+    <ClInclude Include="Code\Systems\Blockers\WallhackBlocker.h" />
+    <ClInclude Include="Code\Systems\Logger.h" />
+    <ClInclude Include="Code\Systems\OnFrameListener.h" />
+    <ClInclude Include="Code\Systems\OnTickListener.h" />
+    <ClInclude Include="Code\Systems\Testers\ConCommandTester.h" />
+    <ClInclude Include="Code\Systems\Testers\ShotTester.h" />
+    <ClInclude Include="Code\Systems\Testers\JumpTester.h" />
+    <ClInclude Include="Code\Systems\Testers\ConVarTester.h" />
+    <ClInclude Include="Code\Systems\Testers\Detections\temp_BaseDetection.h" />
+    <ClInclude Include="Code\Systems\Testers\EyeAnglesTester.h" />
+    <ClInclude Include="Code\Systems\Testers\SpamChangeNameTester.h" />
+    <ClInclude Include="Code\Systems\Testers\SpamConnectTester.h" />
+    <ClInclude Include="Code\Systems\Testers\SpeedTester.h" />
+    <ClInclude Include="Code\Systems\Testers\ValidationTester.h" />
+    <ClInclude Include="Code\Systems\TimerListener.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="SourceSdk\Interfaces\Protobuf\protobuf-2.5.0\vsprojects\Debug\libprotobuf.lib">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
+    </Library>
+    <Library Include="SourceSdk\Interfaces\Protobuf\protobuf-2.5.0\vsprojects\Release\libprotobuf.lib">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
+    </Library>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Res\config.ini">
+      <FileType>XML</FileType>
+    </None>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

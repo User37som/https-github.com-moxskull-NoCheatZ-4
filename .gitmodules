@@ -1,0 +1,4 @@
+[submodule "sourcesdk"]
+	path = server-plugin/SourceSdk
+	url = https://github.com/L-EARN/SourceSdk-ServerPlugin.git
+	branch = master
