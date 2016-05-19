@@ -1,4 +1,4 @@
-# NoCheatZ-3
+# NoCheatZ-4
 Source Engine serverside anti-cheat plugin. (CS:S, CS:GO).
 
 ___
@@ -22,8 +22,7 @@ Currently [CS:S](http://store.steampowered.com/app/240) is the base of this proj
 ___
 
 * **Current project status** : Experimenting
-* **Last known stable commit** : https://github.com/L-EARN/NoCheatZ-3/commit/b2ba18f4a68a40e4762501c9a048c6906bf042ed
-* **Old (ugly) NoCheatZ-3 plugin previously distributed at NoCheatZ.com** : https://github.com/L-EARN/NoCheatZ-3/tree/d83b72dda823d163daa200f0bd959a72599164e9/old-nocheatz3
+* **Last known stable commit** : https://github.com/L-EARN/NoCheatZ-4/commit/b2ba18f4a68a40e4762501c9a048c6906bf042ed
 
 ___
 # Contributing
@@ -50,8 +49,8 @@ ___
 su to your srcds user.
 
 ```git
-git clone git://github.com/L-EARN/NoCheatZ-3.git
-cd NoCheatZ-3
+git clone git://github.com/L-EARN/NoCheatZ-4.git
+cd NoCheatZ-4
 git submodule update --remote
 ```
 
@@ -75,10 +74,10 @@ apt-get install build-essential gcc-multilib g++-multilib ia32-libs lib32gcc1 li
 
 4. With your console, go to the "server-plugin" directory and type `make debug`
 
-The binary and all other stuff will go in NoCheatZ-3/Builds/[CONFIG]/addons/NoCheatZ
+The binary and all other stuff will go in NoCheatZ-4/Builds/[CONFIG]/addons/NoCheatZ
 
 You can copy-paste the entire content of the Builds directory into the root directory of your gameserver.
-(e.g. `cp /R ./NoCheatZ-3/Builds/Release/* /home/user/steamcmd/CSS/cstrike` )
+(e.g. `cp /R ./NoCheatZ-4/Builds/Release/* /home/user/steamcmd/CSS/cstrike` )
 
 5. If you want to run the server using gdb, create a script in steamcmd/CSS with something like this :
 
