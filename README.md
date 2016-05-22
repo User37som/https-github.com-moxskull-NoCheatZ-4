@@ -21,7 +21,7 @@ Currently [CS:S](http://store.steampowered.com/app/240) is the base of this proj
 
 ___
 
-* **Current project status** : Experimenting
+* **Current project status** : [Fixing](https://github.com/L-EARN/NoCheatZ-4/issues)
 * **Last known stable commit** : https://github.com/L-EARN/NoCheatZ-4/commit/b2ba18f4a68a40e4762501c9a048c6906bf042ed
 
 ___
