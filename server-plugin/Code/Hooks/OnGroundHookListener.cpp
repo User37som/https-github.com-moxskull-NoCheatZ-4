@@ -41,7 +41,7 @@ void OnGroundHookListener::HookOnGround(NczPlayer* player)
 	if(pdwInterface != vtptr)
 	{
 		pdwInterface = vtptr;
-		DWORD OldFunc = VirtualTableHook(pdwInterface, g_ConfigManager.GetVirtualFunctionId("mhgroundentity"), (DWORD)nNetworkStateChanged_m_hGroundEntity );
+		DWORD OldFunc = VirtualTableHook(pdwInterface, ConfigManager::GetInstance()->GetVirtualFunctionId("mhgroundentity"), (DWORD)nNetworkStateChanged_m_hGroundEntity );
 		*(DWORD*)&(gpOldGroundFn) = OldFunc;
 	}
 }
@@ -50,7 +50,7 @@ void OnGroundHookListener::UnhookOnGround()
 {
 	if(pdwInterface && gpOldGroundFn)
 	{
-		VirtualTableHook(pdwInterface, g_ConfigManager.GetVirtualFunctionId("mhgroundentity"), (DWORD)gpOldGroundFn, (DWORD)nNetworkStateChanged_m_hGroundEntity);
+		VirtualTableHook(pdwInterface, ConfigManager::GetInstance()->GetVirtualFunctionId("mhgroundentity"), (DWORD)gpOldGroundFn, (DWORD)nNetworkStateChanged_m_hGroundEntity);
 		pdwInterface = nullptr;
 		gpOldGroundFn = nullptr;
 	}
@@ -62,7 +62,7 @@ void HOOKFN_INT OnGroundHookListener::nNetworkStateChanged_m_hGroundEntity(CBase
 void HOOKFN_INT OnGroundHookListener::nNetworkStateChanged_m_hGroundEntity(CBasePlayer* basePlayer, void*, int * new_m_hGroundEntity)
 #endif
 {
-	PlayerHandler* ph = g_NczPlayerManager.GetPlayerHandlerByBasePlayer(basePlayer);
+	PlayerHandler* ph = NczPlayerManager::GetInstance()->GetPlayerHandlerByBasePlayer(basePlayer);
 	bool new_isOnground = true;
 
 	if(ph->status >= PLAYER_CONNECTED)

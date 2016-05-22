@@ -18,6 +18,8 @@
 
 #pragma once
 
-#include <Windows.h>
+#ifdef WIN32
+#	include <Windows.h>
+#endif
 
 #endif

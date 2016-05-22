@@ -21,6 +21,7 @@
 
 #include "NczPlayer.h"
 #include "Preprocessors.h"
+#include "Misc/temp_singleton.h"
 
 #include "SdkPreprocessors.h"
 #include "Interfaces/IGameEventManager/IGameEventManager.h"
@@ -50,6 +51,7 @@ struct PlayerHandler
 	void Reset()
 	{
 		if (playerClass) delete playerClass;
+		playerClass = nullptr;
 		status = INVALID;
 		in_tests_time = std::numeric_limits<float>::max();
 	}
@@ -58,8 +60,12 @@ struct PlayerHandler
 class CCSPlayer;
 
 /* Distribue et met à jour l'état des slots du serveur */
-class NczPlayerManager : public SourceSdk::IGameEventListener002
+class NczPlayerManager :
+	public SourceSdk::IGameEventListener002,
+	public Singleton<NczPlayerManager>
 {
+	typedef  Singleton<NczPlayerManager> singleton_class;
+
 public:
 	NczPlayerManager();
 	virtual ~NczPlayerManager();
@@ -97,8 +103,6 @@ inline PlayerHandler* NczPlayerManager::GetPlayerHandlerByIndex(int slot)
 	return (PlayerHandler*)(&FullHandlersList[slot]);
 }
 
-extern NczPlayerManager g_NczPlayerManager;
-
 /* Utilisé en interne pour initialiser le tableau, des petites fonctions
   Ajout d'une case supplémentaire à FullHandlersList pour pouvoir quitter proprement la boucle PLAYERS_LOOP_RUNTIME */
 #define _PLAYERS_LOOP_INIT { \
@@ -110,9 +114,9 @@ extern NczPlayerManager g_NczPlayerManager;
    Donne la variable ph , x et maxcl dans la boucle */
 #define PLAYERS_LOOP_RUNTIME { \
 		int x = 1; \
-		const int maxcl = g_NczPlayerManager.GetMaxIndex(); \
-		PlayerHandler* ph = g_NczPlayerManager.GetPlayerHandlerByIndex(x); \
-		for(; x <= maxcl; ++x, ph = g_NczPlayerManager.GetPlayerHandlerByIndex(x)){if(ph->status == INVALID) continue;
+		const int maxcl = NczPlayerManager::GetInstance()->GetMaxIndex(); \
+		PlayerHandler* ph = NczPlayerManager::GetInstance()->GetPlayerHandlerByIndex(x); \
+		for(; x <= maxcl; ++x, ph = NczPlayerManager::GetInstance()->GetPlayerHandlerByIndex(x)){if(ph->status == INVALID) continue;
 
 #define END_PLAYERS_LOOP  }}
 #define _END_PLAYERS_LOOP_INIT  ++x;ph = &(FullHandlersList[x]);}while(x <= MAX_PLAYERS);}

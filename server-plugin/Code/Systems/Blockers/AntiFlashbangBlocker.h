@@ -20,6 +20,7 @@
 #include "Players/temp_PlayerDataStruct.h"
 #include "Hooks/SetTransmitHookListener.h"
 #include "Systems/BaseSystem.h"
+#include "Misc/temp_singleton.h"
 
 typedef struct FlashInfoS
 {
@@ -39,8 +40,12 @@ class AntiFlashbangBlocker :
 	private BaseSystem,
 	private SourceSdk::IGameEventListener002,
 	public PlayerDataStructHandler<FlashInfoT>,
-	private SetTransmitHookListener
+	private SetTransmitHookListener,
+	public Singleton<AntiFlashbangBlocker>
 {
+	typedef Singleton<AntiFlashbangBlocker> singleton_class;
+	typedef PlayerDataStructHandler<FlashInfoT> playerdatahandler_class;
+
 public:
 	AntiFlashbangBlocker();
 	~AntiFlashbangBlocker();
@@ -54,7 +59,5 @@ private:
 	bool SetTransmitCallback(SourceSdk::edict_t* const ea, SourceSdk::edict_t* const eb);
 	void FireGameEvent(SourceSdk::IGameEvent* ev);
 };
-
-extern AntiFlashbangBlocker g_AntiFlashbangBlocker;
 
 #endif // ANTIFLASHBANGBLOCKER_H

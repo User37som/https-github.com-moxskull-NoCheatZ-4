@@ -19,7 +19,8 @@
 #include "Systems/BanRequest.h"
 
 SpamConnectTester::SpamConnectTester() :
-	BaseSystem("SpamConnectTester", PLAYER_CONNECTING, INVALID, STATUS_EQUAL_OR_BETTER)
+	BaseSystem("SpamConnectTester", PLAYER_CONNECTING, INVALID, STATUS_EQUAL_OR_BETTER),
+	singleton_class()
 {
 }
 

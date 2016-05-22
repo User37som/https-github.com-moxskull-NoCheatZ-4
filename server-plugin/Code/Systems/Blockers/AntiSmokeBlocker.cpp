@@ -23,9 +23,10 @@
 AntiSmokeBlocker::AntiSmokeBlocker() :
 	BaseSystem("AntiSmokeBlocker", PLAYER_CONNECTED, PLAYER_CONNECTING, STATUS_EQUAL_OR_BETTER),
 	IGameEventListener002(),
-	PlayerDataStructHandler<SmokeInfoT>(),
+	playerdatahandler_class(),
 	SetTransmitHookListener(),
-	OnTickListener()
+	OnTickListener(),
+	singleton_class()
 {
 	METRICS_ADD_TIMER("AntiSmokeBlocker::OnFrame", 10.0);
 }
@@ -119,7 +120,7 @@ void AntiSmokeBlocker::ProcessOnTick()
 				{
 					if (x == y) continue;
 
-					PlayerHandler* const other_ph = g_NczPlayerManager.GetPlayerHandlerByIndex(y);
+					PlayerHandler* const other_ph = NczPlayerManager::GetInstance()->GetPlayerHandlerByIndex(y);
 					if (other_ph->status == INVALID) continue;
 
 					void* const player_info = other_ph->playerClass->GetPlayerInfo();
@@ -171,9 +172,9 @@ bool AntiSmokeBlocker::SetTransmitCallback(SourceSdk::edict_t* const ea, SourceS
 {
 	if(IsActive() && ea != eb)
 	{
-		if(g_NczPlayerManager.GetPlayerHandlerByEdict(eb)->status == INVALID) return false;
+		if(NczPlayerManager::GetInstance()->GetPlayerHandlerByEdict(eb)->status == INVALID) return false;
 
-		NczPlayer* const pPlayer_b = g_NczPlayerManager.GetPlayerHandlerByEdict(eb)->playerClass;
+		NczPlayer* const pPlayer_b = NczPlayerManager::GetInstance()->GetPlayerHandlerByEdict(eb)->playerClass;
 
 		if(GetPlayerDataStruct(pPlayer_b)->is_in_smoke)
 			return true;
@@ -219,5 +220,3 @@ void AntiSmokeBlocker::FireGameEvent(SourceSdk::IGameEvent * ev)
 	ST_R_STATIC SmokeInfoT default_smoke = SmokeInfoT();
 	ResetAll(&default_smoke);
 }
-
-AntiSmokeBlocker g_AntiSmokeBlocker = AntiSmokeBlocker();

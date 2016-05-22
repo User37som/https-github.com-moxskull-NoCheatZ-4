@@ -19,7 +19,11 @@
 #include "Misc/temp_Metrics.h"
 
 
-BanRequest::BanRequest() : m_wait_time(10.0), m_do_writeid(false), TimerListener()
+BanRequest::BanRequest() :
+	m_wait_time(10.0),
+	m_do_writeid(false),
+	TimerListener(),
+	singleton_class()
 {
 
 }
@@ -102,5 +106,3 @@ void BanRequest::WriteBansIfNeeded()
 		SourceSdk::InterfacesProxy::Call_ServerExecute();
 	}
 }
-
-BanRequest g_BanRequest;

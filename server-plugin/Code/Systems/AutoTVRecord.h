@@ -17,7 +17,10 @@ limitations under the License.
 #define AUTOTVRECORD_H
 
 #include "BaseSystem.h"
+#include "OnTickListener.h"
+#include "Hooks/ConCommandHookListener.h"
 #include "Misc/temp_basicstring.h"
+#include "Misc/temp_singleton.h"
 
 /*
 	This system will :
@@ -26,44 +29,58 @@ limitations under the License.
 */
 
 class AutoTVRecord : 
-	public BaseSystem
+	public BaseSystem,
+	private ConCommandHookListener,
+	public Singleton<AutoTVRecord>
 {
+	typedef Singleton<AutoTVRecord> singleton_class;
+
 private:
+	basic_string m_demofile;
+	basic_string m_prefix;
+	size_t m_recordtickcount;
+	int m_tvslot;
+	int m_minplayers;
+	bool m_recording;
+	bool m_expectedtvconfigchange;
+
 	void Init();
 	void Load();
 	void Unload();
 
-	basic_string m_demofile;
-	int m_tvslot;
-	int m_recordstarttick;
-	int m_minplayers;
-	bool m_recording;
+	void StartRecord();
+
+	void StopRecord();
 
 public:
 	AutoTVRecord();
 	~AutoTVRecord();
 
+	void OnTick();
+
 	// How much human players must be in the game before we start recording. 1 or 2 are great values.
 	void SetMinPlayers(int min);
 
 	// Prefix in the filename of records
-	void SetRecordPrefix(basic_string const & directory);
+	void SetRecordPrefix(basic_string const & prefix);
 
-	// What is the current record tick (The tick will be notified in detection logs, so it will be easier to seek the detection)
-	int GetRecordTick();
+	// What is the current record tick (The tick will be notified in detection logs, so it will be easier to seek detections in demos)
+	size_t GetRecordTick() const;
 
-	bool IsRecording();
+	bool IsRecording() const;
 
 	// The index of SourceTV
-	int GetSlot();
+	size_t GetSlot();
+
+	void SpawnTV();
 
 	// The current filename, only the filename.
-	basic_string GetRecordFilename();
+	basic_string const & GetRecordFilename() const;
 
 	// Send a chat message to the TV and to all viewers.
 	void SendTVChatMessage(basic_string const & msg);
-};
 
-extern AutoTVRecord g_AutoTVRecord;
+	virtual bool ConCommandCallback(NczPlayer* player, void* cmd, const SourceSdk::CCommand & args);
+};
 
 #endif

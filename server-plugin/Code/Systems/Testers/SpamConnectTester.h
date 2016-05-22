@@ -22,6 +22,7 @@
 #include "Misc/temp_basiclist.h"
 #include "Preprocessors.h"
 #include "Systems/BaseSystem.h"
+#include "Misc/temp_singleton.h"
 
 struct ConnectInfo
 {
@@ -56,8 +57,11 @@ struct ConnectInfo
 };
 
 class SpamConnectTester :
-	private BaseSystem
+	private BaseSystem,
+	public Singleton<SpamConnectTester>
 {
+	typedef Singleton<SpamConnectTester> singleton_class;
+
 private:
 	typedef CUtlVector<ConnectInfo> ConnectListT;
 	ConnectListT m_connect_list;

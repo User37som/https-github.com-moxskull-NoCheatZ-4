@@ -19,6 +19,7 @@
 #include "Systems/BaseSystem.h"
 #include "Players/temp_PlayerDataStruct.h"
 #include "Hooks/PlayerRunCommandHookListener.h"
+#include "Misc/temp_singleton.h"
 
 enum TickStatus
 {
@@ -50,8 +51,12 @@ struct UserCmdInfo
 class BadUserCmdBlocker :
 	public BaseSystem,
 	public PlayerDataStructHandler<UserCmdInfo>,
-	public PlayerRunCommandHookListener
+	public PlayerRunCommandHookListener,
+	public Singleton<BadUserCmdBlocker>
 {
+	typedef Singleton<BadUserCmdBlocker> singleton_class;
+	typedef PlayerDataStructHandler<UserCmdInfo> playerdatahandler_class;
+
 public:
 	BadUserCmdBlocker();
 	~BadUserCmdBlocker();
@@ -60,7 +65,5 @@ public:
 
 	PlayerRunCommandRet PlayerRunCommandCallback(NczPlayer* player, SourceSdk::CUserCmd* cmd, const SourceSdk::CUserCmd& old_cmd);
 };
-
-extern BadUserCmdBlocker g_BadUserCmdBlocker;
 
 #endif // BADUSERCMDBLOCKER_H

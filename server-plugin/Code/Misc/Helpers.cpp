@@ -29,6 +29,9 @@
 #include "Misc/MRecipientFilter.h"
 #include "Misc/UserMsg.h"
 
+extern unsigned int HashString(char const *);
+extern unsigned int HashStringCaseless(char const *);
+
 namespace Helpers
 {
 	SourceSdk::edict_t * m_EdictList = nullptr;
@@ -266,7 +269,9 @@ namespace Helpers
 	{
 		if (SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive)
 		{
-			return (SourceSdk::edict_t*)((static_cast<SourceSdk::edict_t_csgo*>(static_cast<SourceSdk::CGlobalVars_csgo*>(SourceSdk::InterfacesProxy::Call_GetGlobalVars())->pEdicts)) + iEntIndex);
+			uint8_t* edictlist = reinterpret_cast<uint8_t*>(static_cast<SourceSdk::CGlobalVars_csgo*>(SourceSdk::InterfacesProxy::Call_GetGlobalVars())->pEdicts);
+
+			return (SourceSdk::edict_t *)( sizeof(SourceSdk::edict_t_csgo) * iEntIndex + edictlist );
 		}
 		else
 		{
@@ -388,30 +393,33 @@ namespace Helpers
 		MRecipientFilter filter;
 		filter.AddRecipient(IndexOfEdict(pEntity));
 
-#ifndef NCZ_CSGO
-		SourceSdk::bf_write *pBuffer = SourceSdk::InterfacesProxy::Call_UserMessageBegin( &filter, /*eUserMsg::Fade*/ 12 );
-		SourceSdk::BfWriteShort(pBuffer, (time > 0) ? time : 50);
-		SourceSdk::BfWriteShort(pBuffer, (time > 0) ? 1000 : 0);
-		SourceSdk::BfWriteShort(pBuffer, 0x11);   // FFADE_IN FFADE_PURGE
-		SourceSdk::BfWriteShort(pBuffer, 0xFFFF); // r g
-		SourceSdk::BfWriteShort(pBuffer, 0xFFFF); // b a
+		if (SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive)
+		{
+			CCSUsrMsg_Fade* pBuffer = (CCSUsrMsg_Fade *)g_Cstrike15UsermessageHelpers.GetPrototype(CS_UM_Fade)->New();
+			pBuffer->set_duration((time > 0) ? time : 50);
+			pBuffer->set_hold_time((time > 0) ? 1000 : 0);
+			pBuffer->set_flags(0x11);
+			CMsgRGBA* clr = new CMsgRGBA();
+			clr->set_r(0xFF);
+			clr->set_g(0xFF);
+			clr->set_b(0xFF);
+			clr->set_a(0xFF);
+			pBuffer->set_allocated_clr(clr);
+			SourceSdk::InterfacesProxy::Call_SendUserMessage(&filter, CS_UM_Fade, *pBuffer);
+			delete pBuffer;
+			//delete clr; It is already deleted by the dctor of CCSUsrMsg_Fade
+		}
+		else
+		{
+			SourceSdk::bf_write *pBuffer = SourceSdk::InterfacesProxy::Call_UserMessageBegin(&filter, /*eUserMsg::Fade*/ 12);
+			SourceSdk::BfWriteShort(pBuffer, (time > 0) ? time : 50);
+			SourceSdk::BfWriteShort(pBuffer, (time > 0) ? 1000 : 0);
+			SourceSdk::BfWriteShort(pBuffer, 0x11);   // FFADE_IN FFADE_PURGE
+			SourceSdk::BfWriteShort(pBuffer, 0xFFFF); // r g
+			SourceSdk::BfWriteShort(pBuffer, 0xFFFF); // b a
 
-		SourceSdk::InterfacesProxy::Call_MessageEnd();
-#else
-		CCSUsrMsg_Fade* pBuffer = (CCSUsrMsg_Fade *)g_Cstrike15UsermessageHelpers.GetPrototype(CS_UM_Fade)->New();
-		pBuffer->set_duration((time > 0) ? time : 50);
-		pBuffer->set_hold_time((time > 0) ? 1000 : 0);
-		pBuffer->set_flags(0x11);
-		CMsgRGBA* clr = new CMsgRGBA();
-		clr->set_r(0xFF);
-		clr->set_g(0xFF);
-		clr->set_b(0xFF);
-		clr->set_a(0xFF);
-		pBuffer->set_allocated_clr(clr);
-		SourceSdk::InterfacesProxy::Call_SendUserMessage(&filter, CS_UM_Fade, *pBuffer);
-		delete pBuffer;
-		//delete clr; It is already deleted by the dctor of CCSUsrMsg_Fade
-#endif
+			SourceSdk::InterfacesProxy::Call_MessageEnd();
+		}
 	}
 }
 
@@ -426,19 +434,22 @@ void Helpers::tell(SourceSdk::edict_t *pEntity, const basic_string& message)
 			MRecipientFilter filter;
 			filter.AddRecipient(ent_id);
 
-#			ifndef NCZ_CSGO
-				SourceSdk::bf_write *pBuffer = SourceSdk::InterfacesProxy::Call_UserMessageBegin( &filter, 3 );
-				SourceSdk::BfWriteByte(pBuffer, ent_id);
-				SourceSdk::BfWriteString(pBuffer, message.c_str());
-				SourceSdk::InterfacesProxy::Call_MessageEnd();
-#			else
+			if (SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive)
+			{
 				CCSUsrMsg_SayText* pBuffer = (CCSUsrMsg_SayText *)g_Cstrike15UsermessageHelpers.GetPrototype(CS_UM_SayText)->New();
 				pBuffer->set_ent_idx(ent_id);
 				pBuffer->set_text(message.c_str());
 				pBuffer->set_chat(true);
 				SourceSdk::InterfacesProxy::Call_SendUserMessage(&filter, CS_UM_SayText, *pBuffer);
 				delete pBuffer;
-#			endif
+			}
+			else
+			{
+				SourceSdk::bf_write *pBuffer = SourceSdk::InterfacesProxy::Call_UserMessageBegin(&filter, 3);
+				SourceSdk::BfWriteByte(pBuffer, ent_id);
+				SourceSdk::BfWriteString(pBuffer, message.c_str());
+				SourceSdk::InterfacesProxy::Call_MessageEnd();
+			}
 		}
 	}
 }

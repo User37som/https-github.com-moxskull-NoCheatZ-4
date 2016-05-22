@@ -18,17 +18,17 @@
 
 #include "Logger.h"
 
+#include "Misc/include_windows_headers.h"
+
 #include "Misc/Helpers.h"
 #include "Misc/temp_Metrics.h"
 #include "Players/NczPlayerManager.h"
-
-Logger ILogger;
 
 void Logger::Push(const basic_string& msg)
 {
 	m_msg.AddToTail(msg);
 
-	if(g_NczPlayerManager.GetPlayerCount(PLAYER_CONNECTED, STATUS_EQUAL_OR_BETTER) == 0)
+	if(NczPlayerManager::GetInstance()->GetPlayerCount(PLAYER_CONNECTED, STATUS_EQUAL_OR_BETTER) == 0)
 	{
 		// We can flush right now.
 
@@ -40,6 +40,11 @@ template <>
 void Logger::Msg<MSG_CONSOLE>(const basic_string& msg, int verbose /*= 0*/)
 { 
 	std::cout << prolog.c_str() << msg.c_str() << "\n";
+#ifdef WIN32
+	OutputDebugStringA(prolog.c_str());
+	OutputDebugStringA(msg.c_str());
+	OutputDebugStringA("\n");
+#endif
 }
 
 template <>
@@ -69,8 +74,11 @@ template <>
 void Logger::Msg<MSG_WARNING>(const basic_string& msg, int verbose /*= 0*/)
 {
 	basic_string m(prolog);
-	m.append("WARNING : ").append(msg);
-	std::cout << m.c_str() << "\n";
+	m.append("WARNING : ").append(msg).append('\n');
+	std::cout << m.c_str();
+#ifdef WIN32
+	OutputDebugStringA(m.c_str());
+#endif
 	Push(m);
 }
 
@@ -78,8 +86,11 @@ template <>
 void Logger::Msg<MSG_ERROR>(const basic_string& msg, int verbose /*= 0*/)
 {
 	basic_string m(prolog);
-	m.append("ERROR : ").append(msg);
-	std::cout << m.c_str() << "\n";
+	m.append("ERROR : ").append('\n');
+	std::cout << m.c_str();
+#ifdef WIN32
+	OutputDebugStringA(m.c_str());
+#endif
 	Push(m);
 }
 
@@ -94,7 +105,7 @@ void Logger::Msg<MSG_VERBOSE1>(const basic_string& msg, int verbose /*= 0*/)
 {
 	if (verbose == 1)
 	{
-		Msg<MSG_HINT>(basic_string("VERBOSE1 : ").append(msg));
+		Msg<MSG_CONSOLE>(basic_string("VERBOSE1 : ").append(msg));
 	}
 }
 
@@ -103,7 +114,7 @@ void Logger::Msg<MSG_VERBOSE2>(const basic_string& msg, int verbose /*= 0*/)
 {
 	if (verbose == 2)
 	{
-		Msg<MSG_HINT>(basic_string("VERBOSE2 : ").append(msg));
+		Msg<MSG_CONSOLE>(basic_string("VERBOSE2 : ").append(msg));
 	}
 }
 
@@ -112,7 +123,7 @@ void Logger::Msg<MSG_DEBUG>(const basic_string& msg, int verbose /*= 0*/)
 {
 	if (verbose > 2)
 	{
-		Msg<MSG_HINT>(basic_string("DEBUG : ").append(msg));
+		Msg<MSG_CONSOLE>(basic_string("DEBUG : ").append(msg));
 	}
 }
 
@@ -158,5 +169,5 @@ void Logger::Flush()
 void Helpers::writeToLogfile(const basic_string &text)
 {
 	basic_string msg(Helpers::format("At %f (Server Tick #%d) : %s", Plat_FloatTime(), Helpers::GetTickCount(), text.c_str()));
-	ILogger.Push(msg);
+	Logger::GetInstance()->Push(msg);
 }

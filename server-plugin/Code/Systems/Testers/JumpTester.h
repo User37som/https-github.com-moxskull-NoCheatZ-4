@@ -21,6 +21,7 @@
 #include "Hooks/OnGroundHookListener.h"
 #include "Hooks/PlayerRunCommandHookListener.h"
 #include "Players/temp_PlayerDataStruct.h"
+#include "Misc/temp_singleton.h"
 
 /////////////////////////////////////////////////////////////////////////
 // JumpTester
@@ -129,8 +130,12 @@ class JumpTester :
 	public BaseSystem,
 	public OnGroundHookListener,
 	public PlayerRunCommandHookListener,
-	public PlayerDataStructHandler<JumpInfoT>
+	public PlayerDataStructHandler<JumpInfoT>,
+	public Singleton<JumpTester>
 {
+	typedef Singleton<JumpTester> singleton_class;
+	typedef PlayerDataStructHandler<JumpInfoT> playerdata_class;
+
 public:
 	JumpTester();
 	~JumpTester();
@@ -141,7 +146,5 @@ public:
 	PlayerRunCommandRet PlayerRunCommandCallback(NczPlayer* player, SourceSdk::CUserCmd* cmd, const SourceSdk::CUserCmd& old_cmd);
 	void m_hGroundEntityStateChangedCallback(NczPlayer* player, bool new_isOnGround);
 };
-
-extern JumpTester g_JumpTester;
 
 #endif // JUMPTESTER_H

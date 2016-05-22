@@ -29,8 +29,12 @@
 // BaseSystem
 /////////////////////////////////////////////////////////////////////////
 
-class BaseSystem : public SlotFilter
+class BaseSystem : 
+	public SlotFilter,
+	public ListMe<BaseSystem>
 {
+	typedef ListMe<BaseSystem> ListMeClass;
+
 protected:
 	BaseSystem(char const * const name, SlotStatus filter = PLAYER_IN_TESTS, SlotStatus load_filter = PLAYER_CONNECTED, SlotFilterBehavior filter_behavior = STATUS_STRICT, char const * const commands = "Enable - Disable - Verbose");
 	virtual ~BaseSystem();
@@ -58,7 +62,8 @@ public:
 	/* Donne le nom du système pour pouvoir être identifié dans la console */
 	const char * GetName() const { return m_name; };
 
-	void SetDisabledByConfig() { m_isDisabled = true; SetActive(false); }
+	void SetDisabledByConfigIni() { m_isDisabled = true; SetActive(false); }
+	bool GetDisabledByConfigIni() const { return m_isDisabled; }
 
 protected:
 	/* Returns true if the system has no player to test and can be unloaded */
@@ -88,8 +93,8 @@ protected:
 #endif
 
 protected:
-	const char* m_name;
-	const char* m_cmd_list;
+	char const * const m_name;
+	char const * const m_cmd_list;
 
 private: // called by SetActive()
 	virtual void Load() = 0; // Defined by child, attach to callbacks
@@ -104,11 +109,6 @@ protected:
 #ifdef NCZ_USE_METRICS
 	MetricsContainer<> m_metrics;
 #endif
-
-private:
-	typedef basic_slist<BaseSystem*> SystemsListT;
-
-	static SystemsListT m_systemsList;
 };
 
 #endif

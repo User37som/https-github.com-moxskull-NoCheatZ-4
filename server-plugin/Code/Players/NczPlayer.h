@@ -35,10 +35,11 @@ enum SlotStatus
 {
 	INVALID = 0, // Slot not used
 	KICK, // In process of being kicked or banned
-	BOT,
-	PLAYER_CONNECTING,
-	PLAYER_CONNECTED, // Spectator or dead or ...
-	PLAYER_IN_TESTS, // Playing the round
+	BOT, // A bot ...
+	PLAYER_CONNECTING, // Not a bot, not connected
+	PLAYER_CONNECTED, // Connected as spectator
+	PLAYER_IN_GAME, // Not a spectator but could be dead
+	PLAYER_IN_TESTS // Playing the round and shooting people everywhere like a mad nerd :)
 };
 
 enum SlotFilterBehavior

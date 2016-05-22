@@ -25,6 +25,8 @@
 
 #define TIMERINFO_CHARCOUNT 55
 
+class TimerListener;
+
 struct ALIGN4 TimerInfo
 {
 	char m_name[TIMERINFO_CHARCOUNT];
@@ -62,8 +64,6 @@ struct ALIGN4 TimerInfo
 	}
 
 } ALIGN4_POST;
-
-class TimerListener;
 
 typedef CUtlVector<TimerInfo> timer_list_t;
 typedef basic_slist<TimerListener*> timer_listeners_list_t;

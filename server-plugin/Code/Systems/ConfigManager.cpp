@@ -14,8 +14,6 @@
 #	define ATTRIB_POST "_linux"
 #endif
 
-ConfigManager g_ConfigManager;
-
 bool GetIniAttributeValue(std::ifstream & file, basic_string const & root, basic_string const & attrib, basic_string & value)
 {
 	Assert(file.is_open());
@@ -77,7 +75,9 @@ bool GetIniAttributeValue(std::ifstream & file, basic_string const & root, basic
 	return false;
 }
 
-ConfigManager::ConfigManager() : content_version(0)
+ConfigManager::ConfigManager() :
+	content_version(0),
+	singleton_class()
 {
 
 }
@@ -141,7 +141,7 @@ bool ConfigManager::LoadConfig()
 				BaseSystem* system = BaseSystem::FindSystemByName(it->c_str());
 				if (system)
 				{
-					system->SetDisabledByConfig();
+					system->SetDisabledByConfigIni();
 				}
 			}
 

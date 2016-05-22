@@ -231,6 +231,9 @@
     <ClCompile Include="Code\Systems\ConfigManager.cpp">
       <Filter>Code\Systems</Filter>
     </ClCompile>
+    <ClCompile Include="Code\Systems\AutoTVRecord.cpp">
+      <Filter>Code\Systems</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Code\plugin.h">
@@ -511,6 +514,9 @@
     </ClInclude>
     <ClInclude Include="Code\Systems\AutoTVRecord.h">
       <Filter>Code\Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Misc\temp_singleton.h">
+      <Filter>Code\Misc</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

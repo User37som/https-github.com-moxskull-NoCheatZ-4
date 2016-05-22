@@ -5,7 +5,7 @@
 #include <string.h>
 #include <limits>
 
-#include "Container/utlvector.h"
+#include "Containers/utlvector.h"
 
 template <typename pod = char>
 class String
@@ -331,12 +331,12 @@ void SplitString(String<pod> const & string, pod const delim, CUtlVector < Strin
 		end = string.find(delim, start);
 		if (end == String<pod>::npos)
 		{
-			out.AddToTail(String<pod>(name, start));
+			out.AddToTail(String<pod>(string, start));
 			break;
 		}
 		else
 		{
-			out.AddToTail(String<pod>(name, start, end - 1));
+			out.AddToTail(String<pod>(string, start, end - 1));
 		}
 		start = end+1;
 	}

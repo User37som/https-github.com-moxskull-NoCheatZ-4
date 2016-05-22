@@ -25,6 +25,7 @@
 #include "Systems/OnTickListener.h"
 #include "Hooks/PlayerRunCommandHookListener.h"
 #include "Players/temp_PlayerDataStruct.h"
+#include "Misc/temp_singleton.h"
 
 /////////////////////////////////////////////////////////////////////////
 // SpeedTester
@@ -71,8 +72,12 @@ class SpeedTester :
 	public BaseSystem,
 	public OnTickListener,
 	public PlayerRunCommandHookListener,
-	public PlayerDataStructHandler<SpeedHolderT>
+	public PlayerDataStructHandler<SpeedHolderT>,
+	public Singleton<SpeedTester>
 {
+	typedef PlayerDataStructHandler<SpeedHolderT> playerdata_class;
+	typedef Singleton<SpeedTester> singleton_class;
+
 public:
 	SpeedTester();
 	~SpeedTester();
@@ -84,7 +89,5 @@ public:
 	void ProcessPlayerTestOnTick(NczPlayer* player);
 	void ProcessOnTick(){};
 };
-
-extern SpeedTester g_SpeedTester;
 
 #endif // SPEEDTESTER_H

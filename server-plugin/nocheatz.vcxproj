@@ -93,7 +93,7 @@
       <CompileAs>CompileAsCpp</CompileAs>
       <ErrorReporting>Prompt</ErrorReporting>
       <ShowIncludes>false</ShowIncludes>
-      <MultiProcessorCompilation>false</MultiProcessorCompilation>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <DisableSpecificWarnings>4100;4324</DisableSpecificWarnings>
     </ClCompile>
     <ResourceCompile>
@@ -240,6 +240,7 @@ copy "$(TargetPath)" ..\..\..\game\bin\"$(TargetName)".pdb
     <None Include="Res\nocheatz.vdf" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Code\Systems\AutoTVRecord.cpp" />
     <ClCompile Include="Code\Systems\ConfigManager.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
@@ -288,6 +289,7 @@ copy "$(TargetPath)" ..\..\..\game\bin\"$(TargetName)".pdb
   <ItemGroup>
     <ClInclude Include="Code\Misc\temp_basiclist.h" />
     <ClInclude Include="Code\Misc\temp_basicstring.h" />
+    <ClInclude Include="Code\Misc\temp_singleton.h" />
     <ClInclude Include="Code\Systems\AutoTVRecord.h" />
     <ClInclude Include="Code\Systems\ConfigManager.h" />
     <ClInclude Include="SourceSdk\Console\color.h" />

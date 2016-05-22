@@ -27,7 +27,7 @@
 // NczPlayerManager
 //---------------------------------------------------------------------------------
 
-NczPlayerManager::NczPlayerManager()
+NczPlayerManager::NczPlayerManager() : singleton_class()
 {
 	m_max_index = 0;
 }
@@ -147,7 +147,7 @@ void NczPlayerManager::ClientDisconnect(SourceSdk::edict_t* pEntity)
 	Assert(index);
 	FullHandlersList[index].Reset();
 
-	while(FullHandlersList[m_max_index].status == INVALID)
+	while(m_max_index > 0 && FullHandlersList[m_max_index].status == INVALID)
 		--m_max_index;
 
 	BaseSystem::ManageSystems();
@@ -171,10 +171,10 @@ void NczPlayerManager::FireGameEvent(SourceSdk::IGameEvent* ev)
 		{
 			SlotStatus& pstat = FullHandlersList[x].status;
 			if(pstat == PLAYER_IN_TESTS)
-				pstat = PLAYER_CONNECTED;
+				pstat = PLAYER_IN_GAME;
 		}
 		BaseSystem::ManageSystems();
-		ILogger.Flush();
+		Logger::GetInstance()->Flush();
 		return;
 	}
 	/*else*/ if(*event_name == 'f') // round_freeze_end = round_start
@@ -188,11 +188,14 @@ void NczPlayerManager::FireGameEvent(SourceSdk::IGameEvent* ev)
 				SourceSdk::IPlayerInfo * const pinfo = static_cast<SourceSdk::IPlayerInfo *>(ph.playerClass->GetPlayerInfo());
 				if(pinfo)
 				{
-					if(pinfo->GetTeamIndex() > 1)
+					if (pinfo->GetTeamIndex() > 1)
+					{
+						ph.status = PLAYER_IN_GAME;
 						ph.in_tests_time = Plat_FloatTime() + 1.0f;
+					}
 					else
 					{
-						ph.status = PLAYER_CONNECTED;
+						//ph.status = PLAYER_CONNECTED;
 						ph.in_tests_time = std::numeric_limits<float>::max();
 					}
 				}
@@ -213,8 +216,11 @@ void NczPlayerManager::FireGameEvent(SourceSdk::IGameEvent* ev)
 			SourceSdk::IPlayerInfo * const pinfo = static_cast<SourceSdk::IPlayerInfo *>(ph->playerClass->GetPlayerInfo());
 			if(pinfo)
 			{
-				if(pinfo->GetTeamIndex() > 1)
+				if (pinfo->GetTeamIndex() > 1)
+				{
 					ph->in_tests_time = Plat_FloatTime() + 3.0f;
+					ph->status = PLAYER_IN_GAME;
+				}
 				else
 				{
 					ph->status = PLAYER_CONNECTED;
@@ -229,8 +235,11 @@ void NczPlayerManager::FireGameEvent(SourceSdk::IGameEvent* ev)
 	{
 		if(ph->status > BOT)
 		{
-			if(ev->GetInt("teamid") > 1)
+			if (ev->GetInt("teamid") > 1)
+			{
 				ph->in_tests_time = Plat_FloatTime() + 3.0f;
+				ph->status = PLAYER_IN_GAME;
+			}
 			else
 			{
 				ph->status = PLAYER_CONNECTED;
@@ -245,7 +254,7 @@ void NczPlayerManager::FireGameEvent(SourceSdk::IGameEvent* ev)
 	
 	if(ph->status <= PLAYER_CONNECTED)
 		return;
-	ph->status = PLAYER_CONNECTED;
+	ph->status = PLAYER_IN_GAME;
 	ph->in_tests_time = std::numeric_limits<float>::max();
 	BaseSystem::ManageSystems();
 	//}
@@ -253,7 +262,7 @@ void NczPlayerManager::FireGameEvent(SourceSdk::IGameEvent* ev)
 
 void NczPlayerManager::Think()
 {
-	while(FullHandlersList[m_max_index].status == INVALID)
+	while (m_max_index > 0 && FullHandlersList[m_max_index].status == INVALID)
 		--m_max_index;
 
 	const int maxcl = m_max_index;
@@ -266,6 +275,10 @@ void NczPlayerManager::Think()
 		if(gametime > ph.in_tests_time)
 		{
 			ph.status = PLAYER_IN_TESTS;
+		}
+		else if (ph.status == PLAYER_IN_TESTS)
+		{
+			ph.status = PLAYER_IN_GAME;
 		}
 		else
 		{
@@ -385,5 +398,3 @@ short NczPlayerManager::GetPlayerCount(SlotStatus filter, SlotFilterBehavior str
 
 	return count;
 }
-
-NczPlayerManager g_NczPlayerManager = NczPlayerManager();

@@ -3,10 +3,13 @@
 #include "Console/convar.h"
 #include "Containers/utlvector.h"
 #include "Interfaces/InterfacesProxy.h"
+#include "Systems/ConfigManager.h"
 
 #include "Hooks/Hook.h"
 
 #undef GetProp
+
+typedef SourceSdk::datamap_t* (HOOKFN_EXT *GetDataDescMap_t)(SourceSdk::CBaseEntity*);
 
 void EntityProps::GetPropOffset(const basic_string& name, offset_t* pOffset)
 {
@@ -21,14 +24,15 @@ void EntityProps::GetPropOffset(const basic_string& name, offset_t* pOffset)
 	{
 		if(paths[depth].operator!=(pClass->m_pNetworkName)) continue;
 
-		SourceSdk::SendTable * pTable = pClass->m_pTable;
+		void * pTable = pClass->m_pTable;
 		while(++depth < MaxDepth) // Follow path
 		{
-			for(offset_t prop = 0; prop < pTable->GetNumProps(); ++prop)
+			int const numprops = static_cast<SourceSdk::SendTable*>(pTable)->m_nProps;
+			for(offset_t prop = 0; prop < numprops; ++prop)
 			{
 				if (SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive)
 				{
-					const SourceSdk::SendProp_csgo* const pProp = static_cast<SourceSdk::SendProp_csgo*>(pTable->GetProp(prop));
+					const SourceSdk::SendProp_csgo* const pProp = static_cast<SourceSdk::SendProp_csgo*>(static_cast<SourceSdk::SendTable_csgo*>(pTable)->GetProp(prop));
 					if(paths[depth].operator==(pProp->GetName()))
 					{
 						pTable = pProp->GetDataTable();
@@ -37,7 +41,7 @@ void EntityProps::GetPropOffset(const basic_string& name, offset_t* pOffset)
 				}
 				else
 				{
-					const SourceSdk::SendProp* const pProp = static_cast<SourceSdk::SendProp*>(pTable->GetProp(prop));
+					const SourceSdk::SendProp* const pProp = static_cast<SourceSdk::SendProp*>(static_cast<SourceSdk::SendTable*>(pTable)->GetProp(prop));
 					if (paths[depth].operator==(pProp->GetName()))
 					{
 						pTable = pProp->GetDataTable();
@@ -47,11 +51,12 @@ void EntityProps::GetPropOffset(const basic_string& name, offset_t* pOffset)
 			}
 		}
 		// Find prop
-		for(offset_t prop = 0; prop < pTable->m_nProps; ++prop)
+		int const numprops = static_cast<SourceSdk::SendTable*>(pTable)->m_nProps;
+		for(offset_t prop = 0; prop < numprops; ++prop)
 		{
 			if (SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive)
 			{
-				const SourceSdk::SendProp_csgo* const pProp = static_cast<SourceSdk::SendProp_csgo*>(pTable->GetProp(prop));
+				const SourceSdk::SendProp_csgo* const pProp = static_cast<SourceSdk::SendProp_csgo*>(static_cast<SourceSdk::SendTable_csgo*>(pTable)->GetProp(prop));
 				if (paths[depth].operator==(pProp->GetName()))
 				{
 					*pOffset = pProp->GetOffset();
@@ -63,7 +68,7 @@ void EntityProps::GetPropOffset(const basic_string& name, offset_t* pOffset)
 			}
 			else
 			{
-				const SourceSdk::SendProp* const pProp = static_cast<SourceSdk::SendProp*>(pTable->GetProp(prop));
+				const SourceSdk::SendProp* const pProp = static_cast<SourceSdk::SendProp*>(static_cast<SourceSdk::SendTable*>(pTable)->GetProp(prop));
 				if (paths[depth].operator==(pProp->GetName()))
 				{
 					*pOffset = pProp->GetOffset();
@@ -113,24 +118,18 @@ bool EntityProps::FindInCache(const basic_string & path, offset_t * offset, bool
 	return false;
 }
 
-EntityProps g_EntityProps;
-
-static SourceSdk::ConVar var_getdatadescmap_offset("ncz_getdatadescmap_offset", DEFAULT_GETDATADESCMAP_OFFSET);
-
-typedef SourceSdk::datamap_t* (HOOKFN_EXT *GetDataDescMap_t)(SourceSdk::CBaseEntity*);
-
 SourceSdk::datamap_t* GetDataDescMap(SourceSdk::edict_t* const pEntity)
 {
 	SourceSdk::CBaseEntity* const baseEnt = pEntity->GetUnknown()->GetBaseEntity();
 	const DWORD* pdwInterface = IFACE_PTR(baseEnt);
 
 	GetDataDescMap_t fn;
-	*(DWORD*)&(fn) = pdwInterface[var_getdatadescmap_offset.GetInt()];
+	*(DWORD*)&(fn) = pdwInterface[ConfigManager::GetInstance()->GetVirtualFunctionId("getdatadescmap")];
 
 	return fn(baseEnt);
 }
 
-bool EntityProps::GetDataOffset(SourceSdk::datamap_t* dt, const basic_string& data_name, void* prop, offset_t* offset)
+/*bool EntityProps::GetDataOffset_old(SourceSdk::datamap_t* dt, const basic_string& data_name, void* prop, offset_t* offset)
 {
 	Assert(dt && data_name.size() && offset);
 
@@ -162,8 +161,6 @@ bool EntityProps::GetDataOffset(SourceSdk::datamap_t* dt, const basic_string& da
 				m_cache.AddToTail(PropertyCacheS(data_name, *offset, true));
 				return true;
 			}
-
-			dt = dt->baseMap;
 		}
 		else
 		{
@@ -191,11 +188,58 @@ bool EntityProps::GetDataOffset(SourceSdk::datamap_t* dt, const basic_string& da
 				m_cache.AddToTail(PropertyCacheS(data_name, *offset, true));
 				return true;
 			}
-
-			dt = dt->baseMap;
 		}
 	}
-	while(dt);
+	while((dt = dt->baseMap) != nullptr);
+
+	return false;
+}*/
+
+bool EntityProps::GetDataOffset(SourceSdk::datamap_t* dt, basic_string const & path, offset_t* offset)
+{
+	Assert(dt && path.size() && offset);
+
+	CUtlVector<basic_string> paths;
+	SplitString<char>(path, '.', paths);
+
+	basic_string const & data_class = paths[0];
+	basic_string const & data_name = paths[1];
+
+	do
+	{
+		if (data_class.operator==(dt->dataClassName))
+		{
+			for (int i = 0; i < dt->dataNumFields; ++i)
+			{
+				if (SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive)
+				{
+					SourceSdk::typedescription_t_csgo const & td = static_cast<SourceSdk::typedescription_t_csgo const *>(dt->dataDesc)[i];
+
+					if (data_name.operator==(td.fieldName))
+					{
+						*offset = td.fieldOffset;
+
+						m_cache.AddToTail(PropertyCacheS(data_name, *offset, true));
+
+						return true;
+					}
+				}
+				else
+				{
+					SourceSdk::typedescription_t const & td = static_cast<SourceSdk::typedescription_t const *>(dt->dataDesc)[i];
+
+					if (data_name.operator==(td.fieldName))
+					{
+						*offset = *(td.fieldOffset);
+
+						m_cache.AddToTail(PropertyCacheS(data_name, *offset, true));
+
+						return true;
+					}
+				}
+			}
+		}
+	} while ((dt = dt->baseMap) != nullptr);
 
 	return false;
 }

@@ -23,8 +23,9 @@
 AntiFlashbangBlocker::AntiFlashbangBlocker() :
 	BaseSystem("AntiFlashbangBlocker", PLAYER_CONNECTED, PLAYER_CONNECTING, STATUS_EQUAL_OR_BETTER),
 	IGameEventListener002(),
-	PlayerDataStructHandler<FlashInfoT>(),
-	SetTransmitHookListener()
+	playerdatahandler_class(),
+	SetTransmitHookListener(),
+	singleton_class()
 {
 	METRICS_ADD_TIMER("AntiFlashbangBlocker::SetTransmitCallback", 10.0);
 	METRICS_ADD_TIMER("AntiFlashbangBlocker::FireGameEvent", 2.0);
@@ -63,13 +64,13 @@ bool AntiFlashbangBlocker::SetTransmitCallback(SourceSdk::edict_t* const ea, Sou
 	METRICS_ENTER_SECTION("AntiFlashbangBlocker::SetTransmitCallback");
 	if(IsActive())
 	{
-		if(g_NczPlayerManager.GetPlayerHandlerByEdict(eb)->status == INVALID)
+		if(NczPlayerManager::GetInstance()->GetPlayerHandlerByEdict(eb)->status == INVALID)
 		{
 			METRICS_LEAVE_SECTION("AntiFlashbangBlocker::SetTransmitCallback");
 			return false;
 		}
 
-		NczPlayer* const pPlayer = g_NczPlayerManager.GetPlayerHandlerByEdict(eb)->playerClass;
+		NczPlayer* const pPlayer = NczPlayerManager::GetInstance()->GetPlayerHandlerByEdict(eb)->playerClass;
 		void* const player_info = pPlayer->GetPlayerInfo();
 		if(!player_info) return false;
 		if (SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive)
@@ -113,7 +114,7 @@ void AntiFlashbangBlocker::FireGameEvent(SourceSdk::IGameEvent* ev) // player_bl
 	METRICS_ENTER_SECTION("AntiFlashbangBlocker::FireGameEvent");
 	if(!IsActive()) return;
 
-	PlayerHandler* ph = g_NczPlayerManager.GetPlayerHandlerByUserId(ev->GetInt("userid", 0));
+	PlayerHandler* ph = NczPlayerManager::GetInstance()->GetPlayerHandlerByUserId(ev->GetInt("userid", 0));
 	if(ph->status == INVALID)
 	{
 		METRICS_LEAVE_SECTION("AntiFlashbangBlocker::FireGameEvent");
@@ -123,8 +124,8 @@ void AntiFlashbangBlocker::FireGameEvent(SourceSdk::IGameEvent* ev) // player_bl
 	if(ph->status >= PLAYER_CONNECTED)
 	{
 		FlashInfoT* const pInfo = GetPlayerDataStruct(ph->playerClass);
-		const float flash_alpha = *g_EntityProps.GetPropValue<float>(PLAYERCLASS_PROP".m_flFlashMaxAlpha", ph->playerClass->GetEdict());
-		const float flash_duration = *g_EntityProps.GetPropValue<float>(PLAYERCLASS_PROP".m_flFlashDuration", ph->playerClass->GetEdict());
+		const float flash_alpha = *EntityProps::GetInstance()->GetPropValue<float>(PLAYERCLASS_PROP".m_flFlashMaxAlpha", ph->playerClass->GetEdict());
+		const float flash_duration = *EntityProps::GetInstance()->GetPropValue<float>(PLAYERCLASS_PROP".m_flFlashDuration", ph->playerClass->GetEdict());
 		
 		if (flash_alpha < 255.0)
 		{
@@ -146,5 +147,3 @@ void AntiFlashbangBlocker::FireGameEvent(SourceSdk::IGameEvent* ev) // player_bl
 	}
 	METRICS_LEAVE_SECTION("AntiFlashbangBlocker::FireGameEvent");
 }
-
-AntiFlashbangBlocker g_AntiFlashbangBlocker = AntiFlashbangBlocker();

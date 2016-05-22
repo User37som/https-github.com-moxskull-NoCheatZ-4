@@ -76,10 +76,10 @@ void HOOKFN_INT ConCommandHookListener::nDispatch(void* cmd, void*, SourceSdk::C
 	bool bypass = false;
 	if(index >= PLUGIN_MIN_COMMAND_INDEX && index <= PLUGIN_MAX_COMMAND_INDEX)
 	{
-		const PlayerHandler* const ph = g_NczPlayerManager.GetPlayerHandlerByIndex(g_NoCheatZPlugin.GetCommandIndex()+1);
+		const PlayerHandler* const ph = NczPlayerManager::GetInstance()->GetPlayerHandlerByIndex(index);
 	
-		if(ph->status >= PLAYER_CONNECTED)
-		{
+		//if(ph->status >= PLAYER_CONNECTED)
+		//{
 			/*
 				For each listener :
 					Find if he is listening to this ConCommand then call the callback accordingly.
@@ -94,11 +94,19 @@ void HOOKFN_INT ConCommandHookListener::nDispatch(void* cmd, void*, SourceSdk::C
 				}
 				it = it->m_next;
 			}
-		}
-		else
-		{
-			bypass = true;
-		}
+		//}
+		//else
+		//{
+		//	bypass = true;
+		//}
+	}
+	else if(index == 0)
+	{
+		bypass = false;
+	}
+	else
+	{
+		bypass = true; // just in case ...
 	}
 
 	if(!bypass)

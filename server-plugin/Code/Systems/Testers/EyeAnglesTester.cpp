@@ -24,8 +24,9 @@
 EyeAnglesTester::EyeAnglesTester(void) :
 	BaseSystem("EyeAnglesTester"),
 	PlayerRunCommandHookListener(),
-	PlayerDataStructHandler<EyeAngleInfoT>(),
-	IGameEventListener002()
+	playerdata_class(),
+	IGameEventListener002(),
+	singleton_class()
 {
 }
 
@@ -64,7 +65,7 @@ void EyeAnglesTester::Unload()
 
 PlayerRunCommandRet EyeAnglesTester::PlayerRunCommandCallback(NczPlayer* player, SourceSdk::CUserCmd* pCmd, const SourceSdk::CUserCmd& old_cmd)
 {	
-	int const * const flags = g_EntityProps.GetPropValue<int>("CBasePlayer.m_fFlags", player->GetEdict());
+	int const * const flags = EntityProps::GetInstance()->GetPropValue<int>("CBasePlayer.m_fFlags", player->GetEdict());
 	
 	/*
 		FL_FROZEN			(1 << 5)
@@ -133,7 +134,7 @@ PlayerRunCommandRet EyeAnglesTester::PlayerRunCommandCallback(NczPlayer* player,
 			}
 		}
 		
-		g_BanRequest.AddAsyncBan(player, 0, "Banned by NoCheatZ 4");
+		BanRequest::GetInstance()->AddAsyncBan(player, 0, "Banned by NoCheatZ 4");
 	}
 	return drop_cmd;
 }
@@ -142,7 +143,7 @@ void EyeAnglesTester::FireGameEvent(SourceSdk::IGameEvent *ev) // round_end
 {
 	for(int index = 1; index < MAX_PLAYERS; ++index)
 	{
-		PlayerHandler* ph = g_NczPlayerManager.GetPlayerHandlerByIndex(index);
+		PlayerHandler* ph = NczPlayerManager::GetInstance()->GetPlayerHandlerByIndex(index);
 		if(ph->status > BOT) ++(GetPlayerDataStruct(ph->playerClass)->ignore_last);
 	}
 }
@@ -155,8 +156,6 @@ void EyeAnglesTester::TeleportCallback(NczPlayer* player, SourceSdk::Vector cons
 	EyeAngleInfoT* playerData = GetPlayerDataStruct(player);
 	++playerData->ignore_last;
 }
-
-EyeAnglesTester g_EyeAnglesTester = EyeAnglesTester();
 
 basic_string Detection_EyeAngle::GetDataDump()
 {

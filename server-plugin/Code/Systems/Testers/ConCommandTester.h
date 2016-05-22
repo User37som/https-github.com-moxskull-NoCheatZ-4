@@ -24,6 +24,7 @@
 #include "Systems/BaseSystem.h"
 #include "Players/temp_PlayerDataStruct.h"
 #include "Systems/Testers/Detections/temp_BaseDetection.h"
+#include "Misc/temp_singleton.h"
 
 typedef struct PlayerConCommandS
 {
@@ -133,8 +134,12 @@ typedef CUtlVector<CommandInfoT> CommandListT;
 class ConCommandTester :
 	public BaseSystem,
 	public PlayerDataStructHandler<LastPlayerCommandsT>,
-	public ConCommandHookListener
+	public ConCommandHookListener,
+	public Singleton<ConCommandTester>
 {
+	typedef Singleton<ConCommandTester> singleton_class;
+	typedef PlayerDataStructHandler<LastPlayerCommandsT> playerdatahandler_class;
+
 public:
 	ConCommandTester();
 	~ConCommandTester();
@@ -187,7 +192,5 @@ public:
 		return "ConCommand Violation";
 	};
 };
-
-extern ConCommandTester g_ConCommandTester;
 
 #endif

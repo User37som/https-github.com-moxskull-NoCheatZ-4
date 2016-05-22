@@ -20,6 +20,7 @@ limitations under the License.
 #include "Hooks/PlayerRunCommandHookListener.h"
 #include "Players/temp_PlayerDataStruct.h"
 #include "Systems/Testers/Detections/temp_BaseDetection.h"
+#include "Misc/temp_singleton.h"
 
 #define SHORT_TIME 0.04 // sec
 
@@ -82,8 +83,12 @@ typedef struct ShotStats
 class ShotTester :
 	public BaseSystem,
 	public PlayerRunCommandHookListener,
-	public PlayerDataStructHandler<ShotStatsT>
+	public PlayerDataStructHandler<ShotStatsT>,
+	public Singleton<ShotTester>
 {
+	typedef PlayerDataStructHandler<ShotStatsT> playerdata_class;
+	typedef Singleton<ShotTester> singleton_class;
+
 public:
 	ShotTester();
 	~ShotTester();
@@ -94,8 +99,6 @@ public:
 	SlotStatus GetFilter();
 	PlayerRunCommandRet PlayerRunCommandCallback(NczPlayer* player, SourceSdk::CUserCmd* pCmd, const SourceSdk::CUserCmd& old_cmd);
 };
-
-extern ShotTester g_ShotTester;
 
 class ShotDetection : public LogDetection<ShotStats>
 {

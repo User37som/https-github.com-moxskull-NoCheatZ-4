@@ -24,6 +24,7 @@
 #include "Hooks/WeaponHookListener.h"
 #include "Systems/BaseSystem.h"
 #include "Systems/OnTickListener.h"
+#include "Misc/temp_singleton.h"
 
 enum SpectatorMode {
 	OBS_MODE_NONE = 0,
@@ -124,8 +125,12 @@ class WallhackBlocker :
 	public PlayerDataStructHandler<ClientDataS>,
 	private SetTransmitHookListener,
 	private WeaponHookListener,
-	private OnTickListener
+	private OnTickListener,
+	public Singleton<WallhackBlocker>
 {
+	typedef Singleton<WallhackBlocker> singleton_class;
+	typedef PlayerDataStructHandler<ClientDataS> playerdatahandler_class;
+
 public:
 	WallhackBlocker();
 	~WallhackBlocker();
@@ -157,7 +162,5 @@ private:
 	bool IsVisible(const SourceSdk::Vector& origin, const SourceSdk::Vector& target, const SourceSdk::Vector& mins, const SourceSdk::Vector& maxs, const SourceSdk::vec_t scale = 1.0);
 
 };
-
-extern WallhackBlocker g_WallhackBlocker;
 
 #endif // WALLHACKBLOCKER_H

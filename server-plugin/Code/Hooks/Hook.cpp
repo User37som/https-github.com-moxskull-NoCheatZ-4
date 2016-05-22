@@ -40,10 +40,10 @@ DWORD VirtualTableHook(DWORD* classptr, const int vtable, const DWORD newInterfa
 #endif // WIN32
 		dwStor = classptr[vtable];
 		if(expectedInterface && dwStor != expectedInterface)
-			ILogger.Msg<MSG_WARNING>("Unexpected virtual table value in VirtualTableHook. Another plugin might be in conflict.");
+			Logger::GetInstance()->Msg<MSG_WARNING>("Unexpected virtual table value in VirtualTableHook. Another plugin might be in conflict.");
 		if(dwStor == newInterface)
 		{
-			ILogger.Msg<MSG_WARNING>("Virtual function pointer was the same ...");
+			Logger::GetInstance()->Msg<MSG_WARNING>("Virtual function pointer was the same ...");
 			return 0;
 		}
 #ifdef WIN32

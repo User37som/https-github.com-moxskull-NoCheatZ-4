@@ -56,12 +56,13 @@ protected:
 		Each ConCommand the listener registered will be reviewed to see if it can be unhooked,
 		then it will be passed to UnhookDispatch for extra-check before actually unhooking, if possible.
 
+		This function will clear the requested list of commands the listener needs.
 		After that the listener is removed.
 	*/
 	static void RemoveConCommandHookListener(ConCommandHookListener* listener);
 	
 	/*
-		The listener will receive callacks for all registered ConCommands in this function.
+		The listener will receive callbacks for all registered ConCommands in this function.
 		It must be defined by the child.
 
 		Returning true will bypass the original function.

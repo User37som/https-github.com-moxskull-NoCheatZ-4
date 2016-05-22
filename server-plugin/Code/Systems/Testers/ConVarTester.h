@@ -24,6 +24,7 @@
 #include "Players/NczFilteredPlayersList.h" // + playermanager, singleton
 #include "Players/temp_PlayerDataStruct.h"
 #include "Systems/OnTickListener.h"
+#include "Misc/temp_singleton.h"
 
 /////////////////////////////////////////////////////////////////////////
 // ConVarTester
@@ -97,8 +98,12 @@ class ConVarTester :
 	public BaseSystem,
 	private AsyncNczFilteredPlayersList,
 	public OnTickListener,
-	public PlayerDataStructHandler<CurrentConVarRequestT>
+	public PlayerDataStructHandler<CurrentConVarRequestT>,
+	public Singleton<ConVarTester>
 {
+	typedef Singleton<ConVarTester> singleton_class;
+	typedef PlayerDataStructHandler<CurrentConVarRequestT> playerdata_class;
+
 	friend Detection_ConVar;
 public:
 	ConVarTester();
@@ -126,7 +131,5 @@ private:
 
 	void* var_sv_cheats;
 };
-
-extern ConVarTester g_ConVarTester;
 
 #endif // CONVARTESTER_H

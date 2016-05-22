@@ -21,6 +21,7 @@
 #include "Players/NczFilteredPlayersList.h"
 #include "Systems/OnTickListener.h"
 #include "Players/temp_PlayerDataStruct.h"
+#include "Misc/temp_singleton.h"
 
 /////////////////////////////////////////////////////////////////////////
 // ValidationTester
@@ -44,10 +45,13 @@ class ValidationTester :
 	private BaseSystem,
 	private NczFilteredPlayersList,
 	private OnTickListener,
-	public PlayerDataStructHandler<ValidationInfoT>
+	public PlayerDataStructHandler<ValidationInfoT>,
+	public Singleton<ValidationTester>
 {
 private:
 	typedef basic_slist<const char *> PendingValidationsT;
+	typedef PlayerDataStructHandler<ValidationInfoT> playerdata_class;
+	typedef Singleton<ValidationTester> singleton_class;
 
 	PendingValidationsT m_pending_validations;
 
@@ -66,7 +70,5 @@ public:
 	void AddPendingValidation(const char* steamid);
 	bool JoinCallback(NczPlayer* const player);
 };
-
-extern ValidationTester g_ValidationTester;
 
 #endif // VALIDATIONTESTER_H

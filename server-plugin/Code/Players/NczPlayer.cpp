@@ -51,7 +51,14 @@ void * NczPlayer::GetPlayerInfo() const
 
 const char * NczPlayer::GetName() const
 {
-	return static_cast<SourceSdk::IPlayerInfo*>(GetPlayerInfo())->GetName();
+	if (Helpers::isValidEdict(m_edict))
+	{
+		if (GetPlayerInfo())
+		{
+			return static_cast<SourceSdk::IPlayerInfo*>(GetPlayerInfo())->GetName();
+		}
+	}
+	return "";
 }
 
 const char * NczPlayer::GetSteamID() const
@@ -448,7 +455,7 @@ basic_string NczPlayer::GetReadableIdentity()
 
 void NczPlayer::Kick(const char * msg)
 {
-	g_NczPlayerManager.GetPlayerHandlerByIndex(cIndex)->status = KICK;
+	NczPlayerManager::GetInstance()->GetPlayerHandlerByIndex(cIndex)->status = KICK;
 	Helpers::writeToLogfile(Helpers::format(
 				"Kicked %s with reason : %s\n", this->GetReadableIdentity().c_str(), msg));
 

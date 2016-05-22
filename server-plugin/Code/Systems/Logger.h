@@ -19,6 +19,7 @@
 #include "Preprocessors.h"
 
 #include "Misc/temp_basicstring.h"
+#include "Misc/temp_singleton.h"
 #include "Containers/utlvector.h"
 
 /*
@@ -50,10 +51,12 @@ enum msg_type
 	MSG_DEBUG     
 };
 
-class Logger
+class Logger : public Singleton<Logger>
 {
+	typedef Singleton<Logger> singleton_class;
+
 public:
-	Logger() : prolog("[NoCheatZ " NCZ_VERSION_STR "] ") {};
+	Logger() : prolog("[NoCheatZ " NCZ_VERSION_STR "] "), singleton_class() {};
 	~Logger(){};
 
 	void Push(const basic_string& msg);
@@ -67,13 +70,11 @@ private:
 	basic_string const prolog;
 };
 
-extern Logger ILogger;
-
-#define SystemVerbose1(x) ILogger.Msg<MSG_VERBOSE1>(x, this->m_verbose)
-#define SystemVerbose2(x) ILogger.Msg<MSG_VERBOSE2>(x, this->m_verbose)
+#define SystemVerbose1(x) Logger::GetInstance()->Msg<MSG_VERBOSE1>(x, this->m_verbose)
+#define SystemVerbose2(x) Logger::GetInstance()->Msg<MSG_VERBOSE2>(x, this->m_verbose)
 
 #ifdef DEBUG
-#	define DebugMessage(x) ILogger.Msg<MSG_DEBUG>(x, 3)
+#	define DebugMessage(x) Logger::GetInstance()->Msg<MSG_DEBUG>(x, 3)
 #else
 #	define DebugMessage(x, y)
 #endif

@@ -22,6 +22,7 @@
 #include "Interfaces/IGameEventManager/IGameEventManager.h"
 #include "Systems/Testers/Detections/temp_BaseDetection.h"
 #include "Players/NczFilteredPlayersList.h"
+#include "Misc/temp_singleton.h"
 
 typedef struct EyeAngle
 {
@@ -109,8 +110,12 @@ class EyeAnglesTester :
 	public BaseSystem,
 	public PlayerRunCommandHookListener,
 	public PlayerDataStructHandler<EyeAngleInfoT>,
-	public SourceSdk::IGameEventListener002
+	public SourceSdk::IGameEventListener002,
+	public Singleton<EyeAnglesTester>
 {
+	typedef Singleton<EyeAnglesTester> singleton_class;
+	typedef PlayerDataStructHandler<EyeAngleInfoT> playerdata_class;
+
 public:
 	EyeAnglesTester();
 	~EyeAnglesTester();
@@ -123,7 +128,5 @@ public:
 	void FireGameEvent(SourceSdk::IGameEvent *ev);
 	void TeleportCallback(NczPlayer* player, SourceSdk::Vector const* va, SourceSdk::QAngle const* qa, SourceSdk::Vector const* vb);
 };
-
-extern EyeAnglesTester g_EyeAnglesTester;
 
 #endif

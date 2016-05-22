@@ -37,10 +37,10 @@ public:
 	virtual SlotStatus GetFilter() const {return m_filter;};
 
 protected:
-	/* Appelé par OnFrame, sert à iétrer entre les différents joueurs en fonction du filtre */
+	/* Appelé par OnTick, sert à iétrer entre les différents joueurs en fonction du filtre */
 	virtual void ProcessTestsOnTick();
 
-	/* Appelé par ProcessTestsOnFrame() lorsque le joueur correspond au filtre */
+	/* Appelé par ProcessTestsOnTick() lorsque le joueur correspond au filtre */
 	virtual void ProcessPlayerTestOnTick(NczPlayer* player) = 0;
 	virtual void ProcessOnTick() = 0;
 

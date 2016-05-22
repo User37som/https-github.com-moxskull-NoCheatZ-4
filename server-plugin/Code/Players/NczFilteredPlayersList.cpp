@@ -28,7 +28,7 @@ NczPlayer* NczFilteredPlayersList::GetNextPlayer()
 
 	for(int index = playerStor->GetIndex()+1; index < MAX_PLAYERS; ++index)
 	{
-		m_nextPlayer = g_NczPlayerManager.GetPlayerHandlerByIndex(index);
+		m_nextPlayer = NczPlayerManager::GetInstance()->GetPlayerHandlerByIndex(index);
 		if(m_nextPlayer->status < PLAYER_CONNECTED) continue;
 		break;
 	}
@@ -65,7 +65,7 @@ NczPlayer* AsyncNczFilteredPlayersList::GetNextPlayer()
 	
 	int index = m_nextPlayer->playerClass->GetIndex();
 	int loop_count = 0;
-	while((m_nextPlayer = g_NczPlayerManager.GetPlayerHandlerByIndex(++index)) == nullptr && (++loop_count) != MAX_PLAYERS)
+	while((m_nextPlayer = NczPlayerManager::GetInstance()->GetPlayerHandlerByIndex(++index)) == nullptr && (++loop_count) != MAX_PLAYERS)
 	{
 		index %= MAX_PLAYERS;
 	}

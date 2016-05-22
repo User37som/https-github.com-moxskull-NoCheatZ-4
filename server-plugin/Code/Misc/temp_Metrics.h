@@ -21,7 +21,7 @@
 #include <iostream>
 #include <stdint.h> // uint32_t
 #include "temp_basicstring.h"
-#include <list>
+#include "Misc/temp_singleton.h"
 
 #ifdef WIN32
 #	include "include_windows_headers.h"
@@ -422,7 +422,7 @@ public:
 
 #endif // NCZ_USE_METRICS
 
-extern MetricsTimer g_GlobalTime;
+typedef Singleton<MetricsTimer> GlobalTimer;
 
 extern float Plat_FloatTime();
 

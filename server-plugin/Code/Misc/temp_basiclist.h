@@ -138,5 +138,66 @@ public:
 	}
 };
 
+template <class me>
+class ListMe
+{
+	typedef ListMe<me> hClass;
+
+private:
+	static me* m_first;
+	me* m_next;
+
+	me const * const GetMe(void) const { return static_cast<me const * const>(this); }
+
+protected:
+	ListMe(void)
+	{
+		if (hClass::m_first == nullptr)
+		{
+			hClass::m_first = const_cast<me*>(GetMe());
+			m_next = nullptr;
+		}
+		else
+		{
+			me * const old = hClass::m_first;
+			hClass::m_first = const_cast<me*>(GetMe());
+			m_next = old;
+		}
+	}
+
+	virtual ~ListMe(void)
+	{
+		me* iterator = hClass::m_first;
+		me* prev = nullptr;
+		while (iterator != nullptr)
+		{
+			if (iterator->GetMe() == GetMe())
+			{
+				me* save = iterator->m_next;
+				if (prev == nullptr)
+				{
+					hClass::m_first = iterator->m_next;
+				}
+				else
+				{
+					prev->m_next = iterator->m_next;
+				}
+				iterator = save;
+				continue;
+			}
+			prev = iterator;
+			iterator = iterator->m_next;
+		}
+	};
+
+public:
+	static me * const GetFirst(void) { return hClass::m_first; }
+	me * const GetNext(void) const { return m_next; };
+	static void GetNext(me*& ptr) { ptr = ptr->m_next; };
+};
+
+template <class me>
+me* ListMe<me>::m_first = nullptr;
+
 #endif
 

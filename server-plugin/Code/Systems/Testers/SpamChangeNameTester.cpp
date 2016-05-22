@@ -23,11 +23,11 @@
 
 SpamChangeNameTester::SpamChangeNameTester() :
 	BaseSystem("SpamChangeNameTester", PLAYER_CONNECTING, PLAYER_CONNECTING, STATUS_EQUAL_OR_BETTER),
-	PlayerDataStructHandler<ChangeNameInfo>(),
+	playerdata_class(),
 	IGameEventListener002(),
-	OnTickListener()
+	OnTickListener(),
+	singleton_class()
 {
-	this->m_name = "SpamChangeNameTester";
 }
 
 SpamChangeNameTester::~SpamChangeNameTester()
@@ -96,7 +96,7 @@ void SpamChangeNameTester::FireGameEvent(SourceSdk::IGameEvent* ev)
 {
 	if(!IsActive()) return;
 
-	PlayerHandler* const ph = g_NczPlayerManager.GetPlayerHandlerByUserId(ev->GetInt("userid", 0));
+	PlayerHandler* const ph = NczPlayerManager::GetInstance()->GetPlayerHandlerByUserId(ev->GetInt("userid", 0));
 
 	if(ph->status < PLAYER_CONNECTED) return;
 
@@ -138,5 +138,3 @@ void SpamChangeNameTester::ClientConnect( bool *bAllowConnect, SourceSdk::edict_
 		strncpy(reject, "Your name is not valid", 23);
 	}
 }
-
-SpamChangeNameTester g_SpamChangeNameTester = SpamChangeNameTester();

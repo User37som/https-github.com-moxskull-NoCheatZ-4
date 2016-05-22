@@ -24,11 +24,12 @@
 // ConVarTester
 /////////////////////////////////////////////////////////////////////////
 
-ConVarTester::ConVarTester() : 
+ConVarTester::ConVarTester() :
 	BaseSystem("ConVarTester", PLAYER_CONNECTED, PLAYER_CONNECTING, STATUS_EQUAL_OR_BETTER, "Enable - Disable - Verbose - AddRule - ResetRules"),
 	AsyncNczFilteredPlayersList(),
 	OnTickListener(),
-	PlayerDataStructHandler<CurrentConVarRequestT>(),
+	playerdata_class(),
+	singleton_class(),
 	var_sv_cheats(nullptr)
 {
 }
@@ -179,7 +180,7 @@ void ConVarTester::AddConvarRuleset(const char * name, const char * value, ConVa
 		}
 		else
 		{
-			ILogger.Msg<MSG_ERROR>(Helpers::format("ConVarTester : Failed to link the server convar %s", name));
+			Logger::GetInstance()->Msg<MSG_ERROR>(Helpers::format("ConVarTester : Failed to link the server convar %s", name));
 		}
 	}
 	else
@@ -227,7 +228,7 @@ unexpected:
 				pDetection.PrepareDetectionData(req);
 				pDetection.PrepareDetectionLog(player, this);
 				pDetection.Log();
-				g_BanRequest.AddAsyncBan(player, 0, "Banned by NoCheatZ 4");
+				BanRequest::GetInstance()->AddAsyncBan(player, 0, "Banned by NoCheatZ 4");
 			}
 			else if(ruleset->rule == SAME)
 			{
@@ -242,7 +243,7 @@ unexpected:
 					pDetection.PrepareDetectionData(req);
 					pDetection.PrepareDetectionLog(player, this);
 					pDetection.Log();
-					g_BanRequest.AddAsyncBan(player, 0, "Banned by NoCheatZ 4");
+					BanRequest::GetInstance()->AddAsyncBan(player, 0, "Banned by NoCheatZ 4");
 				}
 			}
 			else if(ruleset->rule == SAME_AS_SERVER)
@@ -258,7 +259,7 @@ unexpected:
 					pDetection.PrepareDetectionData(req);
 					pDetection.PrepareDetectionLog(player, this);
 					pDetection.Log();
-					g_BanRequest.AddAsyncBan(player, 0, "Banned by NoCheatZ 4");
+					BanRequest::GetInstance()->AddAsyncBan(player, 0, "Banned by NoCheatZ 4");
 				}
 			}
 			else if(ruleset->rule == SAME_FLOAT)
@@ -276,7 +277,7 @@ unexpected:
 					pDetection.PrepareDetectionData(req);
 					pDetection.PrepareDetectionLog(player, this);
 					pDetection.Log();
-					g_BanRequest.AddAsyncBan(player, 0, "Banned by NoCheatZ 4");
+					BanRequest::GetInstance()->AddAsyncBan(player, 0, "Banned by NoCheatZ 4");
 				}
 			}
 			else if(ruleset->rule == SAME_FLOAT_AS_SERVER)
@@ -294,7 +295,7 @@ unexpected:
 					pDetection.PrepareDetectionData(req);
 					pDetection.PrepareDetectionLog(player, this);
 					pDetection.Log();
-					g_BanRequest.AddAsyncBan(player, 0, "Banned by NoCheatZ 4");
+					BanRequest::GetInstance()->AddAsyncBan(player, 0, "Banned by NoCheatZ 4");
 				}
 			}
 			break;
@@ -312,7 +313,7 @@ unexpected:
 				pDetection.PrepareDetectionData(req);
 				pDetection.PrepareDetectionLog(player, this);
 				pDetection.Log();
-				g_BanRequest.AddAsyncBan(player, 0, "Banned by NoCheatZ 4");
+				BanRequest::GetInstance()->AddAsyncBan(player, 0, "Banned by NoCheatZ 4");
 			}
 			break;
 		}
@@ -349,7 +350,7 @@ unexpected2:
 	pDetection.PrepareDetectionData(req);
 	pDetection.PrepareDetectionLog(player, this);
 	pDetection.Log();
-	g_BanRequest.AddAsyncBan(player, 0, "Banned by NoCheatZ 4");
+	BanRequest::GetInstance()->AddAsyncBan(player, 0, "Banned by NoCheatZ 4");
 }
 
 void ConVarTester::Load()
@@ -391,7 +392,14 @@ void ConVarTester::Load()
 	AddConvarRuleset("fog_enable", "1", SAME);
 	AddConvarRuleset("cl_pitchup", "89", SAME);
 	AddConvarRuleset("cl_pitchdown", "89", SAME);
-	AddConvarRuleset("cl_bobcycle", "0.8", SAME_FLOAT);
+	if (SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive)
+	{
+		AddConvarRuleset("cl_bobcycle", "0.98", SAME_FLOAT);
+	}
+	else
+	{
+		AddConvarRuleset("cl_bobcycle", "0.8", SAME_FLOAT);
+	}
 	AddConvarRuleset("cl_leveloverviewmarker", "0", SAME);
 	AddConvarRuleset("snd_visualize", "0", SAME);
 	AddConvarRuleset("snd_show", "0", SAME);
@@ -435,8 +443,6 @@ void ConVarTester::Unload()
 	m_convars_rules.RemoveAll();
 }
 
-ConVarTester g_ConVarTester;
-
 const char* ConvertRule(ConVarRule rule)
 {
 	switch(rule)
@@ -462,15 +468,15 @@ basic_string Detection_ConVar::GetDataDump()
 							Helpers::boolToString(GetDataStruct()->isSent),
 							Helpers::boolToString(GetDataStruct()->isReplyed),
 							GetDataStruct()->timeStart,
-							g_ConVarTester.m_convars_rules[GetDataStruct()->ruleset].name,
-							g_ConVarTester.m_convars_rules[GetDataStruct()->ruleset].value,
+							ConVarTester::GetInstance()->m_convars_rules[GetDataStruct()->ruleset].name,
+							ConVarTester::GetInstance()->m_convars_rules[GetDataStruct()->ruleset].value,
 							GetDataStruct()->answer.c_str(),
 							GetDataStruct()->answer_status.c_str(),
-							ConvertRule(g_ConVarTester.m_convars_rules[GetDataStruct()->ruleset].rule));
+							ConvertRule(ConVarTester::GetInstance()->m_convars_rules[GetDataStruct()->ruleset].rule));
 }
 
 basic_string Detection_ConVar::GetDetectionLogMessage()
 {
-	return Helpers::format("%s ConVar Bypasser", g_ConVarTester.m_convars_rules[GetDataStruct()->ruleset].name);
+	return Helpers::format("%s ConVar Bypasser", ConVarTester::GetInstance()->m_convars_rules[GetDataStruct()->ruleset].name);
 }
 

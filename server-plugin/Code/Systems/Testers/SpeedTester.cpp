@@ -21,7 +21,8 @@ SpeedTester::SpeedTester() :
 	BaseSystem("SpeedTester"),
 	OnTickListener(),
 	PlayerRunCommandHookListener(),
-	PlayerDataStructHandler<SpeedHolderT>()
+	playerdata_class(),
+	singleton_class()
 {
 }
 
@@ -105,8 +106,6 @@ PlayerRunCommandRet SpeedTester::PlayerRunCommandCallback(NczPlayer* player, Sou
 	
 	return CONTINUE;
 }
-
-SpeedTester g_SpeedTester = SpeedTester();
 
 basic_string Detection_SpeedHack::GetDataDump()
 {

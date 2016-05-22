@@ -29,7 +29,8 @@ ValidationTester::ValidationTester() :
 	BaseSystem("ValidationTester", PLAYER_CONNECTED, INVALID, STATUS_EQUAL_OR_BETTER),
 	NczFilteredPlayersList(),
 	OnTickListener(),
-	PlayerDataStructHandler<ValidationInfoT>()
+	playerdata_class(),
+	singleton_class()
 {
 }
 
@@ -56,9 +57,9 @@ void ValidationTester::ProcessPlayerTestOnTick(NczPlayer* player)
 	if(GetPlayerDataStruct(player)->b)
 		return;
 
-	SystemVerbose1(Helpers::format("%s SteamID not validated, validation time left : %d", player->GetName(), 20.0 - player->GetTimeConnected()));
+	SystemVerbose1(Helpers::format("%s SteamID not validated, validation time left : %f", player->GetName(), 20.0f - player->GetTimeConnected()));
 
-	if(player->GetTimeConnected() < 20.0) return;
+	if(player->GetTimeConnected() < 20.0f) return;
 	player->Kick();
 }
 
@@ -101,13 +102,15 @@ void ValidationTester::ProcessOnTick()
 	PendingValidationsT::elem_t* it = m_pending_validations.GetFirst();
 	while (it != nullptr)
 	{
-		PlayerHandler* ph = g_NczPlayerManager.GetPlayerHandlerBySteamID(it->m_value);
+		PlayerHandler* ph = NczPlayerManager::GetInstance()->GetPlayerHandlerBySteamID(it->m_value);
 
-		if (ph->status == INVALID) continue;
+		if (ph->status == INVALID)
+		{
+			it = it->m_next;
+			continue;
+		}
 
 		SetValidated(ph->playerClass);
 		it = m_pending_validations.Remove(it);
 	}
 }
-
-ValidationTester g_ValidationTester = ValidationTester();

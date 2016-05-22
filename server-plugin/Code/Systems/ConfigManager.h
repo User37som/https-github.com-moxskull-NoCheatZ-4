@@ -4,6 +4,7 @@
 #include "Containers/utlvector.h"
 
 #include "Misc/temp_basicstring.h"
+#include "Misc/temp_singleton.h"
 
 struct virtual_function
 {
@@ -33,8 +34,10 @@ struct virtual_function
 
 typedef CUtlVector<virtual_function> virtual_functions_t;
 
-class ConfigManager
+class ConfigManager : public Singleton<ConfigManager>
 {
+	typedef Singleton<ConfigManager> singleton_class;
+
 private:
 	virtual_functions_t m_vfuncs;
 	
@@ -56,7 +59,5 @@ public:
 	*/
 	int GetVirtualFunctionId(basic_string const & name);
 };
-
-extern ConfigManager g_ConfigManager;
 
 #endif // CONFIGMANAGER_H

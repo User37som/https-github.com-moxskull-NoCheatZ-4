@@ -18,6 +18,7 @@
 
 #include "temp_basiclist.h"
 #include "temp_basicstring.h"
+#include "temp_singleton.h"
 
 #undef GetClassName
 #include "SdkPreprocessors.h"
@@ -65,7 +66,7 @@ typedef CUtlVector<PropertyCacheT> PropsListT;
 
 SourceSdk::datamap_t* GetDataDescMap(SourceSdk::edict_t* const pEntity);
 
-class EntityProps
+class EntityProps : public Singleton<EntityProps>
 {
 private:
 	/* I believe offsets are consistents so don't need to reset the cache during runtime */
@@ -73,7 +74,7 @@ private:
 
 	void GetPropOffset(const basic_string& name, offset_t* pOffset);
 
-	bool GetDataOffset(SourceSdk::datamap_t* dt, const basic_string& data_name, void* prop, offset_t* offset);
+	bool GetDataOffset(SourceSdk::datamap_t* dt, const basic_string& data_name, offset_t* offset);
 
 	bool FindInCache(const basic_string &path, offset_t* offset, bool type = false);
 
@@ -98,16 +99,12 @@ public:
 			else
 			{
 				SourceSdk::datamap_t* const dt = GetDataDescMap(pEdict);
-				void* td = dt->dataDesc;
-
-				GetDataOffset(dt, path.c_str(), td, &offset);
+				GetDataOffset(dt, path, &offset);
 			}
 		}
 		Assert(offset > 0);
-		return reinterpret_cast<T *>(reinterpret_cast<char *>(pBase) + offset);
+		return reinterpret_cast<T *>(reinterpret_cast<uint8_t *>(pBase) + offset);
 	};
 };
-
-extern EntityProps g_EntityProps;
 
 #endif

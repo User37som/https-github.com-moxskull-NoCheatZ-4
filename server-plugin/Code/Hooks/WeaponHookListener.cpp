@@ -45,8 +45,8 @@ void WeaponHookListener::HookWeapon(NczPlayer* player)
 
 		info_equip->origEnt = info_drop->origEnt = (SourceSdk::CBaseEntity*)unk;
 
-		*(DWORD*)&(info_equip->oldFn) = VirtualTableHook(vtptr, g_ConfigManager.GetVirtualFunctionId("weaponequip"), ( DWORD )nWeapon_Equip );
-		*(DWORD*)&(info_drop->oldFn) = VirtualTableHook(vtptr, g_ConfigManager.GetVirtualFunctionId("weapondrop"), ( DWORD )nWeapon_Drop );
+		*(DWORD*)&(info_equip->oldFn) = VirtualTableHook(vtptr, ConfigManager::GetInstance()->GetVirtualFunctionId("weaponequip"), ( DWORD )nWeapon_Equip );
+		*(DWORD*)&(info_drop->oldFn) = VirtualTableHook(vtptr, ConfigManager::GetInstance()->GetVirtualFunctionId("weapondrop"), ( DWORD )nWeapon_Drop );
 		
 		m_hooked_instances.Add(info_drop);
 		m_hooked_instances.Add(info_equip); // Because add is pushing to front, equip will be before drop
@@ -61,8 +61,8 @@ void WeaponHookListener::UnhookWeapon()
 
 	while (it != nullptr)
 	{
-		if (!tricky_guess) VirtualTableHook(it->m_value->pInterface, g_ConfigManager.GetVirtualFunctionId("weaponequip"), it->m_value->oldFn, (DWORD)nWeapon_Equip);
-		else              VirtualTableHook(it->m_value->pInterface, g_ConfigManager.GetVirtualFunctionId("weapondrop"), it->m_value->oldFn, (DWORD)nWeapon_Drop);
+		if (!tricky_guess) VirtualTableHook(it->m_value->pInterface, ConfigManager::GetInstance()->GetVirtualFunctionId("weaponequip"), it->m_value->oldFn, (DWORD)nWeapon_Equip);
+		else              VirtualTableHook(it->m_value->pInterface, ConfigManager::GetInstance()->GetVirtualFunctionId("weapondrop"), it->m_value->oldFn, (DWORD)nWeapon_Drop);
 
 		tricky_guess = !tricky_guess;
 
@@ -79,7 +79,7 @@ void HOOKFN_INT WeaponHookListener::nWeapon_Equip(CBasePlayer* basePlayer, void*
 	HookList<>::elem_t* it = m_hooked_instances.FindByVtable(IFACE_PTR(basePlayer));
 	Assert(it != nullptr);
 
-	PlayerHandler* ph = g_NczPlayerManager.GetPlayerHandlerByBasePlayer(basePlayer);
+	PlayerHandler* ph = NczPlayerManager::GetInstance()->GetPlayerHandlerByBasePlayer(basePlayer);
 
 	if(ph->status != INVALID)
 	{
@@ -112,7 +112,7 @@ void HOOKFN_INT WeaponHookListener::nWeapon_Drop(CBasePlayer* basePlayer, void*,
 	it = it->m_next; // tricky guess
 	Assert(it != nullptr);
 
-	PlayerHandler* ph = g_NczPlayerManager.GetPlayerHandlerByBasePlayer(basePlayer);
+	PlayerHandler* ph = NczPlayerManager::GetInstance()->GetPlayerHandlerByBasePlayer(basePlayer);
 
 	if (ph->status != INVALID && weapon != nullptr)
 	{

@@ -29,7 +29,8 @@
 ShotTester::ShotTester(void) :
 	BaseSystem("ShotTester"),
 	PlayerRunCommandHookListener(),
-	PlayerDataStructHandler<ShotStatsT>()
+	playerdata_class(),
+	singleton_class()
 {
 }
 
@@ -149,8 +150,6 @@ PlayerRunCommandRet ShotTester::PlayerRunCommandCallback(NczPlayer* player, Sour
 	}
 	return drop_cmd;
 }
-
-ShotTester g_ShotTester = ShotTester();
 
 basic_string ShotDetection::GetDataDump()
 {

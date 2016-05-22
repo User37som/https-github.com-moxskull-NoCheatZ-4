@@ -59,7 +59,7 @@ void PlayerRunCommandHookListener::HookPlayerRunCommand(NczPlayer* player)
 	{
 		pdwInterface = vtptr;
 
-		DWORD OldFunc = VirtualTableHook(pdwInterface, g_ConfigManager.GetVirtualFunctionId("playerruncommand"), (DWORD)nPlayerRunCommand );
+		DWORD OldFunc = VirtualTableHook(pdwInterface, ConfigManager::GetInstance()->GetVirtualFunctionId("playerruncommand"), (DWORD)nPlayerRunCommand );
 		*(DWORD*)&(gpOldPlayerRunCommand) = OldFunc;
 	}
 }
@@ -68,7 +68,7 @@ void PlayerRunCommandHookListener::UnhookPlayerRunCommand()
 {
 	if(pdwInterface && gpOldPlayerRunCommand)
 	{
-		VirtualTableHook(pdwInterface, g_ConfigManager.GetVirtualFunctionId("playerruncommand"), (DWORD)gpOldPlayerRunCommand, (DWORD)nPlayerRunCommand);
+		VirtualTableHook(pdwInterface, ConfigManager::GetInstance()->GetVirtualFunctionId("playerruncommand"), (DWORD)gpOldPlayerRunCommand, (DWORD)nPlayerRunCommand);
 		pdwInterface = nullptr;
 		gpOldPlayerRunCommand = nullptr;
 	}
@@ -80,7 +80,7 @@ void PlayerRunCommandHookListener::nPlayerRunCommand(void* This, SourceSdk::CUse
 void HOOKFN_INT PlayerRunCommandHookListener::nPlayerRunCommand(void* This, void*, SourceSdk::CUserCmd* pCmd, IMoveHelper* pMoveHelper)
 #endif
 {
-	PlayerHandler* ph = g_NczPlayerManager.GetPlayerHandlerByBasePlayer(This);
+	PlayerHandler* ph = NczPlayerManager::GetInstance()->GetPlayerHandlerByBasePlayer(This);
 	PlayerRunCommandRet ret = CONTINUE;
 	
 	if(ph->status > PLAYER_CONNECTING)

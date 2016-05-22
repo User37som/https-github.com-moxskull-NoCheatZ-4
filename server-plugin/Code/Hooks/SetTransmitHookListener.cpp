@@ -44,7 +44,7 @@ void SetTransmitHookListener::HookSetTransmit(SourceSdk::edict_t* ent)
 		HookInfo<>* info = new HookInfo<>(vtptr);
 
 		info->origEnt = (SourceSdk::CBaseEntity*)unk;
-		*(DWORD*)&(info->oldFn) = VirtualTableHook(vtptr, g_ConfigManager.GetVirtualFunctionId("settransmit"), ( DWORD )nSetTransmit );
+		*(DWORD*)&(info->oldFn) = VirtualTableHook(vtptr, ConfigManager::GetInstance()->GetVirtualFunctionId("settransmit"), ( DWORD )nSetTransmit );
 		m_hooked_instances.Add(info);
 
 		DebugMessage(basic_string("Hooked SetTransmit of entity classname ").append(ent->GetClassName()));
@@ -56,7 +56,7 @@ void SetTransmitHookListener::UnhookSetTransmit()
 	InstancesListT::elem_t* it = m_hooked_instances.GetFirst();
 	while (it != nullptr)
 	{
-		VirtualTableHook(it->m_value->pInterface, g_ConfigManager.GetVirtualFunctionId("settransmit"), it->m_value->oldFn, (DWORD)nSetTransmit);
+		VirtualTableHook(it->m_value->pInterface, ConfigManager::GetInstance()->GetVirtualFunctionId("settransmit"), it->m_value->oldFn, (DWORD)nSetTransmit);
 		m_hooked_instances.Remove(it);
 		it = m_hooked_instances.GetFirst();
 	}	
@@ -68,7 +68,7 @@ void HOOKFN_INT SetTransmitHookListener::nSetTransmit(SourceSdk::CBaseEntity* Th
 void HOOKFN_INT SetTransmitHookListener::nSetTransmit(SourceSdk::CBaseEntity* This, void*, SourceSdk::CCheckTransmitInfo* pInfo, bool bAlways)
 #endif
 {
-	PlayerHandler* pplayer = g_NczPlayerManager.GetPlayerHandlerByBasePlayer(This);
+	PlayerHandler* pplayer = NczPlayerManager::GetInstance()->GetPlayerHandlerByBasePlayer(This);
 	if (pplayer->status > INVALID)
 	{
 		SourceSdk::edict_t* const pEdict_sender = pplayer->playerClass->GetEdict();

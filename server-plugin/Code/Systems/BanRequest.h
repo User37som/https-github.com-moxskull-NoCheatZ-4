@@ -17,6 +17,7 @@
 #define BANREQUEST_H
 
 #include "Misc/temp_basiclist.h"
+#include "Misc/temp_singleton.h"
 #include "Preprocessors.h"
 #include "Players/NczPlayer.h"
 #include "Systems/TimerListener.h"
@@ -72,8 +73,12 @@ typedef struct PlayerBanRequest
 
 typedef basic_slist<PlayerBanRequestT> BanRequestListT;
 
-class BanRequest : public TimerListener
+class BanRequest :
+	public TimerListener,
+	public Singleton<BanRequest>
 {
+	typedef Singleton<BanRequest> singleton_class;
+
 public:
 	BanRequest();
 	~BanRequest();
@@ -94,7 +99,5 @@ private:
 
 	BanRequestListT m_requests;
 };
-
-extern BanRequest g_BanRequest;
 
 #endif

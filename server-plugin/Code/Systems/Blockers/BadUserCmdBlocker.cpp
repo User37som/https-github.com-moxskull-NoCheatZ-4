@@ -17,8 +17,9 @@
 
 BadUserCmdBlocker::BadUserCmdBlocker() :
 	BaseSystem("BadUserCmdBlocker", PLAYER_CONNECTED, PLAYER_CONNECTING, STATUS_EQUAL_OR_BETTER),
-	PlayerDataStructHandler<UserCmdInfo>(),
-	PlayerRunCommandHookListener()
+	playerdatahandler_class(),
+	PlayerRunCommandHookListener(),
+	singleton_class()
 {
 	METRICS_ADD_TIMER("BadUserCmdBlocker::PlayerRunCommandCallback", 2.0);
 }
@@ -155,5 +156,3 @@ PlayerRunCommandRet BadUserCmdBlocker::PlayerRunCommandCallback(NczPlayer* playe
 	METRICS_LEAVE_SECTION("BadUserCmdBlocker::PlayerRunCommandCallback");
 	return CONTINUE;
 }
-
-BadUserCmdBlocker g_BadUserCmdBlocker = BadUserCmdBlocker();

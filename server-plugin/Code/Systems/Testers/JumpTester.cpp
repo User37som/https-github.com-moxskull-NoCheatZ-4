@@ -31,7 +31,8 @@ JumpTester::JumpTester() :
 	BaseSystem("JumpTester"),
 	OnGroundHookListener(),
 	PlayerRunCommandHookListener(),
-	PlayerDataStructHandler<JumpInfoT>()
+	playerdata_class(),
+	singleton_class()
 {
 }
 
@@ -165,8 +166,6 @@ PlayerRunCommandRet JumpTester::PlayerRunCommandCallback(NczPlayer* player, Sour
 	}
 	return drop_cmd;
 }
-
-JumpTester g_JumpTester = JumpTester();
 
 const char * ConvertButton(bool v)
 {

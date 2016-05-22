@@ -21,6 +21,7 @@
 #include "Systems/BaseSystem.h"
 #include "Interfaces/IGameEventManager/IGameEventManager.h"
 #include "Systems/OnTickListener.h"
+#include "Misc/temp_singleton.h"
 
 struct ChangeNameInfo
 {
@@ -43,8 +44,12 @@ class SpamChangeNameTester :
 	public PlayerDataStructHandler<ChangeNameInfo>,
 	public SourceSdk::IGameEventListener002,
 	public BaseSystem,
-	public OnTickListener
+	public OnTickListener,
+	public Singleton<SpamChangeNameTester>
 {
+	typedef Singleton<SpamChangeNameTester> singleton_class;
+	typedef PlayerDataStructHandler<ChangeNameInfo> playerdata_class;
+
 public:
 	SpamChangeNameTester();
 	~SpamChangeNameTester();
@@ -59,7 +64,5 @@ public:
 	void ProcessOnTick();
 	void ProcessPlayerTestOnTick(NczPlayer* player){};
 };
-
-extern SpamChangeNameTester g_SpamChangeNameTester;
 
 #endif

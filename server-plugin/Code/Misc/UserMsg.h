@@ -16,7 +16,6 @@
 #ifndef USERMSG_H
 #define USERMSG_H
 
-#ifdef NCZ_CSS
 enum eUserMsg
 {
 	INVALID = -1,
@@ -68,10 +67,7 @@ enum eUserMsg
 	MatchStatsUpdate = 45,
 	PlayerStatsUpdate = 46
 };
-#endif
 
-#ifdef NCZ_CSGO
 #	include <Interfaces/Protobuf/cstrike15_usermessage_helpers.h>
-#endif
 
 #endif

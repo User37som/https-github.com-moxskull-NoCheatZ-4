@@ -24,6 +24,7 @@
 #include "Hooks/SetTransmitHookListener.h"
 #include "Systems/BaseSystem.h"
 #include "Systems/OnTickListener.h"
+#include "Misc/temp_singleton.h"
 
 typedef struct SmokeEntityS
 {
@@ -76,8 +77,12 @@ class AntiSmokeBlocker :
 	private SourceSdk::IGameEventListener002,
 	public PlayerDataStructHandler<SmokeInfoT>,
 	private SetTransmitHookListener,
-	private OnTickListener
+	private OnTickListener,
+	public Singleton<AntiSmokeBlocker>
 {
+	typedef Singleton<AntiSmokeBlocker> singleton_class;
+	typedef PlayerDataStructHandler<SmokeInfoT> playerdatahandler_class;
+
 public:
 	AntiSmokeBlocker();
 	~AntiSmokeBlocker();
@@ -96,7 +101,5 @@ private:
 private:
 	SmokeListT m_smokes;
 };
-
-extern AntiSmokeBlocker g_AntiSmokeBlocker;
 
 #endif // ANTIFLASHBANGBLOCKER_H
