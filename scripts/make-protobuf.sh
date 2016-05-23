@@ -1,6 +1,15 @@
 #!/bin/bash
 
 cd ./SourceSdk/Interfaces/Protobuf/protobuf-2.5.0
+autogenfile=./autogen.sh
+if [ ! -e "$autogenfile" ]; then
+	cd ..
+	echo "Downloading protobuf 2.5.0"
+	wget https://github.com/google/protobuf/archive/v2.5.0.tar.gz
+	tar xzvf protobuf-2.5.0.tar.gz
+	rm protobuf-2.5.0.tar.gz
+	cd protobuf-2.5.0
+fi
 echo "Updating protobuf 2.5.0"
 make
 OUT=$?
@@ -15,4 +24,3 @@ else
 	echo "Building protobuf 2.5.0"
 	make
 fi
-
