@@ -372,7 +372,7 @@ int NczPlayer::aimingAt()
 	SourceSdk::InterfacesProxy::Call_ClientEarPosition(edict, &eyePos);
 
 	SourceSdk::Vector vEnd;
-	AngleVectors(PlayerRunCommandHookListener::GetLastUserCmd(this)->viewangles, &vEnd);
+	AngleVectors(static_cast<SourceSdk::CUserCmd*>(PlayerRunCommandHookListener::GetLastUserCmd(this))->viewangles, &vEnd);
 	VectorMultiply(vEnd, 8192.0f);
 	VectorAdd(eyePos, vEnd);
 

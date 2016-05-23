@@ -22,7 +22,7 @@
 #include "SdkPreprocessors.h"
 #include "Interfaces/usercmd.h"
 
-inline void InertCmd(SourceSdk::CUserCmd* pcmd);
+inline void InertCmd(void* pcmd);
 
 /////////////////////////////////////////////////////////////////////////
 // CCSPlayer::PlayerRunCommand(CUserCmd*, IMoveHelper*)
@@ -32,7 +32,7 @@ class CCSPlayer;
 class IMoveHelper;
 class NczPlayer;
 
-typedef void (HOOKFN_EXT *PlayerRunCommand_t)(void*, SourceSdk::CUserCmd*, IMoveHelper*);
+typedef void (HOOKFN_EXT *PlayerRunCommand_t)(void*, void*, IMoveHelper*);
 
 enum PlayerRunCommandRet
 {
@@ -54,22 +54,22 @@ public:
 	static void HookPlayerRunCommand(NczPlayer* player);
 
 	static void UnhookPlayerRunCommand();
-	static SourceSdk::CUserCmd* GetLastUserCmd(NczPlayer* player);
+	static void* GetLastUserCmd(NczPlayer* player);
 
 protected:
 	static void RegisterPlayerRunCommandHookListener(PlayerRunCommandHookListener* listener, size_t priority = std::numeric_limits<size_t>::max(), SlotStatus filter = PLAYER_IN_TESTS);
 	static void RemovePlayerRunCommandHookListener(PlayerRunCommandHookListener* listener);
 
-	virtual PlayerRunCommandRet PlayerRunCommandCallback(NczPlayer* player, SourceSdk::CUserCmd* cmd, const SourceSdk::CUserCmd& old_cmd) = 0;
+	virtual PlayerRunCommandRet PlayerRunCommandCallback(NczPlayer* player, void* cmd, void* old_cmd) = 0;
 
 private:
 #ifdef GNUC
-	static void HOOKFN_INT nPlayerRunCommand(void* This, SourceSdk::CUserCmd* pCmd, IMoveHelper* pMoveHelper);
+	static void HOOKFN_INT nPlayerRunCommand(void* This, void* pCmd, IMoveHelper* pMoveHelper);
 #else
-	static void HOOKFN_INT nPlayerRunCommand(void* This, void*, SourceSdk::CUserCmd* pCmd, IMoveHelper* pMoveHelper);
+	static void HOOKFN_INT nPlayerRunCommand(void* This, void*, void* pCmd, IMoveHelper* pMoveHelper);
 #endif
 	static ListenersListT m_listeners;
-	static SourceSdk::CUserCmd m_lastCUserCmd[MAX_PLAYERS];
+	static SourceSdk::CUserCmd_csgo m_lastCUserCmd[MAX_PLAYERS];
 	static PlayerRunCommand_t gpOldPlayerRunCommand;
 	static DWORD* pdwInterface;
 } ALIGN8_POST;

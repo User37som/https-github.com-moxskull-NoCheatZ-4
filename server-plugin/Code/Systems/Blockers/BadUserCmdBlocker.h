@@ -63,7 +63,7 @@ public:
 
 	void Load(),Unload(),Init();
 
-	PlayerRunCommandRet PlayerRunCommandCallback(NczPlayer* player, SourceSdk::CUserCmd* cmd, const SourceSdk::CUserCmd& old_cmd);
+	PlayerRunCommandRet PlayerRunCommandCallback(NczPlayer* player, void* cmd, void* old_cmd);
 };
 
 #endif // BADUSERCMDBLOCKER_H

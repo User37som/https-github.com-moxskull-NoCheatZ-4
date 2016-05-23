@@ -85,7 +85,7 @@ public:
 	void Init();
 	void Load();
 	void Unload();
-	PlayerRunCommandRet PlayerRunCommandCallback(NczPlayer* player, SourceSdk::CUserCmd* cmd, const SourceSdk::CUserCmd& old_cmd);
+	PlayerRunCommandRet PlayerRunCommandCallback(NczPlayer* player, void* cmd, void* old_cmd);
 	void ProcessPlayerTestOnTick(NczPlayer* player);
 	void ProcessOnTick(){};
 };

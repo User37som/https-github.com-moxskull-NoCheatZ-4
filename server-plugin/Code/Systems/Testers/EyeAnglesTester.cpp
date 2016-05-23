@@ -63,7 +63,7 @@ void EyeAnglesTester::Unload()
 	END_PLAYERS_LOOP
 }
 
-PlayerRunCommandRet EyeAnglesTester::PlayerRunCommandCallback(NczPlayer* player, SourceSdk::CUserCmd* pCmd, const SourceSdk::CUserCmd& old_cmd)
+PlayerRunCommandRet EyeAnglesTester::PlayerRunCommandCallback(NczPlayer* player, void* pCmd, void* old_cmd)
 {	
 	int const * const flags = EntityProps::GetInstance()->GetPropValue<int>("CBasePlayer.m_fFlags", player->GetEdict());
 	
@@ -76,9 +76,9 @@ PlayerRunCommandRet EyeAnglesTester::PlayerRunCommandCallback(NczPlayer* player,
 	PlayerRunCommandRet drop_cmd = CONTINUE;
 
 	EyeAngleInfoT* playerData = GetPlayerDataStruct(player);
-	playerData->x.abs_value = fabs(    playerData->x.value = pCmd->viewangles.x    );
-	playerData->y.abs_value = fabs(    playerData->y.value = pCmd->viewangles.y    );
-	playerData->z.abs_value = fabs(    playerData->z.value = pCmd->viewangles.z    );
+	playerData->x.abs_value = fabs(    playerData->x.value = static_cast<SourceSdk::CUserCmd_csgo*>(pCmd)->viewangles.x    );
+	playerData->y.abs_value = fabs(    playerData->y.value = static_cast<SourceSdk::CUserCmd_csgo*>(pCmd)->viewangles.y    );
+	playerData->z.abs_value = fabs(    playerData->z.value = static_cast<SourceSdk::CUserCmd_csgo*>(pCmd)->viewangles.z    );
 
 	if (playerData->x.abs_value > 89.0f || playerData->z.abs_value > 0.0f || playerData->y.abs_value > 180.0f)
 	{
@@ -92,7 +92,7 @@ PlayerRunCommandRet EyeAnglesTester::PlayerRunCommandCallback(NczPlayer* player,
 	if(drop_cmd)
 	{
 #		ifdef DEBUG
-			printf("Player %s : Droping command #%d\n", player->GetName(), pCmd->command_number);
+			printf("Player %s : Droping command #%d\n", player->GetName(), static_cast<SourceSdk::CUserCmd_csgo*>(pCmd)->command_number);
 #		endif
 		if(playerData->x.abs_value > 89.0f)
 		{

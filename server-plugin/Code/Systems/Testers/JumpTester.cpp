@@ -113,13 +113,24 @@ void JumpTester::m_hGroundEntityStateChangedCallback(NczPlayer* player, bool new
 	}
 }
 
-PlayerRunCommandRet JumpTester::PlayerRunCommandCallback(NczPlayer* player, SourceSdk::CUserCmd* pCmd, const SourceSdk::CUserCmd& old_cmd)
+PlayerRunCommandRet JumpTester::PlayerRunCommandCallback(NczPlayer* player, void* pCmd, void* old_cmd)
 {
 	PlayerRunCommandRet drop_cmd = CONTINUE;
 
 	JumpInfoT* playerData = GetPlayerDataStruct(player);
 
-	if((playerData->jumpCmdHolder.lastJumpCmdState == false) && (pCmd->buttons & IN_JUMP))
+	bool cur_in_jump;
+
+	if (SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive)
+	{
+		cur_in_jump = (static_cast<SourceSdk::CUserCmd_csgo*>(pCmd)->buttons & IN_JUMP) != 0;
+	}
+	else
+	{
+		cur_in_jump = (static_cast<SourceSdk::CUserCmd*>(pCmd)->buttons & IN_JUMP) != 0;
+	}
+
+	if((playerData->jumpCmdHolder.lastJumpCmdState == false) && cur_in_jump)
 	{
 		playerData->jumpCmdHolder.JumpDown_Tick = GetGameTickCount();
 		if(playerData->isOnGround)
@@ -158,7 +169,7 @@ PlayerRunCommandRet JumpTester::PlayerRunCommandCallback(NczPlayer* player, Sour
 		}
 		playerData->jumpCmdHolder.lastJumpCmdState = true;
 	}
-	else if((playerData->jumpCmdHolder.lastJumpCmdState == true) && ((pCmd->buttons & IN_JUMP) == 0))
+	else if((playerData->jumpCmdHolder.lastJumpCmdState == true) && !cur_in_jump)
 	{
 		playerData->jumpCmdHolder.lastJumpCmdState = false;
 		playerData->jumpCmdHolder.JumpUp_Tick = GetGameTickCount();

@@ -111,7 +111,7 @@ void NczPlayerManager::ClientConnect(SourceSdk::edict_t* pEntity)
 	Assert(ph.status == INVALID || ph.status == PLAYER_CONNECTING);
 	ph.playerClass = new NczPlayer(index);
 	// Should not be here, but heh ...
-	*PlayerRunCommandHookListener::GetLastUserCmd(ph.playerClass) = SourceSdk::CUserCmd();
+	//*PlayerRunCommandHookListener::GetLastUserCmd(ph.playerClass) = SourceSdk::CUserCmd();
 	ph.status = PLAYER_CONNECTING;
 	ph.playerClass->OnConnect();
 

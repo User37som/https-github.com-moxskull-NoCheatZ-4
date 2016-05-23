@@ -5,6 +5,8 @@
     <LocalDebuggerCommandArguments>-console -game csgo -insecure -maxplayers 32 +map de_dust2 +rcon_password cderfv +bot_join_team ct +bot_quota 1 +mp_limitteams 0</LocalDebuggerCommandArguments>
     <LocalDebuggerWorkingDirectory>C:\steamcmd\CSGO\</LocalDebuggerWorkingDirectory>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
+    <LocalDebuggerAmpDefaultAccelerator>
+    </LocalDebuggerAmpDefaultAccelerator>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debub-CSGO|Win32'">
     <LocalDebuggerCommand>C:\steamcmd\CSGO\srcds.exe</LocalDebuggerCommand>

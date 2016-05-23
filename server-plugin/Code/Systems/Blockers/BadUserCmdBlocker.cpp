@@ -50,11 +50,11 @@ void BadUserCmdBlocker::Unload()
 	END_PLAYERS_LOOP
 }
 
-PlayerRunCommandRet BadUserCmdBlocker::PlayerRunCommandCallback(NczPlayer* player, SourceSdk::CUserCmd* pCmd, const SourceSdk::CUserCmd& old_cmd)
+PlayerRunCommandRet BadUserCmdBlocker::PlayerRunCommandCallback(NczPlayer* player, void* pCmd, void* old_cmd)
 {
 	METRICS_ENTER_SECTION("BadUserCmdBlocker::PlayerRunCommandCallback");
 
-	if(pCmd->command_number <= 0)
+	if(static_cast<SourceSdk::CUserCmd_csgo*>(pCmd)->command_number <= 0)
 	{
 		METRICS_LEAVE_SECTION("BadUserCmdBlocker::PlayerRunCommandCallback");
 		return BLOCK;
@@ -62,7 +62,7 @@ PlayerRunCommandRet BadUserCmdBlocker::PlayerRunCommandCallback(NczPlayer* playe
 
 	UserCmdInfo* const pInfo = GetPlayerDataStruct(player);
 
-	if (pCmd->tick_count <= 0)
+	if (static_cast<SourceSdk::CUserCmd_csgo*>(pCmd)->tick_count <= 0)
 		pInfo->m_tick_status = IN_RESET;
 
 	bool isDead = true;
@@ -83,7 +83,7 @@ PlayerRunCommandRet BadUserCmdBlocker::PlayerRunCommandCallback(NczPlayer* playe
 	{
 		pInfo->m_prev_dead = isDead;
 		
-		if (old_cmd.command_number >= pCmd->command_number)
+		if (static_cast<SourceSdk::CUserCmd_csgo*>(old_cmd)->command_number >= static_cast<SourceSdk::CUserCmd_csgo*>(pCmd)->command_number)
 		{
 			if (pInfo->m_tick_status == IN_RESET)
 				pInfo->m_tick_status = RESET;
@@ -98,7 +98,7 @@ PlayerRunCommandRet BadUserCmdBlocker::PlayerRunCommandCallback(NczPlayer* playe
 		return CONTINUE;
 	}
 
-	if (old_cmd.command_number > pCmd->command_number)
+	if (static_cast<SourceSdk::CUserCmd_csgo*>(old_cmd)->command_number > static_cast<SourceSdk::CUserCmd_csgo*>(pCmd)->command_number)
 	{
 		if (pInfo->m_tick_status != OK)
 		{
@@ -115,7 +115,7 @@ PlayerRunCommandRet BadUserCmdBlocker::PlayerRunCommandCallback(NczPlayer* playe
 		return BLOCK;
 	}
 
-	if (old_cmd.command_number == pCmd->command_number)
+	if (static_cast<SourceSdk::CUserCmd_csgo*>(old_cmd)->command_number == static_cast<SourceSdk::CUserCmd_csgo*>(pCmd)->command_number)
 	{
 		if (pInfo->m_tick_status != OK)
 		{
@@ -125,7 +125,7 @@ PlayerRunCommandRet BadUserCmdBlocker::PlayerRunCommandCallback(NczPlayer* playe
 			return BLOCK;
 		}
 	
-		if (old_cmd.tick_count+1 != pCmd->tick_count)
+		if (static_cast<SourceSdk::CUserCmd_csgo*>(old_cmd)->tick_count+1 != static_cast<SourceSdk::CUserCmd_csgo*>(pCmd)->tick_count)
 		{
 			pInfo->m_detected_time = Plat_FloatTime() + 10.0f;
 			
@@ -147,7 +147,7 @@ PlayerRunCommandRet BadUserCmdBlocker::PlayerRunCommandCallback(NczPlayer* playe
 	}
 	z += 8;
 
-	if(pCmd->tick_count > z)
+	if(static_cast<SourceSdk::CUserCmd_csgo*>(pCmd)->tick_count > z)
 	{
 		METRICS_LEAVE_SECTION("BadUserCmdBlocker::PlayerRunCommandCallback");
 		return INERT;

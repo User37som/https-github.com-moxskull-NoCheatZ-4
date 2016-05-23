@@ -97,7 +97,7 @@ public:
 	void Load();
 	void Unload();
 	SlotStatus GetFilter();
-	PlayerRunCommandRet PlayerRunCommandCallback(NczPlayer* player, SourceSdk::CUserCmd* pCmd, const SourceSdk::CUserCmd& old_cmd);
+	PlayerRunCommandRet PlayerRunCommandCallback(NczPlayer* player, void* pCmd, void* old_cmd);
 };
 
 class ShotDetection : public LogDetection<ShotStats>

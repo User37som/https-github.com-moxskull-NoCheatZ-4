@@ -207,15 +207,14 @@ void WallhackBlocker::ProcessOnTick()
 			SourceSdk::VectorCopy(static_cast<SourceSdk::IPlayerInfo*>(playerinfo)->GetAbsOrigin(), pData->abs_origin);
 		}
 
+		SourceSdk::VectorCopy(static_cast<SourceSdk::CUserCmd_csgo*>(PlayerRunCommandHookListener::GetLastUserCmd(pPlayer))->viewangles, pData->eye_angles);
+
 		{
 			SourceSdk::vec_t& bmax2 = pData->bbox_max.z;
 			bmax2 /= 2.0;
 			pData->bbox_min.z -= bmax2;
 			pData->abs_origin.z += bmax2;
 		}
-
-		SourceSdk::VectorCopy(PlayerRunCommandHookListener::GetLastUserCmd(pPlayer)->viewangles, pData->eye_angles);
-		
 
 		SourceSdk::InterfacesProxy::Call_ClientEarPosition(playeredict, &(pData->ear_pos));
 
@@ -237,7 +236,7 @@ void WallhackBlocker::ProcessOnTick()
 				const int lerp_ticks = (int)( 0.5f + *EntityProps::GetInstance()->GetPropValue<float>("CBasePlayer.m_fLerpTime", playeredict, true) / tick_interval );
 				const float fCorrect = netchan->GetLatency(FLOW_OUTGOING) + fmodf(lerp_ticks * tick_interval, 1.0);
 
-				target_tick = PlayerRunCommandHookListener::GetLastUserCmd(pPlayer)->tick_count - lerp_ticks;
+				target_tick = static_cast<SourceSdk::CUserCmd_csgo*>(PlayerRunCommandHookListener::GetLastUserCmd(pPlayer))->tick_count - lerp_ticks;
 
 				diff_time = (game_tick - target_tick) * tick_interval;
 

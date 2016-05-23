@@ -77,18 +77,32 @@ void OutputStat(ShotStatHandlerT* handler)
 	printf(Helpers::format("{ count %lu, ratio %3.2f, avg %3.2f }", handler->n, handler->ratio, handler->avg_time).c_str());
 }
 
-PlayerRunCommandRet ShotTester::PlayerRunCommandCallback(NczPlayer* player, SourceSdk::CUserCmd* pCmd, const SourceSdk::CUserCmd& lastcmd)
+PlayerRunCommandRet ShotTester::PlayerRunCommandCallback(NczPlayer* player, void* pCmd, void* lastcmd)
 {	
 	PlayerRunCommandRet drop_cmd = CONTINUE;
 
 	ShotStatsT* playerData = GetPlayerDataStruct(player);
 
-	if((pCmd->buttons & IN_ATTACK) && !(lastcmd.buttons & IN_ATTACK))
+	bool cur_in_attack;
+	bool past_in_attack;
+
+	if (SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive)
+	{
+		cur_in_attack = (static_cast<SourceSdk::CUserCmd_csgo*>(pCmd)->buttons & IN_ATTACK) != 0;
+		past_in_attack = (static_cast<SourceSdk::CUserCmd_csgo*>(lastcmd)->buttons & IN_ATTACK) != 0;
+	}
+	else
+	{
+		cur_in_attack = (static_cast<SourceSdk::CUserCmd*>(pCmd)->buttons & IN_ATTACK) != 0;
+		past_in_attack = (static_cast<SourceSdk::CUserCmd*>(lastcmd)->buttons & IN_ATTACK) != 0;
+	}
+
+	if(cur_in_attack && !past_in_attack)
 	{
 		SystemVerbose1(Helpers::format("Player %s : IN_ATTACK button down.", player->GetName()));
 		playerData->down_time = Plat_FloatTime();
 	}
-	else if((lastcmd.buttons & IN_ATTACK) && !(pCmd->buttons & IN_ATTACK))
+	else if(past_in_attack && !cur_in_attack)
 	{
 		playerData->up_time = Plat_FloatTime();
 		TriggerStat(&(playerData->clicks), playerData->up_time, playerData->down_time, playerData->clicks.n);

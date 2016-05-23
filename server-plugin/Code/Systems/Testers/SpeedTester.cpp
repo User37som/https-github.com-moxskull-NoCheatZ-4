@@ -96,7 +96,7 @@ void SpeedTester::ProcessPlayerTestOnTick(NczPlayer* player)
 	pInfo->lastTest = game_time;
 }
 
-PlayerRunCommandRet SpeedTester::PlayerRunCommandCallback(NczPlayer* player, SourceSdk::CUserCmd* pCmd, const SourceSdk::CUserCmd& old_cmd)
+PlayerRunCommandRet SpeedTester::PlayerRunCommandCallback(NczPlayer* player, void* pCmd, void* old_cmd)
 {
 	float& tl = this->GetPlayerDataStruct(player)->ticksLeft;
 

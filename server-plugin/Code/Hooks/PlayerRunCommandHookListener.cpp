@@ -32,19 +32,19 @@
 PlayerRunCommand_t PlayerRunCommandHookListener::gpOldPlayerRunCommand = nullptr;
 DWORD* PlayerRunCommandHookListener::pdwInterface = nullptr;
 ListenersListT PlayerRunCommandHookListener::m_listeners;
-SourceSdk::CUserCmd PlayerRunCommandHookListener::m_lastCUserCmd[MAX_PLAYERS];
+SourceSdk::CUserCmd_csgo PlayerRunCommandHookListener::m_lastCUserCmd[MAX_PLAYERS];
 
 PlayerRunCommandHookListener::PlayerRunCommandHookListener()
 {
-	for(int x = 1; x < MAX_PLAYERS; ++x) m_lastCUserCmd[x] = SourceSdk::CUserCmd();
-	std::srand(std::time(0));
+	//for(int x = 1; x < MAX_PLAYERS; ++x) m_lastCUserCmd[x] = SourceSdk::CUserCmd();
+	std::srand((unsigned int)(std::time(0)));
 }
 
 PlayerRunCommandHookListener::~PlayerRunCommandHookListener()
 {
 }
 
-SourceSdk::CUserCmd* PlayerRunCommandHookListener::GetLastUserCmd(NczPlayer* player)
+void* PlayerRunCommandHookListener::GetLastUserCmd(NczPlayer* player)
 {
 	return &(m_lastCUserCmd[player->GetIndex()]);
 }
@@ -77,7 +77,7 @@ void PlayerRunCommandHookListener::UnhookPlayerRunCommand()
 #ifdef GNUC
 void PlayerRunCommandHookListener::nPlayerRunCommand(void* This, SourceSdk::CUserCmd* pCmd, IMoveHelper* pMoveHelper)
 #else
-void HOOKFN_INT PlayerRunCommandHookListener::nPlayerRunCommand(void* This, void*, SourceSdk::CUserCmd* pCmd, IMoveHelper* pMoveHelper)
+void HOOKFN_INT PlayerRunCommandHookListener::nPlayerRunCommand(void* This, void*, void* pCmd, IMoveHelper* pMoveHelper)
 #endif
 {
 	PlayerHandler* ph = NczPlayerManager::GetInstance()->GetPlayerHandlerByBasePlayer(This);
@@ -85,7 +85,7 @@ void HOOKFN_INT PlayerRunCommandHookListener::nPlayerRunCommand(void* This, void
 	
 	if(ph->status > PLAYER_CONNECTING)
 	{
-		SourceSdk::CUserCmd& old_cmd = m_lastCUserCmd[ph->playerClass->GetIndex()];
+		SourceSdk::CUserCmd_csgo& old_cmd = m_lastCUserCmd[ph->playerClass->GetIndex()];
 
 
 		ListenersListT::elem_t* it = m_listeners.GetFirst();
@@ -93,20 +93,27 @@ void HOOKFN_INT PlayerRunCommandHookListener::nPlayerRunCommand(void* This, void
 		{
 			if (ph->status >= it->m_value.filter)
 			{
-				ret = it->m_value.listener->PlayerRunCommandCallback(ph->playerClass, pCmd, old_cmd);
+				ret = it->m_value.listener->PlayerRunCommandCallback(ph->playerClass, pCmd, &old_cmd);
 				if (ret > CONTINUE) break;
 			}
 			it = it->m_next;
 		}
 		
-		old_cmd = *pCmd;
+		memcpy(&old_cmd, pCmd, sizeof(SourceSdk::CUserCmd_csgo));
 	}
 
 	if(ret < BLOCK)
 	{
 		if(ret == INERT) InertCmd(pCmd);
 
-		pCmd->random_seed = std::rand() & std::numeric_limits<int>::max();
+		if (SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive)
+		{
+			static_cast<SourceSdk::CUserCmd_csgo*>(pCmd)->random_seed = std::rand() & std::numeric_limits<int>::max();
+		}
+		else
+		{
+			static_cast<SourceSdk::CUserCmd*>(pCmd)->random_seed = std::rand() & std::numeric_limits<int>::max();
+		}
 
 		gpOldPlayerRunCommand(This, pCmd, pMoveHelper);
 	}
@@ -122,9 +129,20 @@ void PlayerRunCommandHookListener::RemovePlayerRunCommandHookListener(PlayerRunC
 	m_listeners.Remove(listener);
 }
 
-inline void InertCmd(SourceSdk::CUserCmd* pcmd)
+inline void InertCmd(void* pcmd)
 {
-	VectorCopy(SourceSdk::QAngle(0.0f, 0.0f, 0.0f), pcmd->viewangles);
-	pcmd->buttons = 0;
-	pcmd->tick_count = pcmd->tick_count - 50;
+	if (SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive)
+	{
+		SourceSdk::CUserCmd_csgo* z = static_cast<SourceSdk::CUserCmd_csgo*>(pcmd);
+		VectorCopy(SourceSdk::QAngle(0.0f, 0.0f, 0.0f), z->viewangles);
+		z->buttons = 0;
+		//z->tick_count = z->tick_count - 50;
+	}
+	else
+	{
+		SourceSdk::CUserCmd* z = static_cast<SourceSdk::CUserCmd*>(pcmd);
+		VectorCopy(SourceSdk::QAngle(0.0f, 0.0f, 0.0f), z->viewangles);
+		z->buttons = 0;
+		//z->tick_count = z->tick_count - 50;
+	}
 }

@@ -124,7 +124,7 @@ public:
 	void Load();
 	void Unload();
 	SlotStatus GetFilter();
-	PlayerRunCommandRet PlayerRunCommandCallback(NczPlayer* player, SourceSdk::CUserCmd* cmd, const SourceSdk::CUserCmd& old_cmd);
+	PlayerRunCommandRet PlayerRunCommandCallback(NczPlayer* player, void* cmd, void* old_cmd);
 	void FireGameEvent(SourceSdk::IGameEvent *ev);
 	void TeleportCallback(NczPlayer* player, SourceSdk::Vector const* va, SourceSdk::QAngle const* qa, SourceSdk::Vector const* vb);
 };
