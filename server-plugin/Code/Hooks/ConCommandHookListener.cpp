@@ -19,6 +19,7 @@
 
 #include "Misc/Helpers.h"
 #include "plugin.h"
+#include "Systems/ConfigManager.h"
 
 ConCommandListenersListT ConCommandHookListener::m_listeners;
 HookedCommandListT ConCommandHookListener::m_hooked_commands;
@@ -43,13 +44,12 @@ void ConCommandHookListener::HookDispatch(void* cmd )
 		CCommand empty;
 		cmd->Dispatch(empty);
 	*/	
-
 	
 	if(m_hooked_commands.Find(IFACE_PTR(cmd)) == nullptr)
 	{
 		HookInfo<void>* hook = new HookInfo<void>(IFACE_PTR(cmd));
 		hook->origEnt = cmd;
-		hook->oldFn = VirtualTableHook(hook->pInterface, DEFAULT_DISPATCH_OFFSET, ( DWORD )nDispatch );
+		hook->oldFn = VirtualTableHook(hook->pInterface, ConfigManager::GetInstance()->GetVirtualFunctionId("dispatch"), ( DWORD )nDispatch );
 		m_hooked_commands.Add(hook);
 	}
 }
@@ -61,7 +61,7 @@ void ConCommandHookListener::UnhookDispatch(void* cmd)
 
 	if (m_hooked_commands.FindByFunction(hook_info->m_value->oldFn, hook_info) == nullptr)
 	{
-		VirtualTableHook(hook_info->m_value->pInterface, DEFAULT_DISPATCH_OFFSET, (DWORD)hook_info->m_value->oldFn, (DWORD)nDispatch);
+		VirtualTableHook(hook_info->m_value->pInterface, ConfigManager::GetInstance()->GetVirtualFunctionId("dispatch"), (DWORD)hook_info->m_value->oldFn, (DWORD)nDispatch);
 		m_hooked_commands.Remove(hook_info);
 	}
 }
@@ -103,6 +103,17 @@ void HOOKFN_INT ConCommandHookListener::nDispatch(void* cmd, void*, SourceSdk::C
 	else if(index == 0)
 	{
 		bypass = false;
+
+		ConCommandListenersListT::elem_t* it = m_listeners.GetFirst();
+		while (it != nullptr)
+		{
+			int const c = it->m_value.listener->m_mycommands.Find(cmd);
+			if (c != -1)
+			{
+				bypass |= it->m_value.listener->ConCommandCallback(nullptr, cmd, args);
+			}
+			it = it->m_next;
+		}
 	}
 	else
 	{
