@@ -226,6 +226,20 @@ public:
 		return m_size;
 	}
 
+	String<pod>& replace(pod const replace_this, pod const replace_by)
+	{
+		if (m_size > 0)
+		{
+			pod * me = m_alloc;
+			do
+			{
+				if (*me == replace_this) *me = replace_by;
+			} while (*++me != '\0');
+		}
+
+		return *this;
+	}
+
 	size_t find(pod const c, size_t start = 0) const
 	{
 		size_t a = m_size;
