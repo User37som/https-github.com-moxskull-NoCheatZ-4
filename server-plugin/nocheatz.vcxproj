@@ -244,7 +244,7 @@ copy "$(TargetPath)" ..\..\..\game\bin\"$(TargetName)".pdb
   <ItemGroup>
     <ClCompile Include="Code\Systems\AutoTVRecord.cpp" />
     <ClCompile Include="Code\Systems\ConfigManager.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="SourceSdk\Interfaces\Protobuf\cstrike15_usermessages.pb.cc" />

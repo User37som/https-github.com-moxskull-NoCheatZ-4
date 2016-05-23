@@ -76,7 +76,7 @@ private:
 #ifdef DEBUG
 #	define DebugMessage(x) Logger::GetInstance()->Msg<MSG_DEBUG>(x, 3)
 #else
-#	define DebugMessage(x, y)
+#	define DebugMessage(x)
 #endif
 
 #endif
