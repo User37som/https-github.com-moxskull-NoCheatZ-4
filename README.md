@@ -51,7 +51,7 @@ su to your srcds user.
 ```git
 git clone git://github.com/L-EARN/NoCheatZ-4.git
 cd NoCheatZ-4
-git submodule update --remote
+git submodule update --init
 ```
 
 ___
@@ -93,11 +93,13 @@ ___
 
 1. Make sure you installed steamcmd at C:\steamcmd\steamcmd.exe
 
-2. Open the solution with Visual Studio 2015
+2. Download and extract [libprotobuf src 2.5.0](https://github.com/google/protobuf/archive/v2.5.0.zip) in server-plugin\SourceSdk\Interfaces\Protobuf\
 
-3. Choose your configuration.
+3. Open the solution with Visual Studio 2015
 
-4. Click build.
+4. Choose your configuration.
+
+5. Click build. 
          
 ___		 
 ### With Mac
