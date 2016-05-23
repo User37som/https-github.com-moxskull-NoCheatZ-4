@@ -23,11 +23,30 @@
 #include "Misc/Helpers.h"
 #include "Misc/temp_Metrics.h"
 #include "Players/NczPlayerManager.h"
+#include "Systems/AutoTVRecord.h"
 
 void Logger::Push(const basic_string& msg)
 {
-	m_msg.AddToTail(msg);
+	int server_tick;
+	if (SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive)
+	{
+		server_tick = static_cast<SourceSdk::CGlobalVars_csgo*>(SourceSdk::InterfacesProxy::Call_GetGlobalVars())->tickcount;
+	}
+	else
+	{
+		server_tick = static_cast<SourceSdk::CGlobalVars*>(SourceSdk::InterfacesProxy::Call_GetGlobalVars())->tickcount;
+	}
 
+	if (AutoTVRecord::GetInstance()->IsRecording())
+	{
+		basic_string record_tick(Helpers::format("%s.dem:Tick #%d", AutoTVRecord::GetInstance()->GetRecordFilename().c_str(), AutoTVRecord::GetInstance()->GetRecordTick()));
+		m_msg.AddToTail(Helpers::format("%s [Server Tick #%d, SourceTV : %s] %s", Helpers::getStrDateTime("%x %X").c_str(), server_tick, record_tick.c_str(), msg.c_str()));
+	}
+	else
+	{
+		m_msg.AddToTail(Helpers::format("%s [Server Tick #%d] %s", Helpers::getStrDateTime("%x %X").c_str(), server_tick, msg.c_str()));
+	}
+	
 	if(NczPlayerManager::GetInstance()->GetPlayerCount(PLAYER_CONNECTED, STATUS_EQUAL_OR_BETTER) == 0)
 	{
 		// We can flush right now.

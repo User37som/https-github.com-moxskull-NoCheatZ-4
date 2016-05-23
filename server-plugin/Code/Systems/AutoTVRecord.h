@@ -39,6 +39,7 @@ private:
 	basic_string m_demofile;
 	basic_string m_prefix;
 	size_t m_recordtickcount;
+	float m_waitfortv_time;
 	int m_tvslot;
 	int m_minplayers;
 	bool m_recording;
@@ -70,7 +71,7 @@ public:
 	bool IsRecording() const;
 
 	// The index of SourceTV
-	size_t GetSlot();
+	int GetSlot();
 
 	void SpawnTV();
 

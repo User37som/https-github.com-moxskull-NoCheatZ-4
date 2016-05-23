@@ -36,7 +36,9 @@ void AutoTVRecord::Load()
 	//m_mycommands.AddToTail(SourceSdk::InterfacesProxy::ICvar_FindCommand("tv_delay"));
 	ConCommandHookListener::RegisterConCommandHookListener(this);
 
-	SpawnTV();
+	m_waitfortv_time = Plat_FloatTime() + 5.0f;
+
+	//SpawnTV();
 }
 
 void AutoTVRecord::Unload()
@@ -73,10 +75,10 @@ void AutoTVRecord::StartRecord()
 
 		m_expectedtvconfigchange = true;
 
-		m_demofile = Helpers::format("tv_record %s-%s-%s\n", m_prefix.c_str(), mapname, Helpers::getStrDateTime("%x_%X").c_str());
+		m_demofile = Helpers::format("%s-%s-%s", m_prefix.c_str(), mapname, Helpers::getStrDateTime("%x_%X").replace('/', '-').c_str());
 		Logger::GetInstance()->Msg<MSG_LOG>(Helpers::format("Starting to record the game in %s.dem", m_demofile));
 
-		SourceSdk::InterfacesProxy::Call_ServerCommand(m_demofile.c_str());
+		SourceSdk::InterfacesProxy::Call_ServerCommand(basic_string("tv_record ").append(m_demofile).append('\n').c_str());
 		SourceSdk::InterfacesProxy::Call_ServerExecute();
 		m_recording = true;
 
@@ -95,29 +97,60 @@ void AutoTVRecord::StopRecord()
 	SourceSdk::InterfacesProxy::Call_ServerCommand("tv_stoprecord\n");
 	SourceSdk::InterfacesProxy::Call_ServerExecute();
 	m_recording = false;
-	Logger::GetInstance()->Msg<MSG_LOG>(Helpers::format("TV record ended in %s.dem with %u ticks (%f seconds)", m_demofile, m_recordtickcount, m_recordtickcount * SourceSdk::InterfacesProxy::Call_GetTickInterval()));
+	Logger::GetInstance()->Msg<MSG_LOG>(Helpers::format("TV record ended in %s.dem with %u ticks (%f seconds)", m_demofile.c_str(), m_recordtickcount, m_recordtickcount * SourceSdk::InterfacesProxy::Call_GetTickInterval()));
 
 	m_expectedtvconfigchange = false;
 }
 
 void AutoTVRecord::OnTick()
 {
-	if (NczPlayerManager::GetInstance()->GetPlayerCount(PLAYER_CONNECTED) >= m_minplayers) // FIXME : Must not count spectators
+	if (GetSlot() == 0)
 	{
-		if (!m_recording)
+		if (Plat_FloatTime() > m_waitfortv_time)
 		{
-			StartRecord();
-		}
-		else
-		{
-			++m_recordtickcount;
+			SpawnTV();
+			m_waitfortv_time = std::numeric_limits<float>::max();
 		}
 	}
 	else
 	{
-		if (m_recording)
+		int player_count = 0;
+		int x = 1;
+		int maxcl = NczPlayerManager::GetInstance()->GetMaxIndex();
+		PlayerHandler * ph;
+		do
 		{
-			StopRecord();
+			ph = NczPlayerManager::GetInstance()->GetPlayerHandlerByIndex(x);
+			if (ph->status >= PLAYER_CONNECTED)
+			{
+				SourceSdk::IPlayerInfo* pinfo = static_cast<SourceSdk::IPlayerInfo*>(ph->playerClass->GetPlayerInfo());
+				if (pinfo != nullptr)
+				{
+					if (pinfo->GetTeamIndex() > 1)
+					{
+						++player_count;
+					}
+				}
+			}
+		} while (++x <= maxcl);
+
+		if (player_count >= m_minplayers)
+		{
+			if (!m_recording)
+			{
+				StartRecord();
+			}
+			else
+			{
+				++m_recordtickcount;
+			}
+		}
+		else
+		{
+			if (m_recording)
+			{
+				StopRecord();
+			}
 		}
 	}
 }
@@ -142,7 +175,7 @@ bool AutoTVRecord::IsRecording() const
 	return m_recording;
 }
 
-size_t AutoTVRecord::GetSlot()
+int AutoTVRecord::GetSlot()
 {
 	if (m_tvslot == 0)
 	{

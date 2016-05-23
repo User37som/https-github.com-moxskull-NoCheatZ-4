@@ -21,6 +21,7 @@
 #include "plugin.h"
 #include "Systems/Logger.h"
 #include "Systems/ConfigManager.h"
+#include "Systems/AutoTVRecord.h"
 
 TransmitListenersListT SetTransmitHookListener::m_listeners;
 InstancesListT SetTransmitHookListener::m_hooked_instances;
@@ -77,40 +78,44 @@ void HOOKFN_INT SetTransmitHookListener::nSetTransmit(SourceSdk::CBaseEntity* Th
 		SourceSdk::edict_t* const pEdict_receiver = *pInfo;
 		Assert(Helpers::isValidEdict(pEdict_receiver));
 
-		if (pEdict_sender != pEdict_receiver)
+		if (Helpers::IndexOfEdict(pEdict_receiver) != AutoTVRecord::GetInstance()->GetSlot())
 		{
-			TransmitListenersListT::elem_t* it = m_listeners.GetFirst();
 
-			int maxclients;
-			if (SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive)
+			if (pEdict_sender != pEdict_receiver)
 			{
-				maxclients = static_cast<SourceSdk::CGlobalVars_csgo*>(SourceSdk::InterfacesProxy::Call_GetGlobalVars())->maxClients;
-			}
-			else
-			{
-				maxclients = static_cast<SourceSdk::CGlobalVars*>(SourceSdk::InterfacesProxy::Call_GetGlobalVars())->maxClients;
-			}
+				TransmitListenersListT::elem_t* it = m_listeners.GetFirst();
 
-			if (Helpers::IndexOfEdict(pEdict_sender) <= maxclients)
-			{
-				while (it != nullptr)
+				int maxclients;
+				if (SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive)
 				{
-					if (it->m_value.listener->SetTransmitCallback(pEdict_sender, pEdict_receiver))
-					{
-						return;
-					}
-					it = it->m_next;
+					maxclients = static_cast<SourceSdk::CGlobalVars_csgo*>(SourceSdk::InterfacesProxy::Call_GetGlobalVars())->maxClients;
 				}
-			}
-			else /*if(sender_type == WEAPON)*/
-			{
-				while (it != nullptr)
+				else
 				{
-					if (it->m_value.listener->SetTransmitWeaponCallback(pEdict_sender, pEdict_receiver))
+					maxclients = static_cast<SourceSdk::CGlobalVars*>(SourceSdk::InterfacesProxy::Call_GetGlobalVars())->maxClients;
+				}
+
+				if (Helpers::IndexOfEdict(pEdict_sender) <= maxclients)
+				{
+					while (it != nullptr)
 					{
-						return;
+						if (it->m_value.listener->SetTransmitCallback(pEdict_sender, pEdict_receiver))
+						{
+							return;
+						}
+						it = it->m_next;
 					}
-					it = it->m_next;
+				}
+				else /*if(sender_type == WEAPON)*/
+				{
+					while (it != nullptr)
+					{
+						if (it->m_value.listener->SetTransmitWeaponCallback(pEdict_sender, pEdict_receiver))
+						{
+							return;
+						}
+						it = it->m_next;
+					}
 				}
 			}
 		}
