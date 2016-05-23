@@ -75,7 +75,7 @@ void PlayerRunCommandHookListener::UnhookPlayerRunCommand()
 }
 
 #ifdef GNUC
-void PlayerRunCommandHookListener::nPlayerRunCommand(void* This, SourceSdk::CUserCmd* pCmd, IMoveHelper* pMoveHelper)
+void PlayerRunCommandHookListener::nPlayerRunCommand(void* This, void* pCmd, IMoveHelper* pMoveHelper)
 #else
 void HOOKFN_INT PlayerRunCommandHookListener::nPlayerRunCommand(void* This, void*, void* pCmd, IMoveHelper* pMoveHelper)
 #endif

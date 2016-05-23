@@ -6,8 +6,8 @@ if [ ! -e "$autogenfile" ]; then
 	cd ..
 	echo "Downloading protobuf 2.5.0"
 	wget https://github.com/google/protobuf/archive/v2.5.0.tar.gz
-	tar xzvf protobuf-2.5.0.tar.gz
-	rm protobuf-2.5.0.tar.gz
+	tar xzvf v2.5.0.tar.gz
+	rm v2.5.0.tar.gz
 	cd protobuf-2.5.0
 fi
 echo "Updating protobuf 2.5.0"
