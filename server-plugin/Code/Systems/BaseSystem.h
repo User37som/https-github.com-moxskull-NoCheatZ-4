@@ -104,7 +104,7 @@ protected:
 	bool m_isActive;
 	bool m_isDisabled;
 	bool m_configState;
-	uint8_t m_verbose;
+	int m_verbose;
 	
 #ifdef NCZ_USE_METRICS
 	MetricsContainer<> m_metrics;
