@@ -189,8 +189,7 @@ void WallhackBlocker::ProcessOnTick()
 		void* playerinfo = pPlayer->GetPlayerInfo();
 		if (playerinfo == nullptr) continue;
 		SourceSdk::INetChannelInfo* const netchan = pPlayer->GetChannelInfo();
-		if (netchan == nullptr) continue;
-		if(ph->status == BOT) continue;
+		if (netchan == nullptr && ph->status == PLAYER_IN_TESTS) continue;
 
 		SourceSdk::edict_t* const playeredict = pPlayer->GetEdict();
 		ClientDataS* const pData = GetPlayerDataStruct(pPlayer);

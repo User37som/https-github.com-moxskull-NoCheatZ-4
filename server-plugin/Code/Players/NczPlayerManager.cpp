@@ -171,7 +171,7 @@ void NczPlayerManager::FireGameEvent(SourceSdk::IGameEvent* ev)
 		{
 			SlotStatus& pstat = FullHandlersList[x].status;
 			if(pstat == PLAYER_IN_TESTS)
-				pstat = PLAYER_IN_GAME;
+				pstat = PLAYER_CONNECTED;
 		}
 		BaseSystem::ManageSystems();
 		Logger::GetInstance()->Flush();
@@ -190,12 +190,11 @@ void NczPlayerManager::FireGameEvent(SourceSdk::IGameEvent* ev)
 				{
 					if (pinfo->GetTeamIndex() > 1)
 					{
-						ph.status = PLAYER_IN_GAME;
 						ph.in_tests_time = Plat_FloatTime() + 1.0f;
 					}
 					else
 					{
-						//ph.status = PLAYER_CONNECTED;
+						ph.status = PLAYER_CONNECTED;
 						ph.in_tests_time = std::numeric_limits<float>::max();
 					}
 				}
@@ -219,7 +218,6 @@ void NczPlayerManager::FireGameEvent(SourceSdk::IGameEvent* ev)
 				if (pinfo->GetTeamIndex() > 1)
 				{
 					ph->in_tests_time = Plat_FloatTime() + 3.0f;
-					ph->status = PLAYER_IN_GAME;
 				}
 				else
 				{
@@ -238,7 +236,6 @@ void NczPlayerManager::FireGameEvent(SourceSdk::IGameEvent* ev)
 			if (ev->GetInt("teamid") > 1)
 			{
 				ph->in_tests_time = Plat_FloatTime() + 3.0f;
-				ph->status = PLAYER_IN_GAME;
 			}
 			else
 			{
@@ -254,7 +251,7 @@ void NczPlayerManager::FireGameEvent(SourceSdk::IGameEvent* ev)
 	
 	if(ph->status <= PLAYER_CONNECTED)
 		return;
-	ph->status = PLAYER_IN_GAME;
+	ph->status = PLAYER_CONNECTED;
 	ph->in_tests_time = std::numeric_limits<float>::max();
 	BaseSystem::ManageSystems();
 	//}
@@ -275,10 +272,6 @@ void NczPlayerManager::Think()
 		if(gametime > ph.in_tests_time)
 		{
 			ph.status = PLAYER_IN_TESTS;
-		}
-		else if (ph.status == PLAYER_IN_TESTS)
-		{
-			ph.status = PLAYER_IN_GAME;
 		}
 		else
 		{

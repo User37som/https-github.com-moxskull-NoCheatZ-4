@@ -4,7 +4,7 @@
 #include "Logger.h"
 
 AutoTVRecord::AutoTVRecord() :
-	BaseSystem("AutoTVRecord", PLAYER_IN_GAME, INVALID, STATUS_EQUAL_OR_BETTER, "Enable - Disable - Verbose - SetMinPlayers - SetPrefix"),
+	BaseSystem("AutoTVRecord", PLAYER_CONNECTED, INVALID, STATUS_EQUAL_OR_BETTER, "Enable - Disable - Verbose - SetMinPlayers - SetPrefix"),
 	ConCommandHookListener(),
 	singleton_class()
 {
@@ -102,7 +102,7 @@ void AutoTVRecord::StopRecord()
 
 void AutoTVRecord::OnTick()
 {
-	if (NczPlayerManager::GetInstance()->GetPlayerCount(PLAYER_IN_GAME) >= m_minplayers)
+	if (NczPlayerManager::GetInstance()->GetPlayerCount(PLAYER_CONNECTED) >= m_minplayers) // FIXME : Must not count spectators
 	{
 		if (!m_recording)
 		{
