@@ -19,6 +19,7 @@
 
 #include "Misc/EntityProps.h"
 #include "Players/NczPlayerManager.h"
+#include "Systems/ConfigManager.h"
 
 AntiSmokeBlocker::AntiSmokeBlocker() :
 	BaseSystem("AntiSmokeBlocker", PLAYER_CONNECTED, PLAYER_CONNECTING, STATUS_EQUAL_OR_BETTER),
@@ -83,7 +84,7 @@ void AntiSmokeBlocker::ProcessOnTick()
 	float const curtime = Plat_FloatTime();
 	while(it != nullptr)
 	{
-		if(curtime - (it->m_value.bang_time + 15.5f) > 0.0f)
+		if(curtime - (it->m_value.bang_time + ConfigManager::GetInstance()->m_smoke_time) > 0.0f)
 			it = m_smokes.Remove(it);
 		else it = it->m_next;
 	}
@@ -102,18 +103,18 @@ void AntiSmokeBlocker::ProcessOnTick()
 		
 		do // At this stage, m_smokes ! empty
 		{
-			if(curtime - it->m_value.bang_time > 0.75f)
+			if(curtime - it->m_value.bang_time > ConfigManager::GetInstance()->m_smoke_timetobang)
 			{
 				SourceSdk::vec_t dst;
 				SourceSdk::VectorDistanceSqr(earPos, it->m_value.pos, delta, dst);
-				if(dst < 5200.0f)
+				if(dst < ConfigManager::GetInstance()->m_innersmoke_radius_sqr)
 				{
 					GetPlayerDataStruct(x)->is_in_smoke = true;
 				}
 
 				/* Players can't see eachother if they are behind a smoke */
 
-				const SourceSdk::vec_t ang_smoke = tanf(110.0f / sqrtf(dst));
+				const SourceSdk::vec_t ang_smoke = tanf(ConfigManager::GetInstance()->m_smoke_radius / sqrtf(dst));
 				SourceSdk::VectorNorm(delta);
 
 				for (int y = 1; y <= maxcl; ++y)
@@ -142,7 +143,7 @@ void AntiSmokeBlocker::ProcessOnTick()
 
 					SourceSdk::vec_t other_dst;
 					SourceSdk::VectorDistanceSqr(earPos, other_Pos, other_delta, other_dst);
-					if (dst + 110.0f < other_dst)
+					if (dst + ConfigManager::GetInstance()->m_smoke_radius < other_dst)
 					{
 						// Hidden by the hull of the smoke ?
 

@@ -129,6 +129,20 @@ bool ConfigManager::LoadConfig()
 
 			if (!GetIniAttributeValue(file, gamename, "playerdataclass", m_playerdataclass)) return false;
 
+			// load some values
+
+			if (!GetIniAttributeValue(file, gamename, "f_smoketime", value)) return false;
+			m_smoke_time = (float)atof(value.c_str());
+
+			if (!GetIniAttributeValue(file, gamename, "f_smoke_time_to_bang", value)) return false;
+			m_smoke_timetobang = (float)atof(value.c_str());
+
+			if (!GetIniAttributeValue(file, gamename, "f_inner_smoke_radius_sqr", value)) return false;
+			m_innersmoke_radius_sqr = (float)atof(value.c_str());
+
+			if (!GetIniAttributeValue(file, gamename, "f_smoke_radius", value)) return false;
+			m_smoke_radius = (float)atof(value.c_str());
+
 			// disable systems
 
 			if (!GetIniAttributeValue(file, gamename, "disable_systems", value)) return false;
