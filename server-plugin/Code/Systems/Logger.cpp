@@ -105,7 +105,7 @@ template <>
 void Logger::Msg<MSG_ERROR>(const basic_string& msg, int verbose /*= 0*/)
 {
 	basic_string m(prolog);
-	m.append("ERROR : ").append('\n');
+	m.append("ERROR : ").append(msg).append('\n');
 	std::cout << m.c_str();
 #ifdef WIN32
 	OutputDebugStringA(m.c_str());

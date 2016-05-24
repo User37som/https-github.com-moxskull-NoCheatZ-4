@@ -153,5 +153,6 @@ prepare-build:
 	@mkdir -p $(BUILD_DIR)/logs/NoCheatZ_4_Logs/
 	@touch $(BUILD_DIR)/logs/NoCheatZ_4_Logs/.gitignore
 	@cp ./Res/nocheatz.vdf $(BUILD_DIR)/addons/
+	@cp ./Res/nocheatz.ini $(BUILD_DIR)/addons/NoCheatZ/
 	@cp ./Res/nocheatz.cfg $(BUILD_DIR)/cfg/nocheatz.cfg ;true
 	@sh $(BASE)/scripts/make-protobuf.sh

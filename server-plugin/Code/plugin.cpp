@@ -120,7 +120,7 @@ void CNoCheatZPlugin::DestroySingletons()
 //---------------------------------------------------------------------------------
 // Purpose: constructor/destructor
 //---------------------------------------------------------------------------------
-CNoCheatZPlugin::CNoCheatZPlugin()
+CNoCheatZPlugin::CNoCheatZPlugin() : ncz_cmd_ptr(nullptr), nocheatz_instance(nullptr)
 {
 	m_iClientCommandIndex = 0;
 	m_bAlreadyLoaded = false;
@@ -271,13 +271,13 @@ void CNoCheatZPlugin::Unload( void )
 
 	if (SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive)
 	{
-		delete static_cast<SourceSdk::ConVar_csgo*>(nocheatz_instance);
-		delete static_cast<SourceSdk::ConCommand_csgo*>(ncz_cmd_ptr);
+		if(nocheatz_instance) delete static_cast<SourceSdk::ConVar_csgo*>(nocheatz_instance);
+		if(ncz_cmd_ptr) delete static_cast<SourceSdk::ConCommand_csgo*>(ncz_cmd_ptr);
 	}
 	else
 	{
-		delete static_cast<SourceSdk::ConVar*>(nocheatz_instance);
-		delete static_cast<SourceSdk::ConCommand*>(ncz_cmd_ptr);
+		if (nocheatz_instance) delete static_cast<SourceSdk::ConVar*>(nocheatz_instance);
+		if (ncz_cmd_ptr) delete static_cast<SourceSdk::ConCommand*>(ncz_cmd_ptr);
 	}
 
 	DestroySingletons();
