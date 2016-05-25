@@ -43,6 +43,8 @@ public:
 	ConCommandHookListener();
 	virtual ~ConCommandHookListener();
 
+	static void UnhookDispatch();
+
 protected:
 	/*
 		Called by the child to register a ConCommand to be hooked.
@@ -79,7 +81,6 @@ private:
 		This is called automatically by the class
 	*/
 	static void HookDispatch(void* cmd);
-	static void UnhookDispatch(void* cmd);
 
 	/*
 		Our version of the ConCommand::Dispatch.

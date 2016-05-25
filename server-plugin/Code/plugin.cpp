@@ -264,6 +264,7 @@ void CNoCheatZPlugin::Unload( void )
 	//TeleportHookListener::UnhookTeleport();
 	SetTransmitHookListener::UnhookSetTransmit();
 	WeaponHookListener::UnhookWeapon();
+	ConCommandHookListener::UnhookDispatch();
 
 	Logger::GetInstance()->Flush();
 
