@@ -73,6 +73,7 @@ void CNoCheatZPlugin::CreateSingletons()
 	NczPlayerManager::CreateInstance();
 	BanRequest::CreateInstance();
 	EntityProps::CreateInstance();
+	HookGuard::CreateInstance();
 	
 	AntiFlashbangBlocker::CreateInstance();
 	AntiSmokeBlocker::CreateInstance();
@@ -92,6 +93,9 @@ void CNoCheatZPlugin::CreateSingletons()
 
 void CNoCheatZPlugin::DestroySingletons()
 {
+	HookGuard::GetInstance()->UnhookAll();
+	HookGuard::DestroyInstance();
+
 	AutoTVRecord::DestroyInstance();
 	ValidationTester::DestroyInstance();
 	SpeedTester::DestroyInstance();
@@ -259,12 +263,12 @@ void CNoCheatZPlugin::Unload( void )
 		if (inst) SourceSdk::InterfacesProxy::ConVar_SetValue(inst, false);
 	}
 
-	PlayerRunCommandHookListener::UnhookPlayerRunCommand();
+	/*PlayerRunCommandHookListener::UnhookPlayerRunCommand();
 	OnGroundHookListener::UnhookOnGround();
 	//TeleportHookListener::UnhookTeleport();
 	SetTransmitHookListener::UnhookSetTransmit();
 	WeaponHookListener::UnhookWeapon();
-	ConCommandHookListener::UnhookDispatch();
+	ConCommandHookListener::UnhookDispatch();*/
 
 	Logger::GetInstance()->Flush();
 
@@ -339,6 +343,8 @@ void CNoCheatZPlugin::ServerActivate(SourceSdk::edict_t *pEdictList, int edictCo
 void CNoCheatZPlugin::GameFrame( bool simulating )
 {
 	//OnFrameListener::OnFrame();
+
+	HookGuard::GetInstance()->GuardHooks();
 
 	if(simulating)
 	{

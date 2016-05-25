@@ -37,7 +37,7 @@
 	Used to replace a pointer in one virtual table.
 	Returns the old function pointer or 0 in case of error.
 */
-DWORD VirtualTableHook(DWORD* classptr, const int vtable, const DWORD newInterface, const DWORD expectedInterface = 0 );
+
 void MoveVirtualFunction(DWORD const * const from, DWORD * const to);
 
 class CBaseEntity;
@@ -46,254 +46,74 @@ class CBaseEntity;
 	HookInfo will store data about one hooked instance.
 	It is often used in a list when we need to hook thousands of classes that don't really have the same virtual table.
 */
-template <class C = SourceSdk::CBaseEntity>
+
 struct HookInfo
 {
-	C* origEnt;
-	DWORD* pInterface;
-	DWORD oldFn;
+	DWORD oldFn; // Old function address that we replace in the vtable
+	DWORD* vf_entry; // Pointer to the entry in the virtual table
+	void* origEnt; // Address of the class used to determine virtual table base
+	DWORD* pInterface; // Virtual table base
+	DWORD newFn; // New function address that will be at *vf_entry after hook
 	
 	HookInfo()
 	{
-		origEnt = nullptr;
-		pInterface = nullptr;
-		oldFn = 0;
-	};
+		memset(this, 0, sizeof(HookInfo));
+	}
 	HookInfo(const HookInfo& other)
 	{
-		origEnt = other.origEnt;
-		pInterface = other.pInterface;
-		oldFn = other.oldFn;
-	};
-	HookInfo operator=(const HookInfo& other)
+		memcpy(this, &other, sizeof(HookInfo));
+	}
+	HookInfo& operator=(const HookInfo& other)
 	{
-		return HookInfo(other);
-	};
-	HookInfo(DWORD* iface)
+		memcpy(this, &other, sizeof(HookInfo));
+		return *this;
+	}
+	HookInfo(void* class_ptr, int vfid, DWORD new_fn)
 	{
-		pInterface = iface;
-	};
+		origEnt = class_ptr;
+		pInterface = ((DWORD*)*(DWORD*)origEnt);
+		vf_entry = &(pInterface[vfid]);
+		newFn = new_fn;
+		oldFn = 0;
+	}
+	HookInfo(void* class_ptr, int vfid)
+	{
+		origEnt = class_ptr;
+		pInterface = ((DWORD*)*(DWORD*)origEnt);
+		vf_entry = &(pInterface[vfid]);
+	}
 
 	bool operator== (const HookInfo& other) const
 	{
-		return (pInterface == other.pInterface);
-	};
+		return (vf_entry == other.vf_entry);
+	}
 };
 
-template <class C = SourceSdk::CBaseEntity>
-class HookList
+typedef CUtlVector<HookInfo> hooked_list_t;
+
+class HookGuard : public Singleton<HookGuard>
 {
-	typedef HookInfo<C> inner_type;
-public:
-	struct elem_t
-	{
-		inner_type* m_value;
-		elem_t* m_next;
-
-		~elem_t()
-		{
-			delete m_value;
-		}
-	};
-
 private:
+	typedef Singleton<HookGuard> singleton_class;
 
-	elem_t* m_first;
+	hooked_list_t m_list;
 
 public:
+	HookGuard() : singleton_class() {}
+	~HookGuard() {};
 
-	HookList()
-	{
-		m_first = nullptr;
-	}
-	~HookList()
-	{
-		while (m_first != nullptr)
-		{
-			Remove(m_first);
-		}
-	}
+	void VirtualTableHook(HookInfo& info);
 
-	elem_t* GetFirst() const
-	{
-		return m_first;
-	}
+	// Find by virtual table entry address
+	DWORD GetOldFunction(void* class_ptr, int vfid) const;
 
-	/*
-		Add an element to front. The value is already allocated using new before calling Add.
-	*/
-	elem_t* Add(inner_type* value)
-	{
-		if (m_first != nullptr)
-		{
-			elem_t* const old_first = m_first;
-			m_first = new elem_t;
-			m_first->m_next = old_first;
-			m_first->m_value = value;
-		}
-		else
-		{
-			m_first = new elem_t;
-			m_first->m_next = nullptr;
-			m_first->m_value = value;
-		}
-		return m_first;
-	}
+	// Only find by virtual table base (Remove need to call ConfigManager), class_ptr is converted to virtual table base
+	DWORD GetOldFunction(void* class_ptr) const;
 
-	/*
-		Find this exact pointer, call destructor and remove it from list
-	*/
-	void Remove(inner_type* value)
-	{
-		elem_t* iterator = m_first;
-		elem_t* prev = nullptr;
-		while (iterator != nullptr)
-		{
-			if (iterator->m_value == value)
-			{
-				elem_t* to_remove = iterator;
-				if (prev == nullptr)
-				{
-					m_first = iterator->m_next;
-				}
-				else
-				{
-					prev->m_next = iterator->m_next;
-				}
-				iterator = iterator->m_next;
-				delete to_remove;
-				return;
-			}
-			prev = iterator;
-			iterator = iterator->m_next;
-		}
-	}
+	void GuardHooks();
 
-	/*
-		Find this iterator and remove it from list
-	*/
-	elem_t* Remove(elem_t* it)
-	{
-		elem_t* iterator = m_first;
-		elem_t* prev = nullptr;
-		elem_t* return_value = nullptr;
-		while (iterator != nullptr)
-		{
-			if (iterator == it)
-			{
-				return_value = iterator->m_next;
-				if (prev == nullptr)
-				{
-					m_first = iterator->m_next;
-				}
-				else
-				{
-					prev->m_next = iterator->m_next;
-				}
-				delete it;
-				return return_value;
-			}
-			prev = iterator;
-			iterator = iterator->m_next;
-		}
-
-		return return_value;
-	}
-
-	/*
-		Returns the HookInfo by vtable pointer
-	*/
-	elem_t* const FindByVtable(DWORD const * const vtable) const
-	{
-		elem_t* iterator = m_first;
-		while (iterator != nullptr)
-		{
-			if (iterator->m_value->pInterface == vtable)
-			{
-				return iterator;
-			}
-			iterator = iterator->m_next;
-		}
-		return nullptr;
-	}
-
-	/*
-		Returns the HookInfo by instance
-	*/
-	elem_t* const FindByInstance(C const * const instance) const
-	{
-		elem_t* iterator = m_first;
-		while (iterator != nullptr)
-		{
-			if (iterator->m_value->origEnt == instance)
-			{
-				return iterator;
-			}
-			iterator = iterator->m_next;
-		}
-		return nullptr;
-	}
-
-	/*
-	Returns the HookInfo by function
-	*/
-	elem_t* const FindByFunction(DWORD const fn, elem_t const * const exclude_me = nullptr) const
-	{
-		elem_t* iterator = m_first;
-		while (iterator != nullptr)
-		{
-			if (iterator != exclude_me)
-			{
-				if (iterator->m_value->oldFn == fn)
-				{
-					return iterator;
-				}
-			}
-			iterator = iterator->m_next;
-		}
-		return nullptr;
-	}
-
-	/*
-		Find this exact pointer
-	*/
-	elem_t* const Find(inner_type const * const value) const
-	{
-		elem_t* iterator = m_first;
-		while (iterator != nullptr)
-		{
-			if (iterator->m_value == value)
-			{
-				return iterator;
-			}
-			iterator = iterator->m_next;
-		}
-		return nullptr;
-	}
-
-	/*
-		Find this value
-	*/
-	elem_t* const Find(inner_type const & value) const
-	{
-		elem_t* iterator = m_first;
-		while (iterator != nullptr)
-		{
-			if (*(iterator->m_value) == value)
-			{
-				return iterator;
-			}
-			iterator = iterator->m_next;
-		}
-		return nullptr;
-	}
+	void UnhookAll();
 };
-
-/*
-	Get the virtual table pointer of class.
-	x is a pointer to the target class.
-*/
-
 
 /*
 	Some testers need to receive callbacks in a specific order against other testers.

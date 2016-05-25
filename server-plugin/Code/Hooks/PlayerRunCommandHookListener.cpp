@@ -29,8 +29,6 @@
 // PlayerRunCommandHookListener
 /////////////////////////////////////////////////////////////////////////
 
-PlayerRunCommand_t PlayerRunCommandHookListener::gpOldPlayerRunCommand = nullptr;
-DWORD* PlayerRunCommandHookListener::pdwInterface = nullptr;
 ListenersListT PlayerRunCommandHookListener::m_listeners;
 SourceSdk::CUserCmd_csgo PlayerRunCommandHookListener::m_lastCUserCmd[MAX_PLAYERS];
 
@@ -53,18 +51,12 @@ void PlayerRunCommandHookListener::HookPlayerRunCommand(NczPlayer* player)
 {
 	Assert(Helpers::isValidEdict(player->GetEdict()));
 	void* unk = player->GetEdict()->m_pUnk;
-	DWORD* vtptr = IFACE_PTR(unk);
 
-	if(pdwInterface != vtptr)
-	{
-		pdwInterface = vtptr;
-
-		DWORD OldFunc = VirtualTableHook(pdwInterface, ConfigManager::GetInstance()->GetVirtualFunctionId("playerruncommand"), (DWORD)nPlayerRunCommand );
-		*(DWORD*)&(gpOldPlayerRunCommand) = OldFunc;
-	}
+	HookInfo info(unk, ConfigManager::GetInstance()->GetVirtualFunctionId("playerruncommand"), (DWORD)nPlayerRunCommand);
+	HookGuard::GetInstance()->VirtualTableHook(info);
 }
 
-void PlayerRunCommandHookListener::UnhookPlayerRunCommand()
+/*void PlayerRunCommandHookListener::UnhookPlayerRunCommand()
 {
 	if(pdwInterface && gpOldPlayerRunCommand)
 	{
@@ -72,7 +64,7 @@ void PlayerRunCommandHookListener::UnhookPlayerRunCommand()
 		pdwInterface = nullptr;
 		gpOldPlayerRunCommand = nullptr;
 	}
-}
+}*/
 
 #ifdef GNUC
 void PlayerRunCommandHookListener::nPlayerRunCommand(void* This, void* pCmd, IMoveHelper* pMoveHelper)
@@ -115,7 +107,9 @@ void HOOKFN_INT PlayerRunCommandHookListener::nPlayerRunCommand(void* This, void
 			static_cast<SourceSdk::CUserCmd*>(pCmd)->random_seed = std::rand() & std::numeric_limits<int>::max();
 		}
 
-		gpOldPlayerRunCommand(This, pCmd, pMoveHelper);
+		ST_W_STATIC PlayerRunCommand_t gpOldFn;
+		*(DWORD*)&(gpOldFn) = HookGuard::GetInstance()->GetOldFunction(This);
+		gpOldFn(This, pCmd, pMoveHelper);
 	}
 }
 

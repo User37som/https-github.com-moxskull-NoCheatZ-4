@@ -32,7 +32,6 @@ typedef void (HOOKFN_EXT *SetTransmit_t)(void*, SourceSdk::CCheckTransmitInfo*, 
 class SetTransmitHookListener;
 
 typedef HookListenersList<SetTransmitHookListener> TransmitListenersListT;
-typedef HookList<> InstancesListT;
 
 class SetTransmitHookListener
 {
@@ -41,8 +40,6 @@ public:
 	~SetTransmitHookListener();
 
 	static void HookSetTransmit(SourceSdk::edict_t* ent);
-
-	static void UnhookSetTransmit();
 
 protected:
 	static void RegisterSetTransmitHookListener(SetTransmitHookListener* listener, size_t priority);
@@ -58,7 +55,6 @@ private:
 	static void HOOKFN_INT nSetTransmit(SourceSdk::CBaseEntity* This, void*, SourceSdk::CCheckTransmitInfo*, bool);
 #endif
 	static TransmitListenersListT m_listeners;
-	static InstancesListT m_hooked_instances;
 };
 
 #endif // SETTRANSMITHOOKLISTENER
