@@ -100,12 +100,24 @@ DWORD HookGuard::GetOldFunction(void* class_ptr, int vfid) const
 	}
 }
 
-DWORD HookGuard::GetOldFunction(void * class_ptr) const
+DWORD HookGuard::GetOldFunctionByVirtualTable(void * class_ptr) const
 {
 	DWORD* vt = ((DWORD*)*(DWORD*)class_ptr);
 	for (hooked_list_t::const_iterator it = m_list.begin(); it != m_list.end(); ++it)
 	{
 		if (it->pInterface == vt)
+		{
+			return it->oldFn;
+		}
+	}
+	return 0;
+}
+
+DWORD HookGuard::GetOldFunctionByInstance(void * class_ptr) const
+{
+	for (hooked_list_t::const_iterator it = m_list.begin(); it != m_list.end(); ++it)
+	{
+		if (it->origEnt == class_ptr)
 		{
 			return it->oldFn;
 		}
@@ -120,6 +132,7 @@ void HookGuard::GuardHooks()
 		if (*it->vf_entry != it->newFn)
 		{
 			it->oldFn = 0;
+			DebugMessage(Helpers::format("HookGuard::GuardHooks : Re-hooking at %X.", *it->vf_entry));
 			VirtualTableHook(*it); // rehook
 		}
 	}

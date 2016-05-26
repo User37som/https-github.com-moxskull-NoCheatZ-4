@@ -50,7 +50,7 @@ void* PlayerRunCommandHookListener::GetLastUserCmd(NczPlayer* player)
 void PlayerRunCommandHookListener::HookPlayerRunCommand(NczPlayer* player)
 {
 	Assert(Helpers::isValidEdict(player->GetEdict()));
-	void* unk = player->GetEdict()->m_pUnk;
+	SourceSdk::IServerUnknown* unk = player->GetEdict()->m_pUnk;
 
 	HookInfo info(unk, ConfigManager::GetInstance()->GetVirtualFunctionId("playerruncommand"), (DWORD)nPlayerRunCommand);
 	HookGuard::GetInstance()->VirtualTableHook(info);
@@ -108,7 +108,7 @@ void HOOKFN_INT PlayerRunCommandHookListener::nPlayerRunCommand(void* This, void
 		}
 
 		ST_W_STATIC PlayerRunCommand_t gpOldFn;
-		*(DWORD*)&(gpOldFn) = HookGuard::GetInstance()->GetOldFunction(This);
+		*(DWORD*)&(gpOldFn) = HookGuard::GetInstance()->GetOldFunction(This, ConfigManager::GetInstance()->GetVirtualFunctionId("playerruncommand"));
 		gpOldFn(This, pCmd, pMoveHelper);
 	}
 }

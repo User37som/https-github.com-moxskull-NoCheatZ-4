@@ -72,7 +72,7 @@ void HOOKFN_INT OnGroundHookListener::nNetworkStateChanged_m_hGroundEntity(CBase
 	}
 
 	ST_W_STATIC GroundEntity_t gpOldFn;
-	*(DWORD*)&(gpOldFn) = HookGuard::GetInstance()->GetOldFunction(basePlayer);
+	*(DWORD*)&(gpOldFn) = HookGuard::GetInstance()->GetOldFunction(basePlayer, ConfigManager::GetInstance()->GetVirtualFunctionId("mhgroundentity"));
 	gpOldFn(basePlayer, new_m_hGroundEntity);
 }
 

@@ -108,7 +108,10 @@ public:
 	DWORD GetOldFunction(void* class_ptr, int vfid) const;
 
 	// Only find by virtual table base (Remove need to call ConfigManager), class_ptr is converted to virtual table base
-	DWORD GetOldFunction(void* class_ptr) const;
+	DWORD GetOldFunctionByVirtualTable(void* class_ptr) const;
+
+	// Only find by virtual table base (Remove need to call ConfigManager), class_ptr is the original instance
+	DWORD GetOldFunctionByInstance(void* class_ptr) const;
 
 	void GuardHooks();
 

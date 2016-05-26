@@ -128,7 +128,7 @@ void HOOKFN_INT ConCommandHookListener::nDispatch(void* cmd, void*, SourceSdk::C
 
 	if(!bypass)
 	{
-		Assert(it != nullptr);
+		//Assert(it != nullptr);
 
 		ST_W_STATIC Dispatch_t gpOldFn;
 		*(DWORD*)&(gpOldFn) = HookGuard::GetInstance()->GetOldFunction(cmd, ConfigManager::GetInstance()->GetVirtualFunctionId("dispatch"));

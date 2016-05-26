@@ -1,9 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <LocalDebuggerCommand>C:\steamcmd\CSGO\srcds.exe</LocalDebuggerCommand>
-    <LocalDebuggerCommandArguments>-console -game csgo -insecure -maxplayers 32 +map de_dust2 +rcon_password cderfv +bot_join_team ct +bot_quota 1 +mp_limitteams 0</LocalDebuggerCommandArguments>
-    <LocalDebuggerWorkingDirectory>C:\steamcmd\CSGO\</LocalDebuggerWorkingDirectory>
+    <LocalDebuggerCommand>C:\steamcmd\CSS\srcds.exe</LocalDebuggerCommand>
+    <LocalDebuggerCommandArguments>-console -game cstrike -insecure -maxplayers 32 +map de_dust2 +rcon_password cderfv +bot_join_team ct +bot_quota 1 +mp_limitteams 0</LocalDebuggerCommandArguments>
+    <LocalDebuggerWorkingDirectory>C:\steamcmd\CSS\</LocalDebuggerWorkingDirectory>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
     <LocalDebuggerAmpDefaultAccelerator>
     </LocalDebuggerAmpDefaultAccelerator>
