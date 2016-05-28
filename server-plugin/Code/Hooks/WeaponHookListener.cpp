@@ -22,7 +22,6 @@
 #include "Systems/ConfigManager.h"
 
 WeaponHookListenersListT WeaponHookListener::m_listeners;
-HookList<> WeaponHookListener::m_hooked_instances;
 
 WeaponHookListener::WeaponHookListener()
 {
@@ -36,24 +35,14 @@ void WeaponHookListener::HookWeapon(NczPlayer* player)
 {
 	Assert(Helpers::isValidEdict(player->GetEdict()));
 	void* unk = player->GetEdict()->m_pUnk;
-	DWORD* vtptr = IFACE_PTR(unk);
 
-	if(m_hooked_instances.FindByVtable(vtptr) == nullptr)
-	{
-		HookInfo<>* info_equip = new HookInfo<>(vtptr);
-		HookInfo<>* info_drop = new HookInfo<>(vtptr);
-
-		info_equip->origEnt = info_drop->origEnt = (SourceSdk::CBaseEntity*)unk;
-
-		*(DWORD*)&(info_equip->oldFn) = VirtualTableHook(vtptr, ConfigManager::GetInstance()->GetVirtualFunctionId("weaponequip"), ( DWORD )nWeapon_Equip );
-		*(DWORD*)&(info_drop->oldFn) = VirtualTableHook(vtptr, ConfigManager::GetInstance()->GetVirtualFunctionId("weapondrop"), ( DWORD )nWeapon_Drop );
-		
-		m_hooked_instances.Add(info_drop);
-		m_hooked_instances.Add(info_equip); // Because add is pushing to front, equip will be before drop
-	}
+	HookInfo info_equip(unk, ConfigManager::GetInstance()->GetVirtualFunctionId("weaponequip"), (DWORD)nWeapon_Equip);
+	HookInfo info_drop(unk, ConfigManager::GetInstance()->GetVirtualFunctionId("weapondrop"), (DWORD)nWeapon_Drop);
+	HookGuard::GetInstance()->VirtualTableHook(info_equip);
+	HookGuard::GetInstance()->VirtualTableHook(info_drop);
 }
 
-void WeaponHookListener::UnhookWeapon()
+/*void WeaponHookListener::UnhookWeapon()
 {
 	bool tricky_guess = false;
 
@@ -68,7 +57,7 @@ void WeaponHookListener::UnhookWeapon()
 
 		it = m_hooked_instances.Remove(it);
 	}
-}
+}*/
 
 #ifdef GNUC
 void HOOKFN_INT WeaponHookListener::nWeapon_Equip(CBasePlayer* basePlayer, SourceSdk::CBaseEntity* weapon)
@@ -76,9 +65,6 @@ void HOOKFN_INT WeaponHookListener::nWeapon_Equip(CBasePlayer* basePlayer, Sourc
 void HOOKFN_INT WeaponHookListener::nWeapon_Equip(CBasePlayer* basePlayer, void*, SourceSdk::CBaseEntity* weapon)
 #endif
 {
-	HookList<>::elem_t* it = m_hooked_instances.FindByVtable(IFACE_PTR(basePlayer));
-	Assert(it != nullptr);
-
 	PlayerHandler* ph = NczPlayerManager::GetInstance()->GetPlayerHandlerByBasePlayer(basePlayer);
 
 	if(ph->status != INVALID)
@@ -97,7 +83,7 @@ void HOOKFN_INT WeaponHookListener::nWeapon_Equip(CBasePlayer* basePlayer, void*
 	}
 
 	WeaponEquip_t gpOldFn;
-	*(DWORD*)&(gpOldFn) = it->m_value->oldFn;
+	*(DWORD*)&(gpOldFn) = HookGuard::GetInstance()->GetOldFunction(basePlayer, ConfigManager::GetInstance()->GetVirtualFunctionId("weaponequip"));
 	gpOldFn(basePlayer, weapon);
 }
 
@@ -107,11 +93,6 @@ void HOOKFN_INT WeaponHookListener::nWeapon_Drop(CBasePlayer* basePlayer, Source
 void HOOKFN_INT WeaponHookListener::nWeapon_Drop(CBasePlayer* basePlayer, void*, SourceSdk::CBaseEntity* weapon, const SourceSdk::Vector* targetVec, const SourceSdk::Vector* velocity)
 #endif
 {
-	HookList<>::elem_t* it = m_hooked_instances.FindByVtable(IFACE_PTR(basePlayer));
-	Assert(it != nullptr);
-	it = it->m_next; // tricky guess
-	Assert(it != nullptr);
-
 	PlayerHandler* ph = NczPlayerManager::GetInstance()->GetPlayerHandlerByBasePlayer(basePlayer);
 
 	if (ph->status != INVALID && weapon != nullptr)
@@ -130,7 +111,7 @@ void HOOKFN_INT WeaponHookListener::nWeapon_Drop(CBasePlayer* basePlayer, void*,
 	}
 
 	WeaponDrop_t gpOldFn;
-	*(DWORD*)&(gpOldFn) = it->m_value->oldFn;
+	*(DWORD*)&(gpOldFn) = HookGuard::GetInstance()->GetOldFunction(basePlayer, ConfigManager::GetInstance()->GetVirtualFunctionId("weapondrop"));
 	gpOldFn(basePlayer, weapon, targetVec, velocity);
 }
 

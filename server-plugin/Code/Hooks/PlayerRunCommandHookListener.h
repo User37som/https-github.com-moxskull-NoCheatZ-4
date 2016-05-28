@@ -53,7 +53,6 @@ public:
 
 	static void HookPlayerRunCommand(NczPlayer* player);
 
-	static void UnhookPlayerRunCommand();
 	static void* GetLastUserCmd(NczPlayer* player);
 
 protected:
@@ -70,8 +69,6 @@ private:
 #endif
 	static ListenersListT m_listeners;
 	static SourceSdk::CUserCmd_csgo m_lastCUserCmd[MAX_PLAYERS];
-	static PlayerRunCommand_t gpOldPlayerRunCommand;
-	static DWORD* pdwInterface;
 } ALIGN8_POST;
 
 #endif

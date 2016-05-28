@@ -24,7 +24,6 @@
 #include "Systems/AutoTVRecord.h"
 
 TransmitListenersListT SetTransmitHookListener::m_listeners;
-InstancesListT SetTransmitHookListener::m_hooked_instances;
 
 SetTransmitHookListener::SetTransmitHookListener()
 {
@@ -38,21 +37,14 @@ void SetTransmitHookListener::HookSetTransmit(SourceSdk::edict_t* ent)
 {
 	Assert(Helpers::isValidEdict(ent));
 	void* unk = ent->m_pUnk;
-	DWORD* vtptr = IFACE_PTR(unk);
 
-	if(m_hooked_instances.FindByVtable(vtptr) == nullptr)
-	{
-		HookInfo<>* info = new HookInfo<>(vtptr);
+	HookInfo info(unk, ConfigManager::GetInstance()->GetVirtualFunctionId("settransmit"), (DWORD)nSetTransmit);
+	HookGuard::GetInstance()->VirtualTableHook(info);
 
-		info->origEnt = (SourceSdk::CBaseEntity*)unk;
-		*(DWORD*)&(info->oldFn) = VirtualTableHook(vtptr, ConfigManager::GetInstance()->GetVirtualFunctionId("settransmit"), ( DWORD )nSetTransmit );
-		m_hooked_instances.Add(info);
-
-		DebugMessage(basic_string("Hooked SetTransmit of entity classname ").append(ent->GetClassName()));
-	}
+	DebugMessage(basic_string("Hooked SetTransmit of entity classname ").append(ent->GetClassName()));
 }
 
-void SetTransmitHookListener::UnhookSetTransmit()
+/*void SetTransmitHookListener::UnhookSetTransmit()
 {
 	InstancesListT::elem_t* it = m_hooked_instances.GetFirst();
 	while (it != nullptr)
@@ -61,7 +53,7 @@ void SetTransmitHookListener::UnhookSetTransmit()
 		m_hooked_instances.Remove(it);
 		it = m_hooked_instances.GetFirst();
 	}	
-}
+}*/
 
 #ifdef GNUC
 void HOOKFN_INT SetTransmitHookListener::nSetTransmit(SourceSdk::CBaseEntity* This, SourceSdk::CCheckTransmitInfo* pInfo, bool bAlways)
@@ -120,12 +112,8 @@ void HOOKFN_INT SetTransmitHookListener::nSetTransmit(SourceSdk::CBaseEntity* Th
 			}
 		}
 	}
-	HookInfo<> info(IFACE_PTR(This));
-	InstancesListT::elem_t* it = m_hooked_instances.FindByVtable(IFACE_PTR(This));
-	Assert(it != nullptr);
-
 	SetTransmit_t gpOldFn;
-	*(uint32_t*)&(gpOldFn) = it->m_value->oldFn;
+	*(uint32_t*)&(gpOldFn) = HookGuard::GetInstance()->GetOldFunction(This, ConfigManager::GetInstance()->GetVirtualFunctionId("settransmit"));
 	gpOldFn(This, pInfo, bAlways);
 }
 

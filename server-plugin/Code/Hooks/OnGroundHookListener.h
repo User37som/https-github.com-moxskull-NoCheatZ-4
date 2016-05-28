@@ -55,11 +55,6 @@ public:
 	*/
 	static void HookOnGround(NczPlayer* player);
 
-	/*
-		The plugin calls it at unload, level change or when the server is empty.
-	*/
-	static void UnhookOnGround();
-
 protected:
 	static void RegisterOnGroundHookListener(OnGroundHookListener* listener);
 	static void RemoveOnGroundHookListener(OnGroundHookListener* listener);
@@ -74,8 +69,6 @@ private:
 #endif
 	
 	static OnGroundListenersListT m_listeners;
-	static GroundEntity_t gpOldGroundFn;
-	static DWORD* pdwInterface;
 };
 
 #endif

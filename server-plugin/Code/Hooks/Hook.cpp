@@ -14,47 +14,52 @@
 */
 
 #include <iostream>
+#include <algorithm>
 
 #include "SdkPreprocessors.h"
 #include "Hook.h"
 #include "Systems/Logger.h"
 #include "Misc/Helpers.h"
 
-DWORD VirtualTableHook(DWORD* classptr, const int vtable, const DWORD newInterface, const DWORD expectedInterface/* = 0*/  )
+void HookGuard::VirtualTableHook(HookInfo& info)
 { 
-		DWORD dwStor = 0x0;
-		if(!(classptr || vtable || newInterface)) return 0;
+	if (m_list.HasElement(info)) return;
+
+	info.oldFn = 0;
 #ifdef WIN32
 		DWORD dwOld;
-		if(!VirtualProtect(&classptr[vtable], (vtable * sizeof(void *)) + sizeof(void *), PAGE_EXECUTE_READWRITE, &dwOld ))
+		if(!VirtualProtect(info.vf_entry, 2 * sizeof(DWORD*), PAGE_EXECUTE_READWRITE, &dwOld ))
 		{
-			return 0;
+			return;
 		}
 #else // LINUX
         uint32_t psize = sysconf(_SC_PAGESIZE);
-		void *p = (void *)((DWORD)(&classptr[vtable]) & ~(psize-1));
-		if(mprotect(p, ((vtable * sizeof(void *)) + ((DWORD)(&classptr[vtable]) & (psize-1))), PROT_READ | PROT_WRITE | PROT_EXEC ) < 0)
+		void *p = (void *)((DWORD)(info.vf_entry) & ~(psize-1));
+		if(mprotect(p, ((2 * sizeof(void *)) + ((DWORD)(info.vf_entry) & (psize-1))), PROT_READ | PROT_WRITE | PROT_EXEC ) < 0)
 		{
-			return 0;
+			return;
 		}
 #endif // WIN32
-		dwStor = classptr[vtable];
-		if(expectedInterface && dwStor != expectedInterface)
+		
+		if(info.oldFn && info.oldFn != *info.vf_entry)
 			Logger::GetInstance()->Msg<MSG_WARNING>("Unexpected virtual table value in VirtualTableHook. Another plugin might be in conflict.");
-		if(dwStor == newInterface)
+		if(info.newFn == *info.vf_entry)
 		{
 			Logger::GetInstance()->Msg<MSG_WARNING>("Virtual function pointer was the same ...");
-			return 0;
+			return;
 		}
+
+		info.oldFn = *info.vf_entry;
+		*info.vf_entry = info.newFn;
+
 #ifdef WIN32
-		*(DWORD*)&(classptr[vtable]) = newInterface;
-		VirtualProtect(&classptr[vtable], (vtable * sizeof(void *)) + sizeof(void *), dwOld, &dwOld);
+		VirtualProtect(info.vf_entry, 2 * sizeof(DWORD*), dwOld, &dwOld);
 #else // LINUX
-		*(DWORD*)&(classptr[vtable]) = newInterface;
-		mprotect(p, ((vtable * sizeof(void *)) + ((DWORD)(&classptr[vtable]) & (psize-1))), PROT_READ | PROT_EXEC );
+		mprotect(p, ((2 * sizeof(void *)) + ((DWORD)(info.vf_entry) & (psize - 1))), PROT_READ | PROT_EXEC);
 #endif // WIN32
-		DebugMessage(Helpers::format("VirtualTableHook : function 0x%X replaced by 0x%X (0x%X[%d]).", dwStor, newInterface, classptr, vtable));
-		return dwStor;
+		DebugMessage(Helpers::format("VirtualTableHook : function 0x%X replaced by 0x%X.", info.oldFn, info.newFn));
+
+		m_list.AddToTail(info);
 }
 
 void MoveVirtualFunction(DWORD const * const from, DWORD * const to)
@@ -80,4 +85,65 @@ void MoveVirtualFunction(DWORD const * const from, DWORD * const to)
 #else // LINUX
 	mprotect(p, sizeof(DWORD) & (psize - 1), PROT_READ | PROT_EXEC);
 #endif // WIN32
+}
+
+DWORD HookGuard::GetOldFunction(void* class_ptr, int vfid) const
+{
+	int it = m_list.Find(HookInfo(class_ptr, vfid));
+	if (it != -1)
+	{
+		return m_list[it].oldFn;
+	}
+	else
+	{
+		return 0;
+	}
+}
+
+DWORD HookGuard::GetOldFunctionByVirtualTable(void * class_ptr) const
+{
+	DWORD* vt = ((DWORD*)*(DWORD*)class_ptr);
+	for (hooked_list_t::const_iterator it = m_list.begin(); it != m_list.end(); ++it)
+	{
+		if (it->pInterface == vt)
+		{
+			return it->oldFn;
+		}
+	}
+	return 0;
+}
+
+DWORD HookGuard::GetOldFunctionByInstance(void * class_ptr) const
+{
+	for (hooked_list_t::const_iterator it = m_list.begin(); it != m_list.end(); ++it)
+	{
+		if (it->origEnt == class_ptr)
+		{
+			return it->oldFn;
+		}
+	}
+	return 0;
+}
+
+void HookGuard::GuardHooks()
+{
+	for (hooked_list_t::iterator it = m_list.begin(); it != m_list.end(); ++it)
+	{
+		if (*it->vf_entry != it->newFn)
+		{
+			it->oldFn = 0;
+			DebugMessage(Helpers::format("HookGuard::GuardHooks : Re-hooking at %X.", *it->vf_entry));
+			VirtualTableHook(*it); // rehook
+		}
+	}
+}
+
+void HookGuard::UnhookAll()
+{
+	for (hooked_list_t::iterator it = m_list.begin(); it != m_list.end(); ++it)
+	{
+		std::swap(it->newFn, it->oldFn);
+		VirtualTableHook(*it); // unhook
+	}
+	m_list.RemoveAll();
 }

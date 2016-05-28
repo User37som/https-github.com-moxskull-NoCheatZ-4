@@ -73,6 +73,7 @@ void CNoCheatZPlugin::CreateSingletons()
 	NczPlayerManager::CreateInstance();
 	BanRequest::CreateInstance();
 	EntityProps::CreateInstance();
+	HookGuard::CreateInstance();
 	
 	AntiFlashbangBlocker::CreateInstance();
 	AntiSmokeBlocker::CreateInstance();
@@ -92,6 +93,9 @@ void CNoCheatZPlugin::CreateSingletons()
 
 void CNoCheatZPlugin::DestroySingletons()
 {
+	HookGuard::GetInstance()->UnhookAll();
+	HookGuard::DestroyInstance();
+
 	AutoTVRecord::DestroyInstance();
 	ValidationTester::DestroyInstance();
 	SpeedTester::DestroyInstance();
@@ -120,7 +124,7 @@ void CNoCheatZPlugin::DestroySingletons()
 //---------------------------------------------------------------------------------
 // Purpose: constructor/destructor
 //---------------------------------------------------------------------------------
-CNoCheatZPlugin::CNoCheatZPlugin()
+CNoCheatZPlugin::CNoCheatZPlugin() : ncz_cmd_ptr(nullptr), nocheatz_instance(nullptr)
 {
 	m_iClientCommandIndex = 0;
 	m_bAlreadyLoaded = false;
@@ -259,11 +263,12 @@ void CNoCheatZPlugin::Unload( void )
 		if (inst) SourceSdk::InterfacesProxy::ConVar_SetValue(inst, false);
 	}
 
-	PlayerRunCommandHookListener::UnhookPlayerRunCommand();
+	/*PlayerRunCommandHookListener::UnhookPlayerRunCommand();
 	OnGroundHookListener::UnhookOnGround();
 	//TeleportHookListener::UnhookTeleport();
 	SetTransmitHookListener::UnhookSetTransmit();
 	WeaponHookListener::UnhookWeapon();
+	ConCommandHookListener::UnhookDispatch();*/
 
 	Logger::GetInstance()->Flush();
 
@@ -271,13 +276,13 @@ void CNoCheatZPlugin::Unload( void )
 
 	if (SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive)
 	{
-		delete static_cast<SourceSdk::ConVar_csgo*>(nocheatz_instance);
-		delete static_cast<SourceSdk::ConCommand_csgo*>(ncz_cmd_ptr);
+		if(nocheatz_instance) delete static_cast<SourceSdk::ConVar_csgo*>(nocheatz_instance);
+		if(ncz_cmd_ptr) delete static_cast<SourceSdk::ConCommand_csgo*>(ncz_cmd_ptr);
 	}
 	else
 	{
-		delete static_cast<SourceSdk::ConVar*>(nocheatz_instance);
-		delete static_cast<SourceSdk::ConCommand*>(ncz_cmd_ptr);
+		if (nocheatz_instance) delete static_cast<SourceSdk::ConVar*>(nocheatz_instance);
+		if (ncz_cmd_ptr) delete static_cast<SourceSdk::ConCommand*>(ncz_cmd_ptr);
 	}
 
 	DestroySingletons();
@@ -338,6 +343,8 @@ void CNoCheatZPlugin::ServerActivate(SourceSdk::edict_t *pEdictList, int edictCo
 void CNoCheatZPlugin::GameFrame( bool simulating )
 {
 	//OnFrameListener::OnFrame();
+
+	HookGuard::GetInstance()->GuardHooks();
 
 	if(simulating)
 	{
