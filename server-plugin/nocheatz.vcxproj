@@ -132,7 +132,7 @@
       <PreserveSbr>true</PreserveSbr>
     </Bscmake>
     <PostBuildEvent>
-      <Command>..\scripts\prepare-test.bat CSGO Debug 740 csgo</Command>
+      <Command>..\scripts\prepare-test.bat CSS Debug 232330 cstrike</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -247,9 +247,18 @@ copy "$(TargetPath)" ..\..\..\game\bin\"$(TargetName)".pdb
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="SourceSdk\Interfaces\Protobuf\cstrike15_usermessages.pb.cc" />
-    <ClCompile Include="SourceSdk\Interfaces\Protobuf\cstrike15_usermessage_helpers.cpp" />
-    <ClCompile Include="SourceSdk\Interfaces\Protobuf\netmessages.pb.cc" />
+    <ClCompile Include="SourceSdk\Interfaces\Protobuf\cstrike15_usermessages.pb.cc">
+      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">TurnOffAllWarnings</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">TurnOffAllWarnings</WarningLevel>
+    </ClCompile>
+    <ClCompile Include="SourceSdk\Interfaces\Protobuf\cstrike15_usermessage_helpers.cpp">
+      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">TurnOffAllWarnings</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">TurnOffAllWarnings</WarningLevel>
+    </ClCompile>
+    <ClCompile Include="SourceSdk\Interfaces\Protobuf\netmessages.pb.cc">
+      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">TurnOffAllWarnings</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">TurnOffAllWarnings</WarningLevel>
+    </ClCompile>
     <ClCompile Include="SourceSdk\SourceSdk.cpp" />
     <ClCompile Include="Code\Hooks\ConCommandHookListener.cpp" />
     <ClCompile Include="Code\Hooks\Hook.cpp" />

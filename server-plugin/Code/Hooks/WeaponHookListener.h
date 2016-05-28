@@ -45,7 +45,6 @@ public:
 		FIXME : May not works well with others plugins ...
 	*/
 	static void HookWeapon(NczPlayer* player);
-	static void UnhookWeapon();
 
 protected:
 	static void RegisterWeaponHookListener(WeaponHookListener* listener);
@@ -64,7 +63,6 @@ private:
 #endif
 	
 	static WeaponHookListenersListT m_listeners;
-	static HookList<> m_hooked_instances;
 };
 
 #endif

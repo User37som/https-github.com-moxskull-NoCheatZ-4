@@ -22,8 +22,6 @@
 #include "Systems/ConfigManager.h"
 
 OnGroundListenersListT OnGroundHookListener::m_listeners;
-GroundEntity_t OnGroundHookListener::gpOldGroundFn = nullptr;
-DWORD* OnGroundHookListener::pdwInterface = nullptr;
 
 OnGroundHookListener::OnGroundHookListener()
 {
@@ -37,16 +35,12 @@ void OnGroundHookListener::HookOnGround(NczPlayer* player)
 {
 	Assert(Helpers::isValidEdict(player->GetEdict()));
 	void* unk = player->GetEdict()->m_pUnk;
-	DWORD* vtptr = IFACE_PTR(unk);
-	if(pdwInterface != vtptr)
-	{
-		pdwInterface = vtptr;
-		DWORD OldFunc = VirtualTableHook(pdwInterface, ConfigManager::GetInstance()->GetVirtualFunctionId("mhgroundentity"), (DWORD)nNetworkStateChanged_m_hGroundEntity );
-		*(DWORD*)&(gpOldGroundFn) = OldFunc;
-	}
+
+	HookInfo info(unk, ConfigManager::GetInstance()->GetVirtualFunctionId("mhgroundentity"), (DWORD)nNetworkStateChanged_m_hGroundEntity);
+	HookGuard::GetInstance()->VirtualTableHook(info);
 }
 
-void OnGroundHookListener::UnhookOnGround()
+/*void OnGroundHookListener::UnhookOnGround()
 {
 	if(pdwInterface && gpOldGroundFn)
 	{
@@ -54,7 +48,7 @@ void OnGroundHookListener::UnhookOnGround()
 		pdwInterface = nullptr;
 		gpOldGroundFn = nullptr;
 	}
-}
+}*/
 
 #ifdef GNUC
 void HOOKFN_INT OnGroundHookListener::nNetworkStateChanged_m_hGroundEntity(CBasePlayer* basePlayer, int * new_m_hGroundEntity)
@@ -77,7 +71,9 @@ void HOOKFN_INT OnGroundHookListener::nNetworkStateChanged_m_hGroundEntity(CBase
 		}
 	}
 
-	gpOldGroundFn(basePlayer, new_m_hGroundEntity);
+	ST_W_STATIC GroundEntity_t gpOldFn;
+	*(DWORD*)&(gpOldFn) = HookGuard::GetInstance()->GetOldFunction(basePlayer, ConfigManager::GetInstance()->GetVirtualFunctionId("mhgroundentity"));
+	gpOldFn(basePlayer, new_m_hGroundEntity);
 }
 
 void OnGroundHookListener::RegisterOnGroundHookListener(OnGroundHookListener* listener)

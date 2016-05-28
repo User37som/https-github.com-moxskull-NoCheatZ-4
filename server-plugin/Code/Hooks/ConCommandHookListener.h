@@ -30,7 +30,6 @@ typedef void (HOOKFN_EXT *Dispatch_t)(void* cmd, SourceSdk::CCommand const & arg
 
 class ConCommandHookListener;
 
-typedef HookList<void> HookedCommandListT;
 typedef HookListenersList<ConCommandHookListener> ConCommandListenersListT;
 typedef CUtlVector<void*> MyCommandsListT;
 
@@ -79,7 +78,6 @@ private:
 		This is called automatically by the class
 	*/
 	static void HookDispatch(void* cmd);
-	static void UnhookDispatch(void* cmd);
 
 	/*
 		Our version of the ConCommand::Dispatch.
@@ -91,7 +89,6 @@ private:
 #endif
 	
 	static ConCommandListenersListT m_listeners;
-	static HookedCommandListT m_hooked_commands;
 };
 
 #endif // CONCOMMANDHOOKLISTENER
