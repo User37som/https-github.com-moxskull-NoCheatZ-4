@@ -127,7 +127,7 @@ struct SortedListener
 {
 	C* listener;
 	size_t priority;
-	SlotFilter filter;
+	SlotStatus filter;
 };
 
 template <class C>
@@ -172,14 +172,14 @@ public:
 	/*
 		Add a listener sorted by priority.
 	*/
-	elem_t* Add(C * const listener, size_t const priority = 0, SlotStatus const filter = PLAYER_IN_TESTS, SlotFilterBehavior const behavior = STATUS_EQUAL_OR_BETTER)
+	elem_t* Add(C * const listener, size_t const priority = 0, SlotStatus const filter = PLAYER_IN_TESTS)
 	{
 		if (m_first == nullptr)
 		{
 			m_first = new elem_t();
 			m_first->m_value.listener = listener;
 			m_first->m_value.priority = priority;
-			m_first->m_value.filter = SlotFilter(filter, filter, behavior);
+			m_first->m_value.filter = filter;
 			return m_first;
 		}
 		else
@@ -199,7 +199,7 @@ public:
 						m_first->m_next = old_first;
 						m_first->m_value.listener = listener;
 						m_first->m_value.priority = priority;
-						m_first->m_value.filter = SlotFilter(filter, filter, behavior);
+						m_first->m_value.filter = filter;
 						return m_first;
 					}
 					else
@@ -208,7 +208,7 @@ public:
 						prev->m_next->m_next = iterator;
 						prev->m_next->m_value.listener = listener;
 						prev->m_next->m_value.priority = priority;
-						prev->m_next->m_value.filter = SlotFilter(filter, filter, behavior);
+						prev->m_next->m_value.filter = filter;
 						return prev->m_next;
 					}
 				}
@@ -221,7 +221,7 @@ public:
 			prev->m_next = new elem_t();
 			prev->m_next->m_value.listener = listener;
 			prev->m_next->m_value.priority = priority;
-			prev->m_next->m_value.filter = SlotFilter(filter, filter, behavior);
+			prev->m_next->m_value.filter = filter;
 			return prev->m_next;
 		}
 	}

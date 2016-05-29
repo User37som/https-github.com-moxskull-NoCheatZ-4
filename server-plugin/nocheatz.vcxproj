@@ -298,7 +298,6 @@ copy "$(TargetPath)" ..\..\..\game\bin\"$(TargetName)".pdb
     <ClCompile Include="Code\Systems\TimerListener.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Code\Hooks\temp_vtablehook.h" />
     <ClInclude Include="Code\Misc\temp_basiclist.h" />
     <ClInclude Include="Code\Misc\temp_basicstring.h" />
     <ClInclude Include="Code\Misc\temp_singleton.h" />
