@@ -16,13 +16,42 @@
 #include "MRecipientFilter.h"
 
 #include "Helpers.h" // edict, PEntityOfEntIndex
+#include "Players/NczPlayerManager.h"
 
 MRecipientFilter::MRecipientFilter(void)
 {
+	m_Recipients.EnsureCapacity(64);
+	m_bInitMessage = false;
+	m_bReliable = true;
 }
 
 MRecipientFilter::~MRecipientFilter(void)
 {
+}
+
+MRecipientFilter::MRecipientFilter(MRecipientFilter const & other)
+{
+	m_bReliable = other.m_bReliable;
+	m_bInitMessage = other.m_bInitMessage;
+	m_Recipients = other.m_Recipients;
+}
+
+MRecipientFilter& MRecipientFilter::operator=(MRecipientFilter const & other)
+{
+	m_bReliable = other.m_bReliable;
+	m_bInitMessage = other.m_bInitMessage;
+	m_Recipients = other.m_Recipients;
+	return *this;
+}
+
+void MRecipientFilter::SetReliable(bool reliable)
+{
+	m_bReliable = reliable;
+}
+
+void MRecipientFilter::SetInitMessage(bool init)
+{
+	m_bInitMessage = init;
 }
 
 int MRecipientFilter::GetRecipientCount() const
@@ -40,12 +69,12 @@ int MRecipientFilter::GetRecipientIndex(int slot) const
 
 bool MRecipientFilter::IsInitMessage() const
 {
-    return false;
+    return m_bInitMessage;
 }
 
 bool MRecipientFilter::IsReliable() const
 {
-    return false;
+    return m_bReliable;
 }
 
 void MRecipientFilter::AddAllPlayers(int maxClients)
@@ -60,10 +89,59 @@ void MRecipientFilter::AddAllPlayers(int maxClients)
     }
 }
 
+void MRecipientFilter::RemoveAll()
+{
+	m_Recipients.RemoveAll();
+}
+
+void MRecipientFilter::AddTeam(int teamid)
+{
+	PLAYERS_LOOP_RUNTIME
+	{
+		void* playerinfo = ph->playerClass->GetPlayerInfo();
+		if (playerinfo != nullptr)
+		{
+			int player_team;
+			if (SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive)
+			{
+				player_team = static_cast<SourceSdk::IPlayerInfo_csgo*>(playerinfo)->GetTeamIndex();
+			}
+			else
+			{
+				player_team = static_cast<SourceSdk::IPlayerInfo*>(playerinfo)->GetTeamIndex();
+			}
+
+			if (player_team == teamid)
+			{
+				AddRecipient(x);
+			}
+		}
+	}
+	END_PLAYERS_LOOP
+}
+
+void MRecipientFilter::AddAllPlayersExcludeTeam(int teamid)
+{
+	m_Recipients.RemoveAll();
+	if (teamid != 0) AddTeam(0);
+	if (teamid != 1) AddTeam(1);
+	if (teamid != 2) AddTeam(2);
+	if (teamid != 3) AddTeam(3);
+}
+
 void MRecipientFilter::AddRecipient( int iPlayer )
 {
     if ( m_Recipients.Find( iPlayer ) != m_Recipients.InvalidIndex() )
         return;
 
     m_Recipients.AddToTail( iPlayer );
+}
+
+void MRecipientFilter::RemoveRecipient(int iPlayer)
+{
+	int index = m_Recipients.Find(iPlayer);
+	if (index != m_Recipients.InvalidIndex())
+		return;
+
+	m_Recipients.AddToTail(iPlayer);
 }

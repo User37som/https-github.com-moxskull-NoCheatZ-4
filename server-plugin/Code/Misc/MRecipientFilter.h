@@ -26,13 +26,23 @@ public:
 	MRecipientFilter(void);
     ~MRecipientFilter(void);
 
+	MRecipientFilter(MRecipientFilter const & other);
+	MRecipientFilter& operator=(MRecipientFilter const & other);
+
+	void SetReliable(bool reliable);
+	void SetInitMessage(bool init);
     virtual bool IsReliable( void ) const;
     virtual bool IsInitMessage( void ) const;
 
     virtual int GetRecipientCount( void ) const;
     virtual int GetRecipientIndex( int slot ) const;
+
     void AddAllPlayers( int maxClients );
+	void AddTeam(int teamid);
+	void AddAllPlayersExcludeTeam(int teamid);
     void AddRecipient (int iPlayer );
+	void RemoveRecipient(int iPlayer );
+	void RemoveAll();
 
 private:
     bool m_bReliable;
