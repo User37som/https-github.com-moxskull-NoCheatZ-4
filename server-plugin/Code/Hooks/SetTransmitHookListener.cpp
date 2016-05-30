@@ -41,7 +41,7 @@ void SetTransmitHookListener::HookSetTransmit(SourceSdk::edict_t* ent)
 	HookInfo info(unk, ConfigManager::GetInstance()->GetVirtualFunctionId("settransmit"), (DWORD)nSetTransmit);
 	HookGuard::GetInstance()->VirtualTableHook(info);
 
-	DebugMessage(basic_string("Hooked SetTransmit of entity classname ").append(ent->GetClassName()));
+	//DebugMessage(basic_string("Hooked SetTransmit of entity classname ").append(ent->GetClassName()));
 }
 
 /*void SetTransmitHookListener::UnhookSetTransmit()
