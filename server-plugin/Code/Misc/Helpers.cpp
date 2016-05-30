@@ -406,6 +406,7 @@ namespace Helpers
 			clr->set_a(0xFF);
 			pBuffer->set_allocated_clr(clr);
 			SourceSdk::InterfacesProxy::Call_SendUserMessage(&filter, CS_UM_Fade, *pBuffer);
+			SourceSdk::InterfacesProxy::Call_MessageEnd();
 			delete pBuffer;
 			//delete clr; It is already deleted by the dctor of CCSUsrMsg_Fade
 		}
@@ -441,6 +442,7 @@ void Helpers::tell(SourceSdk::edict_t *pEntity, const basic_string& message)
 				pBuffer->set_text(message.c_str());
 				pBuffer->set_chat(true);
 				SourceSdk::InterfacesProxy::Call_SendUserMessage(&filter, CS_UM_SayText, *pBuffer);
+				SourceSdk::InterfacesProxy::Call_MessageEnd();
 				delete pBuffer;
 			}
 			else
