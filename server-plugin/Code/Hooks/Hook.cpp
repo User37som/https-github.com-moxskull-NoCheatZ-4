@@ -21,11 +21,11 @@
 #include "Systems/Logger.h"
 #include "Misc/Helpers.h"
 
-void HookGuard::VirtualTableHook(HookInfo& info)
+void HookGuard::VirtualTableHook(HookInfo& info, bool force /* = false*/ )
 { 
-	if (m_list.HasElement(info)) return;
+	if (m_list.HasElement(info) && !force) return;
 
-	info.oldFn = 0;
+	//info.oldFn = 0;
 #ifdef WIN32
 		DWORD dwOld;
 		if(!VirtualProtect(info.vf_entry, 2 * sizeof(DWORD*), PAGE_EXECUTE_READWRITE, &dwOld ))
@@ -59,7 +59,7 @@ void HookGuard::VirtualTableHook(HookInfo& info)
 #endif // WIN32
 		DebugMessage(Helpers::format("VirtualTableHook : function 0x%X replaced by 0x%X.", info.oldFn, info.newFn));
 
-		m_list.AddToTail(info);
+		if (!m_list.HasElement(info)) m_list.AddToTail(info);
 }
 
 void MoveVirtualFunction(DWORD const * const from, DWORD * const to)
@@ -133,7 +133,7 @@ void HookGuard::GuardHooks()
 		{
 			it->oldFn = 0;
 			DebugMessage(Helpers::format("HookGuard::GuardHooks : Re-hooking at %X.", *it->vf_entry));
-			VirtualTableHook(*it); // rehook
+			VirtualTableHook(*it, true); // rehook
 		}
 	}
 }
@@ -143,7 +143,7 @@ void HookGuard::UnhookAll()
 	for (hooked_list_t::iterator it = m_list.begin(); it != m_list.end(); ++it)
 	{
 		std::swap(it->newFn, it->oldFn);
-		VirtualTableHook(*it); // unhook
+		VirtualTableHook(*it, true); // unhook
 	}
 	m_list.RemoveAll();
 }

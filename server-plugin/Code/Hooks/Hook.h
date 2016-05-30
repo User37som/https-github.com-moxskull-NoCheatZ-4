@@ -102,7 +102,7 @@ public:
 	HookGuard() : singleton_class() {}
 	~HookGuard() {};
 
-	void VirtualTableHook(HookInfo& info);
+	void VirtualTableHook(HookInfo& info, bool force = false);
 
 	// Find by virtual table entry address
 	DWORD GetOldFunction(void* class_ptr, int vfid) const;
