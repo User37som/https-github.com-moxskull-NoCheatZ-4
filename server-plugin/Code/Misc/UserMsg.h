@@ -18,7 +18,7 @@
 
 enum eUserMsg
 {
-	INVALID = -1,
+	MSG_INVALID = -1,
 	Geiger = 0,
 	Train = 1,
 	HudText = 2,
