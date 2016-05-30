@@ -115,6 +115,7 @@ bool EntityProps::FindInCache(const basic_string & path, offset_t * offset, bool
 		}
 	}
 
+	DebugMessage(Helpers::format("EntityProps : Prop %s Not found in cache.", path.c_str()).c_str());
 	return false;
 }
 
@@ -219,7 +220,7 @@ bool EntityProps::GetDataOffset(SourceSdk::datamap_t* dt, basic_string const & p
 					{
 						*offset = td.fieldOffset;
 
-						m_cache.AddToTail(PropertyCacheS(data_name, *offset, true));
+						m_cache.AddToTail(PropertyCacheS(path, *offset, true));
 
 						return true;
 					}
@@ -232,7 +233,7 @@ bool EntityProps::GetDataOffset(SourceSdk::datamap_t* dt, basic_string const & p
 					{
 						*offset = *(td.fieldOffset);
 
-						m_cache.AddToTail(PropertyCacheS(data_name, *offset, true));
+						m_cache.AddToTail(PropertyCacheS(path, *offset, true));
 
 						return true;
 					}
