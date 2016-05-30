@@ -1,0 +1,68 @@
+/*
+Copyright 2012 - Le Padellec Sylvain
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
+#include "ThinkPostHookListener.h"
+
+#include "Systems/ConfigManager.h"
+#include "Misc/Helpers.h"
+#include "Interfaces/InterfacesProxy.h"
+
+ThinkPostHookListener::ListenersList_t ThinkPostHookListener::m_listeners;
+
+ThinkPostHookListener::ThinkPostHookListener()
+{
+
+}
+
+ThinkPostHookListener::~ThinkPostHookListener()
+{
+}
+
+void ThinkPostHookListener::HookThinkPost(SourceSdk::edict_t* entity)
+{
+	HookInfo info(entity->m_pUnk, ConfigManager::GetInstance()->GetVirtualFunctionId("thinkpost"), (DWORD)nThinkPost);
+	HookGuard::GetInstance()->VirtualTableHook(info, true);
+}
+
+void ThinkPostHookListener::RegisterThinkPostHookListener(ThinkPostHookListener* listener)
+{
+	m_listeners.Add(listener);
+}
+
+void ThinkPostHookListener::RemoveThinkPostHookListener(ThinkPostHookListener* listener)
+{
+	m_listeners.Remove(listener);
+}
+
+#ifdef GNUC
+void HOOKFN_INT ThinkPostHookListener::nThinkPost(SourceSdk::CBaseEntity* baseentity)
+#else
+void HOOKFN_INT ThinkPostHookListener::nThinkPost(SourceSdk::CBaseEntity * baseentity, void*)
+#endif
+{
+	PostThink_t gpOldFn;
+	*(DWORD*)&gpOldFn = HookGuard::GetInstance()->GetOldFunction(baseentity, ConfigManager::GetInstance()->GetVirtualFunctionId("thinkpost"));
+	gpOldFn(baseentity);
+
+	ListenersList_t::elem_t const * it = m_listeners.GetFirst();
+	SourceSdk::edict_t const * const pent = SourceSdk::InterfacesProxy::Call_BaseEntityToEdict(baseentity);
+
+	while (it != nullptr)
+	{
+		it->m_value.listener->ThinkPostCallback(pent);
+
+		it = it->m_next;
+	}
+}

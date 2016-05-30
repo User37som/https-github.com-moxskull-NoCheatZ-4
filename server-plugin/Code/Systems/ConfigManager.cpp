@@ -76,7 +76,7 @@ bool GetIniAttributeValue(std::ifstream & file, basic_string const & root, basic
 }
 
 ConfigManager::ConfigManager() :
-	content_version(0),
+	content_version(1),
 	singleton_class()
 {
 
@@ -125,6 +125,9 @@ bool ConfigManager::LoadConfig()
 			if (!GetIniAttributeValue(file, gamename, "dispatch" ATTRIB_POST, value)) return false;
 			m_vfuncs.AddToTail(virtual_function("dispatch", atoi(value.c_str())));
 
+			if (!GetIniAttributeValue(file, gamename, "thinkpost" ATTRIB_POST, value)) return false;
+			m_vfuncs.AddToTail(virtual_function("thinkpost", atoi(value.c_str())));
+
 			// load some strings
 
 			if (!GetIniAttributeValue(file, gamename, "playerdataclass", m_playerdataclass)) return false;
@@ -161,6 +164,10 @@ bool ConfigManager::LoadConfig()
 
 			return true;
 
+		}
+		else
+		{
+			Assert("config.ini content version doesn't match what we expect. Update it." && 0);
 		}
 	}
 

@@ -234,6 +234,9 @@
     <ClCompile Include="Code\Systems\AutoTVRecord.cpp">
       <Filter>Code\Systems</Filter>
     </ClCompile>
+    <ClCompile Include="Code\Hooks\ThinkPostHookListener.cpp">
+      <Filter>Code\Hooks</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Code\plugin.h">
@@ -517,6 +520,9 @@
     </ClInclude>
     <ClInclude Include="Code\Misc\temp_singleton.h">
       <Filter>Code\Misc</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Hooks\ThinkPostHookListener.h">
+      <Filter>Code\Hooks</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
