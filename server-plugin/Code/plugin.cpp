@@ -32,6 +32,7 @@
 #include "Systems/Blockers/AntiSmokeBlocker.h"
 #include "Systems/Blockers/BadUserCmdBlocker.h"
 #include "Systems/Blockers/WallhackBlocker.h"
+#include "Systems/Blockers/RadarHackBlocker.h"
 #include "Systems/BanRequest.h"
 #include "Systems/ConfigManager.h"
 #include "Systems/Logger.h"
@@ -89,6 +90,7 @@ void CNoCheatZPlugin::CreateSingletons()
 	SpeedTester::CreateInstance();
 	ValidationTester::CreateInstance();
 	AutoTVRecord::CreateInstance();
+	RadarHackBlocker::CreateInstance();
 }
 
 void CNoCheatZPlugin::DestroySingletons()
@@ -96,6 +98,7 @@ void CNoCheatZPlugin::DestroySingletons()
 	HookGuard::GetInstance()->UnhookAll();
 	HookGuard::DestroyInstance();
 
+	RadarHackBlocker::DestroyInstance();
 	AutoTVRecord::DestroyInstance();
 	ValidationTester::DestroyInstance();
 	SpeedTester::DestroyInstance();
@@ -239,6 +242,7 @@ bool CNoCheatZPlugin::Load(SourceSdk::CreateInterfaceFn _interfaceFactory, Sourc
 				BadUserCmdBlocker::GetInstance()->ResetPlayerDataStruct(ph->playerClass);
 				WallhackBlocker::GetInstance()->ResetPlayerDataStruct(ph->playerClass);
 				SpamChangeNameTester::GetInstance()->ResetPlayerDataStruct(ph->playerClass);
+				RadarHackBlocker::GetInstance()->ResetPlayerDataStruct(ph->playerClass);
 			}
 		}
 	}
@@ -337,6 +341,8 @@ void CNoCheatZPlugin::ServerActivate(SourceSdk::edict_t *pEdictList, int edictCo
 	//Helpers::m_clientMax = clientMax;
 
 	NczPlayerManager::GetInstance()->LoadPlayerManager();
+
+	RadarHackBlocker::GetInstance()->OnMapStart();
 }
 
 //---------------------------------------------------------------------------------
@@ -464,6 +470,7 @@ SourceSdk::PLUGIN_RESULT CNoCheatZPlugin::ClientConnect( bool *bAllowConnect, So
 	BadUserCmdBlocker::GetInstance()->ResetPlayerDataStruct(player);
 	WallhackBlocker::GetInstance()->ResetPlayerDataStruct(player);
 	SpamChangeNameTester::GetInstance()->ResetPlayerDataStruct(player);
+	RadarHackBlocker::GetInstance()->ResetPlayerDataStruct(player);
 
 	return SourceSdk::PLUGIN_CONTINUE;
 }

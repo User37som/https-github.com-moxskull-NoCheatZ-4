@@ -245,6 +245,7 @@ copy "$(TargetPath)" ..\..\..\game\bin\"$(TargetName)".pdb
     <ClCompile Include="Code\Hooks\ThinkPostHookListener.cpp" />
     <ClCompile Include="Code\Hooks\UserMessageHookListener.cpp" />
     <ClCompile Include="Code\Systems\AutoTVRecord.cpp" />
+    <ClCompile Include="Code\Systems\Blockers\RadarHackBlocker.cpp" />
     <ClCompile Include="Code\Systems\ConfigManager.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
@@ -306,6 +307,7 @@ copy "$(TargetPath)" ..\..\..\game\bin\"$(TargetName)".pdb
     <ClInclude Include="Code\Misc\temp_basicstring.h" />
     <ClInclude Include="Code\Misc\temp_singleton.h" />
     <ClInclude Include="Code\Systems\AutoTVRecord.h" />
+    <ClInclude Include="Code\Systems\Blockers\RadarHackBlocker.h" />
     <ClInclude Include="Code\Systems\ConfigManager.h" />
     <ClInclude Include="SourceSdk\Console\color.h" />
     <ClInclude Include="SourceSdk\Console\convar.h" />
