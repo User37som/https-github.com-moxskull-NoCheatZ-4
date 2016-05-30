@@ -243,6 +243,7 @@ copy "$(TargetPath)" ..\..\..\game\bin\"$(TargetName)".pdb
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Code\Hooks\ThinkPostHookListener.cpp" />
+    <ClCompile Include="Code\Hooks\UserMessageHookListener.cpp" />
     <ClCompile Include="Code\Systems\AutoTVRecord.cpp" />
     <ClCompile Include="Code\Systems\ConfigManager.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
@@ -300,6 +301,7 @@ copy "$(TargetPath)" ..\..\..\game\bin\"$(TargetName)".pdb
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Code\Hooks\ThinkPostHookListener.h" />
+    <ClInclude Include="Code\Hooks\UserMessageHookListener.h" />
     <ClInclude Include="Code\Misc\temp_basiclist.h" />
     <ClInclude Include="Code\Misc\temp_basicstring.h" />
     <ClInclude Include="Code\Misc\temp_singleton.h" />

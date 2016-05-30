@@ -161,6 +161,8 @@ bool CNoCheatZPlugin::Load(SourceSdk::CreateInterfaceFn _interfaceFactory, Sourc
 
 	if (!SourceSdk::InterfacesProxy::Load(gameServerFactory, _interfaceFactory)) return false;
 
+	UserMessageHookListener::HookUserMessage();
+
 	void* pinstance = SourceSdk::InterfacesProxy::ICvar_FindVar("nocheatz_instance");
 	if(pinstance)
 	{
