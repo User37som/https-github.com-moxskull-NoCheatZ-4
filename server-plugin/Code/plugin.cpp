@@ -44,13 +44,13 @@
 static void* __CreatePlugin_interface()
 { 
 	CNoCheatZPlugin::CreateInstance();
-	printf("CNoCheatZPlugin interface created with CSGO callbacks ...");
+	printf("CNoCheatZPlugin interface created with CSGO callbacks ...\n");
 	return CNoCheatZPlugin::GetInstance();
 }
 
 void* CreateInterfaceInternal(char const *pName, int *pReturnCode)
 {
-	printf(Helpers::format("Game engine asking for %s", pName).c_str());
+	printf(Helpers::format("Game engine asking for %s\n", pName).c_str());
 	if(pReturnCode) *pReturnCode = SourceSdk::IFACE_OK;
 	return __CreatePlugin_interface();
 }
