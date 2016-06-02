@@ -28,55 +28,198 @@
 
 #include "Helpers.h"
 #include "Systems/Logger.h"
+#include "Systems/ConfigManager.h"
 
 typedef int offset_t;
 
 class CBaseEntity;
 
+enum UsedProps
+{
+	PROP_ABS_VELOCITY,
+	PROP_FLASH_MAX_ALPHA,
+	PROP_FLASH_DURATION,
+	PROP_FLAGS,
+	PROP_PLAYER_SPOTTED,
+	PROP_BOMB_SPOTTED,
+	PROP_OBSERVER_MODE,
+	PROP_OBSERVER_TARGET,
+	PROP_LERP_TIME,
+
+	PROP_COUNT
+};
+
 typedef struct PropertyCacheS
 {
-	bool prop_type; // false = SendTable, true = datamap
-	basic_string prop_name;
+	bool cache_set;
 	offset_t prop_offset;
-	size_t comp_pred;
 
 	PropertyCacheS()
 	{
-		prop_type = false;
-		prop_offset = 0;
-		comp_pred = 0;
+		cache_set = false;
 	};
 	PropertyCacheS(const PropertyCacheS& other)
 	{
-		prop_type = other.prop_type;
-		prop_name = other.prop_name;
+		cache_set = other.cache_set;
 		prop_offset = other.prop_offset;
-		comp_pred = other.comp_pred;
 	};
-	PropertyCacheS(const basic_string& name, offset_t offset, bool type)
+	PropertyCacheS& operator=(const PropertyCacheS& other)
 	{
-		prop_type = type;
-		prop_name = name;
+		cache_set = other.cache_set;
+		prop_offset = other.prop_offset;
+		return *this;
+	};
+	PropertyCacheS(offset_t offset)
+	{
+		cache_set = true;
 		prop_offset = offset;
-		comp_pred = name.find_last_of("_.")+1;
 	};
 } PropertyCacheT;
 
-typedef CUtlVector<PropertyCacheT> PropsListT;
-
 SourceSdk::datamap_t* GetDataDescMap(SourceSdk::edict_t* const pEntity);
+
+#undef GetProp
 
 class EntityProps : public Singleton<EntityProps>
 {
 private:
 	/* I believe offsets are consistents so don't need to reset the cache during runtime */
-	PropsListT m_cache;
+	PropertyCacheS m_cache[PROP_COUNT];
 
-	void GetPropOffset(const basic_string& name, offset_t* pOffset);
+	template <UsedProps id>
+	basic_string const & PropIdToString();
 
-	bool GetDataOffset(SourceSdk::datamap_t* dt, const basic_string& data_name, offset_t* offset);
+	template <UsedProps id>
+	void GetPropOffset(offset_t* pOffset)
+	{
+		CUtlVector<basic_string> paths;
+		SplitString<char>(PropIdToString<id>(), '.', paths);
 
-	bool FindInCache(const basic_string &path, offset_t* offset, bool type = false);
+		size_t depth = 0;
+		const size_t MaxDepth = paths.Size() - 1;
+
+		SourceSdk::ServerClass * pClass = SourceSdk::InterfacesProxy::Call_GetAllServerClasses();
+		do
+		{
+			if (paths[depth].operator!=(pClass->m_pNetworkName)) continue;
+
+			void * pTable = pClass->m_pTable;
+			while (++depth < MaxDepth) // Follow path
+			{
+				int const numprops = static_cast<SourceSdk::SendTable*>(pTable)->m_nProps;
+				for (offset_t prop = 0; prop < numprops; ++prop)
+				{
+					if (SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive)
+					{
+						const SourceSdk::SendProp_csgo* const pProp = static_cast<SourceSdk::SendProp_csgo*>(static_cast<SourceSdk::SendTable_csgo*>(pTable)->GetProp(prop));
+						if (paths[depth].operator==(pProp->GetName()))
+						{
+							pTable = pProp->GetDataTable();
+							break;
+						}
+					}
+					else
+					{
+						const SourceSdk::SendProp* const pProp = static_cast<SourceSdk::SendProp*>(static_cast<SourceSdk::SendTable*>(pTable)->GetProp(prop));
+						if (paths[depth].operator==(pProp->GetName()))
+						{
+							pTable = pProp->GetDataTable();
+							break;
+						}
+					}
+				}
+			}
+			// Find prop
+			int const numprops = static_cast<SourceSdk::SendTable*>(pTable)->m_nProps;
+			for (offset_t prop = 0; prop < numprops; ++prop)
+			{
+				if (SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive)
+				{
+					const SourceSdk::SendProp_csgo* const pProp = static_cast<SourceSdk::SendProp_csgo*>(static_cast<SourceSdk::SendTable_csgo*>(pTable)->GetProp(prop));
+					if (paths[depth].operator==(pProp->GetName()))
+					{
+						*pOffset = pProp->GetOffset();
+						// Register in our cache
+						m_cache[id] = PropertyCacheS(*pOffset);
+						// Return the offset
+						return;
+					}
+				}
+				else
+				{
+					const SourceSdk::SendProp* const pProp = static_cast<SourceSdk::SendProp*>(static_cast<SourceSdk::SendTable*>(pTable)->GetProp(prop));
+					if (paths[depth].operator==(pProp->GetName()))
+					{
+						*pOffset = pProp->GetOffset();
+						// Register in our cache
+						m_cache[id] = PropertyCacheS(*pOffset);
+						// Return the offset
+						return;
+					}
+				}
+			}
+		} while ((pClass = pClass->m_pNext) != nullptr);
+		pOffset = 0;
+	}
+
+	template <UsedProps id>
+	bool FindInCache(offset_t * offset)
+	{
+		if (m_cache[id].cache_set == true)
+		{
+			*offset = m_cache[id].prop_offset;
+			return true;
+		}
+		return false;
+	}
+
+	template <UsedProps id>
+	bool GetDataOffset(SourceSdk::datamap_t* dt, offset_t* offset)
+	{
+		CUtlVector<basic_string> paths;
+		SplitString<char>(PropIdToString<id>(), '.', paths);
+
+		basic_string const & data_class = paths[0];
+		basic_string const & data_name = paths[1];
+
+		do
+		{
+			if (data_class.operator==(dt->dataClassName))
+			{
+				for (int i = 0; i < dt->dataNumFields; ++i)
+				{
+					if (SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive)
+					{
+						SourceSdk::typedescription_t_csgo const & td = static_cast<SourceSdk::typedescription_t_csgo const *>(dt->dataDesc)[i];
+
+						if (data_name.operator==(td.fieldName))
+						{
+							*offset = td.fieldOffset;
+
+							m_cache[id] = PropertyCacheS(*offset);
+
+							return true;
+						}
+					}
+					else
+					{
+						SourceSdk::typedescription_t const & td = static_cast<SourceSdk::typedescription_t const *>(dt->dataDesc)[i];
+
+						if (data_name.operator==(td.fieldName))
+						{
+							*offset = *(td.fieldOffset);
+
+							m_cache[id] = PropertyCacheS(*offset);
+
+							return true;
+						}
+					}
+				}
+			}
+		} while ((dt = dt->baseMap) != nullptr);
+
+		return false;
+	}
 
 	EntityProps(const EntityProps& other){};
 	EntityProps& operator=(EntityProps const &  other) {};
@@ -85,21 +228,21 @@ public:
 	EntityProps(){};
 	~EntityProps(){};
 
-	template<typename T>
-	T* GetPropValue(const basic_string &path, SourceSdk::edict_t * const pEdict, bool type = false)
+	template<typename T, UsedProps prop_id>
+	T* GetPropValue(SourceSdk::edict_t * const pEdict, bool type = false)
 	{
 		SourceSdk::CBaseEntity * const pBase = pEdict->GetUnknown()->GetBaseEntity();
 		offset_t offset = 0;
-		if (!FindInCache(path, &offset, type))
+		if (!FindInCache<prop_id>(&offset))
 		{
 			if (!type)
 			{
-				GetPropOffset(path, &offset);
+				GetPropOffset<prop_id>(&offset);
 			}
 			else
 			{
 				SourceSdk::datamap_t* const dt = GetDataDescMap(pEdict);
-				GetDataOffset(dt, path, &offset);
+				GetDataOffset<prop_id>(dt, &offset);
 			}
 		}
 		Assert(offset > 0);

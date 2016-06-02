@@ -124,8 +124,8 @@ void AntiFlashbangBlocker::FireGameEvent(SourceSdk::IGameEvent* ev) // player_bl
 	if(ph->status >= PLAYER_CONNECTED)
 	{
 		FlashInfoT* const pInfo = GetPlayerDataStruct(ph->playerClass);
-		const float flash_alpha = *EntityProps::GetInstance()->GetPropValue<float>(PLAYERCLASS_PROP".m_flFlashMaxAlpha", ph->playerClass->GetEdict());
-		const float flash_duration = *EntityProps::GetInstance()->GetPropValue<float>(PLAYERCLASS_PROP".m_flFlashDuration", ph->playerClass->GetEdict());
+		const float flash_alpha = *EntityProps::GetInstance()->GetPropValue<float, PROP_FLASH_MAX_ALPHA>(ph->playerClass->GetEdict());
+		const float flash_duration = *EntityProps::GetInstance()->GetPropValue<float, PROP_FLASH_DURATION>(ph->playerClass->GetEdict());
 		
 		if (flash_alpha < 255.0)
 		{

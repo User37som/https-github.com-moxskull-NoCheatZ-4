@@ -65,7 +65,7 @@ void EyeAnglesTester::Unload()
 
 PlayerRunCommandRet EyeAnglesTester::PlayerRunCommandCallback(NczPlayer* player, void* pCmd, void* old_cmd)
 {	
-	int const * const flags = EntityProps::GetInstance()->GetPropValue<int>("CBasePlayer.m_fFlags", player->GetEdict());
+	int const * const flags = EntityProps::GetInstance()->GetPropValue<int, PROP_FLAGS>(player->GetEdict());
 	
 	/*
 		FL_FROZEN			(1 << 5)

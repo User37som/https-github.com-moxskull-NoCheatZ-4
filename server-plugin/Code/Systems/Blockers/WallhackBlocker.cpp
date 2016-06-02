@@ -86,13 +86,13 @@ bool WallhackBlocker::SetTransmitCallback(SourceSdk::edict_t* const sender, Sour
 		return false;
 	}
 
-	SpectatorMode receiver_spec = *EntityProps::GetInstance()->GetPropValue<SpectatorMode>("CBasePlayer.m_iObserverMode", receiver_player->playerClass->GetEdict(), false);
+	SpectatorMode receiver_spec = *EntityProps::GetInstance()->GetPropValue<SpectatorMode, PROP_OBSERVER_MODE>(receiver_player->playerClass->GetEdict(), false);
 
 	VisCache& cache = WallhackBlocker::GetInstance()->m_viscache;
 
 	if(receiver_spec == OBS_MODE_IN_EYE)
 	{
-		SourceSdk::CBaseHandle &bh = *EntityProps::GetInstance()->GetPropValue<SourceSdk::CBaseHandle>("CBasePlayer.m_hObserverTarget", receiver_player->playerClass->GetEdict(), false);
+		SourceSdk::CBaseHandle &bh = *EntityProps::GetInstance()->GetPropValue<SourceSdk::CBaseHandle, PROP_OBSERVER_TARGET>(receiver_player->playerClass->GetEdict(), false);
 		PlayerHandler* const spec_player = NczPlayerManager::GetInstance()->GetPlayerHandlerByIndex(bh.GetEntryIndex());
 
 		Assert(spec_player->status > INVALID);
@@ -233,8 +233,8 @@ void WallhackBlocker::ProcessOnTick()
 			}
 			else
 			{
-				const int lerp_ticks = (int)( 0.5f + *EntityProps::GetInstance()->GetPropValue<float>("CBasePlayer.m_fLerpTime", playeredict, true) / tick_interval );
-				const float fCorrect = netchan->GetLatency(FLOW_OUTGOING) + fmodf(lerp_ticks * tick_interval, 1.0);
+				const int lerp_ticks = (int)( 0.5f + *EntityProps::GetInstance()->GetPropValue<float, PROP_LERP_TIME>(playeredict, true) / tick_interval );
+				const float fCorrect = netchan->GetLatency(FLOW_OUTGOING) + fmodf(lerp_ticks * tick_interval, 1.0f);
 
 				target_tick = static_cast<SourceSdk::CUserCmd_csgo*>(PlayerRunCommandHookListener::GetLastUserCmd(pPlayer))->tick_count - lerp_ticks;
 

@@ -51,8 +51,8 @@ void RadarHackBlocker::OnMapStart()
 #undef GetClassName
 					if (basic_string("cs_player_manager").operator==(ent->GetClassName()))
 					{
-						m_players_spotted = EntityProps::GetInstance()->GetPropValue<bool>("CCSPlayerResource.m_bPlayerSpotted", ent);
-						m_bomb_spotted = EntityProps::GetInstance()->GetPropValue<bool>("CCSPlayerResource.m_bBombSpotted", ent);
+						m_players_spotted = EntityProps::GetInstance()->GetPropValue<bool, PROP_PLAYER_SPOTTED>(ent);
+						m_bomb_spotted = EntityProps::GetInstance()->GetPropValue<bool, PROP_BOMB_SPOTTED>(ent);
 						ThinkPostHookListener::HookThinkPost(ent);
 						break;
 					}
