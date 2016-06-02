@@ -47,8 +47,14 @@ void ValidationTester::Init()
 void ValidationTester::SetValidated(NczPlayer* player)
 {
 	GetPlayerDataStruct(player)->b = true;
-	std::cout << Plat_FloatTime() << " : " << player->GetName() << " SteamID validated\n";
+	DebugMessage(Helpers::format("%s SteamID validated\n", player->GetName()));
 	SystemVerbose1(("%s SteamID validated", player->GetName()));
+
+	Assert(player->GetPlayerInfo());
+
+	ValidatedIdsT::elem_t const * const it = m_validated_ids.Find(ValidatedInfo(player->GetSteamID()));
+
+	if (it == nullptr) m_validated_ids.Add(ValidatedInfo(player->GetSteamID(), player->GetIPAddress()));
 }
 
 void ValidationTester::ProcessPlayerTestOnTick(NczPlayer* player)
@@ -66,11 +72,13 @@ void ValidationTester::ProcessPlayerTestOnTick(NczPlayer* player)
 void ValidationTester::Load()
 {
 	OnTickListener::RegisterOnTickListener(this);
+	SourceSdk::InterfacesProxy::GetGameEventManager()->AddListener(this, "player_disconnect", true);
 }
 
 void ValidationTester::Unload()
 {
 	OnTickListener::RemoveOnTickListener(this);
+	SourceSdk::InterfacesProxy::GetGameEventManager()->RemoveListener(this);
 
 	PLAYERS_LOOP_RUNTIME
 	{
@@ -85,26 +93,45 @@ bool ValidationTester::JoinCallback(NczPlayer* const player)
 	{
 		if(!GetPlayerDataStruct(player)->b)
 		{
-			Helpers::tell(player->GetEdict(), "You can't join the game now because your Steam ID is not validated yet.\nRetry with the F9 button.");
+			if (!WasPreviouslyValidated(player))
+			{
+				Helpers::tell(player->GetEdict(), "You can't join the game now because your Steam ID is not validated yet.\nRetry with the F9 button or activate Steam and restart the game.");
+			}
+			else
+			{
+				DebugMessage(Helpers::format("%s SteamID was previously validated with the same IP. Plugin will flag this player as validated.\n", player->GetName()));
+				SetValidated(player);
+			}
 			return true;
 		}
 	}
 	return false;
 }
 
-void ValidationTester::AddPendingValidation(const char* steamid)
+void ValidationTester::AddPendingValidation(const char *pszUserName, const char* steamid)
 {
 	m_pending_validations.Add(steamid);
 }
 
-void ValidationTester::ProcessOnTick()
+bool ValidationTester::WasPreviouslyValidated(NczPlayer * const player)
+{
+	Assert(player->GetPlayerInfo());
+
+	ValidatedIdsT::elem_t const * const it = m_validated_ids.Find(ValidatedInfo(player->GetSteamID()));
+
+	if (it == nullptr) return false;
+	else if (strcmp(it->m_value.m_ipaddress, player->GetIPAddress()) == 0) return true;
+	else return false;
+}
+
+void ValidationTester::ProcessOnTick(float const curtime)
 {
 	PendingValidationsT::elem_t* it = m_pending_validations.GetFirst();
 	while (it != nullptr)
 	{
 		PlayerHandler* ph = NczPlayerManager::GetInstance()->GetPlayerHandlerBySteamID(it->m_value);
 
-		if (ph->status == INVALID)
+		if (ph->status == INVALID || ph->playerClass->GetPlayerInfo() == nullptr)
 		{
 			it = it->m_next;
 			continue;
@@ -113,4 +140,10 @@ void ValidationTester::ProcessOnTick()
 		SetValidated(ph->playerClass);
 		it = m_pending_validations.Remove(it);
 	}
+}
+
+void ValidationTester::FireGameEvent(SourceSdk::IGameEvent * ev)
+{
+	//DebugMessage(Helpers::format("Received player_disconnect event : \n\t%d\n\t%s\n\t%s\n\t%s\n\t%d", ev->GetInt("userid"), ev->GetString("reason"), ev->GetString("name"), ev->GetString("networkid"), ev->GetBool("bot")).c_str());
+	m_validated_ids.Remove(ValidatedInfo(ev->GetString("networkid")));
 }

@@ -508,12 +508,7 @@ SourceSdk::PLUGIN_RESULT CNoCheatZPlugin::NetworkIDValidated( const char *pszUse
 {
 	if(!SteamGameServer_BSecure()) return SourceSdk::PLUGIN_CONTINUE;
 
-	NczPlayer* player = NczPlayerManager::GetInstance()->GetPlayerHandlerBySteamID(pszNetworkID)->playerClass;
-	
-	if(player) // Sometimes NetworkIDValidated gets called before CServerPlugin::ClientConnect
-		ValidationTester::GetInstance()->SetValidated(player);
-	else
-		ValidationTester::GetInstance()->AddPendingValidation(pszNetworkID);
+	ValidationTester::GetInstance()->AddPendingValidation(pszUserName, pszNetworkID);
 	
 	return SourceSdk::PLUGIN_CONTINUE;
 }

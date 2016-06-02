@@ -22,6 +22,7 @@
 #include "Systems/OnTickListener.h"
 #include "Players/temp_PlayerDataStruct.h"
 #include "Misc/temp_singleton.h"
+#include "Interfaces/IGameEventManager/IGameEventManager.h"
 
 /////////////////////////////////////////////////////////////////////////
 // ValidationTester
@@ -41,19 +42,61 @@ typedef struct ValidationInfo
 	};
 } ValidationInfoT;
 
+typedef struct ValidatedInfo
+{
+	char m_steamid[64];
+	char m_ipaddress[64];
+
+	ValidatedInfo()
+	{
+		memset(this, 0, sizeof(ValidatedInfo));
+	}
+
+	ValidatedInfo(char const * steamid)
+	{
+		strncpy(m_steamid, steamid, 64);
+	}
+
+	ValidatedInfo(char const * steamid, char const * ip)
+	{
+		strncpy(m_steamid, steamid, 64);
+		strncpy(m_ipaddress, ip, 64);
+	}
+
+	ValidatedInfo(ValidatedInfo const & other)
+	{
+		memcpy(m_steamid, other.m_steamid, 64);
+		memcpy(m_ipaddress, other.m_ipaddress, 64);
+	}
+
+	ValidatedInfo & operator=(ValidatedInfo const & other)
+	{
+		memcpy(m_steamid, other.m_steamid, 64);
+		memcpy(m_ipaddress, other.m_ipaddress, 64);
+	}
+
+	bool operator==(ValidatedInfo const & other) const
+	{
+		return strcmp(m_steamid, other.m_steamid) == 0;
+	}
+} ValidatedInfoT;
+
 class ValidationTester :
 	private BaseSystem,
 	private NczFilteredPlayersList,
 	private OnTickListener,
 	public PlayerDataStructHandler<ValidationInfoT>,
+	private SourceSdk::IGameEventListener002,
 	public Singleton<ValidationTester>
 {
 private:
 	typedef basic_slist<const char *> PendingValidationsT;
+	typedef basic_slist<ValidatedInfoT> ValidatedIdsT;
 	typedef PlayerDataStructHandler<ValidationInfoT> playerdata_class;
 	typedef Singleton<ValidationTester> singleton_class;
 
 	PendingValidationsT m_pending_validations;
+	ValidatedIdsT m_validated_ids;
 
 	void Init();
 	void Load();
@@ -61,13 +104,15 @@ private:
 	
 	void ProcessPlayerTestOnTick(NczPlayer* player);
 	void ProcessOnTick();
+	void FireGameEvent(SourceSdk::IGameEvent* ev);
 
 public:
 	ValidationTester();
 	~ValidationTester();
 
 	void SetValidated(NczPlayer* player);
-	void AddPendingValidation(const char* steamid);
+	void AddPendingValidation(const char *pszUserName, const char* steamid);
+	bool WasPreviouslyValidated(NczPlayer* const player);
 	bool JoinCallback(NczPlayer* const player);
 };
 
