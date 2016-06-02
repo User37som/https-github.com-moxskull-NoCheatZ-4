@@ -23,10 +23,10 @@
 
 #include "Misc/EntityProps.h"
 #include "Hooks/PlayerRunCommandHookListener.h"
+#include "Misc/MathCache.h"
 
 WallhackBlocker::WallhackBlocker() :
 	BaseSystem("WallhackBlocker", PLAYER_CONNECTED, PLAYER_CONNECTING, STATUS_EQUAL_OR_BETTER),
-#include "Misc/MathCache.h"
 	SetTransmitHookListener(),
 	WeaponHookListener(),
 	OnTickListener(),
@@ -114,7 +114,6 @@ bool WallhackBlocker::SetTransmitCallback(SourceSdk::edict_t* const sender, Sour
 	}
 	bool rt = !cache.IsVisible(sender_player->playerClass, receiver_player->playerClass);
 	METRICS_LEAVE_SECTION("WallhackBlocker::SetTransmitCallback");
-	SystemVerbose2(Helpers::format("%s can see %s ? : %s", receiver_player->playerClass->GetName(), sender_player->playerClass->GetName(), Helpers::boolToString(!rt)));
 	return rt;
 }
 
