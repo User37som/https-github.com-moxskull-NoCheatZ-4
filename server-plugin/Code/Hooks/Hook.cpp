@@ -57,7 +57,7 @@ void HookGuard::VirtualTableHook(HookInfo& info, bool force /* = false*/ )
 #else // LINUX
 		mprotect(p, ((2 * sizeof(void *)) + ((DWORD)(info.vf_entry) & (psize - 1))), PROT_READ | PROT_EXEC);
 #endif // WIN32
-		DebugMessage(Helpers::format("VirtualTableHook : function 0x%X replaced by 0x%X.", info.oldFn, info.newFn));
+		DebugMessage(Helpers::format("VirtualTableHook : function 0x%X at 0x%X replaced by 0x%X.", info.oldFn, info.vf_entry, info.newFn));
 
 		if (!m_list.HasElement(info)) m_list.AddToTail(info);
 }
