@@ -41,10 +41,28 @@ struct ClientRadarData
 	bool m_last_spotted_status;
 	int m_origin_index;
 
-	SourceSdk::Vector m_origin;
-	SourceSdk::vec_t m_yawangle;
 	int m_team;
 	float m_next_update;
+
+	ClientRadarData()
+	{
+		memset(this, 0, sizeof(ClientRadarData));
+	}
+	ClientRadarData(int x) : ClientRadarData()
+	{
+		m_origin_index = x;
+	}
+
+	ClientRadarData(ClientRadarData const & other)
+	{
+		memcpy(this, &other, sizeof(ClientRadarData));
+	}
+
+	ClientRadarData& operator=(ClientRadarData const & other)
+	{
+		memcpy(this, &other, sizeof(ClientRadarData));
+		return *this;
+	}
 };
 
 class RadarHackBlocker :

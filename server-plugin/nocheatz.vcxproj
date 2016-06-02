@@ -244,6 +244,7 @@ copy "$(TargetPath)" ..\..\..\game\bin\"$(TargetName)".pdb
   <ItemGroup>
     <ClCompile Include="Code\Hooks\ThinkPostHookListener.cpp" />
     <ClCompile Include="Code\Hooks\UserMessageHookListener.cpp" />
+    <ClCompile Include="Code\Misc\MathCache.cpp" />
     <ClCompile Include="Code\Systems\AutoTVRecord.cpp" />
     <ClCompile Include="Code\Systems\Blockers\RadarHackBlocker.cpp" />
     <ClCompile Include="Code\Systems\ConfigManager.cpp">
@@ -303,6 +304,7 @@ copy "$(TargetPath)" ..\..\..\game\bin\"$(TargetName)".pdb
   <ItemGroup>
     <ClInclude Include="Code\Hooks\ThinkPostHookListener.h" />
     <ClInclude Include="Code\Hooks\UserMessageHookListener.h" />
+    <ClInclude Include="Code\Misc\MathCache.h" />
     <ClInclude Include="Code\Misc\temp_basiclist.h" />
     <ClInclude Include="Code\Misc\temp_basicstring.h" />
     <ClInclude Include="Code\Misc\temp_singleton.h" />

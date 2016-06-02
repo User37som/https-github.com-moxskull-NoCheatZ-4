@@ -240,7 +240,12 @@
     <ClCompile Include="Code\Hooks\ThinkPostHookListener.cpp">
       <Filter>Code\Hooks</Filter>
     </ClCompile>
-    <ClCompile Include="Code\Hooks\UserMessageHookListener.cpp" />
+    <ClCompile Include="Code\Hooks\UserMessageHookListener.cpp">
+      <Filter>Code\Hooks</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Misc\MathCache.cpp">
+      <Filter>Code\Misc</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Code\plugin.h">
@@ -533,6 +538,9 @@
     </ClInclude>
     <ClInclude Include="Code\Hooks\UserMessageHookListener.h">
       <Filter>Code\Hooks</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Misc\MathCache.h">
+      <Filter>Code\Misc</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

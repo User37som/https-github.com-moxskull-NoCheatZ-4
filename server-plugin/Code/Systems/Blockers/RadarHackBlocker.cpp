@@ -18,6 +18,7 @@ limitations under the License.
 #include "Misc/EntityProps.h"
 #include "Misc/UserMsg.h"
 #include "Hooks/PlayerRunCommandHookListener.h"
+#include "Misc/MathCache.h"
 
 RadarHackBlocker::RadarHackBlocker() :
 	BaseSystem("RadarHackBlocker", PLAYER_CONNECTED, PLAYER_CONNECTING, STATUS_EQUAL_OR_BETTER),
@@ -122,16 +123,18 @@ bool RadarHackBlocker::UserMessageBeginCallback(SourceSdk::IRecipientFilter *, i
 
 void RadarHackBlocker::SendApproximativeRadarUpdate(MRecipientFilter & filter, ClientRadarData const * pData) const
 {
+	MathInfo const & player_maths = MathCache::GetInstance()->GetCachedMaths(pData->m_origin_index);
+
 	if (SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive)
 	{
 		CCSUsrMsg_ProcessSpottedEntityUpdate_SpottedEntityUpdate* pBuffer = (CCSUsrMsg_ProcessSpottedEntityUpdate_SpottedEntityUpdate *)g_Cstrike15UsermessageHelpers.GetPrototype(CS_UM_ProcessSpottedEntityUpdate)->New();
 
 		pBuffer->set_entity_idx(pData->m_origin_index);
 		pBuffer->set_class_id(35);
-		pBuffer->set_origin_x((int32_t)pData->m_origin.x);
-		pBuffer->set_origin_y((int32_t)pData->m_origin.y);
-		pBuffer->set_origin_z((int32_t)pData->m_origin.z);
-		pBuffer->set_angle_y((int32_t)pData->m_yawangle);
+		pBuffer->set_origin_x((int32_t)(player_maths.m_abs_origin.x * 0.25f));
+		pBuffer->set_origin_y((int32_t)(player_maths.m_abs_origin.y * 0.25f));
+		pBuffer->set_origin_z((int32_t)std::round((float)std::rand()));
+		pBuffer->set_angle_y((int32_t)player_maths.m_eyeangles.y);
 		//pBuffer->set_defuser();
 		//pBuffer->set_player_has_defuser();
 		//pBuffer->set_player_has_c4();
@@ -145,10 +148,10 @@ void RadarHackBlocker::SendApproximativeRadarUpdate(MRecipientFilter & filter, C
 		SourceSdk::bf_write *pBuffer = SourceSdk::InterfacesProxy::Call_UserMessageBegin(&(filter), /*eUserMsg::UpdateRadar*/ 28);
 
 		SourceSdk::BfWriteByte(pBuffer, pData->m_origin_index);
-		SourceSdk::BfWriteSBitLong(pBuffer, (long)std::round(pData->m_origin.x * 0.25f), 13);
-		SourceSdk::BfWriteSBitLong(pBuffer, (long)std::round(pData->m_origin.y * 0.25f), 13);
-		SourceSdk::BfWriteSBitLong(pBuffer, (long)std::round((float)std::rand()), 13);
-		SourceSdk::BfWriteSBitLong(pBuffer, (long)std::round(pData->m_yawangle), 9);
+		SourceSdk::BfWriteNBits<SourceSdk::vec_t, 13>(pBuffer, std::round(player_maths.m_abs_origin.x * 0.25f));
+		SourceSdk::BfWriteNBits<SourceSdk::vec_t, 13>(pBuffer, std::round(player_maths.m_abs_origin.y * 0.25f));
+		SourceSdk::BfWriteNBits<SourceSdk::vec_t, 13>(pBuffer, std::round((float)std::rand()));
+		SourceSdk::BfWriteNBits<SourceSdk::vec_t, 9>(pBuffer, std::round(player_maths.m_eyeangles.y));
 
 		SourceSdk::BfWriteByte(pBuffer, 0);
 		SourceSdk::InterfacesProxy::Call_MessageEnd();
@@ -163,10 +166,10 @@ void RadarHackBlocker::SendRandomRadarUpdate(MRecipientFilter & filter, ClientRa
 
 		pBuffer->set_entity_idx(pData->m_origin_index);
 		pBuffer->set_class_id(35);
-		pBuffer->set_origin_x((int32_t)pData->m_origin.x);
-		pBuffer->set_origin_y((int32_t)pData->m_origin.y);
-		pBuffer->set_origin_z((int32_t)pData->m_origin.z);
-		pBuffer->set_angle_y((int32_t)pData->m_yawangle);
+		pBuffer->set_origin_x((int32_t)std::round((float)std::rand()));
+		pBuffer->set_origin_y((int32_t)std::round((float)std::rand()));
+		pBuffer->set_origin_z((int32_t)std::round((float)std::rand()));
+		pBuffer->set_angle_y((int32_t)std::round((float)std::rand()));
 		pBuffer->set_defuser(false);
 		pBuffer->set_player_has_defuser(false);
 		pBuffer->set_player_has_c4(false);
@@ -180,10 +183,10 @@ void RadarHackBlocker::SendRandomRadarUpdate(MRecipientFilter & filter, ClientRa
 		SourceSdk::bf_write *pBuffer = SourceSdk::InterfacesProxy::Call_UserMessageBegin(&(filter), /*eUserMsg::UpdateRadar*/ 28);
 
 		SourceSdk::BfWriteByte(pBuffer, pData->m_origin_index);
-		SourceSdk::BfWriteSBitLong(pBuffer, (long)std::round((float)std::rand()), 13);
-		SourceSdk::BfWriteSBitLong(pBuffer, (long)std::round((float)std::rand()), 13);
-		SourceSdk::BfWriteSBitLong(pBuffer, (long)std::round((float)std::rand()), 13);
-		SourceSdk::BfWriteSBitLong(pBuffer, (long)std::round((float)std::rand()), 9);
+		SourceSdk::BfWriteNBits<SourceSdk::vec_t, 13>(pBuffer, std::round((float)std::rand()));
+		SourceSdk::BfWriteNBits<SourceSdk::vec_t, 13>(pBuffer, std::round((float)std::rand()));
+		SourceSdk::BfWriteNBits<SourceSdk::vec_t, 13>(pBuffer, std::round((float)std::rand()));
+		SourceSdk::BfWriteNBits<SourceSdk::vec_t, 9>(pBuffer, std::round((float)std::rand()));
 
 		SourceSdk::BfWriteByte(pBuffer, 0);
 		SourceSdk::InterfacesProxy::Call_MessageEnd();
@@ -195,12 +198,13 @@ void RadarHackBlocker::ProcessEntity(SourceSdk::edict_t const * const pent)
 	ClientRadarData * pData = GetPlayerDataStruct(Helpers::IndexOfEdict(pent));
 
 	MRecipientFilter filter;
+	
 	filter.SetReliable(false);
 
 	if (pData->m_last_spotted_status == true)
 	{
 		/*
-			Player is spotted -> send approximative data to all players
+			Entity is spotted -> send approximative data to all players
 		*/
 
 		filter.AddAllPlayers(NczPlayerManager::GetInstance()->GetMaxIndex());
@@ -210,12 +214,14 @@ void RadarHackBlocker::ProcessEntity(SourceSdk::edict_t const * const pent)
 	else
 	{
 		/*
-			Player is not spotted -> send approximative data to teammates and spectators, random for others.
+			Entity is not spotted -> send approximative data to teammates and spectators, random for others.
 		*/
 
 		filter.AddTeam(pData->m_team);
 		filter.AddTeam(TEAM_SPECTATOR);
 		filter.AddTeam(TEAM_NONE);
+
+		filter.RemoveRecipient(pData->m_origin_index);
 
 		SendApproximativeRadarUpdate(filter, pData);
 
@@ -234,8 +240,6 @@ void RadarHackBlocker::ProcessEntity(SourceSdk::edict_t const * const pent)
 			return;
 		}
 
-		filter.RemoveRecipient(pData->m_origin_index);
-
 		SendRandomRadarUpdate(filter, pData);
 	}
 }
@@ -251,14 +255,10 @@ void RadarHackBlocker::UpdatePlayerData(NczPlayer* pPlayer)
 
 	if (SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive)
 	{
-		SourceSdk::VectorCopy(static_cast<SourceSdk::IPlayerInfo_csgo*>(playerinfo)->GetAbsOrigin(), pData->m_origin);
-		pData->m_yawangle = static_cast<SourceSdk::CUserCmd_csgo*>(PlayerRunCommandHookListener::GetLastUserCmd(pPlayer))->viewangles.y;
 		pData->m_team = static_cast<SourceSdk::IPlayerInfo_csgo*>(playerinfo)->GetTeamIndex();
 	}
 	else
 	{
-		SourceSdk::VectorCopy(static_cast<SourceSdk::IPlayerInfo*>(playerinfo)->GetAbsOrigin(), pData->m_origin);
-		pData->m_yawangle = static_cast<SourceSdk::CUserCmd*>(PlayerRunCommandHookListener::GetLastUserCmd(pPlayer))->viewangles.y;
 		pData->m_team = static_cast<SourceSdk::IPlayerInfo*>(playerinfo)->GetTeamIndex();
 	}
 }

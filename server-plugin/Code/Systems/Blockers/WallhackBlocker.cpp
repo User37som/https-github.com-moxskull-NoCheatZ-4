@@ -26,7 +26,7 @@
 
 WallhackBlocker::WallhackBlocker() :
 	BaseSystem("WallhackBlocker", PLAYER_CONNECTED, PLAYER_CONNECTING, STATUS_EQUAL_OR_BETTER),
-	playerdatahandler_class(),
+#include "Misc/MathCache.h"
 	SetTransmitHookListener(),
 	WeaponHookListener(),
 	OnTickListener(),
@@ -46,7 +46,6 @@ WallhackBlocker::~WallhackBlocker()
 
 void WallhackBlocker::Init()
 {
-	InitDataStruct();
 }
 
 void WallhackBlocker::Load()
@@ -172,8 +171,8 @@ void WallhackBlocker::ProcessOnTick(float const curtime)
 	}
 
 	ST_W_STATIC SourceSdk::CTraceFilterWorldAndPropsOnly itracefilter;
-	ST_R_STATIC SourceSdk::Vector hull_min( -5.0, -5.0, -5.0 );
-	ST_R_STATIC SourceSdk::Vector hull_max( 5.0, 5.0, 5.0 );
+	ST_R_STATIC SourceSdk::Vector hull_min( -5.0f, -5.0f, -5.0f );
+	ST_R_STATIC SourceSdk::Vector hull_max( 5.0f, 5.0f, 5.0f );
 
 	PLAYERS_LOOP_RUNTIME(x)
 	{
@@ -185,42 +184,29 @@ void WallhackBlocker::ProcessOnTick(float const curtime)
 		SourceSdk::INetChannelInfo* const netchan = pPlayer->GetChannelInfo();
 		if (netchan == nullptr && x_ph->status == PLAYER_IN_TESTS) continue;
 
+		MathInfo const & player_maths = MathCache::GetInstance()->GetCachedMaths(x);
+
 		SourceSdk::edict_t* const playeredict = pPlayer->GetEdict();
 		ClientDataS* const pData = GetPlayerDataStruct(pPlayer);
 
-		if (SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive)
-		{
-			SourceSdk::VectorCopy(static_cast<SourceSdk::IPlayerInfo_csgo*>(playerinfo)->GetPlayerMins(), pData->bbox_min);
-			SourceSdk::VectorCopy(static_cast<SourceSdk::IPlayerInfo_csgo*>(playerinfo)->GetPlayerMaxs(), pData->bbox_max);
-			SourceSdk::VectorCopy(static_cast<SourceSdk::IPlayerInfo_csgo*>(playerinfo)->GetAbsOrigin(), pData->abs_origin);
-		}
-		else
-		{
-			SourceSdk::VectorCopy(static_cast<SourceSdk::IPlayerInfo*>(playerinfo)->GetPlayerMins(), pData->bbox_min);
-			SourceSdk::VectorCopy(static_cast<SourceSdk::IPlayerInfo*>(playerinfo)->GetPlayerMaxs(), pData->bbox_max);
-			SourceSdk::VectorCopy(static_cast<SourceSdk::IPlayerInfo*>(playerinfo)->GetAbsOrigin(), pData->abs_origin);
-		}
-
-		SourceSdk::VectorCopy(static_cast<SourceSdk::CUserCmd_csgo*>(PlayerRunCommandHookListener::GetLastUserCmd(pPlayer))->viewangles, pData->eye_angles);
+		SourceSdk::VectorCopy(player_maths.m_mins, pData->bbox_min);
+		SourceSdk::VectorCopy(player_maths.m_maxs, pData->bbox_max);
+		SourceSdk::VectorCopy(player_maths.m_abs_origin, pData->abs_origin);
+		SourceSdk::VectorCopy(player_maths.m_eyepos, pData->ear_pos);
 
 		{
 			SourceSdk::vec_t& bmax2 = pData->bbox_max.z;
-			bmax2 /= 2.0;
+			bmax2 *= 0.5f;
 			pData->bbox_min.z -= bmax2;
 			pData->abs_origin.z += bmax2;
 		}
-
-		SourceSdk::InterfacesProxy::Call_ClientEarPosition(playeredict, &(pData->ear_pos));
-
-		ST_W_STATIC SourceSdk::Vector velocity;
-		SourceSdk::VectorCopy(*EntityProps::GetInstance()->GetPropValue<SourceSdk::Vector>("CBaseEntity.m_vecAbsVelocity", playeredict, true), velocity);
 		
-		if(!SourceSdk::VectorIsZero(velocity, 0.0001f))
+		if(!SourceSdk::VectorIsZero(player_maths.m_velocity, 0.0001f))
 		{
 			ST_W_STATIC float diff_time;
 			ST_W_STATIC int target_tick;
 
-			if(ph->status == BOT)
+			if(x_ph->status == BOT)
 			{
 				target_tick = game_tick - 1;
 				diff_time = tick_interval;
@@ -234,7 +220,7 @@ void WallhackBlocker::ProcessOnTick(float const curtime)
 
 				diff_time = (game_tick - target_tick) * tick_interval;
 
-				if (fabs(fCorrect - diff_time) > 0.2)
+				if (fabs(fCorrect - diff_time) > 0.2f)
 				{
 					target_tick = (int)ceil((float)game_tick - fCorrect / tick_interval);
 					diff_time = (float)(game_tick - target_tick) * tick_interval;
@@ -244,8 +230,7 @@ void WallhackBlocker::ProcessOnTick(float const curtime)
 			ST_W_STATIC SourceSdk::Vector predicted_pos;
 
 			{
-				SourceSdk::VectorMultiply(velocity, 0.01f);
-				SourceSdk::VectorCopy(velocity, predicted_pos);
+				SourceSdk::VectorCopy(player_maths.m_velocity, predicted_pos);
 				SourceSdk::VectorMultiply(predicted_pos, diff_time);
 				SourceSdk::VectorAdd(pData->abs_origin, predicted_pos);
 			}
@@ -253,25 +238,24 @@ void WallhackBlocker::ProcessOnTick(float const curtime)
 			if (SourceSdk::trace_hull_fn(predicted_pos, hull_min, hull_max, MASK_PLAYERSOLID_BRUSHONLY, &itracefilter))
 			{
 				SourceSdk::VectorCopy(predicted_pos, pData->abs_origin);
-				SourceSdk::VectorAdd(velocity, pData->ear_pos);
+				SourceSdk::VectorAdd(player_maths.m_velocity, pData->ear_pos);
 			}
 
 			{
-				SourceSdk::VectorAbs(velocity, velocity);
-				SourceSdk::vec_t const vx = velocity.x;
-				SourceSdk::vec_t const vy = velocity.y;
-				SourceSdk::vec_t const vz = velocity.z;
-				if (vx > 1.0)
+				SourceSdk::vec_t const vx = player_maths.m_abs_velocity.x;
+				SourceSdk::vec_t const vy = player_maths.m_abs_velocity.y;
+				SourceSdk::vec_t const vz = player_maths.m_abs_velocity.z;
+				if (vx > 1.0f)
 				{
 					pData->bbox_min.x *= vx;
 					pData->bbox_max.x *= vx;
 				}
-				if (vy > 1.0)
+				if (vy > 1.0f)
 				{
 					pData->bbox_min.y *= vy;
 					pData->bbox_max.y *= vy;
 				}
-				if (vz > 1.0)
+				if (vz > 1.0f)
 				{
 					pData->bbox_min.z *= vz;
 					pData->bbox_max.z *= vz;
@@ -431,15 +415,15 @@ bool WallhackBlocker::IsAbleToSee(NczPlayer* const sender, NczPlayer* const rece
 	const SourceSdk::Vector& receiver_ear_pos = receiver_data->ear_pos;
 	const SourceSdk::Vector& sender_origin = sender_data->abs_origin;
 
-	if (IsInFOV(receiver_ear_pos, receiver_data->eye_angles, sender_origin))
+	if (IsInFOV(receiver_ear_pos, MathCache::GetInstance()->GetCachedMaths(receiver->GetIndex()).m_eyeangles, sender_origin))
 	{
 		if (IsVisible(receiver_ear_pos, sender_origin))
 			return true;
 		
 		// Only test weapon tip if it's not in the wall
-		if(IsVisible(sender_data->ear_pos, sender_data->eye_angles, sender_data->ear_pos))
+		if(IsVisible(sender_data->ear_pos, MathCache::GetInstance()->GetCachedMaths(sender->GetIndex()).m_eyeangles, sender_data->ear_pos))
 		{
-			if (IsVisible(receiver_ear_pos, sender_data->eye_angles, sender_data->ear_pos))
+			if (IsVisible(receiver_ear_pos, MathCache::GetInstance()->GetCachedMaths(sender->GetIndex()).m_eyeangles, sender_data->ear_pos))
 				return true;
 		}
 		

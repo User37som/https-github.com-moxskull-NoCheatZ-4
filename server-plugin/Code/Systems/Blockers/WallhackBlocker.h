@@ -42,7 +42,6 @@ struct ClientDataS
 	SourceSdk::Vector bbox_max;
 	SourceSdk::Vector abs_origin;
 	SourceSdk::Vector ear_pos;
-	SourceSdk::QAngle eye_angles;
 
 	inline ClientDataS()
 	{

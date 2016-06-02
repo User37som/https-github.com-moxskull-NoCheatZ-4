@@ -22,6 +22,7 @@
 #include "Misc/Helpers.h" // PEntityOfEntIndex, ifaces
 #include "Misc/temp_Metrics.h"
 #include "Hooks/PlayerRunCommandHookListener.h"
+#include "Misc/MathCache.h"
 
 //---------------------------------------------------------------------------------
 // NczPlayer
@@ -368,11 +369,13 @@ int NczPlayer::aimingAt()
 	SourceSdk::edict_t* edict = GetEdict();
 	if(!edict) return -1;
 
+	MathInfo const & player_maths = MathCache::GetInstance()->GetCachedMaths(GetIndex());
+
 	SourceSdk::Vector eyePos;
-	SourceSdk::InterfacesProxy::Call_ClientEarPosition(edict, &eyePos);
+	SourceSdk::VectorCopy(player_maths.m_eyepos, eyePos);
 
 	SourceSdk::Vector vEnd;
-	AngleVectors(static_cast<SourceSdk::CUserCmd*>(PlayerRunCommandHookListener::GetLastUserCmd(this))->viewangles, &vEnd);
+	AngleVectors(player_maths.m_eyeangles, &vEnd);
 	VectorMultiply(vEnd, 8192.0f);
 	VectorAdd(eyePos, vEnd);
 

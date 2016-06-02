@@ -38,6 +38,7 @@
 #include "Systems/Logger.h"
 #include "Systems/AutoTVRecord.h"
 #include "Misc/EntityProps.h"
+#include "Misc/MathCache.h"
 
 #include "Systems/OnTickListener.h"
 #include "Systems/TimerListener.h"
@@ -68,6 +69,7 @@ float Plat_FloatTime()
 
 void CNoCheatZPlugin::CreateSingletons()
 {
+	MathCache::CreateInstance();
 	GlobalTimer::CreateInstance();
 	Logger::CreateInstance();
 	ConfigManager::CreateInstance();
@@ -120,6 +122,7 @@ void CNoCheatZPlugin::DestroySingletons()
 	ConfigManager::DestroyInstance();
 	Logger::DestroyInstance();
 	GlobalTimer::DestroyInstance();
+	MathCache::DestroyInstance();
 }
 
 
@@ -359,6 +362,8 @@ void CNoCheatZPlugin::GameFrame( bool simulating )
 		/**************/
 		NczPlayerManager::GetInstance()->Think(); /// ALWAYS FIRST
 		/**************/
+
+		MathCache::GetInstance()->SetCacheExpired();
 
 		OnTickListener::OnTick();
 
