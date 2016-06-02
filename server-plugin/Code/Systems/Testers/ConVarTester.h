@@ -117,8 +117,8 @@ private:
 	void Unload();
 
 	/* Nouvelle version de la fonction qui va faire en sorte de ne tester qu'un seul joueur par frame */
-	void ProcessOnTick();
-	void ProcessPlayerTestOnTick(NczPlayer* player){};
+	void ProcessOnTick(float const curtime);
+	void ProcessPlayerTestOnTick(NczPlayer* const player, float const curtime){};
 
 	void ProcessPlayerTest(NczPlayer* player);
 

@@ -151,7 +151,7 @@ void WallhackBlocker::WeaponDropCallback(NczPlayer* player, SourceSdk::edict_t* 
 	WallhackBlocker::GetInstance()->m_weapon_owner[weapon_index] = nullptr;
 }
 
-void WallhackBlocker::ProcessOnTick()
+void WallhackBlocker::ProcessOnTick(float const curtime)
 {
 	METRICS_LEAVE_SECTION("WallhackBlocker TraceRay Count Per Tick");
 	METRICS_ENTER_SECTION("WallhackBlocker::OnFrame");

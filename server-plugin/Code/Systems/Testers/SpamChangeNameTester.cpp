@@ -105,7 +105,7 @@ void SpamChangeNameTester::FireGameEvent(SourceSdk::IGameEvent* ev)
 	++(pInfo->namechange_count);
 }
 
-void SpamChangeNameTester::ProcessOnTick()
+void SpamChangeNameTester::ProcessOnTick(float const curtime)
 {
 	if(!IsActive()) return;
 
@@ -115,9 +115,9 @@ void SpamChangeNameTester::ProcessOnTick()
 
 		ChangeNameInfo* const pInfo = GetPlayerDataStruct(ph->playerClass);
 
-		if(pInfo->next_namechange_test < Plat_FloatTime())
 		{
 			if(pInfo->namechange_count >= 5)
+			if (pInfo->next_namechange_test < curtime)
 			{
 				ph->playerClass->Ban("Banned for namechange spamming", 10);
 			}

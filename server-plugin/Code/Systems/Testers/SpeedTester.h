@@ -86,8 +86,8 @@ public:
 	void Load();
 	void Unload();
 	PlayerRunCommandRet PlayerRunCommandCallback(NczPlayer* player, void* cmd, void* old_cmd);
-	void ProcessPlayerTestOnTick(NczPlayer* player);
-	void ProcessOnTick(){};
+	void ProcessPlayerTestOnTick(NczPlayer* const player, float const curtime);
+	void ProcessOnTick(float const curtime){};
 };
 
 #endif // SPEEDTESTER_H

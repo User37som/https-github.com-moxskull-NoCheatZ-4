@@ -102,8 +102,9 @@ private:
 	void Load();
 	void Unload();
 	
-	void ProcessPlayerTestOnTick(NczPlayer* player);
-	void ProcessOnTick();
+	void ProcessPlayerTestOnTick(NczPlayer* const player, float const curtime);
+	void ProcessOnTick(float const curtime);
+
 	void FireGameEvent(SourceSdk::IGameEvent* ev);
 
 public:

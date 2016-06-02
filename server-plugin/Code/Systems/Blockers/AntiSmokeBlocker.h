@@ -95,8 +95,8 @@ private:
 	bool SetTransmitCallback(SourceSdk::edict_t* const ea, SourceSdk::edict_t* const eb);
 	void FireGameEvent(SourceSdk::IGameEvent* ev);
 
-	void ProcessOnTick();
-	void ProcessPlayerTestOnTick(NczPlayer* player){};
+	void ProcessOnTick(float const curtime);
+	void ProcessPlayerTestOnTick(NczPlayer* const player, float const curtime){};
 
 private:
 	SmokeListT m_smokes;

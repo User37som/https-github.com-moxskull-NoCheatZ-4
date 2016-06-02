@@ -38,11 +38,11 @@ public:
 
 protected:
 	/* Appelé par OnTick, sert à iétrer entre les différents joueurs en fonction du filtre */
-	virtual void ProcessTestsOnTick();
+	virtual void ProcessTestsOnTick(float const curtime);
 
 	/* Appelé par ProcessTestsOnTick() lorsque le joueur correspond au filtre */
-	virtual void ProcessPlayerTestOnTick(NczPlayer* player) = 0;
-	virtual void ProcessOnTick() = 0;
+	virtual void ProcessPlayerTestOnTick(NczPlayer* const player, float const curtime) = 0;
+	virtual void ProcessOnTick(float const curtime) = 0;
 
 	/* Permet de se mettre à l'écoute de l'événement, appelé par Load/Unload des testeurs */
 	static void RegisterOnTickListener(OnTickListener* listener);

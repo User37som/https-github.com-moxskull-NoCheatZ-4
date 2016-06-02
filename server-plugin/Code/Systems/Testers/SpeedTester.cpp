@@ -54,12 +54,11 @@ void SpeedTester::Unload()
 	END_PLAYERS_LOOP
 }
 
-void SpeedTester::ProcessPlayerTestOnTick(NczPlayer* player)
+void SpeedTester::ProcessPlayerTestOnTick(NczPlayer* const player, float const curtime)
 {
-	const float game_time = Plat_FloatTime();
 	SpeedHolderT* const pInfo = this->GetPlayerDataStruct(player);
 	float const tick_interval = SourceSdk::InterfacesProxy::Call_GetTickInterval();
-	const float newTicks = ceil((game_time - pInfo->lastTest) / tick_interval);
+	const float newTicks = ceil((curtime - pInfo->lastTest) / tick_interval);
 	SourceSdk::INetChannelInfo* const netchan = player->GetChannelInfo();
 	if(netchan == nullptr) return;
 
@@ -71,14 +70,14 @@ void SpeedTester::ProcessPlayerTestOnTick(NczPlayer* player)
 
 		SystemVerbose1(Helpers::format("Player %s :  Speedhack pre-detection #%ud", player->GetName(), pInfo->detections));
 
-		if (pInfo->detections >= 30 && game_time > pInfo->lastDetectionTime + 30.0f)
+		if (pInfo->detections >= 30 && curtime > pInfo->lastDetectionTime + 30.0f)
 		{
 			Detection_SpeedHack pDetection = Detection_SpeedHack();
 			pDetection.PrepareDetectionData(pInfo);
 			pDetection.PrepareDetectionLog(player, this);
 			pDetection.Log();
 
-			pInfo->lastDetectionTime = game_time;
+			pInfo->lastDetectionTime = curtime;
 		}
 	}
 	else if(pInfo->detections)
@@ -93,7 +92,7 @@ void SpeedTester::ProcessPlayerTestOnTick(NczPlayer* player)
 	}
 			
 	pInfo->previousLatency = latency;
-	pInfo->lastTest = game_time;
+	pInfo->lastTest = curtime;
 }
 
 PlayerRunCommandRet SpeedTester::PlayerRunCommandCallback(NczPlayer* player, void* pCmd, void* old_cmd)

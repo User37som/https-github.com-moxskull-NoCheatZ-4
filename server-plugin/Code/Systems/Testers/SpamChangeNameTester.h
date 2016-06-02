@@ -61,8 +61,8 @@ public:
 	void FireGameEvent(SourceSdk::IGameEvent* ev);
 	void ClientConnect( bool *bAllowConnect, SourceSdk::edict_t *pEntity, const char *pszName, const char *pszAddress, char *reject, int maxrejectlen );
 
-	void ProcessOnTick();
-	void ProcessPlayerTestOnTick(NczPlayer* player){};
+	void ProcessOnTick(float const curtime);
+	void ProcessPlayerTestOnTick(NczPlayer* const player, float const curtime){};
 };
 
 #endif

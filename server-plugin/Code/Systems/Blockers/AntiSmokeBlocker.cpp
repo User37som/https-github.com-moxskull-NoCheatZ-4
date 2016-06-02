@@ -69,7 +69,7 @@ void AntiSmokeBlocker::Unload()
 	END_PLAYERS_LOOP
 }
 
-void AntiSmokeBlocker::ProcessOnTick()
+void AntiSmokeBlocker::ProcessOnTick(float const curtime)
 {
 	METRICS_ENTER_SECTION("AntiSmokeBlocker::OnFrame");
 	if(!IsActive())
@@ -81,7 +81,6 @@ void AntiSmokeBlocker::ProcessOnTick()
 	SmokeListT::elem_t* it = m_smokes.GetFirst();
 
 	// remove old smokes
-	float const curtime = Plat_FloatTime();
 	while(it != nullptr)
 	{
 		if(curtime - (it->m_value.bang_time + ConfigManager::GetInstance()->m_smoke_time) > 0.0f)

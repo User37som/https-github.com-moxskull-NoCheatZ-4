@@ -71,10 +71,12 @@ void RadarHackBlocker::Load()
 {
 	ThinkPostHookListener::RegisterThinkPostHookListener(this);
 	UserMessageHookListener::RegisterUserMessageHookListener(this);
+	OnTickListener::RegisterOnTickListener(this);
 }
 
 void RadarHackBlocker::Unload()
 {
+	OnTickListener::RemoveOnTickListener(this);
 	UserMessageHookListener::RemoveUserMessageHookListener(this);
 	ThinkPostHookListener::RemoveThinkPostHookListener(this);
 }
@@ -258,7 +260,7 @@ void RadarHackBlocker::UpdatePlayerData(NczPlayer* pPlayer)
 	}
 }
 
-void RadarHackBlocker::ProcessPlayerTestOnTick(NczPlayer * player)
+void RadarHackBlocker::ProcessOnTick(float const curtime)
 {
 	float const curtime = Plat_FloatTime();
 	ClientRadarData * pData = GetPlayerDataStruct(player);

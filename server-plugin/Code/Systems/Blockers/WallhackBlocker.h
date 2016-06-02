@@ -142,8 +142,8 @@ private:
 	void Load();
 	void Unload();
 
-	void ProcessOnTick();
-	void ProcessPlayerTestOnTick(NczPlayer* player){};
+	void ProcessOnTick(float const curtime);
+	void ProcessPlayerTestOnTick(NczPlayer* const player, float const curtime){};
 
 	bool SetTransmitCallback(SourceSdk::edict_t* const sender, SourceSdk::edict_t* const receiver);
 	bool SetTransmitWeaponCallback(SourceSdk::edict_t* const sender, SourceSdk::edict_t* const receiver);

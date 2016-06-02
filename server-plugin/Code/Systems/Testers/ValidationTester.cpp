@@ -57,7 +57,7 @@ void ValidationTester::SetValidated(NczPlayer* player)
 	if (it == nullptr) m_validated_ids.Add(ValidatedInfo(player->GetSteamID(), player->GetIPAddress()));
 }
 
-void ValidationTester::ProcessPlayerTestOnTick(NczPlayer* player)
+void ValidationTester::ProcessPlayerTestOnTick(NczPlayer* const player, float const curtime)
 {
 	if(!IsActive() || !SteamGameServer_BSecure()) return;
 	if(GetPlayerDataStruct(player)->b)

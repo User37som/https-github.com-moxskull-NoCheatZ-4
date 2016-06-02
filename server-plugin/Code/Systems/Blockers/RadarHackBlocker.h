@@ -83,9 +83,9 @@ private:
 
 	void UpdatePlayerData(NczPlayer* player);
 
-	void ProcessOnTick() {};
+	void ProcessOnTick(float const curtime);
 
-	void ProcessPlayerTestOnTick(NczPlayer* player);
+	void ProcessPlayerTestOnTick(NczPlayer* const player, float const curtime) {};
 
 	bool* m_players_spotted;
 	bool* m_bomb_spotted;

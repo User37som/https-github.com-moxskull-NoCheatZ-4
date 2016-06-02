@@ -14,6 +14,7 @@
 */
 
 #include "OnTickListener.h"
+#include "plugin.h"
 
 /////////////////////////////////////////////////////////////////////////
 // BaseFramedTester
@@ -26,13 +27,13 @@ OnTickListener::OnTickListener()
 	m_filter = PLAYER_IN_TESTS;
 }
 
-void OnTickListener::ProcessTestsOnTick()
+void OnTickListener::ProcessTestsOnTick(float const curtime)
 {
 	PLAYERS_LOOP_RUNTIME
 	{
 		if(ph->status >= GetFilter())
 		{
-			ProcessPlayerTestOnTick(ph->playerClass);
+			ProcessPlayerTestOnTick(x_ph->playerClass, curtime);
 		}
 	}
 	END_PLAYERS_LOOP
@@ -50,11 +51,12 @@ void OnTickListener::RemoveOnTickListener(OnTickListener* tester)
 
 void OnTickListener::OnTick()
 {
+	float const curtime = Plat_FloatTime();
 	TickListenersListT::elem_t* it = m_tickTestersList.GetFirst();
 	while(it != nullptr)
 	{
-		it->m_value->ProcessOnTick();
-		it->m_value->ProcessTestsOnTick();
+		it->m_value->ProcessOnTick(curtime);
+		it->m_value->ProcessTestsOnTick(curtime);
 
 		it = it->m_next;
 	}
