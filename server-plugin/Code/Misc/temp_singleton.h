@@ -59,6 +59,12 @@ public:
 		hClass::instance = new(ptr) C();
 	}
 
+	static void Required()
+	{
+		if (hClass::instance == nullptr)
+			CreateInstance();
+	}
+
 	static C* GetInstance()
 	{
 		Assert(hClass::instance);
