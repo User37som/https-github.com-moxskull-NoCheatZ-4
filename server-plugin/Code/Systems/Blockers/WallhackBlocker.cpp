@@ -64,12 +64,6 @@ void WallhackBlocker::Unload()
 	WeaponHookListener::RemoveWeaponHookListener(this);
 	OnTickListener::RemoveOnTickListener(this);
 
-	PLAYERS_LOOP_RUNTIME
-	{
-		ResetPlayerDataStruct(ph->playerClass);
-	}
-	END_PLAYERS_LOOP
-
 	memset(m_weapon_owner, 0, MAX_EDICTS*sizeof(NczPlayer*));
 	m_viscache.Invalidate();
 }
@@ -181,15 +175,15 @@ void WallhackBlocker::ProcessOnTick(float const curtime)
 	ST_R_STATIC SourceSdk::Vector hull_min( -5.0, -5.0, -5.0 );
 	ST_R_STATIC SourceSdk::Vector hull_max( 5.0, 5.0, 5.0 );
 
-	PLAYERS_LOOP_RUNTIME
+	PLAYERS_LOOP_RUNTIME(x)
 	{
-		if(ph->status != BOT && ph->status != PLAYER_IN_TESTS) continue;
+		if(x_ph->status != BOT && x_ph->status != PLAYER_IN_TESTS) continue;
 
-		NczPlayer* const pPlayer = ph->playerClass;
+		NczPlayer* const pPlayer = x_ph->playerClass;
 		void* playerinfo = pPlayer->GetPlayerInfo();
 		if (playerinfo == nullptr) continue;
 		SourceSdk::INetChannelInfo* const netchan = pPlayer->GetChannelInfo();
-		if (netchan == nullptr && ph->status == PLAYER_IN_TESTS) continue;
+		if (netchan == nullptr && x_ph->status == PLAYER_IN_TESTS) continue;
 
 		SourceSdk::edict_t* const playeredict = pPlayer->GetEdict();
 		ClientDataS* const pData = GetPlayerDataStruct(pPlayer);

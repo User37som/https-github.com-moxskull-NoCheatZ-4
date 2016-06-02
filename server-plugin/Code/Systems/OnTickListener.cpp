@@ -29,14 +29,14 @@ OnTickListener::OnTickListener()
 
 void OnTickListener::ProcessTestsOnTick(float const curtime)
 {
-	PLAYERS_LOOP_RUNTIME
+	PLAYERS_LOOP_RUNTIME_UNROLL(x)
 	{
-		if(ph->status >= GetFilter())
+		if(x_ph->status >= GetFilter())
 		{
 			ProcessPlayerTestOnTick(x_ph->playerClass, curtime);
 		}
 	}
-	END_PLAYERS_LOOP
+	END_PLAYERS_LOOP_UNROLL(x)
 }
 
 void OnTickListener::RegisterOnTickListener(OnTickListener* tester)

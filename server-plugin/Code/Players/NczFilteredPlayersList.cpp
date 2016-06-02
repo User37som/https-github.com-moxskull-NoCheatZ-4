@@ -40,13 +40,15 @@ void NczFilteredPlayersList::ResetNextPlayer()
 {
 	// Remet l'itération à zero
 	m_nextPlayer = nullptr;
-	PLAYERS_LOOP_RUNTIME
+	PLAYERS_LOOP_RUNTIME_UNROLL(x)
 	{
-		if(ph->status < PLAYER_CONNECTED) continue;
-		m_nextPlayer = ph;
-		break;
+		if (x_ph->status >= PLAYER_CONNECTED)
+		{
+			m_nextPlayer = x_ph;
+			unroll_break;
+		}
 	}
-	END_PLAYERS_LOOP
+	END_PLAYERS_LOOP_UNROLL(x)
 }
 
 NczPlayer* AsyncNczFilteredPlayersList::GetNextPlayer()

@@ -20,6 +20,7 @@
 #include "Misc/EntityProps.h"
 #include "Players/NczPlayerManager.h"
 #include "Systems/ConfigManager.h"
+#include "Misc/MathCache.h"
 
 AntiSmokeBlocker::AntiSmokeBlocker() :
 	BaseSystem("AntiSmokeBlocker", PLAYER_CONNECTED, PLAYER_CONNECTING, STATUS_EQUAL_OR_BETTER),
@@ -62,11 +63,11 @@ void AntiSmokeBlocker::Unload()
 		it = m_smokes.Remove(it);
 	}
 
-	PLAYERS_LOOP_RUNTIME
+	PLAYERS_LOOP_RUNTIME_UNROLL_NOPH(x)
 	{
-		ResetPlayerDataStruct(ph->playerClass);
+		ResetPlayerDataStruct(x_index);
 	}
-	END_PLAYERS_LOOP
+	END_PLAYERS_LOOP_UNROLL(x)
 }
 
 void AntiSmokeBlocker::ProcessOnTick(float const curtime)
@@ -89,23 +90,26 @@ void AntiSmokeBlocker::ProcessOnTick(float const curtime)
 	}
 
 	it = m_smokes.GetFirst();
-	bool const smoke_empty = it == nullptr;
+
+	ResetAll(nullptr);
+
+	if (it == nullptr) return;
 
 	// Test if players are immersed in smoke
-	PLAYERS_LOOP_RUNTIME
+	PLAYERS_LOOP_RUNTIME(x)
 	{
-		ResetPlayerDataStruct(ph->playerClass);
-		if(smoke_empty | (ph->status != PLAYER_IN_TESTS)) continue;
+		if(x_ph->status != PLAYER_IN_TESTS) continue;
 
-		SourceSdk::Vector earPos,delta,other_delta;
-		SourceSdk::InterfacesProxy::Call_ClientEarPosition(ph->playerClass->GetEdict(), &earPos);
+		MathInfo & player_x_maths = MathCache::GetInstance()->GetCachedMaths(x);
+
+		SourceSdk::Vector delta,other_delta;
 		
 		do // At this stage, m_smokes ! empty
 		{
 			if(curtime - it->m_value.bang_time > ConfigManager::GetInstance()->m_smoke_timetobang)
 			{
 				SourceSdk::vec_t dst;
-				SourceSdk::VectorDistanceSqr(earPos, it->m_value.pos, delta, dst);
+				SourceSdk::VectorDistanceSqr(player_x_maths.m_eyepos, it->m_value.pos, delta, dst);
 				if(dst < ConfigManager::GetInstance()->m_innersmoke_radius_sqr)
 				{
 					GetPlayerDataStruct(x)->is_in_smoke = true;
@@ -116,32 +120,22 @@ void AntiSmokeBlocker::ProcessOnTick(float const curtime)
 				const SourceSdk::vec_t ang_smoke = tanf(ConfigManager::GetInstance()->m_smoke_radius / sqrtf(dst));
 				SourceSdk::VectorNorm(delta);
 
-				for (int y = 1; y <= maxcl; ++y)
+				PLAYERS_LOOP_RUNTIME_UNROLL(other)
 				{
-					if (x == y) continue;
+					if (!CanProcessThisSlot(other_ph->status) && other_ph->status != BOT) unroll_continue;
 
-					PlayerHandler* const other_ph = NczPlayerManager::GetInstance()->GetPlayerHandlerByIndex(y);
-					if (other_ph->status == INVALID) continue;
+					if (x == other_index) unroll_continue;
 
 					void* const player_info = other_ph->playerClass->GetPlayerInfo();
 
-					if (!player_info) continue;
-				
+					if (!player_info) unroll_continue;
 
-					SourceSdk::Vector other_Pos;
-					if (SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive)
-					{
-						SourceSdk::VectorCopy(static_cast<SourceSdk::IPlayerInfo_csgo*>(player_info)->GetAbsOrigin(), other_Pos);
-					}
-					else
-					{
-						SourceSdk::VectorCopy(static_cast<SourceSdk::IPlayerInfo*>(player_info)->GetAbsOrigin(), other_Pos);
-					}
-
+					MathInfo & player_y_maths = MathCache::GetInstance()->GetCachedMaths(other_index);
+		
 					// Is he behind the smoke against us ?
 
 					SourceSdk::vec_t other_dst;
-					SourceSdk::VectorDistanceSqr(earPos, other_Pos, other_delta, other_dst);
+					SourceSdk::VectorDistanceSqr(player_x_maths.m_eyepos, player_y_maths.m_abs_origin, other_delta, other_dst);
 					if (dst + ConfigManager::GetInstance()->m_smoke_radius < other_dst)
 					{
 						// Hidden by the hull of the smoke ?
@@ -154,10 +148,11 @@ void AntiSmokeBlocker::ProcessOnTick(float const curtime)
 
 						if (angle_player < ang_smoke)
 						{
-							GetPlayerDataStruct(x)->can_see_this_player[y] = false;
+							GetPlayerDataStruct(x)->can_not_see_this_player[other_index] = true;
 						}
 					}
 				}
+				END_PLAYERS_LOOP_UNROLL(other)
 			}
 			it = it->m_next;
 		} while(it != nullptr);
@@ -179,7 +174,7 @@ bool AntiSmokeBlocker::SetTransmitCallback(SourceSdk::edict_t* const ea, SourceS
 		if(GetPlayerDataStruct(pPlayer_b)->is_in_smoke)
 			return true;
 
-		if(GetPlayerDataStruct(pPlayer_b)->can_see_this_player[Helpers::IndexOfEdict(ea)] == false)
+		if(GetPlayerDataStruct(pPlayer_b)->can_not_see_this_player[Helpers::IndexOfEdict(ea)] == true)
 			return true;
 	}
 	return false;

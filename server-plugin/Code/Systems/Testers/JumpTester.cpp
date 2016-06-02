@@ -57,11 +57,11 @@ void JumpTester::Unload()
 	OnGroundHookListener::RemoveOnGroundHookListener(this);
 	PlayerRunCommandHookListener::RemovePlayerRunCommandHookListener(this);
 
-	PLAYERS_LOOP_RUNTIME
+	PLAYERS_LOOP_RUNTIME_UNROLL_NOPH(x)
 	{
-		ResetPlayerDataStruct(ph->playerClass);
+		ResetPlayerDataStruct(x_index);
 	}
-	END_PLAYERS_LOOP
+	END_PLAYERS_LOOP_UNROLL(x)
 }
 
 int GetGameTickCount()

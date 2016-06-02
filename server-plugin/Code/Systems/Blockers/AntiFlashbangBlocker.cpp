@@ -52,11 +52,11 @@ void AntiFlashbangBlocker::Unload()
 	SetTransmitHookListener::RemoveSetTransmitHookListener(this);
 	SourceSdk::InterfacesProxy::GetGameEventManager()->RemoveListener(this);
 
-	PLAYERS_LOOP_RUNTIME
+	PLAYERS_LOOP_RUNTIME_UNROLL_NOPH(x)
 	{
-		ResetPlayerDataStruct(ph->playerClass);
+		ResetPlayerDataStruct(x_index);
 	}
-	END_PLAYERS_LOOP
+	END_PLAYERS_LOOP_UNROLL(x)
 }
 
 bool AntiFlashbangBlocker::SetTransmitCallback(SourceSdk::edict_t* const ea, SourceSdk::edict_t* const eb)
