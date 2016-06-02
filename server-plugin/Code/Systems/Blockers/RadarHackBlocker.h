@@ -42,7 +42,7 @@ struct ClientRadarData
 	int m_origin_index;
 
 	int m_team;
-	float m_next_update;
+	//float m_next_update;
 
 	ClientRadarData()
 	{
@@ -107,6 +107,10 @@ private:
 
 	bool* m_players_spotted;
 	bool* m_bomb_spotted;
+
+	void* m_cvar_forcecamera;
+
+	float m_next_process;
 };
 
 #endif // RADARHACKBLOCKER_H

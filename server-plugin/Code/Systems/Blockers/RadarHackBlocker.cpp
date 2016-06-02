@@ -65,11 +65,15 @@ void RadarHackBlocker::OnMapStart()
 
 void RadarHackBlocker::Init()
 {
-	InitDataStruct();
+	m_next_process = 0.0;
+	for (int x = 0; x < MAX_PLAYERS; ++x)
+		m_dataStruct[x] = ClientRadarData(x);
 }
 
 void RadarHackBlocker::Load()
 {
+	m_cvar_forcecamera = SourceSdk::InterfacesProxy::ICvar_FindVar("mp_forcecamera");
+
 	ThinkPostHookListener::RegisterThinkPostHookListener(this);
 	UserMessageHookListener::RegisterUserMessageHookListener(this);
 	OnTickListener::RegisterOnTickListener(this);
@@ -140,7 +144,6 @@ void RadarHackBlocker::SendApproximativeRadarUpdate(MRecipientFilter & filter, C
 		//pBuffer->set_player_has_c4();
 
 		SourceSdk::InterfacesProxy::Call_SendUserMessage(&(filter), CS_UM_ProcessSpottedEntityUpdate, *pBuffer);
-		SourceSdk::InterfacesProxy::Call_MessageEnd();
 		delete pBuffer;
 	}
 	else
@@ -175,7 +178,6 @@ void RadarHackBlocker::SendRandomRadarUpdate(MRecipientFilter & filter, ClientRa
 		pBuffer->set_player_has_c4(false);
 
 		SourceSdk::InterfacesProxy::Call_SendUserMessage(&(filter), CS_UM_ProcessSpottedEntityUpdate, *pBuffer);
-		SourceSdk::InterfacesProxy::Call_MessageEnd();
 		delete pBuffer;
 	}
 	else
@@ -217,6 +219,7 @@ void RadarHackBlocker::ProcessEntity(SourceSdk::edict_t const * const pent)
 			Entity is not spotted -> send approximative data to teammates and spectators, random for others.
 		*/
 
+		
 		filter.AddTeam(pData->m_team);
 		filter.AddTeam(TEAM_SPECTATOR);
 		filter.AddTeam(TEAM_NONE);
