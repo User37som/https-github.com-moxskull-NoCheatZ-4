@@ -365,7 +365,6 @@ void ConVarTester::Load()
 	AddConvarRuleset("r_visualizetraces", "0", SAME_AS_SERVER);
 	AddConvarRuleset("mat_normalmaps", "0", SAME_AS_SERVER);
 	AddConvarRuleset("mp_playerid", "0", SAME_AS_SERVER);
-	AddConvarRuleset("mp_forcecamera", "1", SAME_AS_SERVER);
 	AddConvarRuleset("net_fakeloss", "0", SAME);
 	AddConvarRuleset("net_fakelag", "0", SAME);
 	AddConvarRuleset("net_fakejitter", "0", SAME);
