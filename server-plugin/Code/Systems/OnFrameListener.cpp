@@ -28,14 +28,14 @@ OnFrameListener::OnFrameListener()
 
 void OnFrameListener::ProcessTestsOnFrame()
 {
-	PLAYERS_LOOP_RUNTIME_UNROLL(x)
+	PLAYERS_LOOP_RUNTIME
 	{
-		if(x_ph->status >= GetFilter())
+		if(ph->status >= GetFilter())
 		{
-			ProcessPlayerTestOnFrame(x_ph->playerClass);
+			ProcessPlayerTestOnFrame(ph->playerClass);
 		}
 	}
-	END_PLAYERS_LOOP_UNROLL(x)
+	END_PLAYERS_LOOP
 }
 
 void OnFrameListener::RegisterOnFrameListener(OnFrameListener* tester)

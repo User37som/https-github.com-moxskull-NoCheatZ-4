@@ -112,11 +112,11 @@ void ConCommandTester::Unload()
 {
 	m_commands_list.RemoveAll();
 
-	PLAYERS_LOOP_RUNTIME_UNROLL_NOPH(x)
+	PLAYERS_LOOP_RUNTIME
 	{
-		ResetPlayerDataStruct(x_index);
+		ResetPlayerDataStruct(ph->playerClass);
 	}
-	END_PLAYERS_LOOP_UNROLL(x)
+	END_PLAYERS_LOOP
 
 	ConCommandHookListener::RemoveConCommandHookListener(this);
 }

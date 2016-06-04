@@ -89,30 +89,27 @@ void RadarHackBlocker::Unload()
 void RadarHackBlocker::ThinkPostCallback(SourceSdk::edict_t const * const pent)
 {
 	float const curtime = Plat_FloatTime();
-	PLAYERS_LOOP_RUNTIME_UNROLL(x)
+	PLAYERS_LOOP_RUNTIME
 	{
-		if (CanProcessThisSlot(x_ph->status) || x_ph->status == BOT)
+		ClientRadarData * pData = GetPlayerDataStruct(x);
+		if (pData->m_last_spotted_status != m_players_spotted[x])
 		{
-			ClientRadarData * pData = GetPlayerDataStruct(x_index);
-			if (pData->m_last_spotted_status != m_players_spotted[x_index])
-			{
-				pData->m_last_spotted_status = m_players_spotted[x_index];
+			pData->m_last_spotted_status = m_players_spotted[x];
 
-				if (pData->m_last_spotted_status)
-				{
-					UpdatePlayerData(x_ph->playerClass);
-					ProcessEntity(Helpers::PEntityOfEntIndex(x_index));
-				}
-				else
-				{
-					//pData->m_next_update = curtime + 1.0f;
-					//UpdatePlayerData(ph->playerClass);
-					//ProcessEntity(Helpers::PEntityOfEntIndex(x));
-				}
+			if (pData->m_last_spotted_status)
+			{
+				UpdatePlayerData(ph->playerClass);
+				ProcessEntity(Helpers::PEntityOfEntIndex(x));
+			}
+			else
+			{
+				pData->m_next_update = curtime + 1.0f;
+				UpdatePlayerData(ph->playerClass);
+				ProcessEntity(Helpers::PEntityOfEntIndex(x));
 			}
 		}
 	}
-	END_PLAYERS_LOOP_UNROLL(x)
+	END_PLAYERS_LOOP
 }
 
 bool RadarHackBlocker::SendUserMessageCallback(SourceSdk::IRecipientFilter &, int message_id, google::protobuf::Message const &)
@@ -268,31 +265,21 @@ void RadarHackBlocker::UpdatePlayerData(NczPlayer* pPlayer)
 
 void RadarHackBlocker::ProcessOnTick(float const curtime)
 {
-	PLAYERS_LOOP_RUNTIME_UNROLL(x)
+	float const curtime = Plat_FloatTime();
+	ClientRadarData * pData = GetPlayerDataStruct(player);
+
+	if (pData->m_last_spotted_status)
 	{
-		if (!CanProcessThisSlot(x_ph->status) && x_ph->status != BOT) unroll_continue;
-
-		ClientRadarData * pData = GetPlayerDataStruct(x_index);
-
-		if (pData->m_last_spotted_status)
-		{
-			UpdatePlayerData(x_ph->playerClass);
-			ProcessEntity(x_ph->playerClass->GetEdict());
-		}
-		else
-		{
-			if (curtime > m_next_process)
-			{
-				//pData->m_next_update = curtime + 1.0f;
-				UpdatePlayerData(x_ph->playerClass);
-				ProcessEntity(x_ph->playerClass->GetEdict());
-			}
-		}
+		UpdatePlayerData(player);
+		ProcessEntity(player->GetEdict());
 	}
-	END_PLAYERS_LOOP_UNROLL(x)
-
-	if (curtime > m_next_process)
+	else
 	{
-		m_next_process = curtime + 2.0f;
+		if (curtime > pData->m_next_update)
+		{
+			pData->m_next_update = curtime + 1.0f;
+			UpdatePlayerData(player);
+			ProcessEntity(player->GetEdict());
+		}
 	}
 }

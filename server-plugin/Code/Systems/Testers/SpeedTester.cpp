@@ -47,11 +47,11 @@ void SpeedTester::Unload()
 	OnTickListener::RemoveOnTickListener(this);
 	PlayerRunCommandHookListener::RemovePlayerRunCommandHookListener(this);
 
-	PLAYERS_LOOP_RUNTIME_UNROLL_NOPH(x)
+	PLAYERS_LOOP_RUNTIME
 	{
-		ResetPlayerDataStruct(x_index);
+		ResetPlayerDataStruct(ph->playerClass);
 	}
-	END_PLAYERS_LOOP_UNROLL(x)
+	END_PLAYERS_LOOP
 }
 
 void SpeedTester::ProcessPlayerTestOnTick(NczPlayer* const player, float const curtime)

@@ -56,11 +56,11 @@ void EyeAnglesTester::Unload()
 	PlayerRunCommandHookListener::RemovePlayerRunCommandHookListener(this);
 	SourceSdk::InterfacesProxy::GetGameEventManager()->RemoveListener(this);
 
-	PLAYERS_LOOP_RUNTIME_UNROLL_NOPH(x)
+	PLAYERS_LOOP_RUNTIME
 	{
-		ResetPlayerDataStruct(x_index);
+		ResetPlayerDataStruct(ph->playerClass);
 	}
-	END_PLAYERS_LOOP_UNROLL(x)
+	END_PLAYERS_LOOP
 }
 
 PlayerRunCommandRet EyeAnglesTester::PlayerRunCommandCallback(NczPlayer* player, void* pCmd, void* old_cmd)

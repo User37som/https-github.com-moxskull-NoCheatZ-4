@@ -58,11 +58,13 @@ typedef basic_slist<SmokeEntityT> SmokeListT;
 typedef struct SmokeInfoS
 {
 	bool is_in_smoke;
-	bool can_not_see_this_player[MAX_PLAYERS];
+	bool can_see_this_player[MAX_PLAYERS];
 
 	SmokeInfoS()
 	{
-		memset(this, 0, sizeof(SmokeInfoS));
+		is_in_smoke = false;
+
+		memset(can_see_this_player, 0x01010101, sizeof(bool) * MAX_PLAYERS);
 	};
 	SmokeInfoS(const SmokeInfoS& other)
 	{

@@ -434,11 +434,11 @@ void ConVarTester::Unload()
 {
 	OnTickListener::RemoveOnTickListener(this);
 
-	PLAYERS_LOOP_RUNTIME_UNROLL_NOPH(x)
+	PLAYERS_LOOP_RUNTIME
 	{
-		ResetPlayerDataStruct(x_index);
+		ResetPlayerDataStruct(ph->playerClass);
 	}
-	END_PLAYERS_LOOP_UNROLL(x)
+	END_PLAYERS_LOOP
 
 	m_convars_rules.RemoveAll();
 }

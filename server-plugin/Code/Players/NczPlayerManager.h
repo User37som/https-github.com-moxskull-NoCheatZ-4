@@ -18,7 +18,6 @@
 
 #include <limits>
 #include <cstring> // memset, memcpy
-#include <functional>
 
 #include "NczPlayer.h"
 #include "Preprocessors.h"
@@ -111,54 +110,15 @@ inline PlayerHandler* NczPlayerManager::GetPlayerHandlerByIndex(int slot)
 		PlayerHandler* ph = &(FullHandlersList[x]); \
 		do{
 
-  /* Boucle classique pour les utilisations externes
-	 Donne la variable ph , x et maxcl dans la boucle */
-#define PLAYERS_LOOP_RUNTIME(prefix) { \
-		int prefix = 1; \
-		NczPlayerManager * const prefix ## _pm = NczPlayerManager::GetInstance(); \
-		const int maxcl = prefix ## _pm->GetMaxIndex(); \
-		PlayerHandler* prefix ## _ph = prefix ## _pm->GetPlayerHandlerByIndex(x); \
-		for(; prefix <= maxcl; ++ ## prefix, prefix ## _ph = prefix ## _pm->GetPlayerHandlerByIndex( prefix )){
+/* Boucle classique pour les utilisations externes
+   Donne la variable ph , x et maxcl dans la boucle */
+#define PLAYERS_LOOP_RUNTIME { \
+		int x = 1; \
+		const int maxcl = NczPlayerManager::GetInstance()->GetMaxIndex(); \
+		PlayerHandler* ph = NczPlayerManager::GetInstance()->GetPlayerHandlerByIndex(x); \
+		for(; x <= maxcl; ++x, ph = NczPlayerManager::GetInstance()->GetPlayerHandlerByIndex(x)){if(ph->status == INVALID) continue;
 
 #define END_PLAYERS_LOOP  }}
 #define _END_PLAYERS_LOOP_INIT  ++x;ph = &(FullHandlersList[x]);}while(x <= MAX_PLAYERS);}
-
-template <int current>
-inline void players_loop_unroller(std::function<void(int const)> const & f, int & dynamic_max)
-{
-	static_assert(current <= MAX_PLAYERS, "Endless unrolled loop");
-
-	f(current);
-	if (dynamic_max <= current) return;
-	players_loop_unroller<current + 1>(f, dynamic_max);
-}
-
-template <>
-inline void players_loop_unroller<MAX_PLAYERS>(std::function<void(int const)> const & f, int & dynamic_max)
-{
-	f(MAX_PLAYERS);
-}
-
-#define unroll_continue return;
-#define unroll_break dynamic_max = 0; return;
-
-#define PLAYERS_LOOP_RUNTIME_UNROLL(prefix) { \
-		NczPlayerManager * const prefix ## _pm = NczPlayerManager::GetInstance(); \
-		int dynamic_max = prefix ## _pm->GetMaxIndex(); \
-		std::function<void(int const)> const prefix ## _lambda = [&](int const prefix ## _index) \
-		{ \
-			PlayerHandler * prefix ## _ph = prefix ## _pm->GetPlayerHandlerByIndex( prefix ## _index ); 
-
-#define PLAYERS_LOOP_RUNTIME_UNROLL_NOPH(prefix) { \
-		NczPlayerManager * const prefix ## _pm = NczPlayerManager::GetInstance(); \
-		int dynamic_max = prefix ## _pm->GetMaxIndex(); \
-		std::function<void(int const)> const prefix ## _lambda = [&](int const prefix ## _index) \
-		{
-
-#define END_PLAYERS_LOOP_UNROLL(prefix) }; players_loop_unroller<1>( prefix ## _lambda, dynamic_max ); } 
-		
-
-
-
 
 #endif
