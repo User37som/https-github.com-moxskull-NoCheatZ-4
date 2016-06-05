@@ -23,7 +23,6 @@
 typedef void (HOOKFN_EXT *Dispatch_t)(void * const cmd, SourceSdk::CCommand const & args );
 
 class NczPlayer;
-class SourceSdk::CCommand;
 
 /*
 	The base class used by a listener to hook some ConCommands.

@@ -69,7 +69,7 @@ void TriggerStat(ShotStatHandlerT* handler, float up_time, float down_time, size
 
 void OutputStat(ShotStatHandlerT* handler)
 {
-	printf(Helpers::format("{ count %lu, ratio %3.2f, avg %3.2f }", handler->n, handler->ratio, handler->avg_time).c_str());
+	printf("{ count %u, ratio %3.2f, avg %3.2f }", handler->n, handler->ratio, handler->avg_time);
 }
 
 PlayerRunCommandRet ShotTester::PlayerRunCommandCallback(NczPlayer* player, void* pCmd, void* lastcmd)

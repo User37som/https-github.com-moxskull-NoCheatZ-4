@@ -16,16 +16,16 @@
 #ifndef ENTPROPS_H
 #define ENTPROPS_H
 
-#include "temp_basiclist.h"
-#include "temp_basicstring.h"
-#include "temp_singleton.h"
-
 #undef GetClassName
 #include "SdkPreprocessors.h"
+#include "Interfaces/InterfacesProxy.h"
 #include "Interfaces/edict.h"
 #include "Interfaces/server_class.h"
 #include "Interfaces/datamap.h"
 
+#include "temp_basiclist.h"
+#include "temp_basicstring.h"
+#include "temp_singleton.h"
 #include "Helpers.h"
 #include "Systems/Logger.h"
 #include "Systems/ConfigManager.h"
@@ -225,8 +225,8 @@ private:
 		return false;
 	}
 
-	EntityProps(const EntityProps& other){};
-	EntityProps& operator=(EntityProps const &  other) {};
+	EntityProps(const EntityProps& other) = delete;
+	EntityProps& operator=(EntityProps const &  other) = delete;
 
 public:
 	EntityProps(){};

@@ -35,6 +35,7 @@ BASE_CFLAGS =   -msse -D_LINUX -DLINUX -D_alloca=alloca \
 		-fPIC -Wno-deprecated -fno-exceptions -fpermissive \
 		-fno-strict-aliasing \
 		-Wno-non-virtual-dtor -Wno-overloaded-virtual \
+		-Wall -Werror
 
 OPT_FLAGS = -DNDEBUG -O3 -funroll-loops -s -pipe $(OTHER_PREPROCESSORS)
 DEBUG_FLAGS = -g -ggdb3 -O0 -D_DEBUG -DDEBUG $(OTHER_PREPROCESSORS)

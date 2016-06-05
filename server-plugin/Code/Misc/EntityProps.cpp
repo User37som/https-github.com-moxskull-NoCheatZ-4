@@ -2,7 +2,6 @@
 
 #include "Console/convar.h"
 #include "Containers/utlvector.h"
-#include "Interfaces/InterfacesProxy.h"
 #include "Systems/ConfigManager.h"
 
 #include "Hooks/Hook.h"

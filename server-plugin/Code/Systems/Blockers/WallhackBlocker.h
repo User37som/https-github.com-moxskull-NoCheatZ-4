@@ -79,8 +79,8 @@ class VisCache
 private:
 	VisInfo m_cache[MAX_PLAYERS][MAX_PLAYERS];
 
-	VisCache(VisCache const & other){};
-	VisCache& operator=(VisCache const & other){};
+	VisCache(VisCache const & other) = delete;
+	VisCache& operator=(VisCache const & other) = delete;
 
 public:
 	inline VisCache()

@@ -48,7 +48,7 @@ void ValidationTester::SetValidated(NczPlayer const * const player)
 {
 	GetPlayerDataStruct(player)->b = true;
 	DebugMessage(Helpers::format("%s SteamID validated\n", player->GetName()));
-	SystemVerbose1(("%s SteamID validated", player->GetName()));
+	SystemVerbose1(Helpers::format("%s SteamID validated", player->GetName()));
 
 	Assert(player->GetPlayerInfo());
 

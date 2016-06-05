@@ -73,6 +73,7 @@ typedef struct ValidatedInfo
 	{
 		memcpy(m_steamid, other.m_steamid, 64);
 		memcpy(m_ipaddress, other.m_ipaddress, 64);
+		return *this;
 	}
 
 	bool operator==(ValidatedInfo const & other) const

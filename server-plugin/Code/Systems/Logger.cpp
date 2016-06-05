@@ -152,7 +152,7 @@ void Logger::Flush()
 	if(m_msg.IsEmpty()) return;
 
 	basic_string path;
-	SourceSdk::GetGameDir(path);
+	SourceSdk::InterfacesProxy::GetGameDir(path);
 
 	path.append(Helpers::getStrDateTime("/logs/NoCheatZ_4_Logs/NoCheatZ-%d-%b-%Y.log"));
 	std::ofstream fichier(path.c_str(), std::ios::out | std::ios::app);

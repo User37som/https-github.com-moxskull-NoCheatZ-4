@@ -60,7 +60,7 @@ private:
 	basic_string const prolog;
 
 public:
-	Logger() : prolog("[NoCheatZ " NCZ_VERSION_STR "] "), singleton_class() {};
+	Logger() : singleton_class(), m_msg(), prolog("[NoCheatZ " NCZ_VERSION_STR "] ") {};
 	virtual ~Logger() override final {};
 
 	void Push(const basic_string& msg);

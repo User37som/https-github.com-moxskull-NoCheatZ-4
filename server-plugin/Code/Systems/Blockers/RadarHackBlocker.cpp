@@ -92,7 +92,6 @@ void RadarHackBlocker::Unload()
 
 void RadarHackBlocker::ThinkPostCallback(SourceSdk::edict_t const * const pent)
 {
-	float const curtime = Plat_FloatTime();
 	PLAYERS_LOOP_RUNTIME
 	{
 		if (CanProcessThisSlot(ph->status) || ph->status == BOT)
