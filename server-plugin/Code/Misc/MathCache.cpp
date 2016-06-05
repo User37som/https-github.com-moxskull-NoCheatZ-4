@@ -47,23 +47,43 @@ MathInfo& MathCache::GetCachedMaths(int const player_index, bool const force_upd
 
 		if (SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive)
 		{
-			SourceSdk::VectorCopy(static_cast<SourceSdk::IPlayerInfo_csgo*>(playerinfo)->GetPlayerMins(), info.m_mins);
-			SourceSdk::VectorCopy(static_cast<SourceSdk::IPlayerInfo_csgo*>(playerinfo)->GetPlayerMaxs(), info.m_maxs);
-			SourceSdk::VectorCopy(static_cast<SourceSdk::IPlayerInfo_csgo*>(playerinfo)->GetAbsOrigin(), info.m_abs_origin);
+			SourceSdk::IPlayerInfo_csgo* const pinfo = static_cast<SourceSdk::IPlayerInfo_csgo*>(playerinfo);
+
+			SourceSdk::VectorCopy(pinfo->GetPlayerMins(), info.m_mins);
+			SourceSdk::VectorCopy(pinfo->GetPlayerMaxs(), info.m_maxs);
+			SourceSdk::VectorCopy(pinfo->GetAbsOrigin(), info.m_abs_origin);
+			if (pinfo->IsFakeClient())
+			{
+				SourceSdk::VectorCopy(pinfo->GetAbsAngles(), info.m_eyeangles);
+			}
+			else
+			{
+				SourceSdk::VectorCopy(static_cast<SourceSdk::CUserCmd_csgo*>(PlayerRunCommandHookListener::GetLastUserCmd(ph->playerClass))->viewangles, info.m_eyeangles);
+			}
 		}
 		else
 		{
-			SourceSdk::VectorCopy(static_cast<SourceSdk::IPlayerInfo*>(playerinfo)->GetPlayerMins(), info.m_mins);
-			SourceSdk::VectorCopy(static_cast<SourceSdk::IPlayerInfo*>(playerinfo)->GetPlayerMaxs(), info.m_maxs);
-			SourceSdk::VectorCopy(static_cast<SourceSdk::IPlayerInfo*>(playerinfo)->GetAbsOrigin(), info.m_abs_origin);
+			SourceSdk::IPlayerInfo* const pinfo = static_cast<SourceSdk::IPlayerInfo*>(playerinfo);
+
+			SourceSdk::VectorCopy(pinfo->GetPlayerMins(), info.m_mins);
+			SourceSdk::VectorCopy(pinfo->GetPlayerMaxs(), info.m_maxs);
+			SourceSdk::VectorCopy(pinfo->GetAbsOrigin(), info.m_abs_origin);
+			if (pinfo->IsFakeClient())
+			{
+				SourceSdk::VectorCopy(pinfo->GetAbsAngles(), info.m_eyeangles);
+			}
+			else
+			{
+				SourceSdk::VectorCopy(static_cast<SourceSdk::CUserCmd_csgo*>(PlayerRunCommandHookListener::GetLastUserCmd(ph->playerClass))->viewangles, info.m_eyeangles);
+			}
 		}
 
-		SourceSdk::edict_t* pedict = Helpers::PEntityOfEntIndex(player_index);
+		SourceSdk::edict_t* const pedict = Helpers::PEntityOfEntIndex(player_index);
 		SourceSdk::VectorCopy(*EntityProps::GetInstance()->GetPropValue<SourceSdk::Vector, PROP_ABS_VELOCITY>(pedict, true), info.m_velocity);
 		SourceSdk::VectorMultiply(info.m_velocity, 0.01f);
 		SourceSdk::VectorAbs(info.m_velocity, info.m_abs_velocity);
 		SourceSdk::InterfacesProxy::Call_ClientEarPosition(pedict, &info.m_eyepos);
-		SourceSdk::VectorCopy(static_cast<SourceSdk::CUserCmd_csgo*>(PlayerRunCommandHookListener::GetLastUserCmd(ph->playerClass))->viewangles, info.m_eyeangles);
+		
 	}
 	return info;
 }

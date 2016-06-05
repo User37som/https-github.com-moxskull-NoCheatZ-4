@@ -74,11 +74,15 @@ void HOOKFN_INT PlayerRunCommandHookListener::nPlayerRunCommand(void* This, void
 {
 	PlayerHandler const * const ph = NczPlayerManager::GetInstance()->GetPlayerHandlerByBasePlayer(This);
 	PlayerRunCommandRet ret = CONTINUE;
-	
-	if(ph->status > PLAYER_CONNECTING)
+	 
+	/*if (ph->status == BOT) // Bots don't call PlayerRunCommand ... only the SourceTV does but there is no purpose to store this for the tv.
+	{
+		memcpy(&m_lastCUserCmd[ph->playerClass->GetIndex()], pCmd, sizeof(SourceSdk::CUserCmd_csgo));
+		printf("%s\n", ph->playerClass->GetName());
+	}
+	else */if(ph->status > PLAYER_CONNECTING)
 	{
 		SourceSdk::CUserCmd_csgo& old_cmd = m_lastCUserCmd[ph->playerClass->GetIndex()];
-
 
 		ListenersListT::elem_t* it = m_listeners.GetFirst();
 		while (it != nullptr)

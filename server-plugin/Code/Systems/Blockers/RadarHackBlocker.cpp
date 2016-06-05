@@ -21,6 +21,7 @@ limitations under the License.
 #include "Misc/UserMsg.h"
 #include "Hooks/PlayerRunCommandHookListener.h"
 #include "Misc/MathCache.h"
+#include "Systems/AutoTVRecord.h"
 
 RadarHackBlocker::RadarHackBlocker() :
 	BaseSystem("RadarHackBlocker", PLAYER_CONNECTED, PLAYER_CONNECTING, STATUS_EQUAL_OR_BETTER),
@@ -140,7 +141,7 @@ void RadarHackBlocker::SendApproximativeRadarUpdate(MRecipientFilter & filter, C
 		pBuffer->set_class_id(35);
 		pBuffer->set_origin_x((int32_t)(player_maths.m_abs_origin.x * 0.25f));
 		pBuffer->set_origin_y((int32_t)(player_maths.m_abs_origin.y * 0.25f));
-		pBuffer->set_origin_z((int32_t)std::round((float)std::rand()));
+		pBuffer->set_origin_z(0);
 		pBuffer->set_angle_y((int32_t)player_maths.m_eyeangles.y);
 		//pBuffer->set_defuser();
 		//pBuffer->set_player_has_defuser();
@@ -154,10 +155,10 @@ void RadarHackBlocker::SendApproximativeRadarUpdate(MRecipientFilter & filter, C
 		SourceSdk::bf_write *pBuffer = SourceSdk::InterfacesProxy::Call_UserMessageBegin(&(filter), /*eUserMsg::UpdateRadar*/ 28);
 
 		SourceSdk::BfWriteByte(pBuffer, pData->m_origin_index);
-		SourceSdk::BfWriteNBits<SourceSdk::vec_t, 13>(pBuffer, std::round(player_maths.m_abs_origin.x * 0.25f));
-		SourceSdk::BfWriteNBits<SourceSdk::vec_t, 13>(pBuffer, std::round(player_maths.m_abs_origin.y * 0.25f));
-		SourceSdk::BfWriteNBits<SourceSdk::vec_t, 13>(pBuffer, std::round((float)std::rand()));
-		SourceSdk::BfWriteNBits<SourceSdk::vec_t, 9>(pBuffer, std::round(player_maths.m_eyeangles.y));
+		SourceSdk::BfWriteNBits<int32_t, 13>(pBuffer, (int32_t)(std::round(player_maths.m_abs_origin.x * 0.25f)));
+		SourceSdk::BfWriteNBits<int32_t, 13>(pBuffer, (int32_t)(std::round(player_maths.m_abs_origin.y * 0.25f)));
+		SourceSdk::BfWriteNBits<int32_t, 13>(pBuffer, 0);
+		SourceSdk::BfWriteNBits<int32_t, 9>(pBuffer, (int32_t)(std::round(player_maths.m_eyeangles.y)));
 
 		SourceSdk::BfWriteByte(pBuffer, 0);
 		SourceSdk::InterfacesProxy::Call_MessageEnd();
@@ -188,10 +189,10 @@ void RadarHackBlocker::SendRandomRadarUpdate(MRecipientFilter & filter, ClientRa
 		SourceSdk::bf_write *pBuffer = SourceSdk::InterfacesProxy::Call_UserMessageBegin(&(filter), /*eUserMsg::UpdateRadar*/ 28);
 
 		SourceSdk::BfWriteByte(pBuffer, pData->m_origin_index);
-		SourceSdk::BfWriteNBits<SourceSdk::vec_t, 13>(pBuffer, std::round((float)std::rand()));
-		SourceSdk::BfWriteNBits<SourceSdk::vec_t, 13>(pBuffer, std::round((float)std::rand()));
-		SourceSdk::BfWriteNBits<SourceSdk::vec_t, 13>(pBuffer, std::round((float)std::rand()));
-		SourceSdk::BfWriteNBits<SourceSdk::vec_t, 9>(pBuffer, std::round((float)std::rand()));
+		SourceSdk::BfWriteNBits<int32_t, 13>(pBuffer, (int32_t)(std::round((float)std::rand())));
+		SourceSdk::BfWriteNBits<int32_t, 13>(pBuffer, (int32_t)(std::round((float)std::rand())));
+		SourceSdk::BfWriteNBits<int32_t, 13>(pBuffer, (int32_t)(std::round((float)std::rand())));
+		SourceSdk::BfWriteNBits<int32_t, 9>(pBuffer, (int32_t)(std::round((float)std::rand())));
 
 		SourceSdk::BfWriteByte(pBuffer, 0);
 		SourceSdk::InterfacesProxy::Call_MessageEnd();
@@ -271,9 +272,11 @@ void RadarHackBlocker::UpdatePlayerData(NczPlayer* pPlayer)
 
 void RadarHackBlocker::ProcessOnTick(float const curtime)
 {
+	AutoTVRecord* tv_inst = AutoTVRecord::GetInstance();
 	PLAYERS_LOOP_RUNTIME
 	{
 		if (!CanProcessThisSlot(ph->status) && ph->status != BOT) continue;
+		if (tv_inst->GetSlot() == x) continue;
 
 		ClientRadarData * pData = GetPlayerDataStruct(x);
 
