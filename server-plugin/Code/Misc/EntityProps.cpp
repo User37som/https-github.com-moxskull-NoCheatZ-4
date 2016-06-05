@@ -10,6 +10,27 @@
 typedef SourceSdk::datamap_t* (HOOKFN_EXT *GetDataDescMap_t)(SourceSdk::CBaseEntity*);
 
 template <>
+basic_string const & EntityProps::PropIdToString<PROP_SHADOW_DIRECTION>()
+{
+	static basic_string const v("CShadowControl.m_shadowDirection");
+	return v;
+}
+
+template <>
+basic_string const & EntityProps::PropIdToString<PROP_SHADOW_MAX_DIST>()
+{
+	static basic_string const v("CShadowControl.m_flShadowMaxDist");
+	return v;
+}
+
+template <>
+basic_string const & EntityProps::PropIdToString<PROP_DISABLE_SHADOW>()
+{
+	static basic_string const v("CShadowControl.m_bDisableShadows");
+	return v;
+}
+
+template <>
 basic_string const & EntityProps::PropIdToString<PROP_ABS_VELOCITY>()
 {
 	static basic_string const v("CBaseEntity.m_vecAbsVelocity");

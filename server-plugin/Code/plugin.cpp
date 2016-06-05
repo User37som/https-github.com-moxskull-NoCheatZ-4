@@ -346,6 +346,7 @@ void CNoCheatZPlugin::ServerActivate(SourceSdk::edict_t *pEdictList, int edictCo
 	NczPlayerManager::GetInstance()->LoadPlayerManager();
 
 	RadarHackBlocker::GetInstance()->OnMapStart();
+	WallhackBlocker::GetInstance()->OnMapStart();
 }
 
 //---------------------------------------------------------------------------------

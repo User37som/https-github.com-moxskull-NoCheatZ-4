@@ -134,6 +134,10 @@ private:
 	NczPlayer* m_weapon_owner[MAX_EDICTS];
 	VisCache m_viscache;
 
+	bool* m_disable_shadows;
+	SourceSdk::Vector* m_shadow_direction;
+	float* m_shadow_maxdist;
+
 public:
 	WallhackBlocker();
 	virtual ~WallhackBlocker() final;
@@ -153,6 +157,8 @@ private:
 
 public:
 	void ClientDisconnect(SourceSdk::edict_t const * const client);
+
+	void OnMapStart();
 
 private:
 	bool IsAbleToSee(NczPlayer* const sender, NczPlayer* const receiver);

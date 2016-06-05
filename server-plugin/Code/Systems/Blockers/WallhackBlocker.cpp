@@ -74,6 +74,35 @@ void WallhackBlocker::Unload()
 	m_viscache.Invalidate();
 }
 
+void WallhackBlocker::OnMapStart()
+{
+	if (!GetDisabledByConfigIni())
+	{
+		m_disable_shadows = nullptr;
+		m_shadow_direction = nullptr;
+		m_shadow_maxdist = nullptr;
+
+		for (int x = 0; x < MAX_EDICTS; ++x)
+		{
+			SourceSdk::edict_t * const ent = Helpers::PEntityOfEntIndex(x);
+			if (Helpers::isValidEdict(ent))
+			{
+				if (ent->GetClassName() != nullptr)
+				{
+#undef GetClassName
+					if (basic_string("shadow_control").operator==(ent->GetClassName()))
+					{
+						m_disable_shadows = EntityProps::GetInstance()->GetPropValue<bool, PROP_DISABLE_SHADOW>(ent);
+						m_shadow_direction = EntityProps::GetInstance()->GetPropValue<SourceSdk::Vector, PROP_SHADOW_DIRECTION>(ent);
+						m_shadow_maxdist = EntityProps::GetInstance()->GetPropValue<float, PROP_SHADOW_MAX_DIST>(ent);
+						break;
+					}
+				}
+			}
+		}
+	}
+}
+
 bool WallhackBlocker::SetTransmitCallback(SourceSdk::edict_t const * const sender, SourceSdk::edict_t const * const receiver)
 {
 	METRICS_ENTER_SECTION("WallhackBlocker::SetTransmitCallback");
@@ -176,7 +205,7 @@ void WallhackBlocker::ProcessOnTick(float const curtime)
 		tick_interval = static_cast<SourceSdk::CGlobalVars*>(SourceSdk::InterfacesProxy::Call_GetGlobalVars())->interval_per_tick;
 	}
 
-	ST_W_STATIC SourceSdk::CTraceFilterWorldAndPropsOnly itracefilter;
+	ST_W_STATIC SourceSdk::CTraceFilterWorldOnly itracefilter;
 	ST_R_STATIC SourceSdk::Vector hull_min( -5.0f, -5.0f, -5.0f );
 	ST_R_STATIC SourceSdk::Vector hull_max( 5.0f, 5.0f, 5.0f );
 
@@ -300,7 +329,7 @@ inline bool WallhackBlocker::IsInFOV(const SourceSdk::Vector& origin, const Sour
 // Point
 inline bool WallhackBlocker::IsVisible(const SourceSdk::Vector& origin, const SourceSdk::Vector& target)
 {
-	ST_W_STATIC SourceSdk::CTraceFilterWorldAndPropsOnly itracefilter;
+	ST_W_STATIC SourceSdk::CTraceFilterWorldOnly itracefilter;
 
 	return SourceSdk::trace_ray_fn(origin, target, MASK_VISIBLE, &itracefilter);
 }
@@ -431,6 +460,42 @@ bool WallhackBlocker::IsAbleToSee(NczPlayer* const sender, NczPlayer* const rece
 		{
 			if (IsVisible(receiver_ear_pos, MathCache::GetInstance()->GetCachedMaths(sender->GetIndex()).m_eyeangles, sender_data->ear_pos))
 				return true;
+		}
+
+		// Test shadow, if any
+		if (!*m_disable_shadows)
+		{
+			ST_W_STATIC SourceSdk::Vector shadow_trace_end;
+			SourceSdk::VectorCopy(m_shadow_direction, &shadow_trace_end);
+			SourceSdk::VectorMultiply(shadow_trace_end, *m_shadow_maxdist);
+			SourceSdk::VectorAdd(sender_data->ear_pos, shadow_trace_end);
+
+			if (SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive)
+			{
+				SourceSdk::Ray_t_csgo ray;
+				SourceSdk::CGameTrace_csgo trace;
+				ray.Init(sender_data->ear_pos, shadow_trace_end);
+				SourceSdk::InterfacesProxy::Call_ClipRayToEntity(&ray, MASK_PLAYERSOLID_BRUSHONLY, Helpers::PEntityOfEntIndex(0)->m_pUnk, &trace);
+				SourceSdk::VectorAdd(sender_data->ear_pos, ray.m_Delta, shadow_trace_end);
+
+				if (IsVisible(receiver_ear_pos, shadow_trace_end))
+					return true;
+			}
+			else
+			{
+				SourceSdk::Ray_t ray;
+				SourceSdk::CGameTrace trace;
+				ray.Init(sender_data->ear_pos, shadow_trace_end);
+				SourceSdk::InterfacesProxy::Call_ClipRayToEntity(&ray, MASK_PLAYERSOLID_BRUSHONLY, Helpers::PEntityOfEntIndex(0)->m_pUnk, &trace);
+				SourceSdk::VectorMultiply(ray.m_Delta, 0.998f);
+				SourceSdk::VectorAdd(sender_data->ear_pos, ray.m_Delta, shadow_trace_end);
+
+				if (IsVisible(receiver_ear_pos, shadow_trace_end))
+				{
+					//printf("shadow was visible\n");
+					return true;
+				}
+			}
 		}
 		
 		{
