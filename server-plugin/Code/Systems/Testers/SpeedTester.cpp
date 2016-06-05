@@ -20,8 +20,8 @@
 SpeedTester::SpeedTester() :
 	BaseSystem("SpeedTester"),
 	OnTickListener(),
-	PlayerRunCommandHookListener(),
 	playerdata_class(),
+	PlayerRunCommandHookListener(),
 	singleton_class()
 {
 }

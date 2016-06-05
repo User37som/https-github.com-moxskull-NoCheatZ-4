@@ -105,9 +105,9 @@ class Detection_BunnyHopScript : public LogDetection<JumpInfoT>
 	typedef LogDetection<JumpInfoT> hClass;
 public:
 	Detection_BunnyHopScript() : hClass() {};
-	~Detection_BunnyHopScript(){};
+	virtual ~Detection_BunnyHopScript() override {};
 
-	virtual basic_string GetDataDump();
+	virtual basic_string GetDataDump() final;
 	virtual basic_string GetDetectionLogMessage()
 	{
 		return "BunnyHop Script";
@@ -118,9 +118,9 @@ class Detection_BunnyHopProgram : public Detection_BunnyHopScript
 {
 public:
 	Detection_BunnyHopProgram() : Detection_BunnyHopScript() {};
-	~Detection_BunnyHopProgram(){};
+	virtual ~Detection_BunnyHopProgram() override final {};
 
-	basic_string GetDetectionLogMessage()
+	virtual basic_string GetDetectionLogMessage() override final
 	{
 		return "BunnyHop Program";
 	};
@@ -129,8 +129,8 @@ public:
 class JumpTester :
 	public BaseSystem,
 	public OnGroundHookListener,
-	public PlayerRunCommandHookListener,
 	public PlayerDataStructHandler<JumpInfoT>,
+	public PlayerRunCommandHookListener,
 	public Singleton<JumpTester>
 {
 	typedef Singleton<JumpTester> singleton_class;
@@ -138,13 +138,17 @@ class JumpTester :
 
 public:
 	JumpTester();
-	~JumpTester();
+	virtual ~JumpTester() final;
 
-	void Init();
-	void Load();
-	void Unload();
-	PlayerRunCommandRet PlayerRunCommandCallback(NczPlayer* player, void* cmd, void* old_cmd);
-	void m_hGroundEntityStateChangedCallback(NczPlayer* player, bool new_isOnGround);
+	virtual void Init() override final;
+
+	virtual void Load() override final;
+
+	virtual void Unload() override final;
+
+	virtual void m_hGroundEntityStateChangedCallback(NczPlayer * const player, bool const new_isOnGround) override final;
+
+	virtual PlayerRunCommandRet PlayerRunCommandCallback(NczPlayer * const player, void * const cmd, void * const old_cmd) override final;
 };
 
 #endif // JUMPTESTER_H

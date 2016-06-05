@@ -17,7 +17,6 @@
 #define CONCOMMANDTESTER_H
 
 #include <cmath>
-#include "Misc/temp_basicstring.h"
 
 #include "Misc/temp_basiclist.h"
 #include "Hooks/ConCommandHookListener.h"
@@ -25,6 +24,7 @@
 #include "Players/temp_PlayerDataStruct.h"
 #include "Systems/Testers/Detections/temp_BaseDetection.h"
 #include "Misc/temp_singleton.h"
+#include "Misc/temp_basicstring.h"
 
 typedef struct PlayerConCommandS
 {
@@ -133,38 +133,43 @@ typedef CUtlVector<CommandInfoT> CommandListT;
 
 class ConCommandTester :
 	public BaseSystem,
-	public PlayerDataStructHandler<LastPlayerCommandsT>,
 	public ConCommandHookListener,
+	public PlayerDataStructHandler<LastPlayerCommandsT>,
 	public Singleton<ConCommandTester>
 {
 	typedef Singleton<ConCommandTester> singleton_class;
 	typedef PlayerDataStructHandler<LastPlayerCommandsT> playerdatahandler_class;
 
+private:
+	CommandListT m_commands_list;
+
 public:
 	ConCommandTester();
-	~ConCommandTester();
+	virtual ~ConCommandTester() final;
 
+private:
+	virtual void Init() override final;
+
+	virtual void Load() override final;
+
+	virtual void Unload() override final;
+
+	virtual bool ConCommandCallback(NczPlayer * const player, void * const cmd, SourceSdk::CCommand const & args) override final;
+
+public:
 	/* Called by the plugin */
 	bool TestPlayerCommand(NczPlayer* player, const basic_string& command);
 
 private:
-
-	void Init();
-	void Load();
-	void Unload();
-
 	void AddCommandInfo(const basic_string& name, const bool ignore = false, const bool ban = false);
+
 	void RemoveCommandInfo(const basic_string& name);
 
 	void AddPlayerCommand(NczPlayer* player, const basic_string& command);
 
 	static bool HookSayCallback(NczPlayer* const player, const void* const command, const SourceSdk::CCommand & args);
+
 	static bool HookEntCallback(NczPlayer* const player, const void* const command, const SourceSdk::CCommand & args);
-
-	bool ConCommandCallback(NczPlayer* player, void* cmd, const SourceSdk::CCommand & args);
-
-private:
-	CommandListT m_commands_list;
 };
 
 class Detection_CmdFlood : public LogDetection<LastPlayerCommandsT>
@@ -174,7 +179,7 @@ public:
 	Detection_CmdFlood() : hClass() {};
 	virtual ~Detection_CmdFlood(){};
 
-	virtual basic_string GetDataDump();
+	virtual basic_string GetDataDump() final;
 	virtual basic_string GetDetectionLogMessage()
 	{
 		return "ConCommand Flood";
@@ -185,9 +190,9 @@ class Detection_CmdViolation : public Detection_CmdFlood // Use the same GetData
 {
 public:
 	Detection_CmdViolation() : Detection_CmdFlood() {};
-	~Detection_CmdViolation(){};
+	virtual  ~Detection_CmdViolation() override final {};
 
-	virtual basic_string GetDetectionLogMessage()
+	virtual basic_string GetDetectionLogMessage() override final
 	{
 		return "ConCommand Violation";
 	};

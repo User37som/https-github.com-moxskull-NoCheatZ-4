@@ -17,44 +17,42 @@
 #define SETTRANSMITHOOKLISTENER
 
 #include "Interfaces/edict.h"
-#include "Interfaces/iserverunknown.h"
 
 #include "Preprocessors.h"
 #include "Hook.h"
-#include "Players/NczPlayer.h"
 
 /////////////////////////////////////////////////////////////////////////
 // CBaseCombatCharacter::SetTransmit(CCheckTransmitInfo*, bool)
 /////////////////////////////////////////////////////////////////////////
 
-typedef void (HOOKFN_EXT *SetTransmit_t)(void*, SourceSdk::CCheckTransmitInfo*, bool);
-
-class SetTransmitHookListener;
-
-typedef HookListenersList<SetTransmitHookListener> TransmitListenersListT;
+typedef void (HOOKFN_EXT *SetTransmit_t)(void * const, SourceSdk::CCheckTransmitInfo const * const, bool const);
 
 class SetTransmitHookListener
 {
+	typedef HookListenersList<SetTransmitHookListener> TransmitListenersListT;
+
+private:
+	static TransmitListenersListT m_listeners;
+
 public:
 	SetTransmitHookListener();
-	~SetTransmitHookListener();
+	virtual ~SetTransmitHookListener();
 
-	static void HookSetTransmit(SourceSdk::edict_t* ent);
+	static void HookSetTransmit(SourceSdk::edict_t const * const ent);
 
 protected:
-	static void RegisterSetTransmitHookListener(SetTransmitHookListener* listener, size_t priority);
-	static void RemoveSetTransmitHookListener(SetTransmitHookListener* listener);
+	static void RegisterSetTransmitHookListener(SetTransmitHookListener const * const listener, size_t const priority);
+	static void RemoveSetTransmitHookListener(SetTransmitHookListener const * const listener);
 
-	virtual bool SetTransmitCallback(SourceSdk::edict_t* const, SourceSdk::edict_t* const) = 0;
-	virtual bool SetTransmitWeaponCallback(SourceSdk::edict_t* const, SourceSdk::edict_t* const) {return false;};
+	virtual bool SetTransmitCallback(SourceSdk::edict_t const * const, SourceSdk::edict_t const * const) = 0;
+	virtual bool SetTransmitWeaponCallback(SourceSdk::edict_t const *  const, SourceSdk::edict_t const * const) {return false;};
 
 private:
 #ifdef GNUC
-	static void HOOKFN_INT nSetTransmit(SourceSdk::CBaseEntity* This, SourceSdk::CCheckTransmitInfo*, bool);
+	static void HOOKFN_INT nSetTransmit(void * const This, SourceSdk::CCheckTransmitInfo const * const, bool const);
 #else
-	static void HOOKFN_INT nSetTransmit(SourceSdk::CBaseEntity* This, void*, SourceSdk::CCheckTransmitInfo*, bool);
+	static void HOOKFN_INT nSetTransmit(void * const This, void* const, SourceSdk::CCheckTransmitInfo const * const, bool const);
 #endif
-	static TransmitListenersListT m_listeners;
 };
 
 #endif // SETTRANSMITHOOKLISTENER

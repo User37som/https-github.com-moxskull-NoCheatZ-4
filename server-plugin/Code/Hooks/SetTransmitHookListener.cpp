@@ -16,6 +16,7 @@
 #include "SetTransmitHookListener.h"
 
 #include "Console/convar.h"
+#include "Interfaces/InterfacesProxy.h"
 
 #include "Misc/Helpers.h"
 #include "plugin.h"
@@ -23,7 +24,7 @@
 #include "Systems/ConfigManager.h"
 #include "Systems/AutoTVRecord.h"
 
-TransmitListenersListT SetTransmitHookListener::m_listeners;
+SetTransmitHookListener::TransmitListenersListT SetTransmitHookListener::m_listeners;
 
 SetTransmitHookListener::SetTransmitHookListener()
 {
@@ -33,7 +34,7 @@ SetTransmitHookListener::~SetTransmitHookListener()
 {
 }
 
-void SetTransmitHookListener::HookSetTransmit(SourceSdk::edict_t* ent)
+void SetTransmitHookListener::HookSetTransmit(SourceSdk::edict_t const * const ent)
 {
 	Assert(Helpers::isValidEdict(ent));
 	void* unk = ent->m_pUnk;
@@ -44,24 +45,13 @@ void SetTransmitHookListener::HookSetTransmit(SourceSdk::edict_t* ent)
 	//DebugMessage(basic_string("Hooked SetTransmit of entity classname ").append(ent->GetClassName()));
 }
 
-/*void SetTransmitHookListener::UnhookSetTransmit()
-{
-	InstancesListT::elem_t* it = m_hooked_instances.GetFirst();
-	while (it != nullptr)
-	{
-		VirtualTableHook(it->m_value->pInterface, ConfigManager::GetInstance()->GetVirtualFunctionId("settransmit"), it->m_value->oldFn, (DWORD)nSetTransmit);
-		m_hooked_instances.Remove(it);
-		it = m_hooked_instances.GetFirst();
-	}	
-}*/
-
 #ifdef GNUC
-void HOOKFN_INT SetTransmitHookListener::nSetTransmit(SourceSdk::CBaseEntity* This, SourceSdk::CCheckTransmitInfo* pInfo, bool bAlways)
+void HOOKFN_INT SetTransmitHookListener::nSetTransmit(void * const This, SourceSdk::CCheckTransmitInfo const * const pInfo, bool const bAlways)
 #else
-void HOOKFN_INT SetTransmitHookListener::nSetTransmit(SourceSdk::CBaseEntity* This, void*, SourceSdk::CCheckTransmitInfo* pInfo, bool bAlways)
+void HOOKFN_INT SetTransmitHookListener::nSetTransmit(void * const This, void * const, SourceSdk::CCheckTransmitInfo const * const pInfo, bool const bAlways)
 #endif
 {
-	PlayerHandler* pplayer = NczPlayerManager::GetInstance()->GetPlayerHandlerByBasePlayer(This);
+	PlayerHandler const * const pplayer = NczPlayerManager::GetInstance()->GetPlayerHandlerByBasePlayer(This);
 	if (pplayer->status > INVALID)
 	{
 		SourceSdk::edict_t* const pEdict_sender = pplayer->playerClass->GetEdict();
@@ -117,12 +107,12 @@ void HOOKFN_INT SetTransmitHookListener::nSetTransmit(SourceSdk::CBaseEntity* Th
 	gpOldFn(This, pInfo, bAlways);
 }
 
-void SetTransmitHookListener::RegisterSetTransmitHookListener(SetTransmitHookListener* listener, size_t priority)
+void SetTransmitHookListener::RegisterSetTransmitHookListener(SetTransmitHookListener const * const listener, size_t const priority)
 {
 	m_listeners.Add(listener, priority);
 }
 
-void SetTransmitHookListener::RemoveSetTransmitHookListener(SetTransmitHookListener* listener)
+void SetTransmitHookListener::RemoveSetTransmitHookListener(SetTransmitHookListener const * const listener)
 {
 	m_listeners.Remove(listener);
 }

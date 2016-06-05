@@ -16,12 +16,13 @@
 #include "OnGroundHookListener.h"
 
 #include "Interfaces/iserverunknown.h"
+#include "Interfaces/edict.h"
 #include "Console/convar.h"
 
 #include "plugin.h"
 #include "Systems/ConfigManager.h"
 
-OnGroundListenersListT OnGroundHookListener::m_listeners;
+OnGroundHookListener::OnGroundListenersListT OnGroundHookListener::m_listeners;
 
 OnGroundHookListener::OnGroundHookListener()
 {
@@ -31,7 +32,7 @@ OnGroundHookListener::~OnGroundHookListener()
 {
 }
 
-void OnGroundHookListener::HookOnGround(NczPlayer* player)
+void OnGroundHookListener::HookOnGround(NczPlayer const * const player)
 {
 	Assert(Helpers::isValidEdict(player->GetEdict()));
 	void* unk = player->GetEdict()->m_pUnk;
@@ -51,12 +52,12 @@ void OnGroundHookListener::HookOnGround(NczPlayer* player)
 }*/
 
 #ifdef GNUC
-void HOOKFN_INT OnGroundHookListener::nNetworkStateChanged_m_hGroundEntity(CBasePlayer* basePlayer, int * new_m_hGroundEntity)
+void HOOKFN_INT OnGroundHookListener::nNetworkStateChanged_m_hGroundEntity(void * const basePlayer, int const * const new_m_hGroundEntity)
 #else
-void HOOKFN_INT OnGroundHookListener::nNetworkStateChanged_m_hGroundEntity(CBasePlayer* basePlayer, void*, int * new_m_hGroundEntity)
+void HOOKFN_INT OnGroundHookListener::nNetworkStateChanged_m_hGroundEntity(void * const basePlayer, void * const, int const * const new_m_hGroundEntity)
 #endif
 {
-	PlayerHandler* ph = NczPlayerManager::GetInstance()->GetPlayerHandlerByBasePlayer(basePlayer);
+	PlayerHandler const * const  ph = NczPlayerManager::GetInstance()->GetPlayerHandlerByBasePlayer(basePlayer);
 	bool new_isOnground = true;
 
 	if(ph->status >= PLAYER_CONNECTED)
@@ -76,12 +77,12 @@ void HOOKFN_INT OnGroundHookListener::nNetworkStateChanged_m_hGroundEntity(CBase
 	gpOldFn(basePlayer, new_m_hGroundEntity);
 }
 
-void OnGroundHookListener::RegisterOnGroundHookListener(OnGroundHookListener* listener)
+void OnGroundHookListener::RegisterOnGroundHookListener(OnGroundHookListener const * const listener)
 {
 	m_listeners.Add(listener);
 }
 
-void OnGroundHookListener::RemoveOnGroundHookListener(OnGroundHookListener* listener)
+void OnGroundHookListener::RemoveOnGroundHookListener(OnGroundHookListener const * const listener)
 {
 	m_listeners.Remove(listener);
 }

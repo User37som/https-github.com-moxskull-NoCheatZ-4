@@ -25,8 +25,16 @@
 
 class OnTickListener
 {
+	typedef basic_slist<OnTickListener *> TickListenersListT;
+
+private:
+	static TickListenersListT m_tickTestersList;
+
+	SlotStatus m_filter;
+
 public:
 	OnTickListener();
+
 	virtual ~OnTickListener(){};
 
 	/* Appelé par le plugin à chaque frame
@@ -42,17 +50,13 @@ protected:
 
 	/* Appelé par ProcessTestsOnTick() lorsque le joueur correspond au filtre */
 	virtual void ProcessPlayerTestOnTick(NczPlayer* const player, float const curtime) = 0;
+
 	virtual void ProcessOnTick(float const curtime) = 0;
 
 	/* Permet de se mettre à l'écoute de l'événement, appelé par Load/Unload des testeurs */
-	static void RegisterOnTickListener(OnTickListener* listener);
-	static void RemoveOnTickListener(OnTickListener* listener);
+	static void RegisterOnTickListener(OnTickListener const * const listener);
 
-	SlotStatus m_filter;
-
-private:
-	typedef basic_slist<OnTickListener*> TickListenersListT;
-	static TickListenersListT m_tickTestersList;
+	static void RemoveOnTickListener(OnTickListener const * const listener);
 };
 
 #endif // ONTICKLISTENER

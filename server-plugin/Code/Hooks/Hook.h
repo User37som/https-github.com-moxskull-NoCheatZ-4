@@ -100,7 +100,7 @@ private:
 
 public:
 	HookGuard() : singleton_class() {}
-	~HookGuard() {};
+	virtual ~HookGuard() final {};
 
 	void VirtualTableHook(HookInfo& info, bool force = false);
 
@@ -125,7 +125,7 @@ public:
 template <class C>
 struct SortedListener
 {
-	C* listener;
+	mutable C * listener;
 	size_t priority;
 	SlotStatus filter;
 };
@@ -172,12 +172,12 @@ public:
 	/*
 		Add a listener sorted by priority.
 	*/
-	elem_t* Add(C * const listener, size_t const priority = 0, SlotStatus const filter = PLAYER_IN_TESTS)
+	elem_t* Add(C const * const listener, size_t const priority = 0, SlotStatus const filter = PLAYER_IN_TESTS)
 	{
 		if (m_first == nullptr)
 		{
 			m_first = new elem_t();
-			m_first->m_value.listener = listener;
+			m_first->m_value.listener = const_cast<C * const>(listener);
 			m_first->m_value.priority = priority;
 			m_first->m_value.filter = filter;
 			return m_first;
@@ -197,7 +197,7 @@ public:
 						elem_t* const old_first = m_first;
 						m_first = new elem_t();
 						m_first->m_next = old_first;
-						m_first->m_value.listener = listener;
+						m_first->m_value.listener = const_cast<C * const>(listener);
 						m_first->m_value.priority = priority;
 						m_first->m_value.filter = filter;
 						return m_first;
@@ -206,7 +206,7 @@ public:
 					{
 						prev->m_next = new elem_t();
 						prev->m_next->m_next = iterator;
-						prev->m_next->m_value.listener = listener;
+						prev->m_next->m_value.listener = const_cast<C * const>(listener);
 						prev->m_next->m_value.priority = priority;
 						prev->m_next->m_value.filter = filter;
 						return prev->m_next;
@@ -219,7 +219,7 @@ public:
 			while (iterator != nullptr);
 
 			prev->m_next = new elem_t();
-			prev->m_next->m_value.listener = listener;
+			prev->m_next->m_value.listener = const_cast<C * const>(listener);
 			prev->m_next->m_value.priority = priority;
 			prev->m_next->m_value.filter = filter;
 			return prev->m_next;

@@ -30,8 +30,8 @@
 JumpTester::JumpTester() :
 	BaseSystem("JumpTester"),
 	OnGroundHookListener(),
-	PlayerRunCommandHookListener(),
 	playerdata_class(),
+	PlayerRunCommandHookListener(),
 	singleton_class()
 {
 }

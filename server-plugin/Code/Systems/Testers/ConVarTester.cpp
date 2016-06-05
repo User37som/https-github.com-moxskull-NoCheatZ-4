@@ -25,8 +25,8 @@
 /////////////////////////////////////////////////////////////////////////
 
 ConVarTester::ConVarTester() :
-	BaseSystem("ConVarTester", PLAYER_CONNECTED, PLAYER_CONNECTING, STATUS_EQUAL_OR_BETTER, "Enable - Disable - Verbose - AddRule - ResetRules"),
 	AsyncNczFilteredPlayersList(),
+	BaseSystem("ConVarTester", PLAYER_CONNECTED, PLAYER_CONNECTING, STATUS_EQUAL_OR_BETTER, "Enable - Disable - Verbose - AddRule - ResetRules"),
 	OnTickListener(),
 	playerdata_class(),
 	singleton_class(),

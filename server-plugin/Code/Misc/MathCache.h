@@ -16,9 +16,11 @@ limitations under the License.
 #ifndef MATHCACHE_H
 #define MATHCACHE_H
 
-#include "temp_singleton.h"
-#include "Players/temp_PlayerDataStruct.h"
+#include <cstdint>
+
 #include "Maths/Vector.h"
+
+#include "temp_singleton.h"
 
 struct MathInfo
 {
@@ -45,7 +47,7 @@ private:
 
 public:
 	MathCache();
-	~MathCache();
+	virtual ~MathCache() final;
 
 	/*
 		This will update internal cache if it is expired or if force is specified

@@ -15,7 +15,10 @@
 
 #include "MRecipientFilter.h"
 
-#include "Helpers.h" // edict, PEntityOfEntIndex
+#include "Interfaces/edict.h"
+#include "Interfaces/InterfacesProxy.h"
+
+#include "Helpers.h" // PEntityOfEntIndex
 #include "Players/NczPlayerManager.h"
 
 MRecipientFilter::MRecipientFilter(void)

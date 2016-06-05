@@ -33,20 +33,20 @@ void OnTickListener::ProcessTestsOnTick(float const curtime)
 	{
 		if(ph->status >= GetFilter())
 		{
-			ProcessPlayerTestOnTick(x_ph->playerClass, curtime);
+			ProcessPlayerTestOnTick(ph->playerClass, curtime);
 		}
 	}
 	END_PLAYERS_LOOP
 }
 
-void OnTickListener::RegisterOnTickListener(OnTickListener* tester)
+void OnTickListener::RegisterOnTickListener(OnTickListener const * const tester)
 {
-	m_tickTestersList.Add(tester);
+	m_tickTestersList.Add(const_cast<OnTickListener*const>(tester));
 }
 
-void OnTickListener::RemoveOnTickListener(OnTickListener* tester)
+void OnTickListener::RemoveOnTickListener(OnTickListener const * const tester)
 {
-	m_tickTestersList.Remove(tester);
+	m_tickTestersList.Remove(const_cast<OnTickListener*const>(tester));
 }
 
 void OnTickListener::OnTick()

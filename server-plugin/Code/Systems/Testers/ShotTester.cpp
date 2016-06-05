@@ -28,8 +28,8 @@
 
 ShotTester::ShotTester(void) :
 	BaseSystem("ShotTester"),
-	PlayerRunCommandHookListener(),
 	playerdata_class(),
+	PlayerRunCommandHookListener(),
 	singleton_class()
 {
 }
@@ -37,11 +37,6 @@ ShotTester::ShotTester(void) :
 ShotTester::~ShotTester(void)
 {
 	Unload();
-}
-
-SlotStatus ShotTester::GetFilter()
-{
-	return PLAYER_IN_TESTS;
 }
 
 void ShotTester::Init()

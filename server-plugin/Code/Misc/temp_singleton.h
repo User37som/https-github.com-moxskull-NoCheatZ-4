@@ -29,6 +29,7 @@ class NoCopy
 protected:
 	NoCopy() {}
 	virtual ~NoCopy() {}
+
 private:
 	NoCopy(NoCopy const &) = delete;
 	NoCopy& operator=(NoCopy const &) = delete;
@@ -47,7 +48,7 @@ protected:
 	{
 	}
 
-	virtual ~Singleton()
+	virtual ~Singleton() override
 	{
 	}
 

@@ -17,7 +17,7 @@
 
 #include "Maths/Vector.h"
 #include "Interfaces/bspflags.h"
-#include "Interfaces/IEngineTrace/IEngineTrace.h"
+#include "Interfaces/InterfacesProxy.h"
 
 #include "Misc/Helpers.h" // PEntityOfEntIndex, ifaces
 #include "Misc/temp_Metrics.h"
@@ -28,51 +28,18 @@
 // NczPlayer
 //---------------------------------------------------------------------------------
 
-NczPlayer::NczPlayer(const int index) : cIndex(index), m_time_connected(0.0)
+NczPlayer::NczPlayer(const int index) : 
+	NoCopy(),
+	m_index(index),
+	m_userid(SourceSdk::InterfacesProxy::Call_GetPlayerUserid(m_edict)),
+	m_edict(Helpers::PEntityOfEntIndex(index)),
+	m_channelinfo(SourceSdk::InterfacesProxy::Call_GetPlayerNetInfo(index)),
+	m_playerinfo(nullptr),
+	m_time_connected(0.0)
 {
-	m_edict = Helpers::PEntityOfEntIndex(index);
-	m_userid = SourceSdk::InterfacesProxy::Call_GetPlayerUserid(m_edict);
-	m_channelinfo = SourceSdk::InterfacesProxy::Call_GetPlayerNetInfo(index);
 }
 
-int NczPlayer::GetUserid() const
-{
-	return m_userid;
-}
-
-float NczPlayer::GetTimeConnected() const
-{
-	return Plat_FloatTime() - m_time_connected;
-}
-
-void * NczPlayer::GetPlayerInfo() const
-{
-	return SourceSdk::InterfacesProxy::Call_GetPlayerInfo(m_edict);
-}
-
-const char * NczPlayer::GetName() const
-{
-	if (Helpers::isValidEdict(m_edict))
-	{
-		if (GetPlayerInfo())
-		{
-			return static_cast<SourceSdk::IPlayerInfo*>(GetPlayerInfo())->GetName();
-		}
-	}
-	return "";
-}
-
-const char * NczPlayer::GetSteamID() const
-{
-	return SourceSdk::InterfacesProxy::Call_GetPlayerNetworkIDString(m_edict);
-}
-
-const char * NczPlayer::GetIPAddress() const
-{
-	return GetChannelInfo()->GetAddress();
-}
-
-WpnShotType NczPlayer::GetWpnShotType() const
+WpnShotType const NczPlayer::GetWpnShotType() const
 {
 	if (GetPlayerInfo() == nullptr) return HAND;
 
@@ -362,7 +329,7 @@ WpnShotType NczPlayer::GetWpnShotType() const
 	return HAND;
 }
 
-int NczPlayer::aimingAt()
+int const NczPlayer::aimingAt()
 {
 	SourceSdk::CTraceFilterWorldAndPropsOnly filter;
 
@@ -424,41 +391,14 @@ int NczPlayer::aimingAt()
 	return -1;
 }
 
-SourceSdk::INetChannelInfo* NczPlayer::GetChannelInfo() const
-{
-	return m_channelinfo;
-}
-
-SourceSdk::edict_t * NczPlayer::GetEdict() const
-{
-	return m_edict;
-}
-
-bool NczPlayer::isValidEdict()
-{
-	return Helpers::isValidEdict(m_edict);
-}
-
 void NczPlayer::OnConnect()
 {
 	m_time_connected = Plat_FloatTime();
 }
 
-basic_string NczPlayer::GetReadableIdentity()
-{
-	if(SteamGameServer_BSecure())
-	{
-		return Helpers::format("%s [%s - %s]", this->GetName(), this->GetSteamID(), this->GetIPAddress());
-	}
-	else
-	{
-		return Helpers::format("%s [%s]", this->GetName(), this->GetIPAddress());
-	}
-}
-
 void NczPlayer::Kick(const char * msg)
 {
-	NczPlayerManager::GetInstance()->GetPlayerHandlerByIndex(cIndex)->status = KICK;
+	NczPlayerManager::GetInstance()->DeclareKickedPlayer(m_index);
 	Helpers::writeToLogfile(Helpers::format(
 				"Kicked %s with reason : %s\n", this->GetReadableIdentity().c_str(), msg));
 

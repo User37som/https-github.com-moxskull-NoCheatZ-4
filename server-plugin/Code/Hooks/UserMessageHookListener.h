@@ -16,20 +16,39 @@ limitations under the License.
 #ifndef USERMESSAGEHOOKLISTENER_H
 #define USERMESSAGEHOOKLISTENER_H
 
-#include "Hook.h"
-#include "Players/NczPlayerManager.h"
 #include "Preprocessors.h"
-#include "Interfaces/InterfacesProxy.h"
-#include "Misc/UserMsg.h"
+#include "Hook.h"
+
+namespace SourceSdk
+{
+	class IVEngineServer023csgo;
+	class IVEngineServer023;
+	class IRecipientFilter;
+	struct bf_write;
+}
+
+namespace google
+{
+	namespace protobuf
+	{
+		class Message;
+	}
+}
 
 // The function declarations we will call
-typedef void (HOOKFN_EXT *SendUserMessage_t)(SourceSdk::IVEngineServer023csgo*, IRecipientFilter &, int, google::protobuf::Message const &);
-typedef void (HOOKFN_EXT *UserMessageBegin_t)(SourceSdk::IVEngineServer023* thisptr, bf_write*, IRecipientFilter*, int);
+typedef void (HOOKFN_EXT *SendUserMessage_t)(SourceSdk::IVEngineServer023csgo const * const, SourceSdk::IRecipientFilter &, int, google::protobuf::Message const &);
+typedef void (HOOKFN_EXT *UserMessageBegin_t)(SourceSdk::IVEngineServer023 const * const thisptr, SourceSdk::bf_write const * const, SourceSdk::IRecipientFilter const * const, int const);
 typedef void (HOOKFN_EXT *MessageEnd_t)(void*);
 
 class UserMessageHookListener
 {
 	typedef HookListenersList<UserMessageHookListener> ListenersList_t;
+
+private:
+	static ListenersList_t m_listeners;
+	// Bypass current usermessage and incoming messageend based on what is the answer of listener.
+	static bool bypass;
+	static SourceSdk::bf_write* m_buffer;
 
 public:
 	UserMessageHookListener();
@@ -46,28 +65,23 @@ public:
 	static void HookUserMessage();
 
 protected:
-	static void RegisterUserMessageHookListener(UserMessageHookListener* listener);
-	static void RemoveUserMessageHookListener(UserMessageHookListener* listener);
+	static void RegisterUserMessageHookListener(UserMessageHookListener const * const listener);
+	static void RemoveUserMessageHookListener(UserMessageHookListener const * const listener);
 
-	virtual bool SendUserMessageCallback(SourceSdk::IRecipientFilter &, int, google::protobuf::Message const &) = 0;
-	virtual bool UserMessageBeginCallback(SourceSdk::IRecipientFilter*, int) = 0;
+	virtual bool SendUserMessageCallback(SourceSdk::IRecipientFilter const &, int const, google::protobuf::Message const &) = 0;
+	virtual bool UserMessageBeginCallback(SourceSdk::IRecipientFilter const * const, int const) = 0;
 
 private:
-	// Bypass current usermessage and incoming messageend based on what is the answer of listener.
-	static bool bypass;
-	static SourceSdk::bf_write* m_buffer;
 
 #ifdef GNUC
-	static void HOOKFN_INT nSendUserMessage(SourceSdk::IVEngineServer023csgo* thisptr, SourceSdk::IRecipientFilter &, int, google::protobuf::Message const &);
-	static SourceSdk::bf_write* HOOKFN_INT nUserMessageBegin(SourceSdk::IVEngineServer023* thisptr, SourceSdk::IRecipientFilter*, int);
-	static void HOOKFN_INT nMessageEnd(void* thisptr);
+	static void HOOKFN_INT nSendUserMessage(SourceSdk::IVEngineServer023csgo const * const thisptr, SourceSdk::IRecipientFilter const &, int const, google::protobuf::Message const &);
+	static SourceSdk::bf_write* HOOKFN_INT nUserMessageBegin(SourceSdk::IVEngineServer023 const * const thisptr, SourceSdk::IRecipientFilter const * const, int const);
+	static void HOOKFN_INT nMessageEnd(void * const thisptr);
 #else
-	static void HOOKFN_INT nSendUserMessage(SourceSdk::IVEngineServer023csgo* thisptr, void*, SourceSdk::IRecipientFilter &, int, google::protobuf::Message const &);
-	static SourceSdk::bf_write* HOOKFN_INT nUserMessageBegin(SourceSdk::IVEngineServer023* thisptr, void*, SourceSdk::IRecipientFilter*, int);
-	static void HOOKFN_INT nMessageEnd(void* thisptr, void*);
+	static void HOOKFN_INT nSendUserMessage(SourceSdk::IVEngineServer023csgo const * const thisptr, void * const, SourceSdk::IRecipientFilter const &, int const, google::protobuf::Message const &);
+	static SourceSdk::bf_write* HOOKFN_INT nUserMessageBegin(SourceSdk::IVEngineServer023 const * const thisptr, void * const, SourceSdk::IRecipientFilter const * const, int const);
+	static void HOOKFN_INT nMessageEnd(void * const thisptr, void * const);
 #endif
-
-	static ListenersList_t m_listeners;
 };
 
 #endif

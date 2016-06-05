@@ -16,9 +16,8 @@
 #ifndef WEAPONHOOKLISTENER
 #define WEAPONHOOKLISTENER
 
-#include "Hook.h"
-#include "Players/NczPlayerManager.h"
 #include "Preprocessors.h"
+#include "Hook.h"
 
 /////////////////////////////////////////////////////////////////////////
 // CCSPlayer::Weapon_Equip(CBaseCombatWeapon*)
@@ -26,43 +25,49 @@
 /////////////////////////////////////////////////////////////////////////
 
 class CBasePlayer;
-class CBaseEntity;
+class NczPlayer;
 
-typedef void (HOOKFN_EXT *WeaponEquip_t)(CBasePlayer *, SourceSdk::CBaseEntity*);
-typedef void (HOOKFN_EXT *WeaponDrop_t)(CBasePlayer *, SourceSdk::CBaseEntity*, const SourceSdk::Vector*, const SourceSdk::Vector*);
+namespace SourceSdk
+{
+	struct Vector;
+	class CBaseEntity;
+}
 
-class WeaponHookListener;
-typedef HookListenersList<WeaponHookListener> WeaponHookListenersListT;
+typedef void (HOOKFN_EXT *WeaponEquip_t)(void * const, void * const);
+typedef void (HOOKFN_EXT *WeaponDrop_t)(void * const, void * const, SourceSdk::Vector const * const, SourceSdk::Vector const * const);
 
 class WeaponHookListener
 {
+	typedef HookListenersList<WeaponHookListener> WeaponHookListenersListT;
+
+private:
+	static WeaponHookListenersListT m_listeners;
+
 public:
 	WeaponHookListener();
-	~WeaponHookListener();
+	virtual ~WeaponHookListener();
 
 	/*
 		Hook and unhook functions.
 		FIXME : May not works well with others plugins ...
 	*/
-	static void HookWeapon(NczPlayer* player);
+	static void HookWeapon(NczPlayer const * const player);
 
 protected:
-	static void RegisterWeaponHookListener(WeaponHookListener* listener);
-	static void RemoveWeaponHookListener(WeaponHookListener* listener);
+	static void RegisterWeaponHookListener(WeaponHookListener const * const listener);
+	static void RemoveWeaponHookListener(WeaponHookListener const * const listener);
 	
-	virtual void WeaponEquipCallback(NczPlayer* player, SourceSdk::edict_t* const weapon) = 0;
-	virtual void WeaponDropCallback(NczPlayer* player, SourceSdk::edict_t* const weapon) = 0;
+	virtual void WeaponEquipCallback(NczPlayer * const player, SourceSdk::edict_t const * const weapon) = 0;
+	virtual void WeaponDropCallback(NczPlayer * const  player, SourceSdk::edict_t const * const weapon) = 0;
 
 private:
 #ifdef GNUC
-	static void HOOKFN_INT nWeapon_Equip(CBasePlayer* basePlayer, SourceSdk::CBaseEntity* weapon);
-	static void HOOKFN_INT nWeapon_Drop(CBasePlayer* basePlayer, SourceSdk::CBaseEntity* weapon, const SourceSdk::Vector* targetVec, const SourceSdk::Vector* velocity);
+	static void HOOKFN_INT nWeapon_Equip(void * const basePlayer, void * const weapon);
+	static void HOOKFN_INT nWeapon_Drop(void * const basePlayer, void * const weapon, SourceSdk::Vector const * const targetVec, SourceSdk::Vector const * const velocity);
 #else
-	static void HOOKFN_INT nWeapon_Equip(CBasePlayer* basePlayer, void*, SourceSdk::CBaseEntity* weapon);
-	static void HOOKFN_INT nWeapon_Drop(CBasePlayer* basePlayer,  void*, SourceSdk::CBaseEntity* weapon, const SourceSdk::Vector* targetVec, const SourceSdk::Vector* velocity);
+	static void HOOKFN_INT nWeapon_Equip(void * const basePlayer, void * const, void * const weapon);
+	static void HOOKFN_INT nWeapon_Drop(void * const basePlayer,  void * const, void * const weapon, SourceSdk::Vector const * const targetVec, SourceSdk::Vector const * const velocity);
 #endif
-	
-	static WeaponHookListenersListT m_listeners;
 };
 
 #endif

@@ -55,51 +55,54 @@ typedef struct SmokeEntityS
 
 typedef basic_slist<SmokeEntityT> SmokeListT;
 
-typedef struct SmokeInfoS
+typedef struct ALIGN8 SmokeInfoS
 {
 	bool is_in_smoke;
-	bool can_see_this_player[MAX_PLAYERS];
+	bool can_not_see_this_player[MAX_PLAYERS];
 
 	SmokeInfoS()
 	{
-		is_in_smoke = false;
-
-		memset(can_see_this_player, 0x01010101, sizeof(bool) * MAX_PLAYERS);
+		memset(this, 0, sizeof(SmokeInfoS));
 	};
 	SmokeInfoS(const SmokeInfoS& other)
 	{
 		memcpy(this, &other, sizeof(SmokeInfoS));
 	};
-} SmokeInfoT;
+} SmokeInfoT ALIGN8_POST;
 
 class AntiSmokeBlocker :
 	private BaseSystem,
 	private SourceSdk::IGameEventListener002,
+	private OnTickListener,
 	public PlayerDataStructHandler<SmokeInfoT>,
 	private SetTransmitHookListener,
-	private OnTickListener,
 	public Singleton<AntiSmokeBlocker>
 {
 	typedef Singleton<AntiSmokeBlocker> singleton_class;
 	typedef PlayerDataStructHandler<SmokeInfoT> playerdatahandler_class;
 
-public:
-	AntiSmokeBlocker();
-	~AntiSmokeBlocker();
-
-private:
-	void Init();
-	void Load();
-	void Unload();
-
-	bool SetTransmitCallback(SourceSdk::edict_t* const ea, SourceSdk::edict_t* const eb);
-	void FireGameEvent(SourceSdk::IGameEvent* ev);
-
-	void ProcessOnTick(float const curtime);
-	void ProcessPlayerTestOnTick(NczPlayer* const player, float const curtime){};
-
 private:
 	SmokeListT m_smokes;
+
+public:
+	AntiSmokeBlocker();
+
+	virtual ~AntiSmokeBlocker() final;
+
+private:
+	virtual void Init() override final;
+
+	virtual void Load() override final;
+
+	virtual void Unload() override final;
+
+	virtual void FireGameEvent(SourceSdk::IGameEvent* ev) override final;
+
+	virtual void ProcessOnTick(float const curtime) override final;
+
+	virtual void ProcessPlayerTestOnTick(NczPlayer* const player, float const curtime) override final {};
+
+	virtual bool SetTransmitCallback(SourceSdk::edict_t const * const ea, SourceSdk::edict_t const * const eb) override final;
 };
 
 #endif // ANTIFLASHBANGBLOCKER_H

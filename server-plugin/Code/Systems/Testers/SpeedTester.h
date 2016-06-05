@@ -59,20 +59,20 @@ class Detection_SpeedHack : public LogDetection<SpeedHolderT>
 	typedef LogDetection<SpeedHolderT> hClass;
 public:
 	Detection_SpeedHack() : hClass() {};
-	~Detection_SpeedHack(){};
+	virtual ~Detection_SpeedHack() final {};
 
-	virtual basic_string GetDataDump();
-	virtual basic_string GetDetectionLogMessage()
+	virtual basic_string GetDataDump() final;
+	virtual basic_string GetDetectionLogMessage() final
 	{
 		return "SpeedHack";
 	};
 };
 
 class SpeedTester :
-	public BaseSystem,
-	public OnTickListener,
-	public PlayerRunCommandHookListener,
+	private BaseSystem,
+	private OnTickListener,
 	public PlayerDataStructHandler<SpeedHolderT>,
+	private PlayerRunCommandHookListener,
 	public Singleton<SpeedTester>
 {
 	typedef PlayerDataStructHandler<SpeedHolderT> playerdata_class;
@@ -80,14 +80,20 @@ class SpeedTester :
 
 public:
 	SpeedTester();
-	~SpeedTester();
+	virtual ~SpeedTester() final;
 
-	void Init();
-	void Load();
-	void Unload();
-	PlayerRunCommandRet PlayerRunCommandCallback(NczPlayer* player, void* cmd, void* old_cmd);
-	void ProcessPlayerTestOnTick(NczPlayer* const player, float const curtime);
-	void ProcessOnTick(float const curtime){};
+private:
+	virtual void Init() override final;
+
+	virtual void Load() override final;
+
+	virtual void Unload() override final;
+
+	virtual void ProcessPlayerTestOnTick(NczPlayer * const player, float const curtime) override final;
+
+	virtual void ProcessOnTick(float const curtime) override final {};
+
+	virtual PlayerRunCommandRet PlayerRunCommandCallback(NczPlayer * const player, void * const cmd, void * const old_cmd) override final;
 };
 
 #endif // SPEEDTESTER_H

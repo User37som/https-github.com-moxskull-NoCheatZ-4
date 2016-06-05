@@ -19,9 +19,10 @@
 #include <limits>
 #include <cstring> // memset, memcpy
 
-#include "NczPlayer.h"
 #include "Preprocessors.h"
+#include "NczPlayer.h"
 #include "Misc/temp_singleton.h"
+#include "Misc/Helpers.h"
 
 #include "SdkPreprocessors.h"
 #include "Interfaces/IGameEventManager/IGameEventManager.h"
@@ -29,7 +30,7 @@
 struct PlayerHandler
 {
 	SlotStatus status;
-	NczPlayer* playerClass;
+	mutable NczPlayer* playerClass;
 	float in_tests_time;
 
 	PlayerHandler()
@@ -68,19 +69,19 @@ class NczPlayerManager :
 
 public:
 	NczPlayerManager();
-	virtual ~NczPlayerManager();
+	virtual ~NczPlayerManager() final;
 
 	/* Force la mise à jour des slots en scannant la mémoire pour EdictList
 	   S'inscrit aux événements pour mettre à jour les slots en temps réel */
 	void LoadPlayerManager();
 	void OnLevelInit();
 
-	inline PlayerHandler* GetPlayerHandlerByIndex(int slot);
-	PlayerHandler* GetPlayerHandlerByUserId(int userid);
-	PlayerHandler* GetPlayerHandlerByBasePlayer(void* BasePlayer);
-	PlayerHandler* GetPlayerHandlerBySteamID(const char * steamid);
-	PlayerHandler* GetPlayerHandlerByEdict(SourceSdk::edict_t * pEdict);
-	PlayerHandler* GetPlayerHandlerByName(const char * playerName);
+	inline PlayerHandler const * const GetPlayerHandlerByIndex(int const slot) const;
+	inline PlayerHandler const * const GetPlayerHandlerByUserId(int const userid) const;
+	PlayerHandler const * const GetPlayerHandlerByBasePlayer(void* BasePlayer) const;
+	PlayerHandler const * const GetPlayerHandlerBySteamID(const char * steamid) const;
+	inline PlayerHandler const * const GetPlayerHandlerByEdict(SourceSdk::edict_t const * const pEdict) const;
+	PlayerHandler const * const GetPlayerHandlerByName(const char * playerName) const;
 	
 	short GetPlayerCount(SlotStatus filter = INVALID, SlotFilterBehavior strict = STATUS_EQUAL_OR_BETTER) const;
 
@@ -88,6 +89,7 @@ public:
 	void ClientActive(SourceSdk::edict_t* pEntity); // ... they call this at first
 	void ClientDisconnect(SourceSdk::edict_t *pEntity);
 	void FireGameEvent(SourceSdk::IGameEvent* ev);
+	void DeclareKickedPlayer(int const slot);
 
 	void Think();
 
@@ -98,9 +100,19 @@ private:
 	int m_max_index;
 };
 
-inline PlayerHandler* NczPlayerManager::GetPlayerHandlerByIndex(int slot)
+inline PlayerHandler const * const NczPlayerManager::GetPlayerHandlerByIndex(int const slot) const
 {
-	return (PlayerHandler*)(&FullHandlersList[slot]);
+	return (PlayerHandler const * const)(&FullHandlersList[slot]);
+}
+
+inline PlayerHandler const * const NczPlayerManager::GetPlayerHandlerByUserId(int const userid) const
+{
+	return GetPlayerHandlerByIndex(Helpers::getIndexFromUserID(userid));
+}
+
+inline PlayerHandler const* const NczPlayerManager::GetPlayerHandlerByEdict(SourceSdk::edict_t const * const pEdict) const
+{
+	return GetPlayerHandlerByIndex(Helpers::IndexOfEdict(pEdict));
 }
 
 /* Utilisé en interne pour initialiser le tableau, des petites fonctions
@@ -115,7 +127,7 @@ inline PlayerHandler* NczPlayerManager::GetPlayerHandlerByIndex(int slot)
 #define PLAYERS_LOOP_RUNTIME { \
 		int x = 1; \
 		const int maxcl = NczPlayerManager::GetInstance()->GetMaxIndex(); \
-		PlayerHandler* ph = NczPlayerManager::GetInstance()->GetPlayerHandlerByIndex(x); \
+		PlayerHandler const * ph = NczPlayerManager::GetInstance()->GetPlayerHandlerByIndex(x); \
 		for(; x <= maxcl; ++x, ph = NczPlayerManager::GetInstance()->GetPlayerHandlerByIndex(x)){if(ph->status == INVALID) continue;
 
 #define END_PLAYERS_LOOP  }}

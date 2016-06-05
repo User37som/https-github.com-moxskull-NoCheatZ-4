@@ -82,8 +82,8 @@ typedef struct ShotStats
 
 class ShotTester :
 	public BaseSystem,
-	public PlayerRunCommandHookListener,
 	public PlayerDataStructHandler<ShotStatsT>,
+	public PlayerRunCommandHookListener,
 	public Singleton<ShotTester>
 {
 	typedef PlayerDataStructHandler<ShotStatsT> playerdata_class;
@@ -91,13 +91,16 @@ class ShotTester :
 
 public:
 	ShotTester();
-	~ShotTester();
 
-	void Init();
-	void Load();
-	void Unload();
-	SlotStatus GetFilter();
-	PlayerRunCommandRet PlayerRunCommandCallback(NczPlayer* player, void* pCmd, void* old_cmd);
+	virtual ~ShotTester() final;
+
+	virtual void Init() override final;
+
+	virtual void Load() override final;
+
+	virtual void Unload() override final;
+
+	virtual PlayerRunCommandRet PlayerRunCommandCallback(NczPlayer * const player, void * const pCmd, void * const old_cmd) override final;
 };
 
 class ShotDetection : public LogDetection<ShotStats>
@@ -105,10 +108,10 @@ class ShotDetection : public LogDetection<ShotStats>
 	typedef LogDetection<ShotStats> hClass;
 public:
 	ShotDetection() : hClass() {};
-	~ShotDetection() {};
+	virtual ~ShotDetection() override {};
 
-	virtual basic_string GetDataDump();
-	virtual basic_string GetDetectionLogMessage()
+	virtual basic_string GetDataDump() override final;
+	virtual basic_string GetDetectionLogMessage() override
 	{
 		return "ShotDetection";
 	};
@@ -118,9 +121,9 @@ class Detection_TriggerBot : public ShotDetection
 {
 public:
 	Detection_TriggerBot() : ShotDetection() {};
-	~Detection_TriggerBot() {};
+	virtual ~Detection_TriggerBot() override final {};
 
-	virtual basic_string GetDetectionLogMessage()
+	virtual basic_string GetDetectionLogMessage() override final
 	{
 		return "TriggerBot";
 	};
@@ -130,9 +133,9 @@ class Detection_AutoPistol : public ShotDetection
 {
 public:
 	Detection_AutoPistol() : ShotDetection() {};
-	~Detection_AutoPistol() {};
+	virtual ~Detection_AutoPistol() override final {};
 
-	virtual basic_string GetDetectionLogMessage()
+	virtual basic_string GetDetectionLogMessage() override final
 	{
 		return "AutoPistol";
 	};

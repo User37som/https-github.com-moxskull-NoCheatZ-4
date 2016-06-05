@@ -16,17 +16,18 @@ limitations under the License.
 #ifndef THINKPOSTHOOKLISTENER_H
 #define THINKPOSTHOOKLISTENER_H
 
-#include "Hook.h"
-#include "Players/NczPlayerManager.h"
 #include "Preprocessors.h"
+#include "Hook.h"
 
 // The function declaration we will call
-typedef void (HOOKFN_EXT *PostThink_t)(void*);
-
+typedef void (HOOKFN_EXT *PostThink_t)(void * const);
 
 class ThinkPostHookListener
 {
 	typedef HookListenersList<ThinkPostHookListener> ListenersList_t;
+
+private:
+	static ListenersList_t m_listeners;
 
 public:
 	ThinkPostHookListener();
@@ -43,22 +44,20 @@ public:
 
 	This is a single instance hook. The plugin calls this when there is at least one player in game.
 	*/
-	static void HookThinkPost(SourceSdk::edict_t* entity);
+	static void HookThinkPost(SourceSdk::edict_t const * const entity);
 
 protected:
-	static void RegisterThinkPostHookListener(ThinkPostHookListener* listener);
-	static void RemoveThinkPostHookListener(ThinkPostHookListener* listener);
+	static void RegisterThinkPostHookListener(ThinkPostHookListener const * const listener);
+	static void RemoveThinkPostHookListener(ThinkPostHookListener const * const listener);
 
 	virtual void ThinkPostCallback(SourceSdk::edict_t const * const) = 0;
 
 private:
 #ifdef GNUC
-	static void HOOKFN_INT nThinkPost(SourceSdk::CBaseEntity* baseentity);
+	static void HOOKFN_INT nThinkPost(void * const baseentity);
 #else
-	static void HOOKFN_INT nThinkPost(SourceSdk::CBaseEntity* baseentity, void*);
+	static void HOOKFN_INT nThinkPost(void * const baseentity, void * const);
 #endif
-
-	static ListenersList_t m_listeners;
 };
 
 #endif // THINKPOSTHOOKLISTENER_H

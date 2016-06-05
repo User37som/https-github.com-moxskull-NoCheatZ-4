@@ -16,7 +16,6 @@
 #ifndef _MRECIPIENT_FILTER_H
 #define _MRECIPIENT_FILTER_H
 
-
 #include "Interfaces/irecipientfilter.h"
 #include "Containers/utlvector.h"
 
@@ -24,18 +23,19 @@ class MRecipientFilter : public SourceSdk::IRecipientFilter
 {
 public:
 	MRecipientFilter(void);
-    ~MRecipientFilter(void);
+    virtual ~MRecipientFilter(void) final;
+
+	virtual bool IsReliable(void) const final;
+	virtual bool IsInitMessage(void) const final;
+
+	virtual int GetRecipientCount(void) const final;
+	virtual int GetRecipientIndex(int slot) const final;
 
 	MRecipientFilter(MRecipientFilter const & other);
 	MRecipientFilter& operator=(MRecipientFilter const & other);
 
 	void SetReliable(bool reliable);
 	void SetInitMessage(bool init);
-    virtual bool IsReliable( void ) const;
-    virtual bool IsInitMessage( void ) const;
-
-    virtual int GetRecipientCount( void ) const;
-    virtual int GetRecipientIndex( int slot ) const;
 
     void AddAllPlayers( int maxClients );
 	void AddTeam(int teamid);

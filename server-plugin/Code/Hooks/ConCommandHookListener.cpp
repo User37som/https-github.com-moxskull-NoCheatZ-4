@@ -21,7 +21,7 @@
 #include "plugin.h"
 #include "Systems/ConfigManager.h"
 
-ConCommandListenersListT ConCommandHookListener::m_listeners;
+ConCommandHookListener::ConCommandListenersListT ConCommandHookListener::m_listeners;
 
 ConCommandHookListener::ConCommandHookListener()
 {
@@ -136,7 +136,7 @@ void HOOKFN_INT ConCommandHookListener::nDispatch(void* cmd, void*, SourceSdk::C
 	}
 }
 
-void ConCommandHookListener::RegisterConCommandHookListener(ConCommandHookListener* listener)
+void ConCommandHookListener::RegisterConCommandHookListener(ConCommandHookListener const * const listener)
 {
 	Assert(!listener->m_mycommands.IsEmpty());
 
@@ -154,7 +154,7 @@ void ConCommandHookListener::RegisterConCommandHookListener(ConCommandHookListen
 	} while (++cmd_pos != max_pos);
 }
 
-void ConCommandHookListener::RemoveConCommandHookListener(ConCommandHookListener* listener)
+void ConCommandHookListener::RemoveConCommandHookListener(ConCommandHookListener * const listener)
 {
 	/*if (!listener->m_mycommands.IsEmpty())
 	{

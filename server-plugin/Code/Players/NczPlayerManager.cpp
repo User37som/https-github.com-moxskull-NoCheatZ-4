@@ -16,6 +16,7 @@
 #include "NczPlayerManager.h"
 
 #include "Interfaces/usercmd.h"
+#include "Interfaces/InterfacesProxy.h"
 
 #include "Misc/Helpers.h" // helpers, ifaces
 #include "Hooks/PlayerRunCommandHookListener.h"
@@ -204,7 +205,7 @@ void NczPlayerManager::FireGameEvent(SourceSdk::IGameEvent* ev)
 		return;
 	}
 
-	PlayerHandler* ph = GetPlayerHandlerByUserId(ev->GetInt("userid"));
+	PlayerHandler * ph = &(FullHandlersList[Helpers::getIndexFromUserID(ev->GetInt("userid"))]);
 
 	++event_name;
 
@@ -257,6 +258,11 @@ void NczPlayerManager::FireGameEvent(SourceSdk::IGameEvent* ev)
 	//}
 }
 
+void NczPlayerManager::DeclareKickedPlayer(int const slot)
+{
+	FullHandlersList[slot].status = KICK;
+}
+
 void NczPlayerManager::Think()
 {
 	while (m_max_index > 0 && FullHandlersList[m_max_index].status == INVALID)
@@ -280,50 +286,33 @@ void NczPlayerManager::Think()
 	}
 }
 
-PlayerHandler* NczPlayerManager::GetPlayerHandlerByUserId(int userid)
+PlayerHandler const * const NczPlayerManager::GetPlayerHandlerByBasePlayer(void * const BasePlayer) const
 {
-	return GetPlayerHandlerByIndex(Helpers::getIndexFromUserID(userid));
-}
-
-PlayerHandler* NczPlayerManager::GetPlayerHandlerByBasePlayer(void* BasePlayer)
-{
-	void* tBasePlayer = nullptr;
-
 	const int maxcl = m_max_index;
 	for(int x = 1; x <= maxcl; ++x)
 	{
-		PlayerHandler& ph = FullHandlersList[x];
-		if(ph.status == INVALID) continue;
-
-		// Sometimes the edict gets removed by the engine
-		// right before it calls a hook callback
-		// that needs to convert CBaseEntity -> edict > NczPlayer ...
-		SourceSdk::edict_t const * const edict = ph.playerClass->GetEdict();
-		if (!Helpers::isValidEdict(edict))
+		PlayerHandler const & ph = FullHandlersList[x];
+		if (ph.status > INVALID)
 		{
-			ph.Reset();
-			continue;
-		}
-
-		tBasePlayer = reinterpret_cast<void*>(ph.playerClass->GetEdict()->m_pUnk);
-		if(tBasePlayer != nullptr)
-		{
-			//tBasePlayer = reinterpret_cast<void*>(ph.playerClass->GetEdict()->GetUnknown()->GetBaseEntity());
-			if(tBasePlayer == BasePlayer) return &(ph);
+			if (ph.playerClass->isValidEdict())
+			{
+				if ((void*)(ph.playerClass->GetEdict()->m_pUnk) == BasePlayer)
+					return &(ph);
+			}
 		}
 	}
 	
 	return (&FullHandlersList[0]);
 }
 
-PlayerHandler* NczPlayerManager::GetPlayerHandlerBySteamID(const char * steamid)
+PlayerHandler const * const NczPlayerManager::GetPlayerHandlerBySteamID(const char * steamid) const
 {
 	const char *tSteamid;
 
 	const int maxcl = m_max_index;
 	for(int x = 1; x <= maxcl; ++x)
 	{
-		PlayerHandler& ph = FullHandlersList[x];
+		PlayerHandler const & ph = FullHandlersList[x];
 		if(ph.status == INVALID) continue;
 
 		tSteamid = ph.playerClass->GetSteamID();
@@ -333,19 +322,14 @@ PlayerHandler* NczPlayerManager::GetPlayerHandlerBySteamID(const char * steamid)
 	return (&FullHandlersList[0]);
 }
 
-PlayerHandler* NczPlayerManager::GetPlayerHandlerByEdict(SourceSdk::edict_t * pEdict)
-{
-	return GetPlayerHandlerByIndex(Helpers::IndexOfEdict(pEdict));
-}
-
-PlayerHandler* NczPlayerManager::GetPlayerHandlerByName(const char * playerName)
+PlayerHandler const  *const NczPlayerManager::GetPlayerHandlerByName(const char * playerName) const
 {
 	const char * tName;
 
 	const int maxcl = m_max_index;
 	for(int x = 1; x <= maxcl; ++x)
 	{
-		PlayerHandler& ph = FullHandlersList[x];
+		PlayerHandler const & ph = FullHandlersList[x];
 		if(ph.status == INVALID) continue;
 
 		tName = ph.playerClass->GetName();

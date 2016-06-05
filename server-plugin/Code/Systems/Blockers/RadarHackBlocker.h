@@ -67,32 +67,47 @@ struct ClientRadarData
 
 class RadarHackBlocker :
 	public BaseSystem,
-	public PlayerDataStructHandler<ClientRadarData>,
-	public ThinkPostHookListener,
-	public UserMessageHookListener,
 	public OnTickListener,
-	public Singleton<RadarHackBlocker>
+	public PlayerDataStructHandler<ClientRadarData>,
+	public Singleton<RadarHackBlocker>,
+	public ThinkPostHookListener,
+	public UserMessageHookListener
 {
 	typedef Singleton<RadarHackBlocker> singleton_class;
 	typedef PlayerDataStructHandler<ClientRadarData> playerdatahandler_class;
 
+private:
+	bool* m_players_spotted;
+
+	bool* m_bomb_spotted;
+
+	void* m_cvar_forcecamera;
+
+	float m_next_process;
+
 public:
 	RadarHackBlocker();
-	~RadarHackBlocker();
+	virtual ~RadarHackBlocker() final;
 
+private:
+	virtual void Init() override final;
+	virtual void Load() override final;
+	virtual void Unload() override final;
+
+	virtual void ProcessOnTick(float const curtime) override final;
+
+	virtual void ProcessPlayerTestOnTick(NczPlayer* const player, float const curtime) override final {};
+
+	virtual void ThinkPostCallback(SourceSdk::edict_t const * const pent) override final;
+
+	virtual bool SendUserMessageCallback(SourceSdk::IRecipientFilter const &, int const, google::protobuf::Message const &) override final;
+	
+	virtual bool UserMessageBeginCallback(SourceSdk::IRecipientFilter const * const, int const) override final;
+
+public:
 	void OnMapStart();
 
 private:
-	void Init();
-	void Load();
-	void Unload();
-
-	void ThinkPostCallback(SourceSdk::edict_t const * const pent);
-
-	bool SendUserMessageCallback(SourceSdk::IRecipientFilter &, int, google::protobuf::Message const &);
-	
-	bool UserMessageBeginCallback(SourceSdk::IRecipientFilter*, int);
-
 	void SendApproximativeRadarUpdate(MRecipientFilter & filter, ClientRadarData const * data) const;
 
 	void SendRandomRadarUpdate(MRecipientFilter & filter, ClientRadarData const * data) const;
@@ -100,17 +115,6 @@ private:
 	void ProcessEntity(SourceSdk::edict_t const * const pent);
 
 	void UpdatePlayerData(NczPlayer* player);
-
-	void ProcessOnTick(float const curtime);
-
-	void ProcessPlayerTestOnTick(NczPlayer* const player, float const curtime) {};
-
-	bool* m_players_spotted;
-	bool* m_bomb_spotted;
-
-	void* m_cvar_forcecamera;
-
-	float m_next_process;
 };
 
 #endif // RADARHACKBLOCKER_H

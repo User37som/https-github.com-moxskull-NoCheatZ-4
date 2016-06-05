@@ -20,6 +20,7 @@
 
 ConCommandTester::ConCommandTester() :
 	BaseSystem("ConCommandTester", PLAYER_CONNECTING, PLAYER_CONNECTING, STATUS_EQUAL_OR_BETTER),
+	ConCommandHookListener(),
 	playerdatahandler_class(),
 	singleton_class(),
 	m_commands_list()

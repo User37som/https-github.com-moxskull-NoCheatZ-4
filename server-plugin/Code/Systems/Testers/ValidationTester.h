@@ -83,38 +83,48 @@ typedef struct ValidatedInfo
 
 class ValidationTester :
 	private BaseSystem,
+	private SourceSdk::IGameEventListener002,
 	private NczFilteredPlayersList,
 	private OnTickListener,
 	public PlayerDataStructHandler<ValidationInfoT>,
-	private SourceSdk::IGameEventListener002,
 	public Singleton<ValidationTester>
 {
-private:
 	typedef basic_slist<const char *> PendingValidationsT;
 	typedef basic_slist<ValidatedInfoT> ValidatedIdsT;
 	typedef PlayerDataStructHandler<ValidationInfoT> playerdata_class;
 	typedef Singleton<ValidationTester> singleton_class;
 
+private:
 	PendingValidationsT m_pending_validations;
 	ValidatedIdsT m_validated_ids;
 
-	void Init();
-	void Load();
-	void Unload();
-	
-	void ProcessPlayerTestOnTick(NczPlayer* const player, float const curtime);
-	void ProcessOnTick(float const curtime);
-
-	void FireGameEvent(SourceSdk::IGameEvent* ev);
-
 public:
 	ValidationTester();
-	~ValidationTester();
+	virtual ~ValidationTester() final;
 
-	void SetValidated(NczPlayer* player);
+private:
+	virtual void Init() override final;
+
+	virtual void Load() override final;
+
+	virtual void Unload() override final;
+	
+	virtual void ProcessPlayerTestOnTick(NczPlayer * const player, float const curtime) override final;
+
+	virtual void ProcessOnTick(float const curtime) override final;
+
+	virtual void FireGameEvent(SourceSdk::IGameEvent* ev) override final;
+
+	void SetValidated(NczPlayer const * const player);
+
+public:
 	void AddPendingValidation(const char *pszUserName, const char* steamid);
-	bool WasPreviouslyValidated(NczPlayer* const player);
-	bool JoinCallback(NczPlayer* const player);
+
+private:
+	bool WasPreviouslyValidated(NczPlayer const * const player);
+
+public:
+	bool JoinCallback(NczPlayer const * const player);
 };
 
 #endif // VALIDATIONTESTER_H

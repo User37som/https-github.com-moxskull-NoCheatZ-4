@@ -74,43 +74,43 @@ class Detection_EyeAngle : public LogDetection<EyeAngleInfoT>
 	typedef LogDetection<EyeAngleInfoT> hClass;
 public:
 	Detection_EyeAngle() : hClass() {};
-	virtual ~Detection_EyeAngle(){};
+	virtual ~Detection_EyeAngle() {};
 
-	virtual basic_string GetDataDump();
+	virtual basic_string GetDataDump() final;
 };
 
 class Detection_EyeAngleX : public Detection_EyeAngle
 {
 public:
 	Detection_EyeAngleX(){};
-	~Detection_EyeAngleX(){};
+	virtual ~Detection_EyeAngleX() final {};
 
-	virtual basic_string GetDetectionLogMessage();
+	virtual basic_string GetDetectionLogMessage() final;
 };
 
 class Detection_EyeAngleY : public Detection_EyeAngle
 {
 public:
 	Detection_EyeAngleY(){};
-	~Detection_EyeAngleY(){};
+	virtual ~Detection_EyeAngleY() final {};
 
-	virtual basic_string GetDetectionLogMessage();
+	virtual basic_string GetDetectionLogMessage() final;
 };
 
 class Detection_EyeAngleZ : public Detection_EyeAngle
 {
 public:
 	Detection_EyeAngleZ(){};
-	~Detection_EyeAngleZ(){};
+	virtual ~Detection_EyeAngleZ() final {};
 
-	virtual basic_string GetDetectionLogMessage();
+	virtual basic_string GetDetectionLogMessage() final;
 };
 
 class EyeAnglesTester :
 	public BaseSystem,
-	public PlayerRunCommandHookListener,
-	public PlayerDataStructHandler<EyeAngleInfoT>,
 	public SourceSdk::IGameEventListener002,
+	public PlayerDataStructHandler<EyeAngleInfoT>,
+	public PlayerRunCommandHookListener,
 	public Singleton<EyeAnglesTester>
 {
 	typedef Singleton<EyeAnglesTester> singleton_class;
@@ -118,15 +118,18 @@ class EyeAnglesTester :
 
 public:
 	EyeAnglesTester();
-	~EyeAnglesTester();
+	virtual ~EyeAnglesTester() final;
 
-	void Init();
-	void Load();
-	void Unload();
-	SlotStatus GetFilter();
-	PlayerRunCommandRet PlayerRunCommandCallback(NczPlayer* player, void* cmd, void* old_cmd);
-	void FireGameEvent(SourceSdk::IGameEvent *ev);
-	void TeleportCallback(NczPlayer* player, SourceSdk::Vector const* va, SourceSdk::QAngle const* qa, SourceSdk::Vector const* vb);
+private:
+	virtual void Init() override final;
+
+	virtual void Load() override final;
+
+	virtual void Unload() override final;
+
+	virtual void FireGameEvent(SourceSdk::IGameEvent *ev) override final;
+
+	virtual PlayerRunCommandRet PlayerRunCommandCallback(NczPlayer * const player, void * const cmd, void * const old_cmd) override final;
 };
 
 #endif

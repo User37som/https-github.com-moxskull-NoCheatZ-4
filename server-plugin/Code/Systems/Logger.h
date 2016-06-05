@@ -55,19 +55,19 @@ class Logger : public Singleton<Logger>
 {
 	typedef Singleton<Logger> singleton_class;
 
+private:
+	CUtlVector<basic_string> m_msg;
+	basic_string const prolog;
+
 public:
 	Logger() : prolog("[NoCheatZ " NCZ_VERSION_STR "] "), singleton_class() {};
-	~Logger(){};
+	virtual ~Logger() override final {};
 
 	void Push(const basic_string& msg);
 	void Flush();
 
 	template <msg_type type = MSG_CONSOLE>
 	void Msg(const basic_string& msg, int verbose = 0);
-
-private:
-	CUtlVector<basic_string> m_msg;
-	basic_string const prolog;
 };
 
 #define SystemVerbose1(x) Logger::GetInstance()->Msg<MSG_VERBOSE1>(x, this->m_verbose)

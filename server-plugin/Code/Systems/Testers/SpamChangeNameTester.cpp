@@ -13,9 +13,11 @@
    limitations under the License.
 */
 
+#include "SpamChangeNameTester.h"
+
 #include <stdio.h>
 
-#include "SpamChangeNameTester.h"
+#include "Interfaces/InterfacesProxy.h"
 
 #include "Players/NczPlayerManager.h"
 #include "Misc/Helpers.h"
@@ -23,9 +25,9 @@
 
 SpamChangeNameTester::SpamChangeNameTester() :
 	BaseSystem("SpamChangeNameTester", PLAYER_CONNECTING, PLAYER_CONNECTING, STATUS_EQUAL_OR_BETTER),
-	playerdata_class(),
-	IGameEventListener002(),
+	SourceSdk::IGameEventListener002(),
 	OnTickListener(),
+	playerdata_class(),
 	singleton_class()
 {
 }
@@ -96,7 +98,7 @@ void SpamChangeNameTester::FireGameEvent(SourceSdk::IGameEvent* ev)
 {
 	if(!IsActive()) return;
 
-	PlayerHandler* const ph = NczPlayerManager::GetInstance()->GetPlayerHandlerByUserId(ev->GetInt("userid", 0));
+	PlayerHandler const * const ph = NczPlayerManager::GetInstance()->GetPlayerHandlerByUserId(ev->GetInt("userid", 0));
 
 	if(ph->status < PLAYER_CONNECTED) return;
 
@@ -127,7 +129,7 @@ void SpamChangeNameTester::ProcessOnTick(float const curtime)
 	END_PLAYERS_LOOP
 }
 
-void SpamChangeNameTester::ClientConnect( bool *bAllowConnect, SourceSdk::edict_t *pEntity, const char *pszName, const char *pszAddress, char *reject, int maxrejectlen )
+void SpamChangeNameTester::ClientConnect( bool *bAllowConnect, SourceSdk::edict_t const * const pEntity, const char *pszName, const char *pszAddress, char *reject, int maxrejectlen )
 {
 	if(!IsActive()) return;
 	if(!*bAllowConnect) return;

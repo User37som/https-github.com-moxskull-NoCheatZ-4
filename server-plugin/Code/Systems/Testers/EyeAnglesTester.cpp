@@ -23,9 +23,9 @@
 
 EyeAnglesTester::EyeAnglesTester(void) :
 	BaseSystem("EyeAnglesTester"),
-	PlayerRunCommandHookListener(),
+	SourceSdk::IGameEventListener002(),
 	playerdata_class(),
-	IGameEventListener002(),
+	PlayerRunCommandHookListener(),
 	singleton_class()
 {
 }
@@ -33,11 +33,6 @@ EyeAnglesTester::EyeAnglesTester(void) :
 EyeAnglesTester::~EyeAnglesTester(void)
 {
 	Unload();
-}
-
-SlotStatus EyeAnglesTester::GetFilter()
-{
-	return PLAYER_IN_TESTS;
 }
 
 void EyeAnglesTester::Init()
@@ -63,7 +58,7 @@ void EyeAnglesTester::Unload()
 	END_PLAYERS_LOOP
 }
 
-PlayerRunCommandRet EyeAnglesTester::PlayerRunCommandCallback(NczPlayer* player, void* pCmd, void* old_cmd)
+PlayerRunCommandRet EyeAnglesTester::PlayerRunCommandCallback(NczPlayer * const player, void * const pCmd, void * const old_cmd)
 {	
 	int const * const flags = EntityProps::GetInstance()->GetPropValue<int, PROP_FLAGS>(player->GetEdict());
 	
@@ -143,18 +138,9 @@ void EyeAnglesTester::FireGameEvent(SourceSdk::IGameEvent *ev) // round_end
 {
 	for(int index = 1; index < MAX_PLAYERS; ++index)
 	{
-		PlayerHandler* ph = NczPlayerManager::GetInstance()->GetPlayerHandlerByIndex(index);
+		PlayerHandler const * const ph = NczPlayerManager::GetInstance()->GetPlayerHandlerByIndex(index);
 		if(ph->status > BOT) ++(GetPlayerDataStruct(ph->playerClass)->ignore_last);
 	}
-}
-
-void EyeAnglesTester::TeleportCallback(NczPlayer* player, SourceSdk::Vector const* va, SourceSdk::QAngle const* qa, SourceSdk::Vector const* vb)
-{
-#	ifdef DEBUG
-		printf("Player %s : EyeAnglesTester::TeleportCallback\n", player->GetName());
-#	endif
-	EyeAngleInfoT* playerData = GetPlayerDataStruct(player);
-	++playerData->ignore_last;
 }
 
 basic_string Detection_EyeAngle::GetDataDump()

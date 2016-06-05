@@ -41,10 +41,10 @@ struct ChangeNameInfo
 };
 
 class SpamChangeNameTester :
-	public PlayerDataStructHandler<ChangeNameInfo>,
-	public SourceSdk::IGameEventListener002,
 	public BaseSystem,
+	public SourceSdk::IGameEventListener002,
 	public OnTickListener,
+	public PlayerDataStructHandler<ChangeNameInfo>,
 	public Singleton<SpamChangeNameTester>
 {
 	typedef Singleton<SpamChangeNameTester> singleton_class;
@@ -52,17 +52,22 @@ class SpamChangeNameTester :
 
 public:
 	SpamChangeNameTester();
-	~SpamChangeNameTester();
 
-	void Init();
-	void Load();
-	void Unload();
+	virtual ~SpamChangeNameTester() final;
 
-	void FireGameEvent(SourceSdk::IGameEvent* ev);
-	void ClientConnect( bool *bAllowConnect, SourceSdk::edict_t *pEntity, const char *pszName, const char *pszAddress, char *reject, int maxrejectlen );
+	virtual void Init() override final;
 
-	void ProcessOnTick(float const curtime);
-	void ProcessPlayerTestOnTick(NczPlayer* const player, float const curtime){};
+	virtual void Load() override final;
+
+	virtual void Unload() override final;
+
+	virtual void FireGameEvent(SourceSdk::IGameEvent* ev) override final;
+
+	virtual void ProcessOnTick(float const curtime) override final;
+
+	virtual void ProcessPlayerTestOnTick(NczPlayer * const player, float const curtime) override final {};
+
+	void ClientConnect(bool *bAllowConnect, SourceSdk::edict_t const * const pEntity, const char *pszName, const char *pszAddress, char *reject, int maxrejectlen);
 };
 
 #endif

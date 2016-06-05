@@ -25,6 +25,13 @@
 
 class OnFrameListener
 {
+	typedef basic_slist<OnFrameListener *> FrameListenersListT;
+
+private:
+	static FrameListenersListT m_framedTestersList;
+
+	SlotStatus m_filter;
+
 public:
 	OnFrameListener();
 	virtual ~OnFrameListener(){};
@@ -34,7 +41,7 @@ public:
 	static void OnFrame();
 
 	/* Filtre du testeur, peut/doit être redéfinit dans la classe fille */
-	virtual SlotStatus GetFilter() const {return m_filter;};
+	virtual SlotStatus GetFilter() const final {return m_filter;};
 
 protected:
 	/* Appelé par OnFrame, sert à iétrer entre les différents joueurs en fonction du filtre */
@@ -45,14 +52,8 @@ protected:
 	virtual void ProcessOnFrame() = 0;
 
 	/* Permet de se mettre à l'écoute de l'événement, appelé par Load/Unload des testeurs */
-	static void RegisterOnFrameListener(OnFrameListener* listener);
-	static void RemoveOnFrameListener(OnFrameListener* listener);
-
-	SlotStatus m_filter;
-
-private:
-	typedef basic_slist<OnFrameListener*> FrameListenersListT;
-	static FrameListenersListT m_framedTestersList;
+	static void RegisterOnFrameListener(OnFrameListener const * const listener);
+	static void RemoveOnFrameListener(OnFrameListener const * const listener);
 };
 
 #endif // ONFRAMELISTENER

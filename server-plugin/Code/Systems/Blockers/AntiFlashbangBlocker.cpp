@@ -13,9 +13,11 @@
    limitations under the License.
 */
 
+#include "AntiFlashbangBlocker.h"
+
 #include <cmath>
 
-#include "AntiFlashbangBlocker.h"
+#include "Interfaces/InterfacesProxy.h"
 
 #include "Misc/EntityProps.h"
 #include "Players/NczPlayerManager.h"
@@ -59,7 +61,7 @@ void AntiFlashbangBlocker::Unload()
 	END_PLAYERS_LOOP
 }
 
-bool AntiFlashbangBlocker::SetTransmitCallback(SourceSdk::edict_t* const ea, SourceSdk::edict_t* const eb)
+bool AntiFlashbangBlocker::SetTransmitCallback(SourceSdk::edict_t const * const ea, SourceSdk::edict_t const* const eb)
 {
 	METRICS_ENTER_SECTION("AntiFlashbangBlocker::SetTransmitCallback");
 	if(IsActive())
@@ -114,7 +116,7 @@ void AntiFlashbangBlocker::FireGameEvent(SourceSdk::IGameEvent* ev) // player_bl
 	METRICS_ENTER_SECTION("AntiFlashbangBlocker::FireGameEvent");
 	if(!IsActive()) return;
 
-	PlayerHandler* ph = NczPlayerManager::GetInstance()->GetPlayerHandlerByUserId(ev->GetInt("userid", 0));
+	PlayerHandler const * ph = NczPlayerManager::GetInstance()->GetPlayerHandlerByUserId(ev->GetInt("userid", 0));
 	if(ph->status == INVALID)
 	{
 		METRICS_LEAVE_SECTION("AntiFlashbangBlocker::FireGameEvent");

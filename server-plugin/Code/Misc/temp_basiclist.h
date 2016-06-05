@@ -13,7 +13,7 @@ public:
 	{
 		elem_t(inner_type const & newvalue) : m_value(newvalue) {}
 
-		inner_type m_value;
+		mutable inner_type m_value;
 		elem_t* m_next;
 	};
 

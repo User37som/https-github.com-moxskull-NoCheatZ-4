@@ -224,7 +224,7 @@ bool CNoCheatZPlugin::Load(SourceSdk::CreateInterfaceFn _interfaceFactory, Sourc
 
 	for(int i = 1; i < MAX_PLAYERS; ++i)
 	{
-		PlayerHandler* ph = NczPlayerManager::GetInstance()->GetPlayerHandlerByIndex(i);
+		PlayerHandler const * const ph = NczPlayerManager::GetInstance()->GetPlayerHandlerByIndex(i);
 		if(ph->status >= BOT)
 		{
 			HookEntity(ph->playerClass->GetEdict());
@@ -339,7 +339,7 @@ void CNoCheatZPlugin::ServerActivate(SourceSdk::edict_t *pEdictList, int edictCo
 	DebugMessage("CNoCheatZPlugin::ServerActivate");
 
 	Helpers::m_EdictList = pEdictList;
-	Helpers::m_EdictList_csgo = pEdictList;
+	//Helpers::m_EdictList_csgo = pEdictList;
 	//Helpers::m_edictCount = edictCount;
 	//Helpers::m_clientMax = clientMax;
 
@@ -394,7 +394,7 @@ void CNoCheatZPlugin::ClientActive(SourceSdk::edict_t *pEntity )
 
 	NczPlayerManager::GetInstance()->ClientActive(pEntity);
 
-	PlayerHandler* ph = NczPlayerManager::GetInstance()->GetPlayerHandlerByEdict(pEntity);
+	PlayerHandler const * const ph = NczPlayerManager::GetInstance()->GetPlayerHandlerByEdict(pEntity);
 	if(ph->status >= PLAYER_CONNECTED) HookBasePlayer(ph->playerClass);
 	if(ph->status >= BOT)
 	{
@@ -453,7 +453,7 @@ SourceSdk::PLUGIN_RESULT CNoCheatZPlugin::ClientConnect( bool *bAllowConnect, So
 	NczPlayerManager::GetInstance()->ClientConnect(pEntity);
 	NczPlayer* player = NczPlayerManager::GetInstance()->GetPlayerHandlerByEdict(pEntity)->playerClass;
 
-	g_SpamConnectTester.ClientConnect(bAllowConnect, pEntity, pszName, pszAddress, reject, maxrejectlen);
+	SpamConnectTester::GetInstance()->ClientConnect(bAllowConnect, pEntity, pszName, pszAddress, reject, maxrejectlen);
 	SpamChangeNameTester::GetInstance()->ClientConnect(bAllowConnect, pEntity, pszName, pszAddress, reject, maxrejectlen);
 
 	DebugMessage(Helpers::format("CNoCheatZPlugin::ClientConnect (AllowConnect: %s, %X -> %s, %s, %s, %s", Helpers::boolToString(*bAllowConnect), pEntity, pEntity->GetClassName(), pszName, pszAddress, reject));
@@ -492,7 +492,7 @@ SourceSdk::PLUGIN_RESULT CNoCheatZPlugin::ClientCommand(SourceSdk::edict_t *pEnt
 		return SourceSdk::PLUGIN_CONTINUE;
 	}
 
-	PlayerHandler* ph = NczPlayerManager::GetInstance()->GetPlayerHandlerByEdict(pEntity);
+	PlayerHandler const * const ph = NczPlayerManager::GetInstance()->GetPlayerHandlerByEdict(pEntity);
 	if(ph->status >= PLAYER_CONNECTED)
 	{
 		if(ConCommandTester::GetInstance()->TestPlayerCommand(ph->playerClass, args.GetCommandString()))
@@ -523,7 +523,7 @@ SourceSdk::PLUGIN_RESULT CNoCheatZPlugin::NetworkIDValidated( const char *pszUse
 //---------------------------------------------------------------------------------
 void CNoCheatZPlugin::OnQueryCvarValueFinished(SourceSdk::QueryCvarCookie_t iCookie, SourceSdk::edict_t *pPlayerEntity, SourceSdk::EQueryCvarValueStatus eStatus, const char *pCvarName, const char *pCvarValue )
 {
-	PlayerHandler* ph = NczPlayerManager::GetInstance()->GetPlayerHandlerByEdict(pPlayerEntity);
+	PlayerHandler const * const ph = NczPlayerManager::GetInstance()->GetPlayerHandlerByEdict(pPlayerEntity);
 	if(!ConVarTester::GetInstance()->CanProcessThisSlot(ph->status)) return;
 
 	ConVarTester::GetInstance()->OnQueryCvarValueFinished(ph->playerClass, eStatus, pCvarName, pCvarValue);

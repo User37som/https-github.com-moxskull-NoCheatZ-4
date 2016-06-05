@@ -15,57 +15,59 @@
 
 #include "NczFilteredPlayersList.h"
 
+#include "Players/NczPlayerManager.h"
+
 NczFilteredPlayersList::NczFilteredPlayersList()
 {
-	m_nextPlayer = nullptr;
+	m_next_player = nullptr;
 }
 
-NczPlayer* NczFilteredPlayersList::GetNextPlayer()
+NczPlayer * const NczFilteredPlayersList::GetNextPlayer()
 {
 	// Met à jour le prochain pointeur en interne et retourne celui en cours
-	NczPlayer* playerStor = m_nextPlayer->playerClass;
+	NczPlayer* playerStor = m_next_player->playerClass;
 	if(playerStor == nullptr) return nullptr; // Liste vide
 
 	for(int index = playerStor->GetIndex()+1; index < MAX_PLAYERS; ++index)
 	{
-		m_nextPlayer = NczPlayerManager::GetInstance()->GetPlayerHandlerByIndex(index);
-		if(m_nextPlayer->status < PLAYER_CONNECTED) continue;
+		m_next_player = NczPlayerManager::GetInstance()->GetPlayerHandlerByIndex(index);
+		if(m_next_player->status < PLAYER_CONNECTED) continue;
 		break;
 	}
-	if(playerStor == m_nextPlayer->playerClass) return nullptr; // Fin de liste
+	if(playerStor == m_next_player->playerClass) return nullptr; // Fin de liste
 	return playerStor;
 }
 
 void NczFilteredPlayersList::ResetNextPlayer()
 {
 	// Remet l'itération à zero
-	m_nextPlayer = nullptr;
+	m_next_player = nullptr;
 	PLAYERS_LOOP_RUNTIME
 	{
 		if(ph->status < PLAYER_CONNECTED) continue;
-		m_nextPlayer = ph;
+		m_next_player = ph;
 		break;
 	}
 	END_PLAYERS_LOOP
 }
 
-NczPlayer* AsyncNczFilteredPlayersList::GetNextPlayer()
+NczPlayer * const AsyncNczFilteredPlayersList::GetNextPlayer()
 {
 	// On re-vérifie le pointeur actuel
-	if(m_nextPlayer == nullptr) ResetNextPlayer();
-	if(m_nextPlayer == nullptr) return nullptr;
-	if(m_nextPlayer->status < PLAYER_CONNECTED)
+	if(m_next_player == nullptr) ResetNextPlayer();
+	if(m_next_player == nullptr) return nullptr;
+	if(m_next_player->status < PLAYER_CONNECTED)
 	{
 		ResetNextPlayer();
-		if(m_nextPlayer == nullptr) return nullptr;
+		if(m_next_player == nullptr) return nullptr;
 	}
-	if(m_nextPlayer->status == INVALID) return nullptr;
+	if(m_next_player->status == INVALID) return nullptr;
 
-	NczPlayer* playerStor = m_nextPlayer->playerClass;
+	NczPlayer* playerStor = m_next_player->playerClass;
 	
-	int index = m_nextPlayer->playerClass->GetIndex();
+	int index = m_next_player->playerClass->GetIndex();
 	int loop_count = 0;
-	while((m_nextPlayer = NczPlayerManager::GetInstance()->GetPlayerHandlerByIndex(++index)) == nullptr && (++loop_count) != MAX_PLAYERS)
+	while((m_next_player = NczPlayerManager::GetInstance()->GetPlayerHandlerByIndex(++index)) == nullptr && (++loop_count) != MAX_PLAYERS)
 	{
 		index %= MAX_PLAYERS;
 	}

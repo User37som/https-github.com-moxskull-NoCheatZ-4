@@ -13,17 +13,20 @@
    limitations under the License.
 */
 
-#include "Systems/BanRequest.h"
+#include "BanRequest.h"
+
+#include "Interfaces/InterfacesProxy.h"
 
 #include "Misc/Helpers.h"
 #include "Misc/temp_Metrics.h"
 
 
 BanRequest::BanRequest() :
-	m_wait_time(10.0),
-	m_do_writeid(false),
+	singleton_class(),
 	TimerListener(),
-	singleton_class()
+	m_wait_time(10.0),
+	m_do_writeid(false)
+	
 {
 
 }

@@ -48,16 +48,20 @@ class AntiFlashbangBlocker :
 
 public:
 	AntiFlashbangBlocker();
-	~AntiFlashbangBlocker();
+
+	virtual ~AntiFlashbangBlocker() final;
 
 private:
-	void Init();
+	virtual void Init() override final;
 	
-	void Load();
-	void Unload();
+	virtual void Load() override final;
 
-	bool SetTransmitCallback(SourceSdk::edict_t* const ea, SourceSdk::edict_t* const eb);
-	void FireGameEvent(SourceSdk::IGameEvent* ev);
+	virtual void Unload() override final;
+
+	virtual void FireGameEvent(SourceSdk::IGameEvent* ev) override final;
+
+	virtual bool SetTransmitCallback(SourceSdk::edict_t const * const ea, SourceSdk::edict_t const * const eb) override final;
+	
 };
 
 #endif // ANTIFLASHBANGBLOCKER_H

@@ -15,6 +15,8 @@ limitations under the License.
 
 #include "RadarHackBlocker.h"
 
+#include "Interfaces/InterfacesProxy.h"
+
 #include "Misc/EntityProps.h"
 #include "Misc/UserMsg.h"
 #include "Hooks/PlayerRunCommandHookListener.h"
@@ -22,10 +24,11 @@ limitations under the License.
 
 RadarHackBlocker::RadarHackBlocker() :
 	BaseSystem("RadarHackBlocker", PLAYER_CONNECTED, PLAYER_CONNECTING, STATUS_EQUAL_OR_BETTER),
+	OnTickListener(),
 	playerdatahandler_class(),
+	singleton_class(),
 	ThinkPostHookListener(),
-	UserMessageHookListener(),
-	singleton_class()
+	UserMessageHookListener()
 {
 
 }
@@ -91,33 +94,36 @@ void RadarHackBlocker::ThinkPostCallback(SourceSdk::edict_t const * const pent)
 	float const curtime = Plat_FloatTime();
 	PLAYERS_LOOP_RUNTIME
 	{
-		ClientRadarData * pData = GetPlayerDataStruct(x);
-		if (pData->m_last_spotted_status != m_players_spotted[x])
+		if (CanProcessThisSlot(ph->status) || ph->status == BOT)
 		{
-			pData->m_last_spotted_status = m_players_spotted[x];
+			ClientRadarData * pData = GetPlayerDataStruct(x);
+			if (pData->m_last_spotted_status != m_players_spotted[x])
+			{
+				pData->m_last_spotted_status = m_players_spotted[x];
 
-			if (pData->m_last_spotted_status)
-			{
-				UpdatePlayerData(ph->playerClass);
-				ProcessEntity(Helpers::PEntityOfEntIndex(x));
-			}
-			else
-			{
-				pData->m_next_update = curtime + 1.0f;
-				UpdatePlayerData(ph->playerClass);
-				ProcessEntity(Helpers::PEntityOfEntIndex(x));
+				if (pData->m_last_spotted_status)
+				{
+					UpdatePlayerData(ph->playerClass);
+					ProcessEntity(Helpers::PEntityOfEntIndex(x));
+				}
+				else
+				{
+					//pData->m_next_update = curtime + 1.0f;
+					//UpdatePlayerData(ph->playerClass);
+					//ProcessEntity(Helpers::PEntityOfEntIndex(x));
+				}
 			}
 		}
 	}
 	END_PLAYERS_LOOP
 }
 
-bool RadarHackBlocker::SendUserMessageCallback(SourceSdk::IRecipientFilter &, int message_id, google::protobuf::Message const &)
+bool RadarHackBlocker::SendUserMessageCallback(SourceSdk::IRecipientFilter const &, int const message_id, google::protobuf::Message const &)
 {
 	return (message_id == CS_UM_ProcessSpottedEntityUpdate);
 }
 
-bool RadarHackBlocker::UserMessageBeginCallback(SourceSdk::IRecipientFilter *, int message_id)
+bool RadarHackBlocker::UserMessageBeginCallback(SourceSdk::IRecipientFilter const * const, int const message_id)
 {
 	return (message_id == UpdateRadar);
 }
@@ -265,21 +271,30 @@ void RadarHackBlocker::UpdatePlayerData(NczPlayer* pPlayer)
 
 void RadarHackBlocker::ProcessOnTick(float const curtime)
 {
-	float const curtime = Plat_FloatTime();
-	ClientRadarData * pData = GetPlayerDataStruct(player);
+	PLAYERS_LOOP_RUNTIME
+	{
+		if (!CanProcessThisSlot(ph->status) && ph->status != BOT) continue;
 
-	if (pData->m_last_spotted_status)
-	{
-		UpdatePlayerData(player);
-		ProcessEntity(player->GetEdict());
-	}
-	else
-	{
-		if (curtime > pData->m_next_update)
+		ClientRadarData * pData = GetPlayerDataStruct(x);
+
+		if (pData->m_last_spotted_status)
 		{
-			pData->m_next_update = curtime + 1.0f;
-			UpdatePlayerData(player);
-			ProcessEntity(player->GetEdict());
+			UpdatePlayerData(ph->playerClass);
+			ProcessEntity(ph->playerClass->GetEdict());
 		}
+		else
+		{
+			if (curtime > m_next_process)
+			{
+				UpdatePlayerData(ph->playerClass);
+				ProcessEntity(ph->playerClass->GetEdict());
+			}
+		}
+	}
+	END_PLAYERS_LOOP
+
+	if (curtime > m_next_process)
+	{
+		m_next_process = curtime + 2.0f;
 	}
 }

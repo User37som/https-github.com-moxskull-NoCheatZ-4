@@ -12,16 +12,18 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
+
+#include "WeaponHookListener.h"
+
 #include "Console/convar.h"
 #include "Interfaces/InterfacesProxy.h"
 #include "Interfaces/iserverunknown.h"
 
-#include "WeaponHookListener.h"
 #include "Misc/Helpers.h"
 #include "plugin.h"
 #include "Systems/ConfigManager.h"
 
-WeaponHookListenersListT WeaponHookListener::m_listeners;
+WeaponHookListener::WeaponHookListenersListT WeaponHookListener::m_listeners;
 
 WeaponHookListener::WeaponHookListener()
 {
@@ -31,7 +33,7 @@ WeaponHookListener::~WeaponHookListener()
 {
 }
 
-void WeaponHookListener::HookWeapon(NczPlayer* player)
+void WeaponHookListener::HookWeapon(NczPlayer const * const player)
 {
 	Assert(Helpers::isValidEdict(player->GetEdict()));
 	void* unk = player->GetEdict()->m_pUnk;
@@ -42,34 +44,17 @@ void WeaponHookListener::HookWeapon(NczPlayer* player)
 	HookGuard::GetInstance()->VirtualTableHook(info_drop);
 }
 
-/*void WeaponHookListener::UnhookWeapon()
-{
-	bool tricky_guess = false;
-
-	HookList<>::elem_t* it = m_hooked_instances.GetFirst();
-
-	while (it != nullptr)
-	{
-		if (!tricky_guess) VirtualTableHook(it->m_value->pInterface, ConfigManager::GetInstance()->GetVirtualFunctionId("weaponequip"), it->m_value->oldFn, (DWORD)nWeapon_Equip);
-		else              VirtualTableHook(it->m_value->pInterface, ConfigManager::GetInstance()->GetVirtualFunctionId("weapondrop"), it->m_value->oldFn, (DWORD)nWeapon_Drop);
-
-		tricky_guess = !tricky_guess;
-
-		it = m_hooked_instances.Remove(it);
-	}
-}*/
-
 #ifdef GNUC
-void HOOKFN_INT WeaponHookListener::nWeapon_Equip(CBasePlayer* basePlayer, SourceSdk::CBaseEntity* weapon)
+void HOOKFN_INT WeaponHookListener::nWeapon_Equip(void * const basePlayer, void * const weapon)
 #else
-void HOOKFN_INT WeaponHookListener::nWeapon_Equip(CBasePlayer* basePlayer, void*, SourceSdk::CBaseEntity* weapon)
+void HOOKFN_INT WeaponHookListener::nWeapon_Equip(void * const basePlayer, void * const, void * const weapon)
 #endif
 {
-	PlayerHandler* ph = NczPlayerManager::GetInstance()->GetPlayerHandlerByBasePlayer(basePlayer);
+	PlayerHandler const * const ph = NczPlayerManager::GetInstance()->GetPlayerHandlerByBasePlayer(basePlayer);
 
 	if(ph->status != INVALID)
 	{
-		SourceSdk::edict_t* const weapon_ent = SourceSdk::InterfacesProxy::Call_BaseEntityToEdict(weapon);
+		SourceSdk::edict_t const * const weapon_ent = SourceSdk::InterfacesProxy::Call_BaseEntityToEdict(weapon);
 
 		Assert(Helpers::isValidEdict(weapon_ent));
 
@@ -88,12 +73,12 @@ void HOOKFN_INT WeaponHookListener::nWeapon_Equip(CBasePlayer* basePlayer, void*
 }
 
 #ifdef GNUC
-void HOOKFN_INT WeaponHookListener::nWeapon_Drop(CBasePlayer* basePlayer, SourceSdk::CBaseEntity* weapon, const SourceSdk::Vector* targetVec, const SourceSdk::Vector* velocity)
+void HOOKFN_INT WeaponHookListener::nWeapon_Drop(void * const basePlayer, void * const weapon, SourceSdk::Vector const * const targetVec,  SourceSdk::Vector const * const velocity)
 #else
-void HOOKFN_INT WeaponHookListener::nWeapon_Drop(CBasePlayer* basePlayer, void*, SourceSdk::CBaseEntity* weapon, const SourceSdk::Vector* targetVec, const SourceSdk::Vector* velocity)
+void HOOKFN_INT WeaponHookListener::nWeapon_Drop(void * const basePlayer, void * const, void * const weapon, SourceSdk::Vector const * const targetVec, SourceSdk::Vector const * const velocity)
 #endif
 {
-	PlayerHandler* ph = NczPlayerManager::GetInstance()->GetPlayerHandlerByBasePlayer(basePlayer);
+	PlayerHandler const * const ph = NczPlayerManager::GetInstance()->GetPlayerHandlerByBasePlayer(basePlayer);
 
 	if (ph->status != INVALID && weapon != nullptr)
 	{
@@ -115,12 +100,12 @@ void HOOKFN_INT WeaponHookListener::nWeapon_Drop(CBasePlayer* basePlayer, void*,
 	gpOldFn(basePlayer, weapon, targetVec, velocity);
 }
 
-void WeaponHookListener::RegisterWeaponHookListener(WeaponHookListener* listener)
+void WeaponHookListener::RegisterWeaponHookListener(WeaponHookListener const * const listener)
 {
 	m_listeners.Add(listener);
 }
 
-void WeaponHookListener::RemoveWeaponHookListener(WeaponHookListener* listener)
+void WeaponHookListener::RemoveWeaponHookListener(WeaponHookListener const * const listener)
 {
 	m_listeners.Remove(listener);
 }

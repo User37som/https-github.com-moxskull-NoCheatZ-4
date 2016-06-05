@@ -111,6 +111,7 @@ private:
 				{
 					if (SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive)
 					{
+#undef GetProp
 						const SourceSdk::SendProp_csgo* const pProp = static_cast<SourceSdk::SendProp_csgo*>(static_cast<SourceSdk::SendTable_csgo*>(pTable)->GetProp(prop));
 						if (paths[depth].operator==(pProp->GetName()))
 						{
@@ -226,7 +227,7 @@ private:
 
 public:
 	EntityProps(){};
-	~EntityProps(){};
+	virtual ~EntityProps() final {};
 
 	template<typename T, UsedProps prop_id>
 	T* GetPropValue(SourceSdk::edict_t * const pEdict, bool type = false)

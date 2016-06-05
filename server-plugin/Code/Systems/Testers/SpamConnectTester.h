@@ -66,17 +66,19 @@ private:
 	typedef CUtlVector<ConnectInfo> ConnectListT;
 	ConnectListT m_connect_list;
 
-	void Init();
-	void Load();
-	void Unload();
-
 public:
 	SpamConnectTester();
-	~SpamConnectTester();
+	virtual ~SpamConnectTester() final;
 
-	void ClientConnect( bool *bAllowConnect, SourceSdk::edict_t *pEntity, const char *pszName, const char *pszAddress, char *reject, int maxrejectlen );
+private:
+	virtual void Init() override final;
+
+	virtual void Load() override final;
+
+	virtual void Unload() override final;
+
+public:
+	void ClientConnect( bool *bAllowConnect, SourceSdk::edict_t const * const pEntity, const char *pszName, const char *pszAddress, char *reject, int maxrejectlen );
 };
-
-extern SpamConnectTester g_SpamConnectTester;
 
 #endif

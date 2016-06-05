@@ -26,10 +26,10 @@
 /////////////////////////////////////////////////////////////////////////
 
 BaseSystem::BaseSystem(char const * const name, SlotStatus filter, SlotStatus load_filter, SlotFilterBehavior filter_behavior, char const * const commands) : 
+	ListMeClass(),
+	SlotFilter(filter, load_filter, filter_behavior),
 	m_name(name),
 	m_cmd_list(commands),
-	SlotFilter(filter, load_filter, filter_behavior),
-	ListMeClass(),
 	m_isActive(false),
 	m_isDisabled(false),
 	m_configState(true),

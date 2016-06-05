@@ -44,15 +44,16 @@ private:
 	int const content_version; // Backward compatible if we ever change the layout of the config file
 
 public:
-	ConfigManager();
-	~ConfigManager();
-
 	basic_string m_playerdataclass;
 
 	float m_smoke_radius;
 	float m_innersmoke_radius_sqr;
 	float m_smoke_timetobang;
 	float m_smoke_time;
+
+public:
+	ConfigManager();
+	virtual ~ConfigManager() override final;
 
 	/*
 		Load the config file containing configuration. Returns false if error parsing the config file.

@@ -17,7 +17,7 @@
 
 #include "WallhackBlocker.h"
 
-#include "Interfaces/IEngineTrace/IEngineTrace.h"
+#include "Interfaces/InterfacesProxy.h"
 #include "Interfaces/bspflags.h"
 #include "Interfaces/iserverunknown.h"
 
@@ -27,10 +27,11 @@
 
 WallhackBlocker::WallhackBlocker() :
 	BaseSystem("WallhackBlocker", PLAYER_CONNECTED, PLAYER_CONNECTING, STATUS_EQUAL_OR_BETTER),
-	SetTransmitHookListener(),
-	WeaponHookListener(),
 	OnTickListener(),
-	singleton_class()
+	playerdatahandler_class(),
+	SetTransmitHookListener(),
+	singleton_class(),
+	WeaponHookListener()
 {
 	METRICS_ADD_TIMER("WallhackBlocker::SetTransmitCallback", 1.0);
 	METRICS_ADD_TIMER("WallhackBlocker::OnFrame", 10.0);
@@ -73,11 +74,11 @@ void WallhackBlocker::Unload()
 	m_viscache.Invalidate();
 }
 
-bool WallhackBlocker::SetTransmitCallback(SourceSdk::edict_t* const sender, SourceSdk::edict_t* const receiver)
+bool WallhackBlocker::SetTransmitCallback(SourceSdk::edict_t const * const sender, SourceSdk::edict_t const * const receiver)
 {
 	METRICS_ENTER_SECTION("WallhackBlocker::SetTransmitCallback");
-	PlayerHandler* const sender_player = NczPlayerManager::GetInstance()->GetPlayerHandlerByEdict(sender);
-	PlayerHandler* const receiver_player = NczPlayerManager::GetInstance()->GetPlayerHandlerByEdict(receiver);
+	PlayerHandler const * const sender_player = NczPlayerManager::GetInstance()->GetPlayerHandlerByEdict(sender);
+	PlayerHandler const * const receiver_player = NczPlayerManager::GetInstance()->GetPlayerHandlerByEdict(receiver);
 
 	if(sender_player->status == INVALID || receiver_player->status < PLAYER_IN_TESTS)
 	{
@@ -92,7 +93,7 @@ bool WallhackBlocker::SetTransmitCallback(SourceSdk::edict_t* const sender, Sour
 	if(receiver_spec == OBS_MODE_IN_EYE)
 	{
 		SourceSdk::CBaseHandle &bh = *EntityProps::GetInstance()->GetPropValue<SourceSdk::CBaseHandle, PROP_OBSERVER_TARGET>(receiver_player->playerClass->GetEdict(), false);
-		PlayerHandler* const spec_player = NczPlayerManager::GetInstance()->GetPlayerHandlerByIndex(bh.GetEntryIndex());
+		PlayerHandler const * const spec_player = NczPlayerManager::GetInstance()->GetPlayerHandlerByIndex(bh.GetEntryIndex());
 
 		Assert(spec_player->status > INVALID);
 
@@ -123,27 +124,27 @@ bool WallhackBlocker::SetTransmitCallback(SourceSdk::edict_t* const sender, Sour
 	return rt;
 }
 
-bool WallhackBlocker::SetTransmitWeaponCallback(SourceSdk::edict_t* const sender, SourceSdk::edict_t* const receiver)
+bool WallhackBlocker::SetTransmitWeaponCallback(SourceSdk::edict_t const * const sender, SourceSdk::edict_t const * const receiver)
 {
 	const int weapon_index = Helpers::IndexOfEdict(sender);
-	NczPlayer* const owner_player = WallhackBlocker::GetInstance()->m_weapon_owner[weapon_index];
+	NczPlayer const * const owner_player = WallhackBlocker::GetInstance()->m_weapon_owner[weapon_index];
 	if(!owner_player) return false;
 
-	PlayerHandler* const receiver_player = NczPlayerManager::GetInstance()->GetPlayerHandlerByEdict(receiver);
+	PlayerHandler const * const receiver_player = NczPlayerManager::GetInstance()->GetPlayerHandlerByEdict(receiver);
 
 	if(owner_player == receiver_player->playerClass) return false;
 
 	return SetTransmitCallback(owner_player->GetEdict(), receiver);
 }
 
-void WallhackBlocker::WeaponEquipCallback(NczPlayer* player, SourceSdk::edict_t* const weapon)
+void WallhackBlocker::WeaponEquipCallback(NczPlayer * player, SourceSdk::edict_t const * const weapon)
 {
 	const int weapon_index = Helpers::IndexOfEdict(weapon);
 	WallhackBlocker::GetInstance()->m_weapon_owner[weapon_index] = player;
 	SetTransmitHookListener::HookSetTransmit(weapon);
 }
 
-void WallhackBlocker::WeaponDropCallback(NczPlayer* player, SourceSdk::edict_t* const weapon)
+void WallhackBlocker::WeaponDropCallback(NczPlayer* player, SourceSdk::edict_t const * const weapon)
 {
 	const int weapon_index = Helpers::IndexOfEdict(weapon);
 	WallhackBlocker::GetInstance()->m_weapon_owner[weapon_index] = nullptr;
@@ -211,7 +212,7 @@ void WallhackBlocker::ProcessOnTick(float const curtime)
 			ST_W_STATIC float diff_time;
 			ST_W_STATIC int target_tick;
 
-			if(x_ph->status == BOT)
+			if(ph->status == BOT)
 			{
 				target_tick = game_tick - 1;
 				diff_time = tick_interval;
@@ -273,9 +274,9 @@ void WallhackBlocker::ProcessOnTick(float const curtime)
 	METRICS_LEAVE_SECTION("WallhackBlocker::OnFrame");
 }
 
-void WallhackBlocker::ClientDisconnect(SourceSdk::edict_t* const client)
+void WallhackBlocker::ClientDisconnect(SourceSdk::edict_t const * const client)
 {
-	NczPlayer* pPlayer = NczPlayerManager::GetInstance()->GetPlayerHandlerByEdict(client)->playerClass;
+	NczPlayer * const pPlayer = NczPlayerManager::GetInstance()->GetPlayerHandlerByEdict(client)->playerClass;
 	Assert(pPlayer);
 	for(int x = 0; x < MAX_EDICTS; ++x)
 	{

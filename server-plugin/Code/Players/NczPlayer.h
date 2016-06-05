@@ -16,19 +16,12 @@
 #ifndef NCZPCLASS
 #define NCZPCLASS
 
+#include "Interfaces/InterfacesProxy.h"
+
+#include "Misc/temp_Metrics.h"
+#include "Misc/Helpers.h"
+#include "Misc/temp_singleton.h"
 #include "Misc/temp_basicstring.h"
-
-#ifdef GNUC
-#	include <mm_malloc.h>
-#endif
-
-#include "SdkPreprocessors.h"
-#undef GetClassName
-#include "Interfaces/edict.h"
-#include "Interfaces/IPlayerInfoManager/IPlayerInfoManager.h"
-#include "Interfaces/inetchannelinfo.h"
-
-#include "Preprocessors.h"
 
 /* Permet de connaître l'état d'un slot du serveur rapidement */
 enum SlotStatus
@@ -111,17 +104,18 @@ enum WpnShotType
 	PISTOL
 };
 
-class ALIGN16 NczPlayer
+class ALIGN16 NczPlayer : private NoCopy
 {
 private:
-	int cIndex;
-	int m_userid;
-	SourceSdk::edict_t * m_edict;
+	int const m_index;
+	int const m_userid;
+	SourceSdk::edict_t * const m_edict;
 	SourceSdk::INetChannelInfo* m_channelinfo;
+	void* m_playerinfo;
 	float m_time_connected;
 
 public:
-	NczPlayer(int index);
+	NczPlayer(int const index);
 	~NczPlayer(){};
 
 	void* operator new(size_t i)
@@ -134,27 +128,96 @@ public:
 		_mm_free(p);
 	}
 
-	int GetIndex() const { return cIndex; }; 
-	int GetUserid() const;
-	SourceSdk::edict_t * GetEdict() const;
-	void * GetPlayerInfo() const;
-	SourceSdk::INetChannelInfo* GetChannelInfo() const;
-	const char * GetName() const;
-	const char * GetSteamID() const;
-	const char * GetIPAddress() const;
-	WpnShotType GetWpnShotType() const;
-	int aimingAt(); // Retourne index de la cible présente sur le viseur
+	inline int GetIndex() const ;
+	inline int GetUserid() const;
+	inline SourceSdk::edict_t * const GetEdict() const;
+	inline void * const GetPlayerInfo() const;
+	inline SourceSdk::INetChannelInfo * const GetChannelInfo() const;
+	inline const char * GetName() const;
+	inline const char * GetSteamID() const;
+	inline const char * GetIPAddress() const;
+	WpnShotType const GetWpnShotType() const;
+	int const aimingAt(); // Retourne index de la cible présente sur le viseur
 
-	basic_string GetReadableIdentity();
+	inline basic_string const GetReadableIdentity();
 
-	float GetTimeConnected() const;
+	inline float const GetTimeConnected() const;
 
-	bool isValidEdict();
+	inline bool const isValidEdict() const;
 
 	void OnConnect();
 
 	void Kick(const char * msg = "Kicked by NoCheatZ 4");
 	void Ban(const char * msg = "Banned by NoCheatZ 4", int minutes = 0);
 } ALIGN16_POST;
+
+inline int NczPlayer::GetIndex() const
+{
+	return m_index;
+}
+
+inline int NczPlayer::GetUserid() const
+{
+	return m_userid;
+}
+
+inline SourceSdk::edict_t * const NczPlayer::GetEdict() const
+{
+	return m_edict;
+}
+
+inline void * const NczPlayer::GetPlayerInfo() const
+{
+	return SourceSdk::InterfacesProxy::Call_GetPlayerInfo(m_edict);
+}
+
+inline SourceSdk::INetChannelInfo * const NczPlayer::GetChannelInfo() const
+{
+	return m_channelinfo;
+}
+
+inline bool const NczPlayer::isValidEdict() const
+{
+	return Helpers::isValidEdict(m_edict);
+}
+
+inline const char * NczPlayer::GetName() const
+{
+	if (Helpers::isValidEdict(m_edict))
+	{
+		if (GetPlayerInfo())
+		{
+			return static_cast<SourceSdk::IPlayerInfo*>(GetPlayerInfo())->GetName();
+		}
+	}
+	return "";
+}
+
+inline const char * NczPlayer::GetSteamID() const
+{
+	return SourceSdk::InterfacesProxy::Call_GetPlayerNetworkIDString(m_edict);
+}
+
+inline const char * NczPlayer::GetIPAddress() const
+{
+	return GetChannelInfo()->GetAddress();
+}
+
+inline float const NczPlayer::GetTimeConnected() const
+{
+	return Plat_FloatTime() - m_time_connected;
+}
+
+inline basic_string const NczPlayer::GetReadableIdentity()
+{
+	if (SteamGameServer_BSecure())
+	{
+		return Helpers::format("%s [%s - %s]", this->GetName(), this->GetSteamID(), this->GetIPAddress());
+	}
+	else
+	{
+		return Helpers::format("%s [%s]", this->GetName(), this->GetIPAddress());
+	}
+}
 
 #endif

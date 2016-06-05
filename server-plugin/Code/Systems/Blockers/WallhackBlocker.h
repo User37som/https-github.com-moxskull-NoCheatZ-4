@@ -121,40 +121,41 @@ public:
 
 class WallhackBlocker :
 	private BaseSystem,
+	private OnTickListener,
 	public PlayerDataStructHandler<ClientDataS>,
 	private SetTransmitHookListener,
-	private WeaponHookListener,
-	private OnTickListener,
-	public Singleton<WallhackBlocker>
+	public Singleton<WallhackBlocker>,
+	private WeaponHookListener
 {
 	typedef Singleton<WallhackBlocker> singleton_class;
 	typedef PlayerDataStructHandler<ClientDataS> playerdatahandler_class;
-
-public:
-	WallhackBlocker();
-	~WallhackBlocker();
-
-	void ClientDisconnect(SourceSdk::edict_t* const client);
-
-private:
-	void Init();
-	void Load();
-	void Unload();
-
-	void ProcessOnTick(float const curtime);
-	void ProcessPlayerTestOnTick(NczPlayer* const player, float const curtime){};
-
-	bool SetTransmitCallback(SourceSdk::edict_t* const sender, SourceSdk::edict_t* const receiver);
-	bool SetTransmitWeaponCallback(SourceSdk::edict_t* const sender, SourceSdk::edict_t* const receiver);
-	void WeaponEquipCallback(NczPlayer* player, SourceSdk::edict_t* const weapon);
-	void WeaponDropCallback(NczPlayer* player, SourceSdk::edict_t* const weapon);
-
-	bool IsAbleToSee(NczPlayer* const sender, NczPlayer* const receiver);
 
 private:
 	NczPlayer* m_weapon_owner[MAX_EDICTS];
 	VisCache m_viscache;
 
+public:
+	WallhackBlocker();
+	virtual ~WallhackBlocker() final;
+
+private:
+	virtual void Init() override final;
+	virtual void Load() override final;
+	virtual void Unload() override final;
+
+	virtual void ProcessOnTick(float const curtime) override final;
+	virtual void ProcessPlayerTestOnTick(NczPlayer * const player, float const curtime) override final {};
+
+	virtual bool SetTransmitCallback(SourceSdk::edict_t const * const sender, SourceSdk::edict_t const * const receiver) override final;
+	virtual bool SetTransmitWeaponCallback(SourceSdk::edict_t const * const sender, SourceSdk::edict_t const * const receiver) override final;
+	virtual void WeaponEquipCallback(NczPlayer * const player, SourceSdk::edict_t const * const weapon) override final;
+	virtual void WeaponDropCallback(NczPlayer * const player, SourceSdk::edict_t const * const weapon) override final;
+
+public:
+	void ClientDisconnect(SourceSdk::edict_t const * const client);
+
+private:
+	bool IsAbleToSee(NczPlayer* const sender, NczPlayer* const receiver);
 	bool IsInFOV(const SourceSdk::Vector& origin, const SourceSdk::QAngle& dir, const SourceSdk::Vector& target);
 	bool IsVisible(const SourceSdk::Vector& origin, const SourceSdk::Vector& target);
 	bool IsVisible(const SourceSdk::Vector& origin, const SourceSdk::QAngle& dir, const SourceSdk::Vector& target);

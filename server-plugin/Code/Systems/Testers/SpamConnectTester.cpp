@@ -15,6 +15,8 @@
 
 #include "SpamConnectTester.h"
 
+#include "Interfaces/InterfacesProxy.h"
+
 #include "Misc/Helpers.h"
 #include "Systems/BanRequest.h"
 
@@ -42,7 +44,7 @@ void SpamConnectTester::Unload()
 	m_connect_list.RemoveAll();
 }
 
-void SpamConnectTester::ClientConnect( bool *bAllowConnect, SourceSdk::edict_t *pEntity, const char *pszName, const char *pszAddress, char *reject, int maxrejectlen )
+void SpamConnectTester::ClientConnect( bool *bAllowConnect, SourceSdk::edict_t const * const pEntity, const char *pszName, const char *pszAddress, char *reject, int maxrejectlen )
 {
 	if(!IsActive()) return;
 	if(!*bAllowConnect) return;

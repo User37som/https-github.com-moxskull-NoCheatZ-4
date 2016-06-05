@@ -95,8 +95,8 @@ public:
 };
 
 class ConVarTester :
-	public BaseSystem,
 	private AsyncNczFilteredPlayersList,
+	public BaseSystem,
 	public OnTickListener,
 	public PlayerDataStructHandler<CurrentConVarRequestT>,
 	public Singleton<ConVarTester>
@@ -105,31 +105,39 @@ class ConVarTester :
 	typedef PlayerDataStructHandler<CurrentConVarRequestT> playerdata_class;
 
 	friend Detection_ConVar;
-public:
-	ConVarTester();
-	~ConVarTester();
-
-	void OnQueryCvarValueFinished(NczPlayer* player, SourceSdk::EQueryCvarValueStatus eStatus, const char *pCvarName, const char *pCvarValue);
 
 private:
-	void Init();
-	void Load();
-	void Unload();
-
-	/* Nouvelle version de la fonction qui va faire en sorte de ne tester qu'un seul joueur par frame */
-	void ProcessOnTick(float const curtime);
-	void ProcessPlayerTestOnTick(NczPlayer* const player, float const curtime){};
-
-	void ProcessPlayerTest(NczPlayer* player);
-
-	bool sys_cmd_fn ( const SourceSdk::CCommand &args );
-
-	void AddConvarRuleset(const char * name, const char * value, ConVarRuleT rule, bool safe = true);
-	ConVarInfoT* FindConvarRuleset(const char * name);
-
 	ConVarRulesListT m_convars_rules;
 
 	void* var_sv_cheats;
+
+public:
+	ConVarTester();
+	virtual ~ConVarTester() final;
+
+private:
+	virtual void Init() override final;
+
+	virtual void Load() override final;
+
+	virtual void Unload() override final;
+
+	virtual bool sys_cmd_fn(SourceSdk::CCommand const &args) override final;
+
+	/* Nouvelle version de la fonction qui va faire en sorte de ne tester qu'un seul joueur par frame */
+	virtual void ProcessOnTick(float const curtime) override final;
+
+	virtual void ProcessPlayerTestOnTick(NczPlayer * const player, float const curtime) override final {};
+
+public:
+	void OnQueryCvarValueFinished(NczPlayer * const player, SourceSdk::EQueryCvarValueStatus eStatus, const char *pCvarName, const char *pCvarValue);
+
+private:
+	void ProcessPlayerTest(NczPlayer * const player);
+
+	void AddConvarRuleset(const char * name, const char * value, ConVarRuleT rule, bool safe = true);
+
+	ConVarInfoT* FindConvarRuleset(const char * name);
 };
 
 #endif // CONVARTESTER_H

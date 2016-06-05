@@ -15,6 +15,8 @@
 
 #include "BadUserCmdBlocker.h"
 
+#include "Interfaces/InterfacesProxy.h"
+
 BadUserCmdBlocker::BadUserCmdBlocker() :
 	BaseSystem("BadUserCmdBlocker", PLAYER_CONNECTED, PLAYER_CONNECTING, STATUS_EQUAL_OR_BETTER),
 	playerdatahandler_class(),

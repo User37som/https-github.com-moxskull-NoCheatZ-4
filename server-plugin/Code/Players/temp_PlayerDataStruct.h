@@ -16,6 +16,7 @@
 #ifndef PLAYERDATASTRUCT
 #define PLAYERDATASTRUCT
 
+#include "Preprocessors.h"
 #include "Misc/temp_BaseDataStruct.h"
 #include "NczPlayer.h"
 #include "Misc/Helpers.h"
@@ -44,7 +45,7 @@ protected:
 	PlayerDataStructHandler()
 	{
 	};
-	virtual ~PlayerDataStructHandler(){};
+	virtual ~PlayerDataStructHandler() override {};
 
 	inline DataT* GetPlayerDataStruct(NczPlayer const * const player) const
 	{

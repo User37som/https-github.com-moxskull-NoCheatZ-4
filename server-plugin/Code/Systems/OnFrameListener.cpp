@@ -38,14 +38,14 @@ void OnFrameListener::ProcessTestsOnFrame()
 	END_PLAYERS_LOOP
 }
 
-void OnFrameListener::RegisterOnFrameListener(OnFrameListener* tester)
+void OnFrameListener::RegisterOnFrameListener(OnFrameListener const * const tester)
 {
-	m_framedTestersList.Add(tester);
+	m_framedTestersList.Add(const_cast<OnFrameListener*const>(tester));
 }
 
-void OnFrameListener::RemoveOnFrameListener(OnFrameListener* tester)
+void OnFrameListener::RemoveOnFrameListener(OnFrameListener const * const tester)
 {
-	m_framedTestersList.Remove(tester);
+	m_framedTestersList.Remove(const_cast<OnFrameListener*const>(tester));
 }
 
 void OnFrameListener::OnFrame()

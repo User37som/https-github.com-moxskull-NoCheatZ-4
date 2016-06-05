@@ -16,7 +16,8 @@
 #ifndef NCZFILTEREDPLAYERLIST
 #define NCZFILTEREDPLAYERLIST
 
-#include "NczPlayerManager.h"
+class NczPlayer;
+struct PlayerHandler;
 
 /*
 	Gives a list to Systems.
@@ -25,15 +26,15 @@
 */
 class NczFilteredPlayersList
 {
+protected:
+	PlayerHandler const * m_next_player;
+
 public:
 	NczFilteredPlayersList();
 	virtual ~NczFilteredPlayersList(){};
 
-	virtual NczPlayer* GetNextPlayer(); 
-	virtual void ResetNextPlayer();
-
-protected:
-	PlayerHandler* m_nextPlayer;
+	virtual NczPlayer * const GetNextPlayer(); 
+	virtual void ResetNextPlayer() final;
 };
 
 /*
@@ -46,10 +47,10 @@ class AsyncNczFilteredPlayersList : public NczFilteredPlayersList
 {
 public:
 	AsyncNczFilteredPlayersList() : NczFilteredPlayersList() {};
-	virtual ~AsyncNczFilteredPlayersList(){};
+	virtual ~AsyncNczFilteredPlayersList() override {};
 
 	// Returns null only if no players are available
-	virtual NczPlayer* GetNextPlayer();
+	virtual NczPlayer * const GetNextPlayer() override final;
 };
 
 #endif

@@ -29,7 +29,7 @@
 // PlayerRunCommandHookListener
 /////////////////////////////////////////////////////////////////////////
 
-ListenersListT PlayerRunCommandHookListener::m_listeners;
+PlayerRunCommandHookListener::ListenersListT PlayerRunCommandHookListener::m_listeners;
 SourceSdk::CUserCmd_csgo PlayerRunCommandHookListener::m_lastCUserCmd[MAX_PLAYERS];
 
 PlayerRunCommandHookListener::PlayerRunCommandHookListener()
@@ -42,12 +42,12 @@ PlayerRunCommandHookListener::~PlayerRunCommandHookListener()
 {
 }
 
-void* PlayerRunCommandHookListener::GetLastUserCmd(NczPlayer* player)
+void* PlayerRunCommandHookListener::GetLastUserCmd(NczPlayer const * const player)
 {
 	return &(m_lastCUserCmd[player->GetIndex()]);
 }
 
-void PlayerRunCommandHookListener::HookPlayerRunCommand(NczPlayer* player)
+void PlayerRunCommandHookListener::HookPlayerRunCommand(NczPlayer const * const player)
 {
 	Assert(Helpers::isValidEdict(player->GetEdict()));
 	SourceSdk::IServerUnknown* unk = player->GetEdict()->m_pUnk;
@@ -67,12 +67,12 @@ void PlayerRunCommandHookListener::HookPlayerRunCommand(NczPlayer* player)
 }*/
 
 #ifdef GNUC
-void PlayerRunCommandHookListener::nPlayerRunCommand(void* This, void* pCmd, IMoveHelper* pMoveHelper)
+void PlayerRunCommandHookListener::nPlayerRunCommand(void * const This, void * const pCmd, IMoveHelper const * const pMoveHelper)
 #else
-void HOOKFN_INT PlayerRunCommandHookListener::nPlayerRunCommand(void* This, void*, void* pCmd, IMoveHelper* pMoveHelper)
+void HOOKFN_INT PlayerRunCommandHookListener::nPlayerRunCommand(void* This, void*, void * const pCmd, IMoveHelper const * const pMoveHelper)
 #endif
 {
-	PlayerHandler* ph = NczPlayerManager::GetInstance()->GetPlayerHandlerByBasePlayer(This);
+	PlayerHandler const * const ph = NczPlayerManager::GetInstance()->GetPlayerHandlerByBasePlayer(This);
 	PlayerRunCommandRet ret = CONTINUE;
 	
 	if(ph->status > PLAYER_CONNECTING)
@@ -113,12 +113,12 @@ void HOOKFN_INT PlayerRunCommandHookListener::nPlayerRunCommand(void* This, void
 	}
 }
 
-void PlayerRunCommandHookListener::RegisterPlayerRunCommandHookListener(PlayerRunCommandHookListener* listener, size_t priority, SlotStatus filter)
+void PlayerRunCommandHookListener::RegisterPlayerRunCommandHookListener(PlayerRunCommandHookListener const * const listener, size_t priority, SlotStatus filter)
 {
 	m_listeners.Add(listener, priority, filter);
 }
 
-void PlayerRunCommandHookListener::RemovePlayerRunCommandHookListener(PlayerRunCommandHookListener* listener)
+void PlayerRunCommandHookListener::RemovePlayerRunCommandHookListener(PlayerRunCommandHookListener const * const listener)
 {
 	m_listeners.Remove(listener);
 }

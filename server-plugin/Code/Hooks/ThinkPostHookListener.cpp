@@ -30,26 +30,26 @@ ThinkPostHookListener::~ThinkPostHookListener()
 {
 }
 
-void ThinkPostHookListener::HookThinkPost(SourceSdk::edict_t* entity)
+void ThinkPostHookListener::HookThinkPost(SourceSdk::edict_t const * const entity)
 {
 	HookInfo info(entity->m_pUnk, ConfigManager::GetInstance()->GetVirtualFunctionId("thinkpost"), (DWORD)nThinkPost);
 	HookGuard::GetInstance()->VirtualTableHook(info, true);
 }
 
-void ThinkPostHookListener::RegisterThinkPostHookListener(ThinkPostHookListener* listener)
+void ThinkPostHookListener::RegisterThinkPostHookListener(ThinkPostHookListener const * const listener)
 {
 	m_listeners.Add(listener);
 }
 
-void ThinkPostHookListener::RemoveThinkPostHookListener(ThinkPostHookListener* listener)
+void ThinkPostHookListener::RemoveThinkPostHookListener(ThinkPostHookListener const * const listener)
 {
 	m_listeners.Remove(listener);
 }
 
 #ifdef GNUC
-void HOOKFN_INT ThinkPostHookListener::nThinkPost(SourceSdk::CBaseEntity* baseentity)
+void HOOKFN_INT ThinkPostHookListener::nThinkPost(void * const baseentity)
 #else
-void HOOKFN_INT ThinkPostHookListener::nThinkPost(SourceSdk::CBaseEntity * baseentity, void*)
+void HOOKFN_INT ThinkPostHookListener::nThinkPost(void * const baseentity, void * const)
 #endif
 {
 	PostThink_t gpOldFn;

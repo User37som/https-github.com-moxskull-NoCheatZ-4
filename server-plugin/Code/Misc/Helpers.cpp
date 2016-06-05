@@ -24,6 +24,7 @@
 
 #include "Containers/bitbuf.h"
 #include "Interfaces/edict.h"
+#include "Interfaces/InterfacesProxy.h"
 
 #include "Preprocessors.h"
 #include "Misc/MRecipientFilter.h"
@@ -388,7 +389,7 @@ namespace Helpers
 		return false;
 	}
 
-	void FadeUser(SourceSdk::edict_t* const pEntity, const short time)
+	void FadeUser(SourceSdk::edict_t const * const pEntity, const short time)
 	{
 		MRecipientFilter filter;
 		filter.AddRecipient(IndexOfEdict(pEntity));
@@ -423,9 +424,9 @@ namespace Helpers
 	}
 }
 
-void Helpers::tell(SourceSdk::edict_t *pEntity, const basic_string& message)
+void Helpers::tell(SourceSdk::edict_t const * const pEntity, const basic_string& message)
 {
-	SourceSdk::IPlayerInfo * const player = static_cast<SourceSdk::IPlayerInfo *>(SourceSdk::InterfacesProxy::Call_GetPlayerInfo(pEntity));
+	SourceSdk::IPlayerInfo * const player = static_cast<SourceSdk::IPlayerInfo *>(SourceSdk::InterfacesProxy::Call_GetPlayerInfo(const_cast<SourceSdk::edict_t*const>(pEntity)));
 	if (player)
 	{
 		if (player->IsConnected())

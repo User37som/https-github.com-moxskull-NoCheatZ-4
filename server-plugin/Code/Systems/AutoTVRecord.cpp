@@ -1,5 +1,7 @@
 #include "AutoTVRecord.h"
 
+#include "Interfaces/InterfacesProxy.h"
+
 #include "Players/NczPlayerManager.h"
 #include "Logger.h"
 
@@ -117,7 +119,7 @@ void AutoTVRecord::OnTick()
 		int player_count = 0;
 		int x = 1;
 		int maxcl = NczPlayerManager::GetInstance()->GetMaxIndex();
-		PlayerHandler * ph;
+		PlayerHandler const * ph;
 		do
 		{
 			ph = NczPlayerManager::GetInstance()->GetPlayerHandlerByIndex(x);

@@ -74,14 +74,20 @@ typedef struct PlayerBanRequest
 typedef basic_slist<PlayerBanRequestT> BanRequestListT;
 
 class BanRequest :
-	public TimerListener,
-	public Singleton<BanRequest>
+	public Singleton<BanRequest>,
+	public TimerListener
 {
 	typedef Singleton<BanRequest> singleton_class;
 
+private:
+	float m_wait_time;
+	bool m_do_writeid;
+
+	BanRequestListT m_requests;
+
 public:
 	BanRequest();
-	~BanRequest();
+	virtual ~BanRequest() override final;
 
 	void Init();
 
@@ -89,15 +95,9 @@ public:
 
 	void SetWaitTime(float wait_time);
 
-	void AddAsyncBan(NczPlayer* player, int ban_time, const char * kick_message);
+	void AddAsyncBan(NczPlayer * const player, int ban_time, const char * kick_message);
 
 	void TimerCallback(char const * const timer_name);
-
-private:
-	float m_wait_time;
-	bool m_do_writeid;
-
-	BanRequestListT m_requests;
 };
 
 #endif

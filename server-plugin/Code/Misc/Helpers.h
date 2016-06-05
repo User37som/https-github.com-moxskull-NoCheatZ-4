@@ -16,15 +16,14 @@
 #ifndef HELPERS
 #define HELPERS
 
-#include "Misc/temp_basicstring.h"
-#include <vector>
 #include <limits> // numeric_limits
 
-#include "SdkPreprocessors.h"
-#include "Interfaces/edict.h"
-#include "Interfaces/InterfacesProxy.h"
+#include "Misc/temp_basicstring.h"
 
-#include "Preprocessors.h"
+namespace SourceSdk
+{
+	struct edict_t;
+}
 
 namespace Helpers
 {
@@ -60,7 +59,7 @@ namespace Helpers
 
 	bool isValidEdict(const SourceSdk::edict_t * const p_entity);
 
-	int IndexOfEdict(const SourceSdk::edict_t *p_pEdict);
+	int IndexOfEdict(const SourceSdk::edict_t * const p_pEdict);
 	
 
 	int GetPlayerCount();
@@ -80,15 +79,15 @@ namespace Helpers
 	basic_string tostring(const T & p_toConvert);
 
 	/* Retourne vrai si value est un entier ... (140.000, 1587.000 etc) */
-	bool IsInt(float value);
+	bool IsInt(float const value);
 
 	/* Envoie un message chat à tous les clients sauf pEntity */
-	void noTell(const SourceSdk::edict_t *pEntity, const basic_string& msg);
+	void noTell(const SourceSdk::edict_t * const pEntity, const basic_string& msg);
 
 	void chatprintf(const basic_string& msg);
 
 	/* Envoie un message chat à pEntity */
-	void tell(SourceSdk::edict_t *pEntity, const basic_string& message);
+	void tell(SourceSdk::edict_t const * const pEntity, const basic_string& message);
 
 	size_t GetUTF8Bytes(const char* const c);
 
@@ -96,12 +95,11 @@ namespace Helpers
 
 	bool IsCharSpace(const char* const c);
 
-	void FadeUser(SourceSdk::edict_t* const pEntity, const short time);
+	void FadeUser(SourceSdk::edict_t const * const pEntity, const short time);
 
-	const char* boolToString(bool v);
+	const char* boolToString(bool const v);
 
 	/* C'est la base ... */
-	extern SourceSdk::edict_t_csgo* m_EdictList_csgo;
 	extern SourceSdk::edict_t* m_EdictList;
 
 	/* N'est pas utilisé */

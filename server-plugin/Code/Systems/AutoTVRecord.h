@@ -29,7 +29,7 @@ limitations under the License.
 */
 
 class AutoTVRecord : 
-	public BaseSystem,
+	private BaseSystem,
 	private ConCommandHookListener,
 	public Singleton<AutoTVRecord>
 {
@@ -45,18 +45,24 @@ private:
 	bool m_recording;
 	bool m_expectedtvconfigchange;
 
-	void Init();
-	void Load();
-	void Unload();
+public:
+	AutoTVRecord();
+	virtual ~AutoTVRecord() final;
+
+private:
+	virtual void Init() override final;
+
+	virtual void Load() override final;
+
+	virtual void Unload() override final;
+
+	virtual bool ConCommandCallback(NczPlayer * const player, void * const cmd, SourceSdk::CCommand const & args) override final;
 
 	void StartRecord();
 
 	void StopRecord();
 
 public:
-	AutoTVRecord();
-	~AutoTVRecord();
-
 	void OnTick();
 
 	// How much human players must be in the game before we start recording. 1 or 2 are great values.
@@ -80,8 +86,6 @@ public:
 
 	// Send a chat message to the TV and to all viewers.
 	void SendTVChatMessage(basic_string const & msg);
-
-	virtual bool ConCommandCallback(NczPlayer* player, void* cmd, const SourceSdk::CCommand & args);
 };
 
 #endif

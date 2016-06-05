@@ -59,11 +59,15 @@ class BadUserCmdBlocker :
 
 public:
 	BadUserCmdBlocker();
-	~BadUserCmdBlocker();
+	virtual ~BadUserCmdBlocker() final;
 
-	void Load(),Unload(),Init();
+	virtual void Init() override final;
 
-	PlayerRunCommandRet PlayerRunCommandCallback(NczPlayer* player, void* cmd, void* old_cmd);
+	virtual void Load() override final;
+
+	virtual void Unload() override final;
+
+	virtual PlayerRunCommandRet PlayerRunCommandCallback(NczPlayer * const player, void * const cmd, void * const old_cmd) override final;
 };
 
 #endif // BADUSERCMDBLOCKER_H

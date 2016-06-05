@@ -41,7 +41,7 @@ public:
 		this->m_tick = 0;
 		this->m_dataStruct = playerDataStructT();
 	};
-	virtual ~SubDetection(){};
+	virtual ~SubDetection() override {};
 
 	void PrepareDetectionData(playerDataStructT* dataStruct)
 	{
@@ -79,7 +79,7 @@ public:
 	{
 		this->m_testerName = nullptr;
 	};
-	virtual ~LogDetection(){};
+	virtual ~LogDetection() override {};
 
 	virtual basic_string GetDetectionLogMessage(){return "";};
 

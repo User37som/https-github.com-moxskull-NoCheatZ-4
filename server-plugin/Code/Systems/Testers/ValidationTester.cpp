@@ -13,12 +13,11 @@
    limitations under the License.
 */
 
-#include <iostream>
-
 #include "ValidationTester.h"
 
-#include "Misc/Helpers.h"
+#include "Interfaces/InterfacesProxy.h"
 
+#include "Misc/Helpers.h"
 #include "Systems/Logger.h"
 
 /////////////////////////////////////////////////////////////////////////
@@ -27,6 +26,7 @@
 
 ValidationTester::ValidationTester() : 
 	BaseSystem("ValidationTester", PLAYER_CONNECTED, INVALID, STATUS_EQUAL_OR_BETTER),
+	SourceSdk::IGameEventListener002(),
 	NczFilteredPlayersList(),
 	OnTickListener(),
 	playerdata_class(),
@@ -44,7 +44,7 @@ void ValidationTester::Init()
 	InitDataStruct();
 }
 
-void ValidationTester::SetValidated(NczPlayer* player)
+void ValidationTester::SetValidated(NczPlayer const * const player)
 {
 	GetPlayerDataStruct(player)->b = true;
 	DebugMessage(Helpers::format("%s SteamID validated\n", player->GetName()));
@@ -87,7 +87,7 @@ void ValidationTester::Unload()
 	END_PLAYERS_LOOP
 }
 
-bool ValidationTester::JoinCallback(NczPlayer* const player)
+bool ValidationTester::JoinCallback(NczPlayer const * const player)
 {
 	if(IsActive() && SteamGameServer_BSecure())
 	{
@@ -113,7 +113,7 @@ void ValidationTester::AddPendingValidation(const char *pszUserName, const char*
 	m_pending_validations.Add(steamid);
 }
 
-bool ValidationTester::WasPreviouslyValidated(NczPlayer * const player)
+bool ValidationTester::WasPreviouslyValidated(NczPlayer const * const player)
 {
 	Assert(player->GetPlayerInfo());
 
@@ -129,7 +129,7 @@ void ValidationTester::ProcessOnTick(float const curtime)
 	PendingValidationsT::elem_t* it = m_pending_validations.GetFirst();
 	while (it != nullptr)
 	{
-		PlayerHandler* ph = NczPlayerManager::GetInstance()->GetPlayerHandlerBySteamID(it->m_value);
+		PlayerHandler const * const ph = NczPlayerManager::GetInstance()->GetPlayerHandlerBySteamID(it->m_value);
 
 		if (ph->status == INVALID || ph->playerClass->GetPlayerInfo() == nullptr)
 		{

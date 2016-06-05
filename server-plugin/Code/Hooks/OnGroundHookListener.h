@@ -16,31 +16,39 @@
 #ifndef ONGROUNDHOOKLISTENER
 #define ONGROUNDHOOKLISTENER
 
-#include "Hook.h"
-#include "Players/NczPlayerManager.h"
 #include "Preprocessors.h"
+#include "Hook.h"
 
 /////////////////////////////////////////////////////////////////////////
 // CBasePlayer::NetworkStateChanged_m_hGroundEntity(void*)
 /////////////////////////////////////////////////////////////////////////
 
 class CBasePlayer;
+class NczPlayer;
 
 // The function declaration we will call
-typedef void (HOOKFN_EXT *GroundEntity_t)(CBasePlayer *, int*);
+typedef void (HOOKFN_EXT *GroundEntity_t)(void * const, int const * const);
 
 class OnGroundHookListener;
-
-typedef HookListenersList<OnGroundHookListener> OnGroundListenersListT;
 
 /*
 	The base class used to listen for the ground state of human players
 */
 class OnGroundHookListener
 {
+	typedef HookListenersList<OnGroundHookListener> OnGroundListenersListT;
+
+private:
+	static OnGroundListenersListT m_listeners;
+
 public:
 	OnGroundHookListener();
 	virtual ~OnGroundHookListener();
+
+protected:
+	virtual void m_hGroundEntityStateChangedCallback(NczPlayer * const player, bool const new_isOnGround) = 0;
+
+public:
 
 	/*
 		Hook and unhook functions.
@@ -53,22 +61,19 @@ public:
 
 		This is a single instance hook. The plugin calls this when there is at least one player in game.
 	*/
-	static void HookOnGround(NczPlayer* player);
+	static void HookOnGround(NczPlayer const * const player);
 
 protected:
-	static void RegisterOnGroundHookListener(OnGroundHookListener* listener);
-	static void RemoveOnGroundHookListener(OnGroundHookListener* listener);
-	
-	virtual void m_hGroundEntityStateChangedCallback(NczPlayer* player, bool new_isOnGround) = 0;
+	static void RegisterOnGroundHookListener(OnGroundHookListener const * const listener);
+	static void RemoveOnGroundHookListener(OnGroundHookListener const * const listener);
 
 private:
 #ifdef GNUC
-	static void HOOKFN_INT nNetworkStateChanged_m_hGroundEntity(CBasePlayer* basePlayer, int * new_m_hGroundEntity);
+	static void HOOKFN_INT nNetworkStateChanged_m_hGroundEntity(void * const basePlayer, int const * const new_m_hGroundEntity);
 #else
-	static void HOOKFN_INT nNetworkStateChanged_m_hGroundEntity(CBasePlayer* basePlayer, void*, int * new_m_hGroundEntity);
+	static void HOOKFN_INT nNetworkStateChanged_m_hGroundEntity(void * const basePlayer, void* const, int const * const new_m_hGroundEntity);
 #endif
 	
-	static OnGroundListenersListT m_listeners;
 };
 
 #endif

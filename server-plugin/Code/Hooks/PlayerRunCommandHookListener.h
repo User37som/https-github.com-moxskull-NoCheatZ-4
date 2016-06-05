@@ -16,13 +16,12 @@
 #ifndef PLAYERRUNCOMMANDHOOKLISTENER
 #define PLAYERRUNCOMMANDHOOKLISTENER
 
+#include "Interfaces/usercmd.h"
+
 #include "Preprocessors.h"
 #include "Hook.h"
 
-#include "SdkPreprocessors.h"
-#include "Interfaces/usercmd.h"
-
-inline void InertCmd(void* pcmd);
+inline void InertCmd(void * const pcmd);
 
 /////////////////////////////////////////////////////////////////////////
 // CCSPlayer::PlayerRunCommand(CUserCmd*, IMoveHelper*)
@@ -32,7 +31,7 @@ class CCSPlayer;
 class IMoveHelper;
 class NczPlayer;
 
-typedef void (HOOKFN_EXT *PlayerRunCommand_t)(void*, void*, IMoveHelper*);
+typedef void (HOOKFN_EXT *PlayerRunCommand_t)(void* const, void * const, IMoveHelper const * const);
 
 enum PlayerRunCommandRet
 {
@@ -41,34 +40,36 @@ enum PlayerRunCommandRet
 	BLOCK
 };
 
-class PlayerRunCommandHookListener;
-
-typedef HookListenersList<PlayerRunCommandHookListener> ListenersListT;
-
 class ALIGN8 PlayerRunCommandHookListener
 {
+	typedef HookListenersList<PlayerRunCommandHookListener> ListenersListT;
+
+private:
+	static ListenersListT m_listeners;
+	static SourceSdk::CUserCmd_csgo m_lastCUserCmd[MAX_PLAYERS];
+
 public:
 	PlayerRunCommandHookListener();
-	~PlayerRunCommandHookListener();
-
-	static void HookPlayerRunCommand(NczPlayer* player);
-
-	static void* GetLastUserCmd(NczPlayer* player);
+	virtual ~PlayerRunCommandHookListener();
 
 protected:
-	static void RegisterPlayerRunCommandHookListener(PlayerRunCommandHookListener* listener, size_t priority = std::numeric_limits<size_t>::max(), SlotStatus filter = PLAYER_IN_TESTS);
-	static void RemovePlayerRunCommandHookListener(PlayerRunCommandHookListener* listener);
+	virtual PlayerRunCommandRet PlayerRunCommandCallback(NczPlayer * const  player, void * const cmd, void * const old_cmd) = 0;
 
-	virtual PlayerRunCommandRet PlayerRunCommandCallback(NczPlayer* player, void* cmd, void* old_cmd) = 0;
+public:
+	static void HookPlayerRunCommand(NczPlayer const * const player);
+
+	static void* GetLastUserCmd(NczPlayer const * const player);
+
+protected:
+	static void RegisterPlayerRunCommandHookListener(PlayerRunCommandHookListener const * const listener, size_t const priority = std::numeric_limits<size_t>::max(), SlotStatus filter = PLAYER_IN_TESTS);
+	static void RemovePlayerRunCommandHookListener(PlayerRunCommandHookListener const * const listener);
 
 private:
 #ifdef GNUC
-	static void HOOKFN_INT nPlayerRunCommand(void* This, void* pCmd, IMoveHelper* pMoveHelper);
+	static void HOOKFN_INT nPlayerRunCommand(void * const This, void * const pCmd, IMoveHelper const * const pMoveHelper);
 #else
-	static void HOOKFN_INT nPlayerRunCommand(void* This, void*, void* pCmd, IMoveHelper* pMoveHelper);
+	static void HOOKFN_INT nPlayerRunCommand(void * const This, void * const, void * const pCmd, IMoveHelper const * const pMoveHelper);
 #endif
-	static ListenersListT m_listeners;
-	static SourceSdk::CUserCmd_csgo m_lastCUserCmd[MAX_PLAYERS];
 } ALIGN8_POST;
 
 #endif
