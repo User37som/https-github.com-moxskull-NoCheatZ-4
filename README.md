@@ -41,8 +41,7 @@ Currently [CS:S](http://store.steampowered.com/app/240) is the base of this proj
 # Current Project Status
 ___
 
-* **Status** : [Fixing](https://github.com/L-EARN/NoCheatZ-4/issues)
-* **Last known stable commit** : https://github.com/L-EARN/NoCheatZ-4/tree/b760b88a77fef6022b206241ba62a0e68468d57d
+* **Status** : [Testing / Fixing](https://github.com/L-EARN/NoCheatZ-4/issues)
 
 <a name="Features"></a> 
 # Features
@@ -74,6 +73,7 @@ ___
 * AntiSmokeBlocker : Players inside a smoke cannot see others. **Players can't see thru smokes even when r_drawparticles is 0**.
 * BadUserCmdBlocker : Reject malformed or cheated CUserCmds.
 * WallhackBlocker : Player visibility is tested against the walls.
+* RadarHackBlocker : Block aimbots and ESPs that use the radar positions.
 
 <a name="other-systems"></a> 
 ### Other Systems

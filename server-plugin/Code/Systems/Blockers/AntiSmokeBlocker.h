@@ -68,7 +68,7 @@ typedef struct ALIGN8 SmokeInfoS
 	{
 		memcpy(this, &other, sizeof(SmokeInfoS));
 	};
-} SmokeInfoT ALIGN8_POST;
+} ALIGN8_POST SmokeInfoT;
 
 class AntiSmokeBlocker :
 	private BaseSystem,

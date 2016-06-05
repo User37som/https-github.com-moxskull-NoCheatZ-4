@@ -76,8 +76,9 @@ bool GetIniAttributeValue(std::ifstream & file, basic_string const & root, basic
 }
 
 ConfigManager::ConfigManager() :
-	content_version(1),
-	singleton_class()
+	singleton_class(),
+	m_vfuncs(),
+	content_version(1)
 {
 
 }
@@ -91,7 +92,7 @@ bool ConfigManager::LoadConfig()
 {
 	basic_string path;
 	basic_string gamename;
-	SourceSdk::GetGameDir(path);
+	SourceSdk::InterfacesProxy::GetGameDir(path);
 	gamename = path;
 	path.append("/addons/NoCheatZ/config.ini");
 	std::ifstream file(path.c_str(), std::ios::in);

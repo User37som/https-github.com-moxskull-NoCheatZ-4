@@ -27,7 +27,7 @@
 #	include <cstdlib>
 #endif
 
-#define NCZ_VERSION_STR	"4.0 Alpha"
+#define NCZ_VERSION_STR	"4 Beta r1"
 
 #define NCZ_PLUGIN_NAME			"NoCheatZ" // Name of the plugin
 

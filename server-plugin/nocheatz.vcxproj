@@ -168,7 +168,7 @@ copy "$(TargetPath)" ..\..\..\game\bin\"$(TargetName)".pdb
       <ObjectFileName>$(IntDir)</ObjectFileName>
       <ProgramDataBaseFileName>$(IntDir)</ProgramDataBaseFileName>
       <GenerateXMLDocumentationFiles>false</GenerateXMLDocumentationFiles>
-      <BrowseInformation />
+      <BrowseInformation>false</BrowseInformation>
       <BrowseInformationFile>$(IntDir)</BrowseInformationFile>
       <WarningLevel>Level4</WarningLevel>
       <DebugInformationFormat>None</DebugInformationFormat>
@@ -198,9 +198,9 @@ copy "$(TargetPath)" ..\..\..\game\bin\"$(TargetName)".pdb
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>..\Tiers\Source Engine SDKs\css-sdk\lib\public;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>libc;libcd;libcmtd;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
-      <GenerateDebugInformation>DebugFastLink</GenerateDebugInformation>
+      <GenerateDebugInformation>No</GenerateDebugInformation>
       <ProgramDatabaseFile>$(IntDir)$(TargetName).pdb</ProgramDatabaseFile>
-      <GenerateMapFile>true</GenerateMapFile>
+      <GenerateMapFile>false</GenerateMapFile>
       <MapFileName>$(IntDir)$(TargetName).map</MapFileName>
       <SubSystem>Windows</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
@@ -210,11 +210,13 @@ copy "$(TargetPath)" ..\..\..\game\bin\"$(TargetName)".pdb
       <TargetMachine>MachineX86</TargetMachine>
       <LinkErrorReporting>PromptImmediately</LinkErrorReporting>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
-      <FullProgramDatabaseFile>true</FullProgramDatabaseFile>
+      <FullProgramDatabaseFile>false</FullProgramDatabaseFile>
       <AssemblyDebug>false</AssemblyDebug>
       <TurnOffAssemblyGeneration>true</TurnOffAssemblyGeneration>
       <SectionAlignment>32</SectionAlignment>
-      <MapExports>true</MapExports>
+      <MapExports>false</MapExports>
+      <Version>
+      </Version>
     </Link>
     <Manifest>
       <SuppressStartupBanner>true</SuppressStartupBanner>

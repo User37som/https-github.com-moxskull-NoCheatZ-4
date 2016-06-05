@@ -48,9 +48,7 @@ private:
 	SlotStatus const m_load_status;
 	SlotFilterBehavior const m_behavior;
 
-	SlotFilter& operator=(SlotFilter const & other)
-	{
-	}
+	SlotFilter& operator=(SlotFilter const & other) = delete;
 
 protected:
 	SlotFilter(SlotFilter const & other) : m_status(other.m_status), m_load_status(other.m_load_status), m_behavior(other.m_behavior)

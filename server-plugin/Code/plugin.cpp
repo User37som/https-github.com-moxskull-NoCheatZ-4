@@ -52,7 +52,7 @@ static void* __CreatePlugin_interface()
 
 void* CreateInterfaceInternal(char const *pName, int *pReturnCode)
 {
-	printf(Helpers::format("Game engine asking for %s\n", pName).c_str());
+	printf("Game engine asking for %s\n", pName);
 	if(pReturnCode) *pReturnCode = SourceSdk::IFACE_OK;
 	return __CreatePlugin_interface();
 }
