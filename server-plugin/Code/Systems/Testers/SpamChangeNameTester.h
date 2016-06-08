@@ -30,7 +30,7 @@ struct ChangeNameInfo
 
 	ChangeNameInfo()
 	{
-		next_namechange_test = Plat_FloatTime() + 5.0f;
+		next_namechange_test = 0;
 		namechange_count = 0;
 	};
 	ChangeNameInfo(const ChangeNameInfo& other)
