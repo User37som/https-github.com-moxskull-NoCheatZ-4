@@ -73,6 +73,7 @@ void AutoTVRecord::StartRecord()
 			mapname = static_cast<SourceSdk::CGlobalVars*>(SourceSdk::InterfacesProxy::Call_GetGlobalVars())->mapname;
 		}
 
+
 		size_t const strip = mapname.find_last_of("/\\");
 		if(strip != basic_string::npos) mapname = mapname.c_str() + strip + 1;
 
