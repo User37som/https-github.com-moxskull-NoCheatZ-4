@@ -48,6 +48,22 @@ private:
 	size_t m_size;
 	size_t m_capacity;
 
+private:
+	inline size_t autolen(pod const * string) const
+	{
+		return strlen(string);
+	}
+
+	inline size_t autonlen(pod const * string, size_t max) const
+	{
+		return strnlen(string, max);
+	}
+
+	inline pod const * autoempty() const
+	{
+		return "";
+	}
+
 public:
 
 	String()
@@ -64,9 +80,9 @@ public:
 #endif
 	}
 
-	const pod  *c_str() const
+	const pod *c_str() const
 	{
-		return m_alloc ? m_alloc : "";
+		return m_alloc ? m_alloc : autoempty();
 	}
 
 	void assign(const String<pod> &src)
@@ -89,10 +105,10 @@ public:
 		}
 		else
 		{
-			size_t const len = strlen(d) + 1;
+			size_t const len = autolen(d) + 1;
 			Grow(len, false);
-			memcpy(m_alloc, d, len * sizeof(char));
-			m_size = strlen(m_alloc);
+			memcpy(m_alloc, d, len * sizeof(pod));
+			m_size = autolen(m_alloc);
 		}
 	}
 
@@ -104,11 +120,11 @@ public:
 		}
 		else
 		{
-			size_t const len = strnlen(d, count) + 1;
+			size_t const len = autonlen(d, count) + 1;
 			Grow(len, false);
-			memcpy(m_alloc, d, len * sizeof(char));
+			memcpy(m_alloc, d, len * sizeof(pod));
 			m_alloc[len] = 0;
-			m_size = strlen(m_alloc);
+			m_size = autolen(m_alloc);
 		}
 	}
 
@@ -171,7 +187,7 @@ public:
 
 	bool operator ==(pod const * other) const
 	{
-		if (m_size != strlen(other)) return false;
+		if (m_size != autolen(other)) return false;
 
 		pod const * me = m_alloc;
 		do
@@ -190,9 +206,9 @@ public:
 
 	String<pod>& append(pod const * t)
 	{
-		size_t const len = strlen(t) + 1;
+		size_t const len = autolen(t) + 1;
 		Grow(m_size + len);
-		memcpy(m_alloc + m_size, t, sizeof(char) * len);
+		memcpy(m_alloc + m_size, t, sizeof(pod) * len);
 		m_size = strlen(m_alloc);
 		return *this;
 	}
@@ -243,6 +259,20 @@ public:
 		return *this;
 	}
 
+	String<pod>& replace(pod const * replace_list, pod const replace_by)
+	{
+		if (m_size > 0)
+		{
+			while (*replace_list != 0)
+			{
+				replace(*replace_list, replace_by);
+				++replace_list;
+			}
+		}
+
+		return *this;
+	}
+
 	String<pod>& remove(size_t pos)
 	{
 		if (pos < m_size)
@@ -250,7 +280,7 @@ public:
 			do
 			{
 				m_alloc[pos] = m_alloc[pos + 1];
-			} while (m_alloc[++pos] != '\0');
+			} while (m_alloc[++pos] != 0);
 			--m_size;
 		}
 		return *this;
@@ -316,7 +346,7 @@ public:
 
 	size_t find(pod const * const c, size_t start = 0) const
 	{
-		size_t const csize = strlen(c);
+		size_t const csize = autolen(c);
 		if (start + csize > m_size) return npos;
 		char * me = m_alloc + start;
 
@@ -396,68 +426,21 @@ public:
 };
 
 template <>
-const wchar_t * String<wchar_t>::c_str() const
+inline size_t String<wchar_t>::autolen(wchar_t const * string) const
 {
-	return m_alloc ? m_alloc : L"";
+	return wcslen(string);
 }
 
 template <>
-String<wchar_t>& String<wchar_t>::append(wchar_t const * t)
+inline size_t String<wchar_t>::autonlen(wchar_t const * string, size_t max) const
 {
-	size_t const len = wcslen(t) + 1;
-	Grow(m_size + len);
-	memcpy(m_alloc + m_size, t, sizeof(wchar_t) * len);
-	m_size = wcslen(m_alloc);
-	return *this;
+	return wcsnlen(string, max);
 }
 
 template <>
-void String<wchar_t>::assign(wchar_t const *d)
+inline wchar_t const * String<wchar_t>::autoempty() const
 {
-	if (!d)
-	{
-		clear();
-	}
-	else
-	{
-		size_t const len = wcslen(d) + 1;
-		Grow(len, false);
-		memcpy(m_alloc, d, len * sizeof(wchar_t));
-		m_size = wcslen(m_alloc);
-	}
-}
-
-template <>
-void String<wchar_t>::assign(wchar_t const *d, size_t count)
-{
-	if (!d)
-	{
-		clear();
-	}
-	else
-	{
-		size_t const len = wcsnlen(d, count) + 1;
-		Grow(len, false);
-		memcpy(m_alloc, d, len * sizeof(wchar_t));
-		m_alloc[len] = L'\0';
-		m_size = wcslen(m_alloc);
-	}
-}
-
-template <>
-size_t String<wchar_t>::find(wchar_t const * const c, size_t start) const
-{
-	size_t const csize = wcslen(c);
-	if (start + csize > m_size) return npos;
-	wchar_t * me = m_alloc + start;
-
-	while (memcmp(me, c, csize * sizeof(char32_t)) != 0)
-	{
-		++me;
-		if (++start + csize > m_size) return npos;
-	}
-
-	return start;
+	return L"";
 }
 
 typedef String<char> basic_string;
