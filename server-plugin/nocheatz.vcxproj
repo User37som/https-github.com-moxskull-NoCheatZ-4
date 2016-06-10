@@ -132,7 +132,7 @@
       <PreserveSbr>true</PreserveSbr>
     </Bscmake>
     <PostBuildEvent>
-      <Command>..\scripts\prepare-test.bat CSS Debug 232330 cstrike</Command>
+      <Command>..\scripts\prepare-test.bat CSGO Debug 740 csgo</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -198,9 +198,9 @@ copy "$(TargetPath)" ..\..\..\game\bin\"$(TargetName)".pdb
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>..\Tiers\Source Engine SDKs\css-sdk\lib\public;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>libc;libcd;libcmtd;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
-      <GenerateDebugInformation>No</GenerateDebugInformation>
+      <GenerateDebugInformation>DebugFastLink</GenerateDebugInformation>
       <ProgramDatabaseFile>$(IntDir)$(TargetName).pdb</ProgramDatabaseFile>
-      <GenerateMapFile>false</GenerateMapFile>
+      <GenerateMapFile>true</GenerateMapFile>
       <MapFileName>$(IntDir)$(TargetName).map</MapFileName>
       <SubSystem>Windows</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
@@ -210,13 +210,15 @@ copy "$(TargetPath)" ..\..\..\game\bin\"$(TargetName)".pdb
       <TargetMachine>MachineX86</TargetMachine>
       <LinkErrorReporting>PromptImmediately</LinkErrorReporting>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
-      <FullProgramDatabaseFile>false</FullProgramDatabaseFile>
-      <AssemblyDebug>false</AssemblyDebug>
+      <FullProgramDatabaseFile>true</FullProgramDatabaseFile>
+      <AssemblyDebug>true</AssemblyDebug>
       <TurnOffAssemblyGeneration>true</TurnOffAssemblyGeneration>
       <SectionAlignment>32</SectionAlignment>
-      <MapExports>false</MapExports>
+      <MapExports>true</MapExports>
       <Version>
       </Version>
+      <StripPrivateSymbols>
+      </StripPrivateSymbols>
     </Link>
     <Manifest>
       <SuppressStartupBanner>true</SuppressStartupBanner>
@@ -229,7 +231,7 @@ copy "$(TargetPath)" ..\..\..\game\bin\"$(TargetName)".pdb
       <OutputFile>$(OutDir)serverplugin_empty.bsc</OutputFile>
     </Bscmake>
     <PostBuildEvent>
-      <Command>..\scripts\prepare-test.bat CSS Release 232330 cstrike</Command>
+      <Command>..\scripts\prepare-test.bat CSGO Release 740 csgo</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
