@@ -127,7 +127,7 @@ void AntiSmokeBlocker::ProcessOnTick(float const curtime)
 					if (x == y) continue;
 
 					PlayerHandler const * const other_ph = NczPlayerManager::GetInstance()->GetPlayerHandlerByIndex(y);
-					if (other_ph->status != PLAYER_IN_TESTS || other_ph->status != BOT) continue;
+					if (other_ph->status != PLAYER_IN_TESTS && other_ph->status != BOT) continue;
 
 					MathInfo const & y_math = MathCache::GetInstance()->GetCachedMaths(y);
 
