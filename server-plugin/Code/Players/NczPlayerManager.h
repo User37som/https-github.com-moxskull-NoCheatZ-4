@@ -39,15 +39,9 @@ struct PlayerHandler
 		playerClass = nullptr;
 		in_tests_time = std::numeric_limits<float>::max();
 	};
-	PlayerHandler(const PlayerHandler& other)
-	{
-		memcpy(this, &other, sizeof(PlayerHandler));
-	};
-	PlayerHandler& operator=(const PlayerHandler& other)
-	{
-		memcpy(this, &other, sizeof(PlayerHandler));
-		return *this;
-	};
+
+	PlayerHandler(const PlayerHandler& other) = delete;
+	PlayerHandler& operator=(const PlayerHandler& other) = delete;
 
 	void Reset()
 	{
