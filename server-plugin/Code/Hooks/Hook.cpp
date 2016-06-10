@@ -127,7 +127,8 @@ DWORD HookGuard::GetOldFunctionByInstance(void * class_ptr) const
 
 void HookGuard::GuardHooks()
 {
-	for (hooked_list_t::iterator it = m_list.begin(); it != m_list.end(); ++it)
+	Assert(0);
+	/*for (hooked_list_t::iterator it = m_list.begin(); it != m_list.end(); ++it)
 	{
 		if (*it->vf_entry != it->newFn)
 		{
@@ -135,7 +136,7 @@ void HookGuard::GuardHooks()
 			DebugMessage(Helpers::format("HookGuard::GuardHooks : Re-hooking at %X.", *it->vf_entry));
 			VirtualTableHook(*it, true); // rehook
 		}
-	}
+	}*/
 }
 
 void HookGuard::UnhookAll()

@@ -356,7 +356,7 @@ void CNoCheatZPlugin::GameFrame( bool simulating )
 {
 	//OnFrameListener::OnFrame();
 
-	HookGuard::GetInstance()->GuardHooks();
+	//HookGuard::GetInstance()->GuardHooks();
 
 	if(simulating)
 	{
