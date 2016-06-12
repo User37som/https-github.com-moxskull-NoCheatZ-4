@@ -1,19 +1,18 @@
 # NoCheatZ-4
 Source Engine serversided anti-cheat plugin. (CS:S, CS:GO).
-___
 
 # Table of content
-___
 
-1. [Goal](#Goal)
-2. [Current Project Status](#Status)
-3. [Features](#Features)
+1. [Introduction](#Introduction)
+2. [Goal](#Goal)
+3. [Current Project Status](#Status)
+4. [Features](#Features)
     1. [Systems](#Systems)
         1. [Detection Systems](#detection-systems)
         2. [Blocking Systems](#blocking-systems)
         3. [Other Systems](#other-systems)
     2. [Available Command](#command)
-4. [Contributing](#Contributing)
+5. [Contributing](#Contributing)
     1. [Installing a Game Server](#Installation)
     2. [Cloning the repository](#Cloning)
     3. [Compiling the project](#Compiling)
@@ -21,6 +20,37 @@ ___
         2. [With Windows](#Windows)
         3. [With Mac](#Mac)
     4. [What to do with the code ?](#what-to-do)
+
+<a name="Introduction"></a>
+# Notes about anti-cheat systems in general (*especially for hlmod.ru*)
+ 
+> * Be aware that no anti-cheat in this world can detect every cheating for this game.
+* Also be aware that there is no such a thing as an anti-cheat system that detects each and every cheating method.
+  
+### So far there are 4 kinds of anti-cheats :
+
+* Client side anti-cheats
+* Server side anti-cheats
+* Both client and server side anti-cheats
+* **Yourself**
+
+### Let me explain the differences ...
+
+* Some anti-cheat systems can detects injected programs and illegal memory patchs, such as VAC. However those anti-cheat systems can be bypassed because they run on the **clients computer** - morever, requiring the install of yet another anti-cheat **will decrease the activity of your server** because clients will have to lose time downloading unwanted programs to play there. In addition, sometimes that anti cheat may not be compatible.
+Client side anti cheat systems also suffers from the fact they are **reading -private- data** on client computers and can access -anything-.
+
+* The **server sided anti cheats** are more concerned about the data the client is sending to the server. But this can also be exploited on client side.
+On the other hand, **the server can block for sure the data** it sends to the clients while client side anti-cheats can always be bypassed for those blocking systems.
+The avantage is the server side anti cheats are less subjects to bypassing (If the admin is of confidence) because they are more protected. But they can't access the entire computer of the clients and, because of that, **are less effective** because they must run more heuristic tests that returns more false detections than client sided anti cheats.
+
+* Anti-cheat systems that runs on **both client and server side** just merge all the drawbacks and advantages.
+
+* And there is you. If you read this page, this should be because you think you have a lot of cheating in your server. So you know (or at least think to know) when someone seems to be cheating and **you need a solution to automatically ban cheaters**.
+  
+But if there was something to tell you "*Hey, there's something suspicious right now ...*" when you're viewing a demo or "*Hey, I banned this cheater. Look at this if you don't trust me*", this would help a lot, wouldn't it ?
+ 
+#### NoCheatZ 4 is here to help.
+* It's not an anti-cheat that will detect everything - *don't get the wrong idea because such anti-cheat does not exist and will never* - but it will at least **help you** detect cheats and at most **ban** confirmed **cheaters**, **sparing you not only plenty of time but also money**.
 
 <a name="Goal"></a> 
 # Goal
