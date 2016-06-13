@@ -17,6 +17,7 @@
 
 #include "Misc/Helpers.h"
 #include "Systems/BanRequest.h"
+#include "Systems/Logger.h"
 
 ConCommandTester::ConCommandTester() :
 	BaseSystem("ConCommandTester", PLAYER_CONNECTING, PLAYER_CONNECTING, STATUS_EQUAL_OR_BETTER),
@@ -366,16 +367,26 @@ bool ConCommandTester::ConCommandCallback(NczPlayer* player, void* cmd, const So
 {
 	char const * const command_name = SourceSdk::InterfacesProxy::ConCommand_GetName(cmd);
 
-	if(Helpers::bStriEq(command_name, "ent_create") | Helpers::bStriEq(command_name, "ent_fire"))
+	if (player) /// https://github.com/L-EARN/NoCheatZ-4/issues/16#issuecomment-225543330
 	{
-		return HookEntCallback(player, cmd, args);
+		if (Helpers::bStriEq(command_name, "ent_create") | Helpers::bStriEq(command_name, "ent_fire"))
+		{
+			return HookEntCallback(player, cmd, args);
+		}
+		else if (Helpers::bStriEq(command_name, "say") | Helpers::bStriEq(command_name, "say_team"))
+		{
+			return HookSayCallback(player, cmd, args);
+		}
+		else
+		{
+			return false;
+		}
 	}
-	else if(Helpers::bStriEq(command_name, "say") | Helpers::bStriEq(command_name, "say_team"))
+	else
 	{
-		return HookSayCallback(player, cmd, args);
+		Logger::GetInstance()->Msg<MSG_ERROR>(Helpers::format("ConCommandTester::ConCommandCallback : Intercepted a ConCommand because player class is not ready. Command name : %s\n", command_name));
+		return true; // Always block the command if the plugin is not ready to test this player (player class not already created)
 	}
-
-	return false;
 }
 
 basic_string Detection_CmdFlood::GetDataDump()
