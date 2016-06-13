@@ -109,7 +109,10 @@ bool WallhackBlocker::SetTransmitCallback(SourceSdk::edict_t const * const sende
 	PlayerHandler const * const sender_player = NczPlayerManager::GetInstance()->GetPlayerHandlerByEdict(sender);
 	PlayerHandler const * const receiver_player = NczPlayerManager::GetInstance()->GetPlayerHandlerByEdict(receiver);
 
-	if(sender_player->status == INVALID || receiver_player->status < PLAYER_IN_TESTS)
+	bool can_not_process = sender_player->status < BOT || sender_player->status == PLAYER_CONNECTING;
+	can_not_process |= receiver_player->status < PLAYER_CONNECTED; // Also process spectators but not bots when they are receivers
+
+	if(can_not_process)
 	{
 		METRICS_LEAVE_SECTION("WallhackBlocker::SetTransmitCallback");
 		return false;
@@ -139,10 +142,9 @@ bool WallhackBlocker::SetTransmitCallback(SourceSdk::edict_t const * const sende
 
 		bool rt = !cache.IsVisible(sender_player->playerClass, spec_player->playerClass);
 		METRICS_LEAVE_SECTION("WallhackBlocker::SetTransmitCallback");
-		SystemVerbose2(Helpers::format("%s can see %s ? : %s", spec_player->playerClass->GetName(), sender_player->playerClass->GetName(), Helpers::boolToString(!rt)));
+		//SystemVerbose2(Helpers::format("%s can see %s ? : %s", spec_player->playerClass->GetName(), sender_player->playerClass->GetName(), Helpers::boolToString(!rt)));
 		return rt;
 	}
-
 	
 	if(!cache.IsValid(sender_player->playerClass, receiver_player->playerClass))
 	{
