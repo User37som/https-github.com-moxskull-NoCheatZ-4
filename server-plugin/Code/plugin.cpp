@@ -328,6 +328,8 @@ void CNoCheatZPlugin::LevelInit( char const *pMapName )
 
 	Logger::GetInstance()->Flush();
 	NczPlayerManager::GetInstance()->OnLevelInit();
+
+	BanRequest::GetInstance()->OnLevelInit();
 }
 
 //---------------------------------------------------------------------------------

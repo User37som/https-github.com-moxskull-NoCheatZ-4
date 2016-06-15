@@ -23,6 +23,7 @@
 #include "Misc/temp_Metrics.h"
 #include "Hooks/PlayerRunCommandHookListener.h"
 #include "Misc/MathCache.h"
+#include "Systems/BanRequest.h"
 
 //---------------------------------------------------------------------------------
 // NczPlayer
@@ -412,16 +413,6 @@ void NczPlayer::Ban(const char * msg, int minutes)
 	Helpers::writeToLogfile(Helpers::format(
 				"Banned %s with reason : %s\n", this->GetReadableIdentity().c_str(), msg));
 	{
-		if(SteamGameServer_BSecure())
-		{
-			SourceSdk::InterfacesProxy::Call_ServerCommand(Helpers::format("banid %d %s\n", minutes, GetSteamID()).c_str());
-			SourceSdk::InterfacesProxy::Call_ServerCommand("writeid\n");
-		}
-		Kick(msg);
-		if(!Helpers::bStrEq("127.0.0.1", GetIPAddress()))
-		{
-			SourceSdk::InterfacesProxy::Call_ServerCommand(Helpers::format("addip 1440 \"%s\"\n", GetIPAddress()).c_str());
-			SourceSdk::InterfacesProxy::Call_ServerCommand("writeip\n");
-		}
+		BanRequest::GetInstance()->BanNow(this, minutes, msg);
 	}
 }

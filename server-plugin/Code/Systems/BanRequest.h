@@ -42,6 +42,10 @@ typedef struct PlayerBanRequest
 		do {player_name[x]=steamid[x]=ip[x]=identity[x]='\0';} while(++x < 24);
 		do {identity[x]='\0';} while(++x < 64); 
 	};
+	PlayerBanRequest(int id)
+	{
+		userid = id;
+	};
 	PlayerBanRequest(const PlayerBanRequest& other)
 	{
 		ban_time = other.ban_time;
@@ -83,7 +87,12 @@ private:
 	float m_wait_time;
 	bool m_do_writeid;
 
+	void * cmd_gb_ban;
+	void * cmd_sm_ban;
+
 	BanRequestListT m_requests;
+
+	void BanInternal(int ban_time, char const * steam_id, int userid, char const * kick_message, char const * ip);
 
 public:
 	BanRequest();
@@ -91,11 +100,15 @@ public:
 
 	void Init();
 
+	void OnLevelInit();
+
 	void WriteBansIfNeeded();
 
 	void SetWaitTime(float wait_time);
 
 	void AddAsyncBan(NczPlayer * const player, int ban_time, const char * kick_message);
+
+	void BanNow(NczPlayer * const player, int ban_time, const char * kick_message);
 
 	void TimerCallback(char const * const timer_name);
 };

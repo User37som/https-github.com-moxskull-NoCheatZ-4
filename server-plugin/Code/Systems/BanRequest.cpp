@@ -19,14 +19,17 @@
 
 #include "Misc/Helpers.h"
 #include "Misc/temp_Metrics.h"
+#include "Players/NczPlayerManager.h"
 
 
 BanRequest::BanRequest() :
 	singleton_class(),
 	TimerListener(),
 	m_wait_time(10.0),
-	m_do_writeid(false)
-	
+	m_do_writeid(false),
+	cmd_gb_ban(nullptr),
+	cmd_sm_ban(nullptr),
+	m_requests()
 {
 
 }
@@ -34,6 +37,12 @@ BanRequest::BanRequest() :
 void BanRequest::Init()
 {
 	TimerListener::AddTimerListener(this);
+}
+
+void BanRequest::OnLevelInit()
+{
+	cmd_gb_ban = SourceSdk::InterfacesProxy::ICvar_FindCommand("gb_externalBanUser");
+	cmd_sm_ban = SourceSdk::InterfacesProxy::ICvar_FindCommand("sm_ban");
 }
 
 BanRequest::~BanRequest()
@@ -67,28 +76,71 @@ void BanRequest::AddAsyncBan(NczPlayer* player, int ban_time, const char * kick_
 	AddTimer(m_wait_time, player->GetName(), true);
 }
 
+void BanRequest::BanInternal(int ban_time, char const * steam_id, int userid, char const * kick_message, char const * ip)
+{
+	if (cmd_gb_ban)
+	{
+	//	SourceSdk::InterfacesProxy::Call_ServerCommand(Helpers::format("gb_externalBanUser \"%s\" \"%s\" \"%s\" %d minutes \"%s\"\n", gb_admin_id.c_str(), SteamID, gb_reason_id.c_str(), minutes, this->getName()));
+	}
+	if (cmd_sm_ban)
+	{
+		SourceSdk::InterfacesProxy::Call_ServerCommand(Helpers::format("sm_ban %d %d \"%s\"\n", userid, ban_time, kick_message).c_str());
+	}
+	else
+	{
+		if (SteamGameServer_BSecure() && steam_id != nullptr)
+		{
+			SourceSdk::InterfacesProxy::Call_ServerCommand(Helpers::format("banid %d %s\n", ban_time, steam_id).c_str());
+		}
+		SourceSdk::InterfacesProxy::Call_ServerCommand(Helpers::format("kickid %d [NoCheatZ 4] %s\n", userid, kick_message).c_str());
+		if (!Helpers::bStrEq("127.0.0.1", ip))
+		{
+			SourceSdk::InterfacesProxy::Call_ServerCommand(Helpers::format("addip 1440 \"%s\"\n", ip).c_str());
+		}
+
+		m_do_writeid = true;
+	}
+}
+
+void BanRequest::BanNow(NczPlayer * const player, int ban_time, const char * kick_message)
+{
+	// Remove player from process list until he entirely gets removed from the server
+
+	NczPlayerManager::GetInstance()->DeclareKickedPlayer(player->GetIndex());
+
+	// Ban
+
+	BanInternal(ban_time, player->GetSteamID(), player->GetUserid(), kick_message, player->GetIPAddress());
+
+	// Remove from async requests if any
+
+	BanRequestListT::elem_t* it = m_requests.Find(player->GetUserid());
+	if (it != nullptr)
+	{
+		m_requests.Remove(it);
+	}
+}
+
 void BanRequest::TimerCallback(char const * const timer_name)
 {
 	BanRequestListT::elem_t* it = m_requests.GetFirst();
 	float const curtime = Plat_FloatTime();
 	while(it != nullptr)
 	{
-		if(it->m_value.request_time + m_wait_time < curtime)
+		PlayerBanRequestT const & v = it->m_value;
+
+		if(v.request_time + m_wait_time < curtime)
 		{
-			Helpers::writeToLogfile(Helpers::format("%s banned (%f seconds after first detection).", it->m_value.identity, m_wait_time));
-			if(SteamGameServer_BSecure())
+			PlayerHandler const * const ph = SteamGameServer_BSecure() ? NczPlayerManager::GetInstance()->GetPlayerHandlerBySteamID(v.steamid) : NczPlayerManager::GetInstance()->GetPlayerHandlerByUserId(v.userid);
+
+			if (ph->status > KICK) // Still connected
 			{
-				SourceSdk::InterfacesProxy::Call_ServerCommand(Helpers::format("banid %d %s\n", it->m_value.ban_time, it->m_value.steamid).c_str());
+				NczPlayerManager::GetInstance()->DeclareKickedPlayer(ph->playerClass->GetIndex());
 			}
-			SourceSdk::InterfacesProxy::Call_ServerCommand(Helpers::format("kickid %d [NoCheatZ 4] %s\n", it->m_value.userid, it->m_value.kick_message).c_str());
-			if(!Helpers::bStrEq("127.0.0.1", it->m_value.ip))
-			{
-				SourceSdk::InterfacesProxy::Call_ServerCommand(Helpers::format("addip 1440 \"%s\"\n", it->m_value.ip).c_str());
-			}
-			SourceSdk::InterfacesProxy::Call_ServerExecute();
+			
+			BanInternal(v.ban_time, v.steamid, v.userid, v.kick_message, v.ip);
 
 			it = m_requests.Remove(it);
-			m_do_writeid = true;
 		}
 		else
 		{
@@ -106,6 +158,7 @@ void BanRequest::WriteBansIfNeeded()
 			SourceSdk::InterfacesProxy::Call_ServerCommand("writeid\n");
 		}
 		SourceSdk::InterfacesProxy::Call_ServerCommand("writeip\n");
-		SourceSdk::InterfacesProxy::Call_ServerExecute();
+
+		m_do_writeid = false;
 	}
 }
