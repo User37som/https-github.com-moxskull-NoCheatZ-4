@@ -66,11 +66,7 @@ public:
 			CreateInstance();
 	}
 
-	static C* GetInstance()
-	{
-		Assert(hClass::instance);
-		return hClass::instance;
-	}
+	inline static C * const GetInstance();
 
 	static void DestroyInstance()
 	{
@@ -85,5 +81,12 @@ public:
 
 template <class C>
 C* Singleton<C>::instance = nullptr;
+
+template <class C>
+inline C * const Singleton<C>::GetInstance()
+{
+	Assert(hClass::instance);
+	return hClass::instance;
+}
 
 #endif // SINGLETON_H
