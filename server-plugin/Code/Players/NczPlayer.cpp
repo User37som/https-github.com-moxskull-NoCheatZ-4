@@ -44,18 +44,9 @@ WpnShotType const NczPlayer::GetWpnShotType() const
 {
 	if (GetPlayerInfo() == nullptr) return HAND;
 
-	char const * wpn_name;
-	if (SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive)
-	{
-		wpn_name = static_cast<SourceSdk::IPlayerInfo_csgo*>(GetPlayerInfo())->GetWeaponName();
-	}
-	else
-	{
-		wpn_name = static_cast<SourceSdk::IPlayerInfo*>(GetPlayerInfo())->GetWeaponName();
-	}
+	char const * wpn_name = m_playerinfo->GetWeaponName();
 		
 	if(!wpn_name || ! *wpn_name) return HAND;
-
 
 	switch (SourceSdk::InterfacesProxy::m_game)
 	{
@@ -123,7 +114,7 @@ WpnShotType const NczPlayer::GetWpnShotType() const
 	}
 	case SourceSdk::CounterStrikeGlobalOffensive:
 	{
-		wpn_name = static_cast<SourceSdk::IPlayerInfo_csgo*>(GetPlayerInfo())->GetWeaponName();
+		//wpn_name = static_cast<SourceSdk::IPlayerInfo_csgo*>(GetPlayerInfo())->GetWeaponName();
 		if (!wpn_name || !*wpn_name) return HAND;
 		switch (wpn_name[7])
 		{

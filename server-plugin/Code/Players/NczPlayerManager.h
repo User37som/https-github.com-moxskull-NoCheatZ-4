@@ -27,10 +27,75 @@
 #include "SdkPreprocessors.h"
 #include "Interfaces/IGameEventManager/IGameEventManager.h"
 
-struct PlayerHandler
+class NczPlayerManager;
+
+class ALIGN16 PlayerHandler
 {
+	friend NczPlayerManager;
+
+	typedef NczPlayer* const NczPlayer_ptr;
+
+public:
+	class iterator;
+
+	typedef iterator const const_iterator;
+
+	class ALIGNX(sizeof(PlayerHandler const *)) iterator
+	{
+		friend NczPlayerManager;
+
+	private:
+		mutable PlayerHandler const * m_ptr;
+
+		inline PlayerHandler * GetHandler() const; // backdoor for NczPlayerManager
+
+	public:
+		iterator() {}
+		iterator(PlayerHandler const * const ptr) : m_ptr(ptr) {}
+		iterator(int const slot_index) : m_ptr(invalid.m_ptr + slot_index) {}
+		iterator(const_iterator & other) : m_ptr(other.m_ptr) {}
+		const_iterator & operator=(PlayerHandler const * const ptr) const
+		{
+			m_ptr = ptr;
+			return *this;
+		}
+		const_iterator & operator=(const_iterator & other) const
+		{
+			m_ptr = other.m_ptr;
+			return *this;
+		}
+		const_iterator & operator=(int const slot_index) const
+		{
+			m_ptr = invalid.m_ptr + slot_index;
+			return *this;
+		}
+		~iterator() {}
+		inline const_iterator & operator++() const;
+		inline int GetIndex() const;
+		inline bool operator==(const_iterator & other) const;
+		inline bool operator!=(const_iterator & other) const;
+		inline bool operator==(SlotStatus const other_status) const;
+		inline bool operator!=(SlotStatus const other_status) const;
+		inline bool operator>=(SlotStatus const other_status) const;
+		inline bool operator<=(SlotStatus const other_status) const;
+		inline bool operator>(SlotStatus const other_status) const;
+		inline bool operator<(SlotStatus const other_status) const;
+		inline operator bool() const;
+		inline bool operator!() const;
+		inline operator NczPlayer_ptr() const;
+		inline operator SlotStatus() const;
+		inline NczPlayer_ptr operator*() const;
+		inline NczPlayer_ptr operator->() const;
+	} ALIGNX_POST(sizeof(PlayerHandler const *));
+
+private:
+
+	static const_iterator first;
+	static const_iterator last;
+	static const_iterator invalid;
+
 	SlotStatus status;
-	mutable NczPlayer* playerClass;
+	NczPlayer* playerClass;
 	float in_tests_time;
 
 	PlayerHandler()
@@ -50,7 +115,109 @@ struct PlayerHandler
 		status = INVALID;
 		in_tests_time = std::numeric_limits<float>::max();
 	}
-};
+
+public:
+	inline static const_iterator & begin();
+
+	inline static const_iterator & end();
+
+} ALIGN16_POST;
+
+inline PlayerHandler * PlayerHandler::iterator::GetHandler() const
+{
+	return const_cast<PlayerHandler *>(m_ptr);
+}
+
+inline PlayerHandler::const_iterator & PlayerHandler::iterator::operator++() const // CONST CHEATTERR
+{
+	--m_ptr;
+	return *this;
+}
+
+inline PlayerHandler::const_iterator & PlayerHandler::begin()
+{
+	return last; // Let's blow your brain ... it's reversed.
+}
+
+inline PlayerHandler::const_iterator & PlayerHandler::end()
+{
+	return invalid;
+}
+
+inline PlayerHandler::iterator::operator bool() const
+{
+	return m_ptr->status != INVALID;
+}
+
+inline bool PlayerHandler::iterator::operator!() const
+{
+	return m_ptr->status == INVALID;
+}
+
+inline PlayerHandler::iterator::operator NczPlayer_ptr() const
+{
+	return m_ptr->playerClass;
+}
+
+inline int PlayerHandler::iterator::GetIndex() const
+{
+	return m_ptr - invalid.m_ptr;
+}
+
+inline bool PlayerHandler::iterator::operator==(const_iterator & other) const
+{
+	return m_ptr == other.m_ptr;
+}
+
+inline bool PlayerHandler::iterator::operator!=(const_iterator & other) const
+{
+	return m_ptr != other.m_ptr;
+}
+
+inline bool PlayerHandler::iterator::operator==(SlotStatus const other_status) const
+{
+	return m_ptr->status == other_status;
+}
+
+inline bool PlayerHandler::iterator::operator!=(SlotStatus const other_status) const
+{
+	return m_ptr->status != other_status;
+}
+
+inline bool PlayerHandler::iterator::operator>=(SlotStatus const other_status) const
+{
+	return m_ptr->status >= other_status;
+}
+
+inline bool PlayerHandler::iterator::operator<=(SlotStatus const other_status) const
+{
+	return m_ptr->status <= other_status;
+}
+
+inline bool PlayerHandler::iterator::operator>(SlotStatus const other_status) const
+{
+	return m_ptr->status > other_status;
+}
+
+inline bool PlayerHandler::iterator::operator<(SlotStatus const other_status) const
+{
+	return m_ptr->status < other_status;
+}
+
+inline PlayerHandler::iterator::operator SlotStatus() const
+{
+	return m_ptr->status;
+}
+
+inline PlayerHandler::NczPlayer_ptr PlayerHandler::iterator::operator*() const
+{
+	return m_ptr->playerClass;
+}
+
+inline PlayerHandler::NczPlayer_ptr PlayerHandler::iterator::operator->() const
+{
+	return m_ptr->playerClass;
+}
 
 class CCSPlayer;
 
@@ -60,6 +227,9 @@ class NczPlayerManager :
 	public Singleton<NczPlayerManager>
 {
 	typedef  Singleton<NczPlayerManager> singleton_class;
+private:
+	PlayerHandler FullHandlersList[MAX_PLAYERS + 1];
+	int m_max_index;
 
 public:
 	NczPlayerManager();
@@ -70,12 +240,12 @@ public:
 	void LoadPlayerManager();
 	void OnLevelInit();
 
-	inline PlayerHandler const * const GetPlayerHandlerByIndex(int const slot) const;
-	inline PlayerHandler const * const GetPlayerHandlerByUserId(int const userid) const;
-	PlayerHandler const * const GetPlayerHandlerByBasePlayer(void* BasePlayer) const;
-	PlayerHandler const * const GetPlayerHandlerBySteamID(const char * steamid) const;
-	inline PlayerHandler const * const GetPlayerHandlerByEdict(SourceSdk::edict_t const * const pEdict) const;
-	PlayerHandler const * const GetPlayerHandlerByName(const char * playerName) const;
+	inline PlayerHandler::const_iterator GetPlayerHandlerByIndex(int const slot) const;
+	inline PlayerHandler::const_iterator GetPlayerHandlerByUserId(int const userid) const;
+	PlayerHandler::const_iterator GetPlayerHandlerByBasePlayer(void* BasePlayer) const;
+	PlayerHandler::const_iterator GetPlayerHandlerBySteamID(const char * steamid) const;
+	inline PlayerHandler::const_iterator GetPlayerHandlerByEdict(SourceSdk::edict_t const * const pEdict) const;
+	PlayerHandler::const_iterator GetPlayerHandlerByName(const char * playerName) const;
 	
 	short GetPlayerCount(SlotStatus filter = INVALID, SlotFilterBehavior strict = STATUS_EQUAL_OR_BETTER) const;
 
@@ -88,25 +258,21 @@ public:
 	void Think();
 
 	const int GetMaxIndex() const {return m_max_index;};
-
-private:
-	PlayerHandler FullHandlersList[MAX_PLAYERS+1];
-	int m_max_index;
 };
 
-inline PlayerHandler const * const NczPlayerManager::GetPlayerHandlerByIndex(int const slot) const
+inline PlayerHandler::const_iterator NczPlayerManager::GetPlayerHandlerByIndex(int const slot) const
 {
-	return (PlayerHandler const * const)(&FullHandlersList[slot]);
+	return slot;
 }
 
-inline PlayerHandler const * const NczPlayerManager::GetPlayerHandlerByUserId(int const userid) const
+inline PlayerHandler::const_iterator NczPlayerManager::GetPlayerHandlerByUserId(int const userid) const
 {
-	return GetPlayerHandlerByIndex(Helpers::getIndexFromUserID(userid));
+	return Helpers::getIndexFromUserID(userid);
 }
 
-inline PlayerHandler const* const NczPlayerManager::GetPlayerHandlerByEdict(SourceSdk::edict_t const * const pEdict) const
+inline PlayerHandler::const_iterator NczPlayerManager::GetPlayerHandlerByEdict(SourceSdk::edict_t const * const pEdict) const
 {
-	return GetPlayerHandlerByIndex(Helpers::IndexOfEdict(pEdict));
+	return Helpers::IndexOfEdict(pEdict);
 }
 
 /* Utilisé en interne pour initialiser le tableau, des petites fonctions
@@ -116,15 +282,6 @@ inline PlayerHandler const* const NczPlayerManager::GetPlayerHandlerByEdict(Sour
 		PlayerHandler* ph = &(FullHandlersList[x]); \
 		do{
 
-/* Boucle classique pour les utilisations externes
-   Donne la variable ph , x et maxcl dans la boucle */
-#define PLAYERS_LOOP_RUNTIME { \
-		int x = 1; \
-		const int maxcl = NczPlayerManager::GetInstance()->GetMaxIndex(); \
-		PlayerHandler const * ph = NczPlayerManager::GetInstance()->GetPlayerHandlerByIndex(x); \
-		for(; x <= maxcl; ++x, ph = NczPlayerManager::GetInstance()->GetPlayerHandlerByIndex(x)){if(ph->status == INVALID) continue;
-
-#define END_PLAYERS_LOOP  }}
 #define _END_PLAYERS_LOOP_INIT  ++x;ph = &(FullHandlersList[x]);}while(x <= MAX_PLAYERS);}
 
 #endif

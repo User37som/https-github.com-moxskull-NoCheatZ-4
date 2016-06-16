@@ -50,9 +50,9 @@ void HOOKFN_INT WeaponHookListener::nWeapon_Equip(void * const basePlayer, void 
 void HOOKFN_INT WeaponHookListener::nWeapon_Equip(void * const basePlayer, void * const, void * const weapon)
 #endif
 {
-	PlayerHandler const * const ph = NczPlayerManager::GetInstance()->GetPlayerHandlerByBasePlayer(basePlayer);
+	PlayerHandler::const_iterator ph = NczPlayerManager::GetInstance()->GetPlayerHandlerByBasePlayer(basePlayer);
 
-	if(ph->status != INVALID)
+	if(ph != INVALID)
 	{
 		SourceSdk::edict_t const * const weapon_ent = SourceSdk::InterfacesProxy::Call_BaseEntityToEdict(weapon);
 
@@ -61,7 +61,7 @@ void HOOKFN_INT WeaponHookListener::nWeapon_Equip(void * const basePlayer, void 
 		WeaponHookListenersListT::elem_t* it2 = m_listeners.GetFirst();
 		while (it2 != nullptr)
 		{
-			it2->m_value.listener->WeaponEquipCallback(ph->playerClass, weapon_ent);
+			it2->m_value.listener->WeaponEquipCallback(ph, weapon_ent);
 
 			it2 = it2->m_next;
 		}
@@ -78,9 +78,9 @@ void HOOKFN_INT WeaponHookListener::nWeapon_Drop(void * const basePlayer, void *
 void HOOKFN_INT WeaponHookListener::nWeapon_Drop(void * const basePlayer, void * const, void * const weapon, SourceSdk::Vector const * const targetVec, SourceSdk::Vector const * const velocity)
 #endif
 {
-	PlayerHandler const * const ph = NczPlayerManager::GetInstance()->GetPlayerHandlerByBasePlayer(basePlayer);
+	PlayerHandler::const_iterator ph = NczPlayerManager::GetInstance()->GetPlayerHandlerByBasePlayer(basePlayer);
 
-	if (ph->status != INVALID && weapon != nullptr)
+	if (ph != INVALID && weapon != nullptr)
 	{
 		SourceSdk::edict_t* const weapon_ent = SourceSdk::InterfacesProxy::Call_BaseEntityToEdict(weapon);
 
@@ -89,7 +89,7 @@ void HOOKFN_INT WeaponHookListener::nWeapon_Drop(void * const basePlayer, void *
 		WeaponHookListenersListT::elem_t* it2 = m_listeners.GetFirst();
 		while (it2 != nullptr)
 		{
-			it2->m_value.listener->WeaponDropCallback(ph->playerClass, weapon_ent);
+			it2->m_value.listener->WeaponDropCallback(ph, weapon_ent);
 
 			it2 = it2->m_next;
 		}

@@ -109,7 +109,7 @@ private:
 	int const m_userid;
 	SourceSdk::edict_t * const m_edict;
 	SourceSdk::INetChannelInfo* m_channelinfo;
-	void* m_playerinfo;
+	mutable SourceSdk::IPlayerInfo * m_playerinfo;
 	float m_time_connected;
 
 public:
@@ -129,7 +129,7 @@ public:
 	inline int GetIndex() const ;
 	inline int GetUserid() const;
 	inline SourceSdk::edict_t * const GetEdict() const;
-	inline void * const GetPlayerInfo() const;
+	inline SourceSdk::IPlayerInfo * const GetPlayerInfo() const;
 	inline SourceSdk::INetChannelInfo * const GetChannelInfo() const;
 	inline const char * GetName() const;
 	inline const char * GetSteamID() const;
@@ -164,9 +164,13 @@ inline SourceSdk::edict_t * const NczPlayer::GetEdict() const
 	return m_edict;
 }
 
-inline void * const NczPlayer::GetPlayerInfo() const
+inline SourceSdk::IPlayerInfo * const NczPlayer::GetPlayerInfo() const
 {
-	return SourceSdk::InterfacesProxy::Call_GetPlayerInfo(m_edict);
+	if (m_playerinfo == nullptr)
+	{
+		m_playerinfo = (SourceSdk::IPlayerInfo *)SourceSdk::InterfacesProxy::Call_GetPlayerInfo(m_edict);
+	}
+	return m_playerinfo;
 }
 
 inline SourceSdk::INetChannelInfo * const NczPlayer::GetChannelInfo() const
@@ -185,7 +189,7 @@ inline const char * NczPlayer::GetName() const
 	{
 		if (GetPlayerInfo())
 		{
-			return static_cast<SourceSdk::IPlayerInfo*>(GetPlayerInfo())->GetName();
+			return m_playerinfo->GetName();
 		}
 	}
 	return "";

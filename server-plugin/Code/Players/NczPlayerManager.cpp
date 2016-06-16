@@ -24,12 +24,21 @@
 #include "plugin.h"
 #include "Systems/BaseSystem.h"
 
+PlayerHandler::const_iterator PlayerHandler::invalid = nullptr;
+PlayerHandler::const_iterator PlayerHandler::first = PlayerHandler::invalid;
+PlayerHandler::const_iterator PlayerHandler::last = PlayerHandler::invalid;
+
+
 //---------------------------------------------------------------------------------
 // NczPlayerManager
 //---------------------------------------------------------------------------------
 
 NczPlayerManager::NczPlayerManager() : singleton_class()
 {
+	PlayerHandler::invalid = FullHandlersList;
+	PlayerHandler::first = PlayerHandler::invalid;
+	PlayerHandler::last = PlayerHandler::invalid;
+
 	m_max_index = 0;
 }
 
@@ -47,6 +56,8 @@ void NczPlayerManager::OnLevelInit()
 	}
 	_END_PLAYERS_LOOP_INIT
 	m_max_index = 0;
+	PlayerHandler::first = PlayerHandler::invalid;
+	PlayerHandler::last = PlayerHandler::invalid;
 }
 
 void NczPlayerManager::LoadPlayerManager()
@@ -60,20 +71,18 @@ void NczPlayerManager::LoadPlayerManager()
 	//Helpers::FastScan_EntList();
 	Helpers::m_EdictList = Helpers::PEntityOfEntIndex(0);
 
-	if(Helpers::m_EdictList)
-	{
-		int maxcl = Helpers::GetMaxClients();
+	//if(Helpers::m_EdictList)
+	//{
+		//int maxcl = Helpers::GetMaxClients();
 		
-		for(int x = 1; x <= maxcl; ++x)
+		for(PlayerHandler::const_iterator ph = PlayerHandler::begin(); ph != PlayerHandler::end(); ++ph)
 		{
-			SourceSdk::edict_t* const pEntity = Helpers::PEntityOfEntIndex(x);
+			SourceSdk::edict_t* const pEntity = Helpers::PEntityOfEntIndex(ph.GetIndex());
 			if(Helpers::isValidEdict(pEntity))
 			{
 				void * playerinfo = SourceSdk::InterfacesProxy::Call_GetPlayerInfo(pEntity);
 				if(playerinfo)
-				{
-					PlayerHandler& ph = FullHandlersList[x];
-					
+				{	
 					bool isfakeclient;
 					if (SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive)
 					{
@@ -85,20 +94,32 @@ void NczPlayerManager::LoadPlayerManager()
 					}
 					if(isfakeclient)
 					{
-						ph.status = BOT;
-						ph.playerClass = new NczPlayer(x);
-						m_max_index = x;
+						ph.GetHandler()->status = BOT;
+						ph.GetHandler()->playerClass = new NczPlayer(ph.GetIndex());
+						m_max_index = ph.GetIndex();
 					}
 					else if (static_cast<SourceSdk::IPlayerInfo*>(playerinfo)->IsConnected())
 					{
-						ph.status = PLAYER_CONNECTED;
-						ph.playerClass = new NczPlayer(x);
-						ph.playerClass->OnConnect();
-						m_max_index = x;
+						ph.GetHandler()->status = PLAYER_CONNECTED;
+						ph.GetHandler()->playerClass = new NczPlayer(ph.GetIndex());
+						ph.GetHandler()->playerClass->OnConnect();
+						m_max_index = ph.GetIndex();
 					}
 				}
 			}
 		}
+
+	//}
+
+	if (m_max_index)
+	{
+		PlayerHandler::first = (&FullHandlersList[1]);
+		PlayerHandler::last = (&FullHandlersList[m_max_index]);
+	}
+	else
+	{
+		PlayerHandler::first = PlayerHandler::invalid;
+		PlayerHandler::last = PlayerHandler::invalid;
 	}
 
 	BaseSystem::ManageSystems();
@@ -117,6 +138,9 @@ void NczPlayerManager::ClientConnect(SourceSdk::edict_t* pEntity)
 	ph.playerClass->OnConnect();
 
 	if(index > m_max_index) m_max_index = index;
+
+	PlayerHandler::first = (&FullHandlersList[1]);
+	PlayerHandler::last = (&FullHandlersList[m_max_index]);
 
 	BaseSystem::ManageSystems();
 }
@@ -139,6 +163,9 @@ void NczPlayerManager::ClientActive(SourceSdk::edict_t* pEntity)
 
 	if(index > m_max_index) m_max_index = index;
 
+	PlayerHandler::first = (&FullHandlersList[1]);
+	PlayerHandler::last = (&FullHandlersList[m_max_index]);
+
 	BaseSystem::ManageSystems();
 }
 
@@ -150,6 +177,17 @@ void NczPlayerManager::ClientDisconnect(SourceSdk::edict_t* pEntity)
 
 	while(m_max_index > 0 && FullHandlersList[m_max_index].status == INVALID)
 		--m_max_index;
+
+	if (m_max_index)
+	{
+		PlayerHandler::first = (&FullHandlersList[1]);
+		PlayerHandler::last = (&FullHandlersList[m_max_index]);
+	}
+	else
+	{
+		PlayerHandler::first = PlayerHandler::invalid;
+		PlayerHandler::last = PlayerHandler::invalid;
+	}
 
 	BaseSystem::ManageSystems();
 }
@@ -186,7 +224,7 @@ void NczPlayerManager::FireGameEvent(SourceSdk::IGameEvent* ev)
 			if(ph.status == INVALID) continue;
 			if(ph.status == PLAYER_CONNECTED)
 			{
-				SourceSdk::IPlayerInfo * const pinfo = static_cast<SourceSdk::IPlayerInfo *>(ph.playerClass->GetPlayerInfo());
+				SourceSdk::IPlayerInfo * const pinfo = ph.playerClass->GetPlayerInfo();
 				if(pinfo)
 				{
 					if (pinfo->GetTeamIndex() > 1)
@@ -213,7 +251,7 @@ void NczPlayerManager::FireGameEvent(SourceSdk::IGameEvent* ev)
 	{
 		if(ph->status > BOT)
 		{
-			SourceSdk::IPlayerInfo * const pinfo = static_cast<SourceSdk::IPlayerInfo *>(ph->playerClass->GetPlayerInfo());
+			SourceSdk::IPlayerInfo * const pinfo = ph->playerClass->GetPlayerInfo();
 			if(pinfo)
 			{
 				if (pinfo->GetTeamIndex() > 1)
@@ -268,6 +306,17 @@ void NczPlayerManager::Think()
 	while (m_max_index > 0 && FullHandlersList[m_max_index].status == INVALID)
 		--m_max_index;
 
+	if (m_max_index)
+	{
+		PlayerHandler::first = (&FullHandlersList[1]);
+		PlayerHandler::last = (&FullHandlersList[m_max_index]);
+	}
+	else
+	{
+		PlayerHandler::first = PlayerHandler::invalid;
+		PlayerHandler::last = PlayerHandler::invalid;
+	}
+
 	const int maxcl = m_max_index;
 	const float gametime = Plat_FloatTime();
 	for(int x = 1; x <= maxcl; ++x)
@@ -286,57 +335,43 @@ void NczPlayerManager::Think()
 	}
 }
 
-PlayerHandler const * const NczPlayerManager::GetPlayerHandlerByBasePlayer(void * const BasePlayer) const
+PlayerHandler::const_iterator NczPlayerManager::GetPlayerHandlerByBasePlayer(void * const BasePlayer) const
 {
-	const int maxcl = m_max_index;
-	for(int x = 1; x <= maxcl; ++x)
+	SourceSdk::edict_t const * const ent = SourceSdk::InterfacesProxy::Call_BaseEntityToEdict(BasePlayer);
+	
+	return Helpers::isValidEdict(ent) ? &FullHandlersList[Helpers::IndexOfEdict(ent)] : PlayerHandler::end();
+}
+
+PlayerHandler::const_iterator NczPlayerManager::GetPlayerHandlerBySteamID(const char * steamid) const
+{
+	const char * tSteamId;
+
+	for (PlayerHandler::const_iterator it = PlayerHandler::begin(); it != PlayerHandler::end(); ++it)
 	{
-		PlayerHandler const & ph = FullHandlersList[x];
-		if (ph.status > INVALID)
+		if (it)
 		{
-			if (ph.playerClass->isValidEdict())
-			{
-				if ((void*)(ph.playerClass->GetEdict()->m_pUnk) == BasePlayer)
-					return &(ph);
-			}
+			tSteamId = it->GetSteamID();
+			if (Helpers::bStrEq(tSteamId, steamid)) return it;
 		}
 	}
-	
-	return (&FullHandlersList[0]);
+
+	return PlayerHandler::end();
 }
 
-PlayerHandler const * const NczPlayerManager::GetPlayerHandlerBySteamID(const char * steamid) const
-{
-	const char *tSteamid;
-
-	const int maxcl = m_max_index;
-	for(int x = 1; x <= maxcl; ++x)
-	{
-		PlayerHandler const & ph = FullHandlersList[x];
-		if(ph.status == INVALID) continue;
-
-		tSteamid = ph.playerClass->GetSteamID();
-		if(strcmp(tSteamid, steamid) == 0) return &(ph);
-	}
-		
-	return (&FullHandlersList[0]);
-}
-
-PlayerHandler const  *const NczPlayerManager::GetPlayerHandlerByName(const char * playerName) const
+PlayerHandler::const_iterator NczPlayerManager::GetPlayerHandlerByName(const char * playerName) const
 {
 	const char * tName;
 
-	const int maxcl = m_max_index;
-	for(int x = 1; x <= maxcl; ++x)
+	for (PlayerHandler::const_iterator it = PlayerHandler::begin(); it != PlayerHandler::end(); ++it)
 	{
-		PlayerHandler const & ph = FullHandlersList[x];
-		if(ph.status == INVALID) continue;
-
-		tName = ph.playerClass->GetName();
-		if(Helpers::bStrEq(tName, playerName)) return &(ph);
+		if (it)
+		{
+			tName = it->GetName();
+			if (Helpers::bStrEq(tName, playerName)) return it;
+		}
 	}
 
-	return (&FullHandlersList[0]);
+	return PlayerHandler::end();
 }
 
 short NczPlayerManager::GetPlayerCount(SlotStatus filter, SlotFilterBehavior strict) const

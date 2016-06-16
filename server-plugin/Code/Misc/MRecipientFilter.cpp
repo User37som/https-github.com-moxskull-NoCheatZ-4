@@ -99,28 +99,23 @@ void MRecipientFilter::RemoveAll()
 
 void MRecipientFilter::AddTeam(int teamid)
 {
-	PLAYERS_LOOP_RUNTIME
+	for (PlayerHandler::const_iterator ph = PlayerHandler::begin(); ph != PlayerHandler::end(); ++ph)
 	{
-		void* playerinfo = ph->playerClass->GetPlayerInfo();
-		if (playerinfo != nullptr)
+		if (ph)
 		{
-			int player_team;
-			if (SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive)
+			SourceSdk::IPlayerInfo * const playerinfo = ph->GetPlayerInfo();
+			if (playerinfo != nullptr)
 			{
-				player_team = static_cast<SourceSdk::IPlayerInfo_csgo*>(playerinfo)->GetTeamIndex();
-			}
-			else
-			{
-				player_team = static_cast<SourceSdk::IPlayerInfo*>(playerinfo)->GetTeamIndex();
-			}
+				int player_team;
+				player_team = playerinfo->GetTeamIndex();
 
-			if (player_team == teamid)
-			{
-				AddRecipient(x);
+				if (player_team == teamid)
+				{
+					AddRecipient(ph.GetIndex());
+				}
 			}
 		}
 	}
-	END_PLAYERS_LOOP
 }
 
 void MRecipientFilter::AddAllPlayersExcludeTeam(int teamid)

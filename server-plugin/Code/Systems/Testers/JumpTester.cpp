@@ -48,6 +48,12 @@ void JumpTester::Init()
 
 void JumpTester::Load()
 {
+	for (PlayerHandler::const_iterator it = PlayerHandler::begin(); it != PlayerHandler::end(); ++it)
+	{
+		if (it)
+			ResetPlayerDataStruct(*it);
+	}
+
 	OnGroundHookListener::RegisterOnGroundHookListener(this);
 	PlayerRunCommandHookListener::RegisterPlayerRunCommandHookListener(this, 3);
 }
@@ -56,12 +62,6 @@ void JumpTester::Unload()
 {
 	OnGroundHookListener::RemoveOnGroundHookListener(this);
 	PlayerRunCommandHookListener::RemovePlayerRunCommandHookListener(this);
-
-	PLAYERS_LOOP_RUNTIME
-	{
-		ResetPlayerDataStruct(ph->playerClass);
-	}
-	END_PLAYERS_LOOP
 }
 
 int GetGameTickCount()

@@ -39,44 +39,16 @@ MathInfo& MathCache::GetCachedMaths(int const player_index, bool const force_upd
 	MathInfo& info = item.m_info;
 	if ( (!item.m_is_not_expired) || force_update)
 	{
-		PlayerHandler const * const ph = NczPlayerManager::GetInstance()->GetPlayerHandlerByIndex(player_index);
+		PlayerHandler::const_iterator ph(player_index);
 
-		Assert(ph->status > INVALID);
+		Assert(ph > INVALID);
 
-		void * const playerinfo = ph->playerClass->GetPlayerInfo();
+		SourceSdk::IPlayerInfo * const playerinfo = ph->GetPlayerInfo();
 
-		if (SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive)
-		{
-			SourceSdk::IPlayerInfo_csgo* const pinfo = static_cast<SourceSdk::IPlayerInfo_csgo*>(playerinfo);
-
-			SourceSdk::VectorCopy(pinfo->GetPlayerMins(), info.m_mins);
-			SourceSdk::VectorCopy(pinfo->GetPlayerMaxs(), info.m_maxs);
-			SourceSdk::VectorCopy(pinfo->GetAbsOrigin(), info.m_abs_origin);
-			if (pinfo->IsFakeClient())
-			{
-				SourceSdk::VectorCopy(pinfo->GetAbsAngles(), info.m_eyeangles);
-			}
-			else
-			{
-				SourceSdk::VectorCopy(static_cast<SourceSdk::CUserCmd_csgo*>(PlayerRunCommandHookListener::GetLastUserCmd(ph->playerClass))->viewangles, info.m_eyeangles);
-			}
-		}
-		else
-		{
-			SourceSdk::IPlayerInfo* const pinfo = static_cast<SourceSdk::IPlayerInfo*>(playerinfo);
-
-			SourceSdk::VectorCopy(pinfo->GetPlayerMins(), info.m_mins);
-			SourceSdk::VectorCopy(pinfo->GetPlayerMaxs(), info.m_maxs);
-			SourceSdk::VectorCopy(pinfo->GetAbsOrigin(), info.m_abs_origin);
-			if (pinfo->IsFakeClient())
-			{
-				SourceSdk::VectorCopy(pinfo->GetAbsAngles(), info.m_eyeangles);
-			}
-			else
-			{
-				SourceSdk::VectorCopy(static_cast<SourceSdk::CUserCmd_csgo*>(PlayerRunCommandHookListener::GetLastUserCmd(ph->playerClass))->viewangles, info.m_eyeangles);
-			}
-		}
+		SourceSdk::VectorCopy(playerinfo->GetPlayerMins(), info.m_mins);
+		SourceSdk::VectorCopy(playerinfo->GetPlayerMaxs(), info.m_maxs);
+		SourceSdk::VectorCopy(playerinfo->GetAbsOrigin(), info.m_abs_origin);
+		SourceSdk::VectorCopy(playerinfo->GetAbsAngles(), info.m_eyeangles);
 
 		SourceSdk::edict_t* const pedict = Helpers::PEntityOfEntIndex(player_index);
 		SourceSdk::VectorCopy(*EntityProps::GetInstance()->GetPropValue<SourceSdk::Vector, PROP_ABS_VELOCITY>(pedict, true), info.m_velocity);

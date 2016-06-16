@@ -51,10 +51,10 @@ void HOOKFN_INT SetTransmitHookListener::nSetTransmit(void * const This, SourceS
 void HOOKFN_INT SetTransmitHookListener::nSetTransmit(void * const This, void * const, SourceSdk::CCheckTransmitInfo const * const pInfo, bool const bAlways)
 #endif
 {
-	PlayerHandler const * const pplayer = NczPlayerManager::GetInstance()->GetPlayerHandlerByBasePlayer(This);
-	if (pplayer->status > INVALID)
+	PlayerHandler::const_iterator pplayer = NczPlayerManager::GetInstance()->GetPlayerHandlerByBasePlayer(This);
+	if (pplayer > INVALID)
 	{
-		SourceSdk::edict_t* const pEdict_sender = pplayer->playerClass->GetEdict();
+		SourceSdk::edict_t* const pEdict_sender = pplayer->GetEdict();
 		//Assert(Helpers::isValidEdict(pEdict_sender));
 
 		SourceSdk::edict_t* const pEdict_receiver = *pInfo;

@@ -82,29 +82,18 @@ void HOOKFN_INT ConCommandHookListener::nDispatch(void* cmd, void*, SourceSdk::C
 	bool bypass = false;
 	if(index >= PLUGIN_MIN_COMMAND_INDEX && index <= PLUGIN_MAX_COMMAND_INDEX)
 	{
-		const PlayerHandler* const ph = NczPlayerManager::GetInstance()->GetPlayerHandlerByIndex(index);
+		PlayerHandler::const_iterator ph = NczPlayerManager::GetInstance()->GetPlayerHandlerByIndex(index);
 	
-		//if(ph->status >= PLAYER_CONNECTED)
-		//{
-			/*
-				For each listener :
-					Find if he is listening to this ConCommand then call the callback accordingly.
-			*/
-			ConCommandListenersListT::elem_t* it = m_listeners.GetFirst();
-			while (it != nullptr)
+		ConCommandListenersListT::elem_t* it = m_listeners.GetFirst();
+		while (it != nullptr)
+		{
+			int const c = it->m_value.listener->m_mycommands.Find(cmd);
+			if (c != -1)
 			{
-				int const c = it->m_value.listener->m_mycommands.Find(cmd);
-				if (c != -1)
-				{
-					bypass |= it->m_value.listener->ConCommandCallback(ph->playerClass, cmd, args);
-				}
-				it = it->m_next;
+				bypass |= it->m_value.listener->ConCommandCallback(ph, cmd, args);
 			}
-		//}
-		//else
-		//{
-		//	bypass = true;
-		//}
+			it = it->m_next;
+		}
 	}
 	else if(index == 0)
 	{

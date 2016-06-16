@@ -123,15 +123,12 @@ void AutoTVRecord::OnTick()
 	else
 	{
 		int player_count = 0;
-		int x = 1;
-		int maxcl = NczPlayerManager::GetInstance()->GetMaxIndex();
-		PlayerHandler const * ph;
-		do
+
+		for (PlayerHandler::const_iterator ph = PlayerHandler::begin(); ph != PlayerHandler::end(); ++ph)
 		{
-			ph = NczPlayerManager::GetInstance()->GetPlayerHandlerByIndex(x);
-			if (ph->status >= PLAYER_CONNECTED)
+			if (ph >= PLAYER_CONNECTED)
 			{
-				SourceSdk::IPlayerInfo* pinfo = static_cast<SourceSdk::IPlayerInfo*>(ph->playerClass->GetPlayerInfo());
+				SourceSdk::IPlayerInfo * const pinfo = ph->GetPlayerInfo();
 				if (pinfo != nullptr)
 				{
 					if (pinfo->GetTeamIndex() > 1)
@@ -140,7 +137,7 @@ void AutoTVRecord::OnTick()
 					}
 				}
 			}
-		} while (++x <= maxcl);
+		}
 
 		if (player_count >= m_minplayers)
 		{

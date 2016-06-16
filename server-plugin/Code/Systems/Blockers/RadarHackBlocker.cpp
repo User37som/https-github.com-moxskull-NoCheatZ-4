@@ -92,19 +92,20 @@ void RadarHackBlocker::Unload()
 
 void RadarHackBlocker::ThinkPostCallback(SourceSdk::edict_t const * const pent)
 {
-	PLAYERS_LOOP_RUNTIME
+	for (PlayerHandler::const_iterator ph = PlayerHandler::begin(); ph != PlayerHandler::end(); ++ph)
 	{
-		if (CanProcessThisSlot(ph->status) || ph->status == BOT)
+		if (CanProcessThisSlot(ph) || ph == BOT)
 		{
-			ClientRadarData * pData = GetPlayerDataStruct(x);
-			if (pData->m_last_spotted_status != m_players_spotted[x])
+			int const index = ph.GetIndex();
+			ClientRadarData * pData = GetPlayerDataStruct(index);
+			if (pData->m_last_spotted_status != m_players_spotted[index])
 			{
-				pData->m_last_spotted_status = m_players_spotted[x];
+				pData->m_last_spotted_status = m_players_spotted[index];
 
 				if (pData->m_last_spotted_status)
 				{
-					UpdatePlayerData(ph->playerClass);
-					ProcessEntity(Helpers::PEntityOfEntIndex(x));
+					UpdatePlayerData(ph);
+					ProcessEntity(ph->GetEdict());
 				}
 				else
 				{
@@ -115,7 +116,6 @@ void RadarHackBlocker::ThinkPostCallback(SourceSdk::edict_t const * const pent)
 			}
 		}
 	}
-	END_PLAYERS_LOOP
 }
 
 bool RadarHackBlocker::SendUserMessageCallback(SourceSdk::IRecipientFilter const &, int const message_id, google::protobuf::Message const &)
@@ -254,46 +254,38 @@ void RadarHackBlocker::UpdatePlayerData(NczPlayer* pPlayer)
 {
 	ClientRadarData * pData = GetPlayerDataStruct(pPlayer);
 
-	void* playerinfo = pPlayer->GetPlayerInfo();
+	SourceSdk::IPlayerInfo * const playerinfo = pPlayer->GetPlayerInfo();
 	if (playerinfo == nullptr) return;
 
 	pData->m_origin_index = pPlayer->GetIndex();
-
-	if (SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive)
-	{
-		pData->m_team = static_cast<SourceSdk::IPlayerInfo_csgo*>(playerinfo)->GetTeamIndex();
-	}
-	else
-	{
-		pData->m_team = static_cast<SourceSdk::IPlayerInfo*>(playerinfo)->GetTeamIndex();
-	}
+	pData->m_team = playerinfo->GetTeamIndex();
 }
 
 void RadarHackBlocker::ProcessOnTick(float const curtime)
 {
 	AutoTVRecord* tv_inst = AutoTVRecord::GetInstance();
-	PLAYERS_LOOP_RUNTIME
+	for (PlayerHandler::const_iterator ph = PlayerHandler::begin(); ph != PlayerHandler::end(); ++ph)
 	{
-		if (!CanProcessThisSlot(ph->status) && ph->status != BOT) continue;
-		if (tv_inst->GetSlot() == x) continue;
+		if (!CanProcessThisSlot(ph) && ph != BOT) continue;
+		int const index = ph.GetIndex();
+		if (tv_inst->GetSlot() == index) continue;
 
-		ClientRadarData * pData = GetPlayerDataStruct(x);
+		ClientRadarData * pData = GetPlayerDataStruct(index);
 
 		if (pData->m_last_spotted_status)
 		{
-			UpdatePlayerData(ph->playerClass);
-			ProcessEntity(ph->playerClass->GetEdict());
+			UpdatePlayerData(ph);
+			ProcessEntity(ph->GetEdict());
 		}
 		else
 		{
 			if (curtime > m_next_process)
 			{
-				UpdatePlayerData(ph->playerClass);
-				ProcessEntity(ph->playerClass->GetEdict());
+				UpdatePlayerData(ph);
+				ProcessEntity(ph->GetEdict());
 			}
 		}
 	}
-	END_PLAYERS_LOOP
 
 	if (curtime > m_next_process)
 	{
