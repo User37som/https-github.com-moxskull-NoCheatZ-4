@@ -95,7 +95,8 @@ void HOOKFN_INT PlayerRunCommandHookListener::nPlayerRunCommand(void* This, void
 			it = it->m_next;
 		}
 		
-		memcpy(&old_cmd, pCmd, sizeof(SourceSdk::CUserCmd_csgo));
+		// memcpy but skip the virtual table pointer : https://github.com/L-EARN/NoCheatZ-4/issues/16#issuecomment-226697469
+		memcpy((char *)(&old_cmd) + sizeof(void *), (char *)pCmd + sizeof(void *), sizeof(SourceSdk::CUserCmd_csgo) - sizeof(void *));
 	}
 
 	if(ret < BLOCK)
