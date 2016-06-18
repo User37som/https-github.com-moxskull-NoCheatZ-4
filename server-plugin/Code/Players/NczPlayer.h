@@ -137,6 +137,14 @@ public:
 	WpnShotType const GetWpnShotType() const;
 	int const aimingAt(); // Retourne index de la cible présente sur le viseur
 
+	void GetAbsOrigin(SourceSdk::Vector & out);
+
+	void GetRelEyePos(SourceSdk::Vector & out) const;
+
+	void GetAbsEyePos(SourceSdk::Vector & out);
+
+	void GetEyeAngles(SourceSdk::QAngle & out) const;
+
 	inline basic_string const GetReadableIdentity();
 
 	inline float const GetTimeConnected() const;

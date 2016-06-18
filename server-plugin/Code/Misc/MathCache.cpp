@@ -37,7 +37,7 @@ MathInfo& MathCache::GetCachedMaths(int const player_index, bool const force_upd
 
 	CacheInfo& item = m_cache[player_index];
 	MathInfo& info = item.m_info;
-	if ( (!item.m_is_not_expired) || force_update)
+	if ( (item.m_is_not_expired == false) || force_update)
 	{
 		PlayerHandler::const_iterator ph(player_index);
 
@@ -45,17 +45,21 @@ MathInfo& MathCache::GetCachedMaths(int const player_index, bool const force_upd
 
 		SourceSdk::IPlayerInfo * const playerinfo = ph->GetPlayerInfo();
 
-		SourceSdk::VectorCopy(playerinfo->GetPlayerMins(), info.m_mins);
-		SourceSdk::VectorCopy(playerinfo->GetPlayerMaxs(), info.m_maxs);
 		SourceSdk::VectorCopy(playerinfo->GetAbsOrigin(), info.m_abs_origin);
-		SourceSdk::VectorCopy(playerinfo->GetAbsAngles(), info.m_eyeangles);
-
-		SourceSdk::edict_t* const pedict = Helpers::PEntityOfEntIndex(player_index);
-		SourceSdk::VectorCopy(*EntityProps::GetInstance()->GetPropValue<SourceSdk::Vector, PROP_ABS_VELOCITY>(pedict, true), info.m_velocity);
+		ph->GetAbsEyePos(info.m_eyepos);
+		if (playerinfo->IsFakeClient())
+		{
+			SourceSdk::VectorCopy(playerinfo->GetAbsAngles(), info.m_eyeangles);
+		}
+		else
+		{
+			ph->GetEyeAngles(info.m_eyeangles);
+		}
+		SourceSdk::VectorCopy(*EntityProps::GetInstance()->GetPropValue<SourceSdk::Vector, PROP_ABS_VELOCITY>(ph->GetEdict(), true), info.m_velocity);
 		SourceSdk::VectorMultiply(info.m_velocity, 0.01f);
 		SourceSdk::VectorAbs(info.m_velocity, info.m_abs_velocity);
-		SourceSdk::InterfacesProxy::Call_ClientEarPosition(pedict, &info.m_eyepos);
-		
+		SourceSdk::VectorCopy(playerinfo->GetPlayerMins(), info.m_mins);
+		SourceSdk::VectorCopy(playerinfo->GetPlayerMaxs(), info.m_maxs);
 	}
 	return info;
 }

@@ -24,6 +24,7 @@
 #include "Hooks/PlayerRunCommandHookListener.h"
 #include "Misc/MathCache.h"
 #include "Systems/BanRequest.h"
+#include "Misc/EntityProps.h"
 
 //---------------------------------------------------------------------------------
 // NczPlayer
@@ -331,7 +332,7 @@ int const NczPlayer::aimingAt()
 	MathInfo const & player_maths = MathCache::GetInstance()->GetCachedMaths(GetIndex());
 
 	SourceSdk::Vector eyePos;
-	SourceSdk::VectorCopy(player_maths.m_eyepos, eyePos);
+	GetAbsEyePos(eyePos);
 
 	SourceSdk::Vector vEnd;
 	AngleVectors(player_maths.m_eyeangles, &vEnd);
@@ -406,4 +407,36 @@ void NczPlayer::Ban(const char * msg, int minutes)
 	{
 		BanRequest::GetInstance()->BanNow(this, minutes, msg);
 	}
+}
+
+void NczPlayer::GetAbsOrigin(SourceSdk::Vector & out)
+{
+	if (GetPlayerInfo())
+	{
+		SourceSdk::VectorCopy(m_playerinfo->GetAbsOrigin(), out);
+	}
+#ifdef DEBUG
+	else
+	{
+		SourceSdk::VectorClear(out);
+	}
+#endif
+}
+
+void NczPlayer::GetRelEyePos(SourceSdk::Vector & out) const
+{
+	SourceSdk::VectorCopy(EntityProps::GetInstance()->GetPropValue<SourceSdk::Vector, PROP_VIEW_OFFSET>(m_edict), &out);
+}
+
+void NczPlayer::GetAbsEyePos(SourceSdk::Vector & out)
+{
+	SourceSdk::Vector rel_eye_pos;
+	GetAbsOrigin(out);
+	GetRelEyePos(rel_eye_pos);
+	SourceSdk::VectorAdd(rel_eye_pos, out);
+}
+
+void NczPlayer::GetEyeAngles(SourceSdk::QAngle & out) const
+{
+	SourceSdk::VectorCopy(static_cast<SourceSdk::CUserCmd const *>(PlayerRunCommandHookListener::GetLastUserCmd(this))->viewangles, out);
 }
