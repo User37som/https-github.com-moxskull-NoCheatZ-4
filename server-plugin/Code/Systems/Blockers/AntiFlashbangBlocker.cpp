@@ -64,38 +64,36 @@ void AntiFlashbangBlocker::Unload()
 bool AntiFlashbangBlocker::SetTransmitCallback(SourceSdk::edict_t const * const ea, SourceSdk::edict_t const* const eb)
 {
 	METRICS_ENTER_SECTION("AntiFlashbangBlocker::SetTransmitCallback");
-	if(IsActive())
+	
+	NczPlayerManager * const inst = NczPlayerManager::GetInstance();
+	if(inst->GetPlayerHandlerByEdict(eb) == INVALID)
 	{
-		NczPlayerManager * const inst = NczPlayerManager::GetInstance();
-		if(inst->GetPlayerHandlerByEdict(eb) == INVALID)
+		METRICS_LEAVE_SECTION("AntiFlashbangBlocker::SetTransmitCallback");
+		return false;
+	}
+
+	NczPlayer* const pPlayer = inst->GetPlayerHandlerByEdict(eb);
+	SourceSdk::IPlayerInfo * const player_info = pPlayer->GetPlayerInfo();
+	if(!player_info) return false;
+
+	if (player_info->IsFakeClient())
+	{
+		METRICS_LEAVE_SECTION("AntiFlashbangBlocker::SetTransmitCallback");
+		return false;
+	}
+
+	FlashInfoT* const pInfo = GetPlayerDataStruct(pPlayer);
+
+	if (pInfo->flash_end_time != 0.0)
+	{
+		if (pInfo->flash_end_time > Plat_FloatTime())
 		{
 			METRICS_LEAVE_SECTION("AntiFlashbangBlocker::SetTransmitCallback");
-			return false;
+			return true;
 		}
-
-		NczPlayer* const pPlayer = inst->GetPlayerHandlerByEdict(eb);
-		SourceSdk::IPlayerInfo * const player_info = pPlayer->GetPlayerInfo();
-		if(!player_info) return false;
-
-		if (player_info->IsFakeClient())
-		{
-			METRICS_LEAVE_SECTION("AntiFlashbangBlocker::SetTransmitCallback");
-			return false;
-		}
-
-		FlashInfoT* const pInfo = GetPlayerDataStruct(pPlayer);
-
-		if (pInfo->flash_end_time != 0.0)
-		{
-			if (pInfo->flash_end_time > Plat_FloatTime())
-			{
-				METRICS_LEAVE_SECTION("AntiFlashbangBlocker::SetTransmitCallback");
-				return true;
-			}
 		
-			Helpers::FadeUser(eb, 0);
-			ResetPlayerDataStruct(eb);
-		}
+		Helpers::FadeUser(eb, 0);
+		ResetPlayerDataStruct(eb);
 	}
 
 	METRICS_LEAVE_SECTION("AntiFlashbangBlocker::SetTransmitCallback");
@@ -105,7 +103,6 @@ bool AntiFlashbangBlocker::SetTransmitCallback(SourceSdk::edict_t const * const 
 void AntiFlashbangBlocker::FireGameEvent(SourceSdk::IGameEvent* ev) // player_blind
 {
 	METRICS_ENTER_SECTION("AntiFlashbangBlocker::FireGameEvent");
-	if(!IsActive()) return;
 
 	PlayerHandler::const_iterator ph = NczPlayerManager::GetInstance()->GetPlayerHandlerByUserId(ev->GetInt("userid", 0));
 	if(ph == INVALID)

@@ -46,7 +46,6 @@ void ConVarTester::Init()
 
 void ConVarTester::ProcessOnTick(float const curtime)
 {
-	if(!IsActive()) return;
 	if(m_convars_rules.IsEmpty()) return;
 
 	

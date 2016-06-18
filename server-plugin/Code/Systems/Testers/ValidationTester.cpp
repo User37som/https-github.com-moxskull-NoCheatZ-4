@@ -59,7 +59,7 @@ void ValidationTester::SetValidated(NczPlayer const * const player)
 
 void ValidationTester::ProcessPlayerTestOnTick(NczPlayer* const player, float const curtime)
 {
-	if(!IsActive() || !SteamGameServer_BSecure()) return;
+	if(!SteamGameServer_BSecure()) return;
 	if(GetPlayerDataStruct(player)->b)
 		return;
 

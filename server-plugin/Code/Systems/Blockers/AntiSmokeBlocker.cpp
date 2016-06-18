@@ -75,11 +75,6 @@ void AntiSmokeBlocker::Unload()
 void AntiSmokeBlocker::ProcessOnTick(float const curtime)
 {
 	METRICS_ENTER_SECTION("AntiSmokeBlocker::OnFrame");
-	if(!IsActive())
-	{	
-		METRICS_LEAVE_SECTION("AntiSmokeBlocker::OnFrame");
-		return;
-	}
 
 	SmokeListT::elem_t* it = m_smokes.GetFirst();
 
@@ -160,24 +155,21 @@ void AntiSmokeBlocker::ProcessOnTick(float const curtime)
 
 bool AntiSmokeBlocker::SetTransmitCallback(SourceSdk::edict_t const * const ea, SourceSdk::edict_t const * const eb)
 {
-	if(IsActive() && ea != eb)
-	{
-		if(NczPlayerManager::GetInstance()->GetPlayerHandlerByEdict(eb) == INVALID) return false;
+	PlayerHandler::const_iterator pPlayer_b = NczPlayerManager::GetInstance()->GetPlayerHandlerByEdict(eb);
 
-		NczPlayer * const pPlayer_b = NczPlayerManager::GetInstance()->GetPlayerHandlerByEdict(eb);
+	if(!pPlayer_b) return false;
 
-		if(GetPlayerDataStruct(pPlayer_b)->is_in_smoke)
-			return true;
+	if(GetPlayerDataStruct(pPlayer_b.GetIndex())->is_in_smoke)
+		return true;
 
-		if(GetPlayerDataStruct(pPlayer_b)->can_not_see_this_player[Helpers::IndexOfEdict(ea)] == true)
-			return true;
-	}
+	if(GetPlayerDataStruct(pPlayer_b.GetIndex())->can_not_see_this_player[Helpers::IndexOfEdict(ea)] == true)
+		return true;
+
 	return false;
 }
 
 void AntiSmokeBlocker::FireGameEvent(SourceSdk::IGameEvent * ev)
 {
-	if(!IsActive()) return;
 
 	if(ev->GetName()[0] == 's') // smokegrenade_detonate
 	{

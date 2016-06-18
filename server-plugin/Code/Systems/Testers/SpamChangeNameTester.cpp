@@ -92,8 +92,6 @@ bool IsNameValid(const char* const o_name)
 
 void SpamChangeNameTester::FireGameEvent(SourceSdk::IGameEvent* ev)
 {
-	if(!IsActive()) return;
-
 	PlayerHandler::const_iterator ph = NczPlayerManager::GetInstance()->GetPlayerHandlerByUserId(ev->GetInt("userid", 0));
 
 	if(ph < PLAYER_CONNECTED) return;
@@ -105,8 +103,6 @@ void SpamChangeNameTester::FireGameEvent(SourceSdk::IGameEvent* ev)
 
 void SpamChangeNameTester::ProcessOnTick(float const curtime)
 {
-	if(!IsActive()) return;
-
 	for (PlayerHandler::const_iterator ph = PlayerHandler::begin(); ph != PlayerHandler::end(); ++ph)
 	{
 		if(ph < PLAYER_CONNECTED) continue;
@@ -126,7 +122,6 @@ void SpamChangeNameTester::ProcessOnTick(float const curtime)
 
 void SpamChangeNameTester::ClientConnect( bool *bAllowConnect, SourceSdk::edict_t const * const pEntity, const char *pszName, const char *pszAddress, char *reject, int maxrejectlen )
 {
-	if(!IsActive()) return;
 	if(!*bAllowConnect) return;
 
 	if(!IsNameValid(pszName))

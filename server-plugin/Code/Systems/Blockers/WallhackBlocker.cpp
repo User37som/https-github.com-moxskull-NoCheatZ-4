@@ -185,11 +185,6 @@ void WallhackBlocker::ProcessOnTick(float const curtime)
 {
 	METRICS_LEAVE_SECTION("WallhackBlocker TraceRay Count Per Tick");
 	METRICS_ENTER_SECTION("WallhackBlocker::OnFrame");
-	if (!IsActive())
-	{
-		METRICS_LEAVE_SECTION("WallhackBlocker::OnFrame");
-		return;
-	}
 
 	m_viscache.Invalidate();
 
