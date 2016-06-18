@@ -118,6 +118,12 @@ bool WallhackBlocker::SetTransmitCallback(SourceSdk::edict_t const * const sende
 		return false;
 	}
 
+	if (sender_player->GetPlayerInfo()->GetTeamIndex() == receiver_player->GetPlayerInfo()->GetTeamIndex())
+	{
+		METRICS_LEAVE_SECTION("WallhackBlocker::SetTransmitCallback");
+		return false;
+	}
+
 	SpectatorMode receiver_spec = *EntityProps::GetInstance()->GetPropValue<SpectatorMode, PROP_OBSERVER_MODE>(receiver_player->GetEdict(), false);
 
 	VisCache& cache = WallhackBlocker::GetInstance()->m_viscache;
@@ -128,12 +134,6 @@ bool WallhackBlocker::SetTransmitCallback(SourceSdk::edict_t const * const sende
 		PlayerHandler::const_iterator spec_player(bh.GetEntryIndex());
 
 		Assert(spec_player > INVALID);
-
-		if(spec_player == BOT)
-		{
-			METRICS_LEAVE_SECTION("WallhackBlocker::SetTransmitCallback");
-			return false;
-		}
 
 		if(!cache.IsValid(sender_player, spec_player))
 		{

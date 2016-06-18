@@ -2,7 +2,7 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LocalDebuggerCommand>C:\steamcmd\CSS\srcds.exe</LocalDebuggerCommand>
-    <LocalDebuggerCommandArguments>-console -game cstrike -insecure -maxplayers 64 +game_type 1 +game_mode 2 +map de_inferno +rcon_password cderfv +bot_join_team any +bot_quota 64 +mp_limitteams 0</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>-console -game cstrike -insecure -maxplayers 64 +game_type 1 +game_mode 2 +map de_inferno +rcon_password cderfv +bot_join_team any +bot_quota 31 +mp_limitteams 0 +bot_chatter off</LocalDebuggerCommandArguments>
     <LocalDebuggerWorkingDirectory>C:\steamcmd\CSS\</LocalDebuggerWorkingDirectory>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
     <LocalDebuggerAmpDefaultAccelerator>
