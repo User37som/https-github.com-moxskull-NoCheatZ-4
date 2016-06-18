@@ -202,7 +202,8 @@ void RadarHackBlocker::ProcessEntity(SourceSdk::edict_t const * const pent)
 {
 	ClientRadarData * pData = GetPlayerDataStruct(Helpers::IndexOfEdict(pent));
 
-	MRecipientFilter filter;
+	static MRecipientFilter filter;
+	filter.RemoveAll();
 	
 	filter.SetReliable(false);
 
