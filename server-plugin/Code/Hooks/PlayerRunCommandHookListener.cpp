@@ -24,6 +24,7 @@
 
 #include "plugin.h"
 #include "Systems/ConfigManager.h"
+#include "Systems/Logger.h"
 
 /////////////////////////////////////////////////////////////////////////
 // PlayerRunCommandHookListener
@@ -110,6 +111,10 @@ void HOOKFN_INT PlayerRunCommandHookListener::nPlayerRunCommand(void* This, void
 		ST_W_STATIC PlayerRunCommand_t gpOldFn;
 		*(DWORD*)&(gpOldFn) = HookGuard::GetInstance()->GetOldFunction(This, ConfigManager::GetInstance()->vfid_playerruncommand);
 		gpOldFn(This, pCmd, pMoveHelper);
+	}
+	else
+	{
+		DebugMessage("Blocked CUserCmd");
 	}
 }
 
