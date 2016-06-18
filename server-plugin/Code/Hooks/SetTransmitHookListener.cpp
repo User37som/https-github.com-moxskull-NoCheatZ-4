@@ -46,9 +46,9 @@ void SetTransmitHookListener::HookSetTransmit(SourceSdk::edict_t const * const e
 }
 
 #ifdef GNUC
-void HOOKFN_INT SetTransmitHookListener::nSetTransmit(void * const This, SourceSdk::CCheckTransmitInfo const * const pInfo, bool const bAlways)
+void HOOKFN_INT SetTransmitHookListener::nSetTransmit(void * const This, SourceSdk::CCheckTransmitInfo * pInfo, bool bAlways)
 #else
-void HOOKFN_INT SetTransmitHookListener::nSetTransmit(void * const This, void * const, SourceSdk::CCheckTransmitInfo const * const pInfo, bool const bAlways)
+void HOOKFN_INT SetTransmitHookListener::nSetTransmit(void * const This, void * const, SourceSdk::CCheckTransmitInfo * pInfo, bool bAlways)
 #endif
 {
 	PlayerHandler::const_iterator pplayer = NczPlayerManager::GetInstance()->GetPlayerHandlerByBasePlayer(This);
