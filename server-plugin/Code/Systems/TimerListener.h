@@ -72,13 +72,13 @@ class TimerListener
 {
 private:
 	timer_list_t m_timers;
-	ST_W_STATIC timer_listeners_list_t m_listeners;
-	ST_W_STATIC bool m_undersample;
+	static timer_listeners_list_t m_listeners;
+	static bool m_undersample;
 
 protected:
 
-	ST_W_STATIC void AddTimerListener(TimerListener* listener);
-	ST_W_STATIC void RemoveTimerListener(TimerListener* listener);
+	static void AddTimerListener(TimerListener* listener);
+	static void RemoveTimerListener(TimerListener* listener);
 
 	TimerListener();
 	virtual ~TimerListener();
@@ -92,7 +92,7 @@ protected:
 	virtual void TimerCallback(char const * const timer_name /* Pointer can be invalid past the function */) = 0;
 
 public:
-	ST_W_STATIC void OnTick();
+	static void OnTick();
 
 };
 
