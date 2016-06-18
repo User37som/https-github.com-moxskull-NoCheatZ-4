@@ -52,7 +52,7 @@ void HOOKFN_INT SetTransmitHookListener::nSetTransmit(void * const This, void * 
 #endif
 {
 	PlayerHandler::const_iterator pplayer = NczPlayerManager::GetInstance()->GetPlayerHandlerByBasePlayer(This);
-	if (pplayer > INVALID)
+	if (pplayer > INVALID && !bAlways)
 	{
 		SourceSdk::edict_t* const pEdict_sender = pplayer->GetEdict();
 		//Assert(Helpers::isValidEdict(pEdict_sender));
