@@ -33,44 +33,9 @@ ConCommandHookListener::~ConCommandHookListener()
 
 void ConCommandHookListener::HookDispatch(void* cmd )
 {
-	/* Thanksfully we have the declaration of ConCommand so we can grab the
-		vtable offset of Dispatch using the commented code below
-		with the debugger in ASM mode :
-
-		CSGO : (mov eax, edx+38h) = (56/4) = 14 for Windows
-		CSS : (mov eax, edx+30h) = (48/4) = 12 for Windows
-	
-		CCommand empty;
-		cmd->Dispatch(empty);
-	*/	
-
-	HookInfo info(cmd, ConfigManager::GetInstance()->GetVirtualFunctionId("dispatch"), (DWORD)nDispatch);
+	HookInfo info(cmd, ConfigManager::GetInstance()->vfid_dispatch, (DWORD)nDispatch);
 	HookGuard::GetInstance()->VirtualTableHook(info);
 }
-
-/*void ConCommandHookListener::UnhookDispatch(void* cmd)
-{
-	HookList<void>::elem_t* const hook_info = m_hooked_commands.FindByInstance(cmd);
-	if (hook_info == nullptr) return;
-
-	if (m_hooked_commands.FindByFunction(hook_info->m_value->oldFn, hook_info) == nullptr)
-	{
-		VirtualTableHook(hook_info->m_value->pInterface, ConfigManager::GetInstance()->GetVirtualFunctionId("dispatch"), (DWORD)hook_info->m_value->oldFn, (DWORD)nDispatch);
-		m_hooked_commands.Remove(hook_info);
-	}
-}*/
-
-/*void ConCommandHookListener::UnhookDispatch()
-{
-	HookList<void>::elem_t*  hook_info = m_hooked_commands.GetFirst();
-	if (hook_info == nullptr) return;
-
-	do
-	{
-		VirtualTableHook(hook_info->m_value->pInterface, ConfigManager::GetInstance()->GetVirtualFunctionId("dispatch"), (DWORD)hook_info->m_value->oldFn, (DWORD)nDispatch);
-		hook_info = m_hooked_commands.Remove(hook_info);
-	} while(hook_info != nullptr)
-}*/
 
 #ifdef GNUC
 void HOOKFN_INT ConCommandHookListener::nDispatch(void* cmd, SourceSdk::CCommand const &args )
@@ -120,7 +85,7 @@ void HOOKFN_INT ConCommandHookListener::nDispatch(void* cmd, void*, SourceSdk::C
 		//Assert(it != nullptr);
 
 		ST_W_STATIC Dispatch_t gpOldFn;
-		*(DWORD*)&(gpOldFn) = HookGuard::GetInstance()->GetOldFunction(cmd, ConfigManager::GetInstance()->GetVirtualFunctionId("dispatch"));
+		*(DWORD*)&(gpOldFn) = HookGuard::GetInstance()->GetOldFunction(cmd, ConfigManager::GetInstance()->vfid_dispatch);
 		gpOldFn(cmd, args);
 	}
 }
@@ -145,27 +110,6 @@ void ConCommandHookListener::RegisterConCommandHookListener(ConCommandHookListen
 
 void ConCommandHookListener::RemoveConCommandHookListener(ConCommandHookListener * const listener)
 {
-	/*if (!listener->m_mycommands.IsEmpty())
-	{
-		size_t cmd_pos = 0;
-		size_t const max_pos = listener->m_mycommands.Size();
-		do
-		{
-			bool can_unhook = true;
-			for (ConCommandListenersListT::elem_t* z = m_listeners.GetFirst(); z != nullptr; z = z->m_next)
-			{
-				if (z->m_value.listener == listener) continue;
-
-				if (z->m_value.listener->m_mycommands.Find(listener->m_mycommands[cmd_pos]) != -1)
-				{
-					can_unhook = false;
-					break;
-				}
-			}
-			if (can_unhook) UnhookDispatch(listener->m_mycommands[cmd_pos]);
-		} while (++cmd_pos != max_pos);
-		listener->m_mycommands.RemoveAll();
-	}*/
 	listener->m_mycommands.RemoveAll();
 	m_listeners.Remove(listener);
 }

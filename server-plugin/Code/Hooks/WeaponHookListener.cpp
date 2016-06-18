@@ -38,8 +38,8 @@ void WeaponHookListener::HookWeapon(NczPlayer const * const player)
 	Assert(Helpers::isValidEdict(player->GetEdict()));
 	void* unk = player->GetEdict()->m_pUnk;
 
-	HookInfo info_equip(unk, ConfigManager::GetInstance()->GetVirtualFunctionId("weaponequip"), (DWORD)nWeapon_Equip);
-	HookInfo info_drop(unk, ConfigManager::GetInstance()->GetVirtualFunctionId("weapondrop"), (DWORD)nWeapon_Drop);
+	HookInfo info_equip(unk, ConfigManager::GetInstance()->vfid_weaponequip, (DWORD)nWeapon_Equip);
+	HookInfo info_drop(unk, ConfigManager::GetInstance()->vfid_weapondrop, (DWORD)nWeapon_Drop);
 	HookGuard::GetInstance()->VirtualTableHook(info_equip);
 	HookGuard::GetInstance()->VirtualTableHook(info_drop);
 }
@@ -68,7 +68,7 @@ void HOOKFN_INT WeaponHookListener::nWeapon_Equip(void * const basePlayer, void 
 	}
 
 	WeaponEquip_t gpOldFn;
-	*(DWORD*)&(gpOldFn) = HookGuard::GetInstance()->GetOldFunction(basePlayer, ConfigManager::GetInstance()->GetVirtualFunctionId("weaponequip"));
+	*(DWORD*)&(gpOldFn) = HookGuard::GetInstance()->GetOldFunction(basePlayer, ConfigManager::GetInstance()->vfid_weaponequip);
 	gpOldFn(basePlayer, weapon);
 }
 
@@ -96,7 +96,7 @@ void HOOKFN_INT WeaponHookListener::nWeapon_Drop(void * const basePlayer, void *
 	}
 
 	WeaponDrop_t gpOldFn;
-	*(DWORD*)&(gpOldFn) = HookGuard::GetInstance()->GetOldFunction(basePlayer, ConfigManager::GetInstance()->GetVirtualFunctionId("weapondrop"));
+	*(DWORD*)&(gpOldFn) = HookGuard::GetInstance()->GetOldFunction(basePlayer, ConfigManager::GetInstance()->vfid_weapondrop);
 	gpOldFn(basePlayer, weapon, targetVec, velocity);
 }
 

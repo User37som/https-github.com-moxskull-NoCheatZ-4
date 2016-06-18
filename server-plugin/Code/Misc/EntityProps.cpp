@@ -105,7 +105,7 @@ SourceSdk::datamap_t* GetDataDescMap(SourceSdk::edict_t* const pEntity)
 	const DWORD* pdwInterface = IFACE_PTR(baseEnt);
 
 	GetDataDescMap_t fn;
-	*(DWORD*)&(fn) = pdwInterface[ConfigManager::GetInstance()->GetVirtualFunctionId("getdatadescmap")];
+	*(DWORD*)&(fn) = pdwInterface[ConfigManager::GetInstance()->vfid_getdatadescmap];
 
 	return fn(baseEnt);
 }

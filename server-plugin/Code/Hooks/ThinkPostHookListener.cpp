@@ -32,7 +32,7 @@ ThinkPostHookListener::~ThinkPostHookListener()
 
 void ThinkPostHookListener::HookThinkPost(SourceSdk::edict_t const * const entity)
 {
-	HookInfo info(entity->m_pUnk, ConfigManager::GetInstance()->GetVirtualFunctionId("thinkpost"), (DWORD)nThinkPost);
+	HookInfo info(entity->m_pUnk, ConfigManager::GetInstance()->vfid_thinkpost, (DWORD)nThinkPost);
 	HookGuard::GetInstance()->VirtualTableHook(info, true);
 }
 
@@ -53,7 +53,7 @@ void HOOKFN_INT ThinkPostHookListener::nThinkPost(void * const baseentity, void 
 #endif
 {
 	PostThink_t gpOldFn;
-	*(DWORD*)&gpOldFn = HookGuard::GetInstance()->GetOldFunction(baseentity, ConfigManager::GetInstance()->GetVirtualFunctionId("thinkpost"));
+	*(DWORD*)&gpOldFn = HookGuard::GetInstance()->GetOldFunction(baseentity, ConfigManager::GetInstance()->vfid_thinkpost);
 	gpOldFn(baseentity);
 
 	ListenersList_t::elem_t const * it = m_listeners.GetFirst();

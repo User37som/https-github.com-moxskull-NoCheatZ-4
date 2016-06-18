@@ -39,7 +39,7 @@ void SetTransmitHookListener::HookSetTransmit(SourceSdk::edict_t const * const e
 	Assert(Helpers::isValidEdict(ent));
 	void* unk = ent->m_pUnk;
 
-	HookInfo info(unk, ConfigManager::GetInstance()->GetVirtualFunctionId("settransmit"), (DWORD)nSetTransmit);
+	HookInfo info(unk, ConfigManager::GetInstance()->vfid_settransmit, (DWORD)nSetTransmit);
 	HookGuard::GetInstance()->VirtualTableHook(info);
 
 	//DebugMessage(basic_string("Hooked SetTransmit of entity classname ").append(ent->GetClassName()));
@@ -103,7 +103,7 @@ void HOOKFN_INT SetTransmitHookListener::nSetTransmit(void * const This, void * 
 		}
 	}
 	SetTransmit_t gpOldFn;
-	*(uint32_t*)&(gpOldFn) = HookGuard::GetInstance()->GetOldFunction(This, ConfigManager::GetInstance()->GetVirtualFunctionId("settransmit"));
+	*(uint32_t*)&(gpOldFn) = HookGuard::GetInstance()->GetOldFunction(This, ConfigManager::GetInstance()->vfid_settransmit);
 	gpOldFn(This, pInfo, bAlways);
 }
 

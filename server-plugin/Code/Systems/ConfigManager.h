@@ -6,50 +6,32 @@
 #include "Misc/temp_basicstring.h"
 #include "Misc/temp_singleton.h"
 
-struct virtual_function
-{
-	basic_string m_name;
-	int m_vfid;
-
-	virtual_function(basic_string const & name, int vfid)
-	{
-		m_name = name;
-		m_vfid = vfid;
-	}
-	virtual_function(const virtual_function & other)
-	{
-		m_name = other.m_name;
-		m_vfid = other.m_vfid;
-	}
-
-	virtual_function(basic_string const & name)
-	{
-		m_name = name;
-	}
-	bool operator==(virtual_function const & other) const
-	{
-		return m_name == other.m_name;
-	}
-};
-
-typedef CUtlVector<virtual_function> virtual_functions_t;
-
 class ConfigManager : public Singleton<ConfigManager>
 {
 	typedef Singleton<ConfigManager> singleton_class;
 
 private:
-	virtual_functions_t m_vfuncs;
 	
 	int const content_version; // Backward compatible if we ever change the layout of the config file
 
 public:
 	basic_string m_playerdataclass;
 
+	// values
 	float m_smoke_radius;
 	float m_innersmoke_radius_sqr;
 	float m_smoke_timetobang;
 	float m_smoke_time;
+
+	// virtual functions
+	int vfid_getdatadescmap;
+	int vfid_settransmit;
+	int vfid_mhgroundentity;
+	int vfid_weaponequip;
+	int vfid_weapondrop;
+	int vfid_playerruncommand;
+	int vfid_dispatch;
+	int vfid_thinkpost;
 
 public:
 	ConfigManager();
@@ -59,11 +41,6 @@ public:
 		Load the config file containing configuration. Returns false if error parsing the config file.
 	*/
 	bool LoadConfig();
-
-	/*
-		Used for virtual table hooking
-	*/
-	int GetVirtualFunctionId(basic_string const & name);
 };
 
 #endif // CONFIGMANAGER_H

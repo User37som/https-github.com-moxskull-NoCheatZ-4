@@ -37,7 +37,7 @@ void OnGroundHookListener::HookOnGround(NczPlayer const * const player)
 	Assert(Helpers::isValidEdict(player->GetEdict()));
 	void* unk = player->GetEdict()->m_pUnk;
 
-	HookInfo info(unk, ConfigManager::GetInstance()->GetVirtualFunctionId("mhgroundentity"), (DWORD)nNetworkStateChanged_m_hGroundEntity);
+	HookInfo info(unk, ConfigManager::GetInstance()->vfid_mhgroundentity, (DWORD)nNetworkStateChanged_m_hGroundEntity);
 	HookGuard::GetInstance()->VirtualTableHook(info);
 }
 
@@ -73,7 +73,7 @@ void HOOKFN_INT OnGroundHookListener::nNetworkStateChanged_m_hGroundEntity(void 
 	}
 
 	ST_W_STATIC GroundEntity_t gpOldFn;
-	*(DWORD*)&(gpOldFn) = HookGuard::GetInstance()->GetOldFunction(basePlayer, ConfigManager::GetInstance()->GetVirtualFunctionId("mhgroundentity"));
+	*(DWORD*)&(gpOldFn) = HookGuard::GetInstance()->GetOldFunction(basePlayer, ConfigManager::GetInstance()->vfid_mhgroundentity);
 	gpOldFn(basePlayer, new_m_hGroundEntity);
 }
 
