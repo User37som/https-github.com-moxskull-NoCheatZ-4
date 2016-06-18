@@ -267,7 +267,12 @@ inline PlayerHandler::const_iterator NczPlayerManager::GetPlayerHandlerByIndex(i
 
 inline PlayerHandler::const_iterator NczPlayerManager::GetPlayerHandlerByUserId(int const userid) const
 {
-	return Helpers::getIndexFromUserID(userid);
+	for (PlayerHandler::const_iterator it(PlayerHandler::begin()); it != PlayerHandler::end(); ++it)
+	{
+		if (it->GetPlayerInfo()->GetUserID() == userid)
+			return it;
+	}
+	return PlayerHandler::end();
 }
 
 inline PlayerHandler::const_iterator NczPlayerManager::GetPlayerHandlerByEdict(SourceSdk::edict_t const * const pEdict) const

@@ -58,8 +58,7 @@ void BanRequest::SetWaitTime(float wait_time)
 void BanRequest::AddAsyncBan(NczPlayer* player, int ban_time, const char * kick_message)
 {
 	PlayerBanRequestT req;
-	req.userid = player->GetUserid();
-
+	req.userid = SourceSdk::InterfacesProxy::Call_GetPlayerUserid(player->GetEdict());
 
 	if(m_requests.Find(req) == nullptr)
 	{
@@ -110,11 +109,11 @@ void BanRequest::BanNow(NczPlayer * const player, int ban_time, const char * kic
 
 	// Ban
 
-	BanInternal(ban_time, player->GetSteamID(), player->GetUserid(), kick_message, player->GetIPAddress());
+	BanInternal(ban_time, player->GetSteamID(), SourceSdk::InterfacesProxy::Call_GetPlayerUserid(player->GetEdict()), kick_message, player->GetIPAddress());
 
 	// Remove from async requests if any
 
-	BanRequestListT::elem_t* it = m_requests.Find(player->GetUserid());
+	BanRequestListT::elem_t* it = m_requests.Find(SourceSdk::InterfacesProxy::Call_GetPlayerUserid(player->GetEdict()));
 	if (it != nullptr)
 	{
 		m_requests.Remove(it);

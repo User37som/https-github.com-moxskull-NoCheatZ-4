@@ -55,7 +55,6 @@ namespace Helpers
 	SourceSdk::edict_t * getEdictFromSteamID(const char *p_SteamID);
 	int getIndexFromSteamID(const char *SteamID);
 	SourceSdk::edict_t * PEntityOfEntIndex(const int p_iEntIndex);
-	int getIndexFromUserID(const int p_userid);
 
 	bool isValidEdict(const SourceSdk::edict_t * const p_entity);
 

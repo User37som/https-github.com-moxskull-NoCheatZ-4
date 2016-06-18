@@ -243,25 +243,24 @@ void NczPlayerManager::FireGameEvent(SourceSdk::IGameEvent* ev)
 		return;
 	}
 
-	PlayerHandler * ph = &(FullHandlersList[Helpers::getIndexFromUserID(ev->GetInt("userid"))]);
-
+	PlayerHandler::const_iterator ph(GetPlayerHandlerByUserId(ev->GetInt("userid")));
 	++event_name;
 
 	if(*event_name == 's') // player_spawn
 	{
-		if(ph->status > BOT)
+		if(ph > BOT)
 		{
-			SourceSdk::IPlayerInfo * const pinfo = ph->playerClass->GetPlayerInfo();
+			SourceSdk::IPlayerInfo * const pinfo = ph->GetPlayerInfo();
 			if(pinfo)
 			{
 				if (pinfo->GetTeamIndex() > 1)
 				{
-					ph->in_tests_time = Plat_FloatTime() + 3.0f;
+					ph.GetHandler()->in_tests_time = Plat_FloatTime() + 3.0f;
 				}
 				else
 				{
-					ph->status = PLAYER_CONNECTED;
-					ph->in_tests_time = std::numeric_limits<float>::max();
+					ph.GetHandler()->status = PLAYER_CONNECTED;
+					ph.GetHandler()->in_tests_time = std::numeric_limits<float>::max();
 				}
 			}
 		}
@@ -270,16 +269,16 @@ void NczPlayerManager::FireGameEvent(SourceSdk::IGameEvent* ev)
 	}
 	if(*event_name == 't') // player_team
 	{
-		if(ph->status > BOT)
+		if(ph > BOT)
 		{
 			if (ev->GetInt("teamid") > 1)
 			{
-				ph->in_tests_time = Plat_FloatTime() + 3.0f;
+				ph.GetHandler()->in_tests_time = Plat_FloatTime() + 3.0f;
 			}
 			else
 			{
-				ph->status = PLAYER_CONNECTED;
-				ph->in_tests_time = std::numeric_limits<float>::max();
+				ph.GetHandler()->status = PLAYER_CONNECTED;
+				ph.GetHandler()->in_tests_time = std::numeric_limits<float>::max();
 			}
 		}
 		BaseSystem::ManageSystems();
@@ -288,10 +287,10 @@ void NczPlayerManager::FireGameEvent(SourceSdk::IGameEvent* ev)
 	//else // player_death
 	//{
 	
-	if(ph->status <= PLAYER_CONNECTED)
+	if(ph <= PLAYER_CONNECTED)
 		return;
-	ph->status = PLAYER_CONNECTED;
-	ph->in_tests_time = std::numeric_limits<float>::max();
+	ph.GetHandler()->status = PLAYER_CONNECTED;
+	ph.GetHandler()->in_tests_time = std::numeric_limits<float>::max();
 	BaseSystem::ManageSystems();
 	//}
 }

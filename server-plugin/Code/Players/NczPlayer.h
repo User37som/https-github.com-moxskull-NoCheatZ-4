@@ -106,7 +106,6 @@ class ALIGN16 NczPlayer : private NoCopy
 {
 private:
 	int const m_index;
-	int const m_userid;
 	SourceSdk::edict_t * const m_edict;
 	SourceSdk::INetChannelInfo* m_channelinfo;
 	mutable SourceSdk::IPlayerInfo * m_playerinfo;
@@ -127,7 +126,6 @@ public:
 	}
 
 	inline int GetIndex() const ;
-	inline int GetUserid() const;
 	inline SourceSdk::edict_t * const GetEdict() const;
 	inline SourceSdk::IPlayerInfo * const GetPlayerInfo() const;
 	inline SourceSdk::INetChannelInfo * const GetChannelInfo() const;
@@ -160,11 +158,6 @@ public:
 inline int NczPlayer::GetIndex() const
 {
 	return m_index;
-}
-
-inline int NczPlayer::GetUserid() const
-{
-	return m_userid;
 }
 
 inline SourceSdk::edict_t * const NczPlayer::GetEdict() const

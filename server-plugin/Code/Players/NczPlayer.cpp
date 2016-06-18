@@ -33,7 +33,6 @@
 NczPlayer::NczPlayer(const int index) : 
 	NoCopy(),
 	m_index(index),
-	m_userid(SourceSdk::InterfacesProxy::Call_GetPlayerUserid(m_edict)),
 	m_edict(Helpers::PEntityOfEntIndex(index)),
 	m_channelinfo(SourceSdk::InterfacesProxy::Call_GetPlayerNetInfo(index)),
 	m_playerinfo(nullptr),
@@ -396,7 +395,7 @@ void NczPlayer::Kick(const char * msg)
 				"Kicked %s with reason : %s\n", this->GetReadableIdentity().c_str(), msg));
 
 	SourceSdk::InterfacesProxy::Call_ServerCommand(
-				Helpers::format("kickid %d [NoCheatZ 4] %s\n", this->GetUserid(), msg).c_str()
+				Helpers::format("kickid %d [NoCheatZ 4] %s\n", SourceSdk::InterfacesProxy::Call_GetPlayerUserid(m_edict), msg).c_str()
 				);
 }
 
