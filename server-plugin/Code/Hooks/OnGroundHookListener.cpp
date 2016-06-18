@@ -37,7 +37,7 @@ void OnGroundHookListener::HookOnGround(NczPlayer const * const player)
 	Assert(Helpers::isValidEdict(player->GetEdict()));
 	void* unk = player->GetEdict()->m_pUnk;
 
-	HookInfo info(unk, ConfigManager::GetInstance()->GetVirtualFunctionId("mhgroundentity"), (DWORD)nNetworkStateChanged_m_hGroundEntity);
+	HookInfo info(unk, ConfigManager::GetInstance()->vfid_mhgroundentity, (DWORD)nNetworkStateChanged_m_hGroundEntity);
 	HookGuard::GetInstance()->VirtualTableHook(info);
 }
 
@@ -57,23 +57,23 @@ void HOOKFN_INT OnGroundHookListener::nNetworkStateChanged_m_hGroundEntity(void 
 void HOOKFN_INT OnGroundHookListener::nNetworkStateChanged_m_hGroundEntity(void * const basePlayer, void * const, int const * const new_m_hGroundEntity)
 #endif
 {
-	PlayerHandler const * const  ph = NczPlayerManager::GetInstance()->GetPlayerHandlerByBasePlayer(basePlayer);
+	PlayerHandler::const_iterator  ph = NczPlayerManager::GetInstance()->GetPlayerHandlerByBasePlayer(basePlayer);
 	bool new_isOnground = true;
 
-	if(ph->status >= PLAYER_CONNECTED)
+	if(ph >= PLAYER_CONNECTED)
 	{
 		if(*new_m_hGroundEntity != -1) new_isOnground = false;
 
 		OnGroundListenersListT::elem_t* it = m_listeners.GetFirst();
 		while (it != nullptr)
 		{
-			it->m_value.listener->m_hGroundEntityStateChangedCallback(ph->playerClass, new_isOnground);
+			it->m_value.listener->m_hGroundEntityStateChangedCallback(ph, new_isOnground);
 			it = it->m_next;
 		}
 	}
 
 	ST_W_STATIC GroundEntity_t gpOldFn;
-	*(DWORD*)&(gpOldFn) = HookGuard::GetInstance()->GetOldFunction(basePlayer, ConfigManager::GetInstance()->GetVirtualFunctionId("mhgroundentity"));
+	*(DWORD*)&(gpOldFn) = HookGuard::GetInstance()->GetOldFunction(basePlayer, ConfigManager::GetInstance()->vfid_mhgroundentity);
 	gpOldFn(basePlayer, new_m_hGroundEntity);
 }
 

@@ -24,6 +24,7 @@
 #include "Hooks/PlayerRunCommandHookListener.h"
 #include "Misc/MathCache.h"
 #include "Systems/BanRequest.h"
+#include "Misc/EntityProps.h"
 
 //---------------------------------------------------------------------------------
 // NczPlayer
@@ -32,7 +33,6 @@
 NczPlayer::NczPlayer(const int index) : 
 	NoCopy(),
 	m_index(index),
-	m_userid(SourceSdk::InterfacesProxy::Call_GetPlayerUserid(m_edict)),
 	m_edict(Helpers::PEntityOfEntIndex(index)),
 	m_channelinfo(SourceSdk::InterfacesProxy::Call_GetPlayerNetInfo(index)),
 	m_playerinfo(nullptr),
@@ -44,18 +44,9 @@ WpnShotType const NczPlayer::GetWpnShotType() const
 {
 	if (GetPlayerInfo() == nullptr) return HAND;
 
-	char const * wpn_name;
-	if (SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive)
-	{
-		wpn_name = static_cast<SourceSdk::IPlayerInfo_csgo*>(GetPlayerInfo())->GetWeaponName();
-	}
-	else
-	{
-		wpn_name = static_cast<SourceSdk::IPlayerInfo*>(GetPlayerInfo())->GetWeaponName();
-	}
+	char const * wpn_name = m_playerinfo->GetWeaponName();
 		
 	if(!wpn_name || ! *wpn_name) return HAND;
-
 
 	switch (SourceSdk::InterfacesProxy::m_game)
 	{
@@ -123,7 +114,7 @@ WpnShotType const NczPlayer::GetWpnShotType() const
 	}
 	case SourceSdk::CounterStrikeGlobalOffensive:
 	{
-		wpn_name = static_cast<SourceSdk::IPlayerInfo_csgo*>(GetPlayerInfo())->GetWeaponName();
+		//wpn_name = static_cast<SourceSdk::IPlayerInfo_csgo*>(GetPlayerInfo())->GetWeaponName();
 		if (!wpn_name || !*wpn_name) return HAND;
 		switch (wpn_name[7])
 		{
@@ -340,7 +331,7 @@ int const NczPlayer::aimingAt()
 	MathInfo const & player_maths = MathCache::GetInstance()->GetCachedMaths(GetIndex());
 
 	SourceSdk::Vector eyePos;
-	SourceSdk::VectorCopy(player_maths.m_eyepos, eyePos);
+	GetAbsEyePos(eyePos);
 
 	SourceSdk::Vector vEnd;
 	AngleVectors(player_maths.m_eyeangles, &vEnd);
@@ -404,7 +395,7 @@ void NczPlayer::Kick(const char * msg)
 				"Kicked %s with reason : %s\n", this->GetReadableIdentity().c_str(), msg));
 
 	SourceSdk::InterfacesProxy::Call_ServerCommand(
-				Helpers::format("kickid %d [NoCheatZ 4] %s\n", this->GetUserid(), msg).c_str()
+				Helpers::format("kickid %d [NoCheatZ 4] %s\n", SourceSdk::InterfacesProxy::Call_GetPlayerUserid(m_edict), msg).c_str()
 				);
 }
 
@@ -415,4 +406,36 @@ void NczPlayer::Ban(const char * msg, int minutes)
 	{
 		BanRequest::GetInstance()->BanNow(this, minutes, msg);
 	}
+}
+
+void NczPlayer::GetAbsOrigin(SourceSdk::Vector & out)
+{
+	if (GetPlayerInfo())
+	{
+		SourceSdk::VectorCopy(m_playerinfo->GetAbsOrigin(), out);
+	}
+#ifdef DEBUG
+	else
+	{
+		SourceSdk::VectorClear(out);
+	}
+#endif
+}
+
+void NczPlayer::GetRelEyePos(SourceSdk::Vector & out) const
+{
+	SourceSdk::VectorCopy(EntityProps::GetInstance()->GetPropValue<SourceSdk::Vector, PROP_VIEW_OFFSET>(m_edict), &out);
+}
+
+void NczPlayer::GetAbsEyePos(SourceSdk::Vector & out)
+{
+	SourceSdk::Vector rel_eye_pos;
+	GetAbsOrigin(out);
+	GetRelEyePos(rel_eye_pos);
+	SourceSdk::VectorAdd(rel_eye_pos, out);
+}
+
+void NczPlayer::GetEyeAngles(SourceSdk::QAngle & out) const
+{
+	SourceSdk::VectorCopy(static_cast<SourceSdk::CUserCmd const *>(PlayerRunCommandHookListener::GetLastUserCmd(this))->viewangles, out);
 }

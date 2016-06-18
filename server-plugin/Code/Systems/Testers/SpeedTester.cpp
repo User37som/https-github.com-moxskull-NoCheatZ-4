@@ -38,6 +38,12 @@ void SpeedTester::Init()
 
 void SpeedTester::Load()
 {
+	for (PlayerHandler::const_iterator it = PlayerHandler::begin(); it != PlayerHandler::end(); ++it)
+	{
+		if (it)
+			ResetPlayerDataStruct(*it);
+	}
+
 	OnTickListener::RegisterOnTickListener(this);
 	PlayerRunCommandHookListener::RegisterPlayerRunCommandHookListener(this, 1);
 }
@@ -46,12 +52,6 @@ void SpeedTester::Unload()
 {
 	OnTickListener::RemoveOnTickListener(this);
 	PlayerRunCommandHookListener::RemovePlayerRunCommandHookListener(this);
-
-	PLAYERS_LOOP_RUNTIME
-	{
-		ResetPlayerDataStruct(ph->playerClass);
-	}
-	END_PLAYERS_LOOP
 }
 
 void SpeedTester::ProcessPlayerTestOnTick(NczPlayer* const player, float const curtime)

@@ -46,7 +46,6 @@ void ConVarTester::Init()
 
 void ConVarTester::ProcessOnTick(float const curtime)
 {
-	if(!IsActive()) return;
 	if(m_convars_rules.IsEmpty()) return;
 
 	
@@ -355,6 +354,12 @@ unexpected2:
 
 void ConVarTester::Load()
 {
+	for (PlayerHandler::const_iterator it = PlayerHandler::begin(); it != PlayerHandler::end(); ++it)
+	{
+		if (it)
+			ResetPlayerDataStruct(*it);
+	}
+
 	AddConvarRuleset("developer", "0", SAME);
 	AddConvarRuleset("sv_cheats", "0", SAME_AS_SERVER);
 	AddConvarRuleset("sv_accelerate", "0", SAME_AS_SERVER);
@@ -434,13 +439,6 @@ void ConVarTester::Load()
 void ConVarTester::Unload()
 {
 	OnTickListener::RemoveOnTickListener(this);
-
-	PLAYERS_LOOP_RUNTIME
-	{
-		ResetPlayerDataStruct(ph->playerClass);
-	}
-	END_PLAYERS_LOOP
-
 	m_convars_rules.RemoveAll();
 }
 

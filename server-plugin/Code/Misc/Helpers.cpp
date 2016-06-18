@@ -363,20 +363,6 @@ namespace Helpers
 		return (value & 1);
 	}
 
-	int getIndexFromUserID(const int userid)
-	{
-		int const ent_count = GetMaxClients();
-		int i = 1;
-		do
-		{
-			if(SourceSdk::InterfacesProxy::Call_GetPlayerUserid(PEntityOfEntIndex(i)) == userid)
-			{
-				return i;
-			}
-		} while(++i <= ent_count);
-		return -1;
-	}
-
 	bool isValidEdict(const SourceSdk::edict_t * const p_entity)
 	{
 		return p_entity != nullptr && !p_entity->IsFree();

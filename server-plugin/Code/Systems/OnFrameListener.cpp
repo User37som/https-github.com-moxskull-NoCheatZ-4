@@ -28,14 +28,13 @@ OnFrameListener::OnFrameListener()
 
 void OnFrameListener::ProcessTestsOnFrame()
 {
-	PLAYERS_LOOP_RUNTIME
+	for (PlayerHandler::const_iterator it = PlayerHandler::begin(); it != PlayerHandler::end(); ++it)
 	{
-		if(ph->status >= GetFilter())
+		if(it >= GetFilter())
 		{
-			ProcessPlayerTestOnFrame(ph->playerClass);
+			ProcessPlayerTestOnFrame(it);
 		}
 	}
-	END_PLAYERS_LOOP
 }
 
 void OnFrameListener::RegisterOnFrameListener(OnFrameListener const * const tester)

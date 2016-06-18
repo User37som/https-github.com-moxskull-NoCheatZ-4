@@ -47,6 +47,12 @@ void AntiSmokeBlocker::Init()
 	
 void AntiSmokeBlocker::Load()
 {
+	for (PlayerHandler::const_iterator it = PlayerHandler::begin(); it != PlayerHandler::end(); ++it)
+	{
+		if (it)
+			ResetPlayerDataStruct(*it);
+	}
+
 	SourceSdk::InterfacesProxy::GetGameEventManager()->AddListener(this, "smokegrenade_detonate", true);
 	SourceSdk::InterfacesProxy::GetGameEventManager()->AddListener(this, "round_start", true);
 	OnTickListener::RegisterOnTickListener(this);
@@ -64,22 +70,11 @@ void AntiSmokeBlocker::Unload()
 	{
 		it = m_smokes.Remove(it);
 	}
-
-	PLAYERS_LOOP_RUNTIME
-	{
-		ResetPlayerDataStruct(ph->playerClass);
-	}
-	END_PLAYERS_LOOP
 }
 
 void AntiSmokeBlocker::ProcessOnTick(float const curtime)
 {
 	METRICS_ENTER_SECTION("AntiSmokeBlocker::OnFrame");
-	if(!IsActive())
-	{	
-		METRICS_LEAVE_SECTION("AntiSmokeBlocker::OnFrame");
-		return;
-	}
 
 	SmokeListT::elem_t* it = m_smokes.GetFirst();
 
@@ -98,13 +93,13 @@ void AntiSmokeBlocker::ProcessOnTick(float const curtime)
 	if (it == nullptr) return;
 
 	// Test if players are immersed in smoke
-	PLAYERS_LOOP_RUNTIME
+	for (PlayerHandler::const_iterator ph = PlayerHandler::begin(); ph != PlayerHandler::end(); ++ph)
 	{
-		if(ph->status != PLAYER_IN_TESTS) continue;
+		if(ph != PLAYER_IN_TESTS) continue;
 
 		SourceSdk::Vector delta,other_delta;
 
-		MathInfo const & x_math = MathCache::GetInstance()->GetCachedMaths(x);
+		MathInfo const & x_math = MathCache::GetInstance()->GetCachedMaths(ph.GetIndex());
 		
 		do // At this stage, m_smokes ! empty
 		{
@@ -114,7 +109,7 @@ void AntiSmokeBlocker::ProcessOnTick(float const curtime)
 				SourceSdk::VectorDistanceSqr(x_math.m_eyepos, it->m_value.pos, delta, dst);
 				if(dst < ConfigManager::GetInstance()->m_innersmoke_radius_sqr)
 				{
-					GetPlayerDataStruct(x)->is_in_smoke = true;
+					GetPlayerDataStruct(ph.GetIndex())->is_in_smoke = true;
 				}
 
 				/* Players can't see eachother if they are behind a smoke */
@@ -122,14 +117,12 @@ void AntiSmokeBlocker::ProcessOnTick(float const curtime)
 				const SourceSdk::vec_t ang_smoke = tanf(ConfigManager::GetInstance()->m_smoke_radius / sqrtf(dst));
 				SourceSdk::VectorNorm(delta);
 
-				for (int y = 1; y <= maxcl; ++y)
+				for (PlayerHandler::const_iterator other_ph = PlayerHandler::begin(); other_ph != PlayerHandler::end(); ++other_ph)
 				{
-					if (x == y) continue;
+					if (other_ph != PLAYER_IN_TESTS && other_ph != BOT) continue;
+					if (ph == other_ph) continue;
 
-					PlayerHandler const * const other_ph = NczPlayerManager::GetInstance()->GetPlayerHandlerByIndex(y);
-					if (other_ph->status != PLAYER_IN_TESTS && other_ph->status != BOT) continue;
-
-					MathInfo const & y_math = MathCache::GetInstance()->GetCachedMaths(y);
+					MathInfo const & y_math = MathCache::GetInstance()->GetCachedMaths(other_ph.GetIndex());
 
 					// Is he behind the smoke against us ?
 
@@ -147,7 +140,7 @@ void AntiSmokeBlocker::ProcessOnTick(float const curtime)
 
 						if (angle_player < ang_smoke)
 						{
-							GetPlayerDataStruct(x)->can_not_see_this_player[y] = true;
+							GetPlayerDataStruct(ph.GetIndex())->can_not_see_this_player[other_ph.GetIndex()] = true;
 						}
 					}
 				}
@@ -156,31 +149,27 @@ void AntiSmokeBlocker::ProcessOnTick(float const curtime)
 		} while(it != nullptr);
 		it = m_smokes.GetFirst();
 	}
-	END_PLAYERS_LOOP
 
 	METRICS_LEAVE_SECTION("AntiSmokeBlocker::OnFrame");
 }
 
 bool AntiSmokeBlocker::SetTransmitCallback(SourceSdk::edict_t const * const ea, SourceSdk::edict_t const * const eb)
 {
-	if(IsActive() && ea != eb)
-	{
-		if(NczPlayerManager::GetInstance()->GetPlayerHandlerByEdict(eb)->status == INVALID) return false;
+	PlayerHandler::const_iterator pPlayer_b = NczPlayerManager::GetInstance()->GetPlayerHandlerByEdict(eb);
 
-		NczPlayer* const pPlayer_b = NczPlayerManager::GetInstance()->GetPlayerHandlerByEdict(eb)->playerClass;
+	if(!pPlayer_b) return false;
 
-		if(GetPlayerDataStruct(pPlayer_b)->is_in_smoke)
-			return true;
+	if(GetPlayerDataStruct(pPlayer_b.GetIndex())->is_in_smoke)
+		return true;
 
-		if(GetPlayerDataStruct(pPlayer_b)->can_not_see_this_player[Helpers::IndexOfEdict(ea)] == true)
-			return true;
-	}
+	if(GetPlayerDataStruct(pPlayer_b.GetIndex())->can_not_see_this_player[Helpers::IndexOfEdict(ea)] == true)
+		return true;
+
 	return false;
 }
 
 void AntiSmokeBlocker::FireGameEvent(SourceSdk::IGameEvent * ev)
 {
-	if(!IsActive()) return;
 
 	if(ev->GetName()[0] == 's') // smokegrenade_detonate
 	{
@@ -210,6 +199,6 @@ void AntiSmokeBlocker::FireGameEvent(SourceSdk::IGameEvent * ev)
 		it = m_smokes.Remove(it);
 	}
 
-	ST_R_STATIC SmokeInfoT default_smoke = SmokeInfoT();
-	ResetAll(&default_smoke);
+	//ST_R_STATIC SmokeInfoT default_smoke = SmokeInfoT();
+	//ResetAll(&default_smoke);
 }

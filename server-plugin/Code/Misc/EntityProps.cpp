@@ -9,6 +9,13 @@
 typedef SourceSdk::datamap_t* (HOOKFN_EXT *GetDataDescMap_t)(SourceSdk::CBaseEntity*);
 
 template <>
+basic_string const & EntityProps::PropIdToString<PROP_VIEW_OFFSET>()
+{
+	static basic_string const v("CBasePlayer.localdata.m_vecViewOffset[0]");
+	return v;
+}
+
+template <>
 basic_string const & EntityProps::PropIdToString<PROP_SHADOW_DIRECTION>()
 {
 	static basic_string const v("CShadowControl.m_shadowDirection");
@@ -98,7 +105,7 @@ SourceSdk::datamap_t* GetDataDescMap(SourceSdk::edict_t* const pEntity)
 	const DWORD* pdwInterface = IFACE_PTR(baseEnt);
 
 	GetDataDescMap_t fn;
-	*(DWORD*)&(fn) = pdwInterface[ConfigManager::GetInstance()->GetVirtualFunctionId("getdatadescmap")];
+	*(DWORD*)&(fn) = pdwInterface[ConfigManager::GetInstance()->vfid_getdatadescmap];
 
 	return fn(baseEnt);
 }

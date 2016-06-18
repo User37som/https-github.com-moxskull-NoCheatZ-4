@@ -38,18 +38,18 @@ void BadUserCmdBlocker::Init()
 
 void BadUserCmdBlocker::Load()
 {
+	for (PlayerHandler::const_iterator it = PlayerHandler::begin(); it != PlayerHandler::end(); ++it)
+	{
+		if (it)
+			ResetPlayerDataStruct(*it);
+	}
+
 	RegisterPlayerRunCommandHookListener(this, 0, PLAYER_CONNECTED);
 }
 
 void BadUserCmdBlocker::Unload()
 {
 	RemovePlayerRunCommandHookListener(this);
-
-	PLAYERS_LOOP_RUNTIME
-	{
-		ResetPlayerDataStruct(ph->playerClass);
-	}
-	END_PLAYERS_LOOP
 }
 
 PlayerRunCommandRet BadUserCmdBlocker::PlayerRunCommandCallback(NczPlayer* player, void* pCmd, void* old_cmd)
@@ -68,17 +68,10 @@ PlayerRunCommandRet BadUserCmdBlocker::PlayerRunCommandCallback(NczPlayer* playe
 		pInfo->m_tick_status = IN_RESET;
 
 	bool isDead = true;
-	void* const player_info = player->GetPlayerInfo();
+	SourceSdk::IPlayerInfo * const player_info = player->GetPlayerInfo();
 	if (player_info)
 	{
-		if (SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive)
-		{
-			isDead = static_cast<SourceSdk::IPlayerInfo_csgo*>(player_info)->IsDead();
-		}
-		else
-		{
-			isDead = static_cast<SourceSdk::IPlayerInfo*>(player_info)->IsDead();
-		}
+		isDead = player_info->IsDead();
 	}
 
 	if (isDead || pInfo->m_prev_dead || Plat_FloatTime() <= pInfo->m_detected_time)

@@ -39,43 +39,35 @@ void SetTransmitHookListener::HookSetTransmit(SourceSdk::edict_t const * const e
 	Assert(Helpers::isValidEdict(ent));
 	void* unk = ent->m_pUnk;
 
-	HookInfo info(unk, ConfigManager::GetInstance()->GetVirtualFunctionId("settransmit"), (DWORD)nSetTransmit);
+	HookInfo info(unk, ConfigManager::GetInstance()->vfid_settransmit, (DWORD)nSetTransmit);
 	HookGuard::GetInstance()->VirtualTableHook(info);
 
 	//DebugMessage(basic_string("Hooked SetTransmit of entity classname ").append(ent->GetClassName()));
 }
 
 #ifdef GNUC
-void HOOKFN_INT SetTransmitHookListener::nSetTransmit(void * const This, SourceSdk::CCheckTransmitInfo const * const pInfo, bool const bAlways)
+void HOOKFN_INT SetTransmitHookListener::nSetTransmit(void * const This, SourceSdk::CCheckTransmitInfo * pInfo, bool bAlways)
 #else
-void HOOKFN_INT SetTransmitHookListener::nSetTransmit(void * const This, void * const, SourceSdk::CCheckTransmitInfo const * const pInfo, bool const bAlways)
+void HOOKFN_INT SetTransmitHookListener::nSetTransmit(void * const This, void * const, SourceSdk::CCheckTransmitInfo * pInfo, bool bAlways)
 #endif
 {
-	PlayerHandler const * const pplayer = NczPlayerManager::GetInstance()->GetPlayerHandlerByBasePlayer(This);
-	if (pplayer->status > INVALID)
+	if (!bAlways)
 	{
-		SourceSdk::edict_t* const pEdict_sender = pplayer->playerClass->GetEdict();
-		//Assert(Helpers::isValidEdict(pEdict_sender));
-
-		SourceSdk::edict_t* const pEdict_receiver = *pInfo;
-		Assert(Helpers::isValidEdict(pEdict_receiver));
-
-		if (Helpers::IndexOfEdict(pEdict_receiver) != AutoTVRecord::GetInstance()->GetSlot())
+		NczPlayerManager const * const inst = NczPlayerManager::GetInstance();
+		PlayerHandler::const_iterator pplayer = inst->GetPlayerHandlerByBasePlayer(This);
+		if (pplayer > INVALID)
 		{
+			SourceSdk::edict_t const * const pEdict_sender = pplayer->GetEdict();
+			//Assert(Helpers::isValidEdict(pEdict_sender));
+
+			SourceSdk::edict_t const * const pEdict_receiver = *pInfo;
+			Assert(Helpers::isValidEdict(pEdict_receiver));
 
 			if (pEdict_sender != pEdict_receiver)
 			{
 				TransmitListenersListT::elem_t* it = m_listeners.GetFirst();
 
-				int maxclients;
-				if (SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive)
-				{
-					maxclients = static_cast<SourceSdk::CGlobalVars_csgo*>(SourceSdk::InterfacesProxy::Call_GetGlobalVars())->maxClients;
-				}
-				else
-				{
-					maxclients = static_cast<SourceSdk::CGlobalVars*>(SourceSdk::InterfacesProxy::Call_GetGlobalVars())->maxClients;
-				}
+				int const maxclients = inst->GetMaxIndex();
 
 				if (Helpers::IndexOfEdict(pEdict_sender) <= maxclients)
 				{
@@ -103,7 +95,7 @@ void HOOKFN_INT SetTransmitHookListener::nSetTransmit(void * const This, void * 
 		}
 	}
 	SetTransmit_t gpOldFn;
-	*(uint32_t*)&(gpOldFn) = HookGuard::GetInstance()->GetOldFunction(This, ConfigManager::GetInstance()->GetVirtualFunctionId("settransmit"));
+	*(uint32_t*)&(gpOldFn) = HookGuard::GetInstance()->GetOldFunction(This, ConfigManager::GetInstance()->vfid_settransmit);
 	gpOldFn(This, pInfo, bAlways);
 }
 

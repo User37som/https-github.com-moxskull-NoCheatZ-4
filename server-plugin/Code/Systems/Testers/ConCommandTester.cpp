@@ -40,6 +40,12 @@ void ConCommandTester::Init()
 
 void ConCommandTester::Load()
 {
+	for (PlayerHandler::const_iterator it = PlayerHandler::begin(); it != PlayerHandler::end(); ++it)
+	{
+		if (it)
+			ResetPlayerDataStruct(*it);
+	}
+
 	AddCommandInfo("ai_test_los", false);
 	AddCommandInfo("changelevel", false, true);
 	AddCommandInfo("cl_fullupdate", false);
@@ -113,13 +119,6 @@ void ConCommandTester::Load()
 void ConCommandTester::Unload()
 {
 	m_commands_list.RemoveAll();
-
-	PLAYERS_LOOP_RUNTIME
-	{
-		ResetPlayerDataStruct(ph->playerClass);
-	}
-	END_PLAYERS_LOOP
-
 	ConCommandHookListener::RemoveConCommandHookListener(this);
 }
 

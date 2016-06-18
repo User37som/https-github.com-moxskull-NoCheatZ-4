@@ -80,10 +80,16 @@
 	W -> Is a read/write variable.
 */
 
+/*
 #define MT_R_STATIC static const  // Must be atomic, currently it isn't
 #define ST_R_STATIC static const
 #define MT_W_STATIC static // Must be atomic, currently it isn't
 #define ST_W_STATIC static
+*/
+#define MT_R_STATIC
+#define ST_R_STATIC
+#define MT_W_STATIC
+#define ST_W_STATIC
 
 #ifndef MAGICVALUES_H
 #	include "MagicValues.h"

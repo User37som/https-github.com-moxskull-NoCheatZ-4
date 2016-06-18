@@ -24,6 +24,7 @@
 
 #include "plugin.h"
 #include "Systems/ConfigManager.h"
+#include "Systems/Logger.h"
 
 /////////////////////////////////////////////////////////////////////////
 // PlayerRunCommandHookListener
@@ -52,7 +53,7 @@ void PlayerRunCommandHookListener::HookPlayerRunCommand(NczPlayer const * const 
 	Assert(Helpers::isValidEdict(player->GetEdict()));
 	SourceSdk::IServerUnknown* unk = player->GetEdict()->m_pUnk;
 
-	HookInfo info(unk, ConfigManager::GetInstance()->GetVirtualFunctionId("playerruncommand"), (DWORD)nPlayerRunCommand);
+	HookInfo info(unk, ConfigManager::GetInstance()->vfid_playerruncommand, (DWORD)nPlayerRunCommand);
 	HookGuard::GetInstance()->VirtualTableHook(info);
 }
 
@@ -72,24 +73,19 @@ void PlayerRunCommandHookListener::nPlayerRunCommand(void * const This, void * c
 void HOOKFN_INT PlayerRunCommandHookListener::nPlayerRunCommand(void* This, void*, void * const pCmd, IMoveHelper const * const pMoveHelper)
 #endif
 {
-	PlayerHandler const * const ph = NczPlayerManager::GetInstance()->GetPlayerHandlerByBasePlayer(This);
+	PlayerHandler::const_iterator ph = NczPlayerManager::GetInstance()->GetPlayerHandlerByBasePlayer(This);
 	PlayerRunCommandRet ret = CONTINUE;
 	 
-	/*if (ph->status == BOT) // Bots don't call PlayerRunCommand ... only the SourceTV does but there is no purpose to store this for the tv.
+	if(ph > PLAYER_CONNECTING)
 	{
-		memcpy(&m_lastCUserCmd[ph->playerClass->GetIndex()], pCmd, sizeof(SourceSdk::CUserCmd_csgo));
-		printf("%s\n", ph->playerClass->GetName());
-	}
-	else */if(ph->status > PLAYER_CONNECTING)
-	{
-		SourceSdk::CUserCmd_csgo& old_cmd = m_lastCUserCmd[ph->playerClass->GetIndex()];
+		SourceSdk::CUserCmd_csgo& old_cmd = m_lastCUserCmd[ph->GetIndex()];
 
 		ListenersListT::elem_t* it = m_listeners.GetFirst();
 		while (it != nullptr)
 		{
-			if (ph->status >= it->m_value.filter)
+			if (ph >= it->m_value.filter)
 			{
-				ret = it->m_value.listener->PlayerRunCommandCallback(ph->playerClass, pCmd, &old_cmd);
+				ret = it->m_value.listener->PlayerRunCommandCallback(ph, pCmd, &old_cmd);
 				if (ret > CONTINUE) break;
 			}
 			it = it->m_next;
@@ -105,16 +101,20 @@ void HOOKFN_INT PlayerRunCommandHookListener::nPlayerRunCommand(void* This, void
 
 		if (SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive)
 		{
-			static_cast<SourceSdk::CUserCmd_csgo*>(pCmd)->random_seed = std::rand() & std::numeric_limits<int>::max();
+			static_cast<SourceSdk::CUserCmd_csgo*>(pCmd)->random_seed = (int)std::rand();
 		}
 		else
 		{
-			static_cast<SourceSdk::CUserCmd*>(pCmd)->random_seed = std::rand() & std::numeric_limits<int>::max();
+			static_cast<SourceSdk::CUserCmd*>(pCmd)->random_seed = (int)std::rand();
 		}
 
 		ST_W_STATIC PlayerRunCommand_t gpOldFn;
-		*(DWORD*)&(gpOldFn) = HookGuard::GetInstance()->GetOldFunction(This, ConfigManager::GetInstance()->GetVirtualFunctionId("playerruncommand"));
+		*(DWORD*)&(gpOldFn) = HookGuard::GetInstance()->GetOldFunction(This, ConfigManager::GetInstance()->vfid_playerruncommand);
 		gpOldFn(This, pCmd, pMoveHelper);
+	}
+	else
+	{
+		DebugMessage("Blocked CUserCmd");
 	}
 }
 

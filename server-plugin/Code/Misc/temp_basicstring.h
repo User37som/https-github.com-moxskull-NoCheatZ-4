@@ -7,6 +7,67 @@
 
 #include "Containers/utlvector.h"
 
+#define STRING_POOL_SIZE 128
+#define AVERAGE_STRING_SIZE 32
+
+/*
+Use a pool of pointers to prevent re-allocations.
+*/
+
+template <typename pod>
+struct ALIGN4 memory_info
+{
+	size_t m_capacity;
+	pod * m_ptr;
+	bool m_in_use;
+
+	memory_info() : m_capacity(0), m_ptr(nullptr), m_in_use(false)
+	{
+	}
+
+	memory_info(memory_info const & other) = delete;
+	memory_info & operator= (memory_info const & other) = delete;
+
+} ALIGN4_POST;
+
+template <typename pod>
+class string_memory_pool
+{
+	
+private:
+	memory_info<pod> m_alloc_pool[STRING_POOL_SIZE]; // list of free memory actually not removed from heap
+	size_t m_pool_elements;
+
+public:
+
+	string_memory_pool() : m_alloc_pool(), m_pool_elements(0)
+	{
+		memset(m_alloc_pool, 0, sizeof(memory_info<pod>) * STRING_POOL_SIZE);
+	}
+
+	~string_memory_pool()
+	{
+		size_t index = 0;
+		do
+		{
+			if (m_alloc_pool[index].m_in_use)
+			{
+				delete[] m_alloc_pool[index].m_ptr;
+			}
+		} while (++index < STRING_POOL_SIZE);
+	}
+
+public:
+	// True if the pool can store a free pointer, so the string must call DeclareFreeMemory instead of delete[]
+	inline bool StringShouldNotDealloc() const;
+
+	// Add a free pointer to the pool.
+	void DeclareFreeMemory(pod * ptr, size_t capacity);
+
+	// Re-use a free pointer if we have capacity, otherwise return nullptr. The pool will delete element if there is a match.
+	pod * GetFreeMemory(size_t target_min_capacity);
+};
+
 template <typename pod = char>
 class String
 {
@@ -18,21 +79,53 @@ public:
 
 private:
 
+	pod * m_alloc;
+	size_t m_size;
+	size_t m_capacity;
+
+private:
+	static string_memory_pool<pod> m_pool;
+
+private:
+
+	inline pod * Alloc(size_t capacity)
+	{
+		pod * t = m_pool.GetFreeMemory(capacity);
+		if(t == nullptr) return new pod[capacity];
+		else return t;
+	}
+
+	inline void Dealloc()
+	{
+		if (m_alloc)
+		{
+			if (m_pool.StringShouldNotDealloc())
+			{
+				m_pool.DeclareFreeMemory(m_alloc, m_capacity);
+			}
+			else
+			{
+				delete[] m_alloc;
+			}
+			m_alloc = nullptr;
+		}
+	}
+
 	/*  -need- always contains the zero char. */
 	void Grow(size_t need, bool copy = true)
 	{
 		if (need <= m_capacity)
 			return;
 
-		size_t new_capacity = 32;
+		size_t new_capacity = AVERAGE_STRING_SIZE;
 		while (new_capacity < need) new_capacity <<= 1;
 
-		pod *n = new pod[new_capacity];
+		pod * n = Alloc(new_capacity);
 		
 		if (m_alloc)
 		{
 			if(copy) memcpy(n, m_alloc, m_size * sizeof(pod));
-			delete[] m_alloc;
+			Dealloc();
 		}
 		else
 		{
@@ -44,11 +137,6 @@ private:
 		m_capacity = new_capacity;
 	}
 
-	pod * m_alloc;
-	size_t m_size;
-	size_t m_capacity;
-
-private:
 	inline size_t autolen(pod const * string) const
 	{
 		return strlen(string);
@@ -73,8 +161,7 @@ public:
 
 	~String()
 	{
-		if (m_alloc)
-			delete[] m_alloc;
+		Dealloc();
 #ifdef DEBUG
 		memset(this, 0xCCCCCCCC, sizeof(String));
 #endif
@@ -445,6 +532,49 @@ inline wchar_t const * String<wchar_t>::autoempty() const
 
 typedef String<char> basic_string;
 typedef String<wchar_t> basic_wstring;
+
+template <typename pod>
+inline bool string_memory_pool<pod>::StringShouldNotDealloc() const
+{
+	return m_pool_elements != STRING_POOL_SIZE;
+}
+
+template <typename pod>
+void string_memory_pool<pod>::DeclareFreeMemory(pod * ptr, size_t capacity)
+{
+	size_t index = 0;
+	do
+	{
+		if (!m_alloc_pool[index].m_in_use)
+		{
+			m_alloc_pool[index].m_capacity = capacity;
+			m_alloc_pool[index].m_ptr = ptr;
+			m_alloc_pool[index].m_in_use = true;
+			++m_pool_elements;
+			return;
+		}
+	} while (++index < STRING_POOL_SIZE);
+}
+
+template <typename pod>
+pod * string_memory_pool<pod>::GetFreeMemory(size_t target_min_capacity)
+{
+	if (m_pool_elements > 0)
+	{
+		size_t index = 0;
+		do
+		{
+			if (m_alloc_pool[index].m_in_use && m_alloc_pool[index].m_capacity >= target_min_capacity)
+			{
+				m_alloc_pool[index].m_in_use = false;
+				--m_pool_elements;
+				return m_alloc_pool[index].m_ptr;
+			}
+		} while (++index < STRING_POOL_SIZE);
+	}
+
+	return nullptr;
+}
 
 template <typename pod>
 void SplitString(String<pod> const & string, pod const delim, CUtlVector < String<pod> > & out)

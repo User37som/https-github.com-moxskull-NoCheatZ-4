@@ -59,7 +59,7 @@ void ValidationTester::SetValidated(NczPlayer const * const player)
 
 void ValidationTester::ProcessPlayerTestOnTick(NczPlayer* const player, float const curtime)
 {
-	if(!IsActive() || !SteamGameServer_BSecure()) return;
+	if(!SteamGameServer_BSecure()) return;
 	if(GetPlayerDataStruct(player)->b)
 		return;
 
@@ -71,6 +71,12 @@ void ValidationTester::ProcessPlayerTestOnTick(NczPlayer* const player, float co
 
 void ValidationTester::Load()
 {
+	for (PlayerHandler::const_iterator it = PlayerHandler::begin(); it != PlayerHandler::end(); ++it)
+	{
+		if (it)
+			ResetPlayerDataStruct(*it);
+	}
+
 	OnTickListener::RegisterOnTickListener(this);
 	SourceSdk::InterfacesProxy::GetGameEventManager()->AddListener(this, "player_disconnect", true);
 }
@@ -79,12 +85,6 @@ void ValidationTester::Unload()
 {
 	OnTickListener::RemoveOnTickListener(this);
 	SourceSdk::InterfacesProxy::GetGameEventManager()->RemoveListener(this);
-
-	PLAYERS_LOOP_RUNTIME
-	{
-		ResetPlayerDataStruct(ph->playerClass);
-	}
-	END_PLAYERS_LOOP
 }
 
 bool ValidationTester::JoinCallback(NczPlayer const * const player)
@@ -129,15 +129,15 @@ void ValidationTester::ProcessOnTick(float const curtime)
 	PendingValidationsT::elem_t* it = m_pending_validations.GetFirst();
 	while (it != nullptr)
 	{
-		PlayerHandler const * const ph = NczPlayerManager::GetInstance()->GetPlayerHandlerBySteamID(it->m_value);
+		PlayerHandler::const_iterator ph = NczPlayerManager::GetInstance()->GetPlayerHandlerBySteamID(it->m_value);
 
-		if (ph->status == INVALID || ph->playerClass->GetPlayerInfo() == nullptr)
+		if (ph == INVALID || ph->GetPlayerInfo() == nullptr)
 		{
 			it = it->m_next;
 			continue;
 		}
 
-		SetValidated(ph->playerClass);
+		SetValidated(ph);
 		it = m_pending_validations.Remove(it);
 	}
 }

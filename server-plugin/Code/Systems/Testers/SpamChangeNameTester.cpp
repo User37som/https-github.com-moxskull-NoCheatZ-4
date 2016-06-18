@@ -44,11 +44,12 @@ void SpamChangeNameTester::Init()
 
 void SpamChangeNameTester::Load()
 {
-	PLAYERS_LOOP_RUNTIME
+	for (PlayerHandler::const_iterator it = PlayerHandler::begin(); it != PlayerHandler::end(); ++it)
 	{
-		ResetPlayerDataStruct(ph->playerClass);
+		if (it)
+			ResetPlayerDataStruct(*it);
 	}
-	END_PLAYERS_LOOP
+
 	SourceSdk::InterfacesProxy::GetGameEventManager()->AddListener(this, "player_changename", true);
 	OnTickListener::RegisterOnTickListener(this);
 }
@@ -57,11 +58,6 @@ void SpamChangeNameTester::Unload()
 {
 	OnTickListener::RemoveOnTickListener(this);
 	SourceSdk::InterfacesProxy::GetGameEventManager()->RemoveListener(this);
-	PLAYERS_LOOP_RUNTIME
-	{
-		ResetPlayerDataStruct(ph->playerClass);
-	}
-	END_PLAYERS_LOOP
 }
 
 bool IsNameValid(const char* const o_name)
@@ -96,42 +92,36 @@ bool IsNameValid(const char* const o_name)
 
 void SpamChangeNameTester::FireGameEvent(SourceSdk::IGameEvent* ev)
 {
-	if(!IsActive()) return;
+	PlayerHandler::const_iterator ph = NczPlayerManager::GetInstance()->GetPlayerHandlerByUserId(ev->GetInt("userid", 0));
 
-	PlayerHandler const * const ph = NczPlayerManager::GetInstance()->GetPlayerHandlerByUserId(ev->GetInt("userid", 0));
+	if(ph < PLAYER_CONNECTED) return;
 
-	if(ph->status < PLAYER_CONNECTED) return;
-
-	ChangeNameInfo* const pInfo = GetPlayerDataStruct(ph->playerClass);
+	ChangeNameInfo* const pInfo = GetPlayerDataStruct(ph);
 
 	++(pInfo->namechange_count);
 }
 
 void SpamChangeNameTester::ProcessOnTick(float const curtime)
 {
-	if(!IsActive()) return;
-
-	PLAYERS_LOOP_RUNTIME
+	for (PlayerHandler::const_iterator ph = PlayerHandler::begin(); ph != PlayerHandler::end(); ++ph)
 	{
-		if(ph->status < PLAYER_CONNECTED) continue;
+		if(ph < PLAYER_CONNECTED) continue;
 
-		ChangeNameInfo* const pInfo = GetPlayerDataStruct(ph->playerClass);
+		ChangeNameInfo* const pInfo = GetPlayerDataStruct(ph);
 
 		{
 			if(pInfo->namechange_count >= 5)
 			if (pInfo->next_namechange_test < curtime)
 			{
-				ph->playerClass->Ban("Banned for namechange spamming", 10);
+				ph->Ban("Banned for namechange spamming", 10);
 			}
-			ResetPlayerDataStruct(ph->playerClass);
+			ResetPlayerDataStruct(ph);
 		}
 	}
-	END_PLAYERS_LOOP
 }
 
 void SpamChangeNameTester::ClientConnect( bool *bAllowConnect, SourceSdk::edict_t const * const pEntity, const char *pszName, const char *pszAddress, char *reject, int maxrejectlen )
 {
-	if(!IsActive()) return;
 	if(!*bAllowConnect) return;
 
 	if(!IsNameValid(pszName))

@@ -43,6 +43,9 @@
 #include "Systems/OnTickListener.h"
 #include "Systems/TimerListener.h"
 
+template <typename pod>
+string_memory_pool<pod> String<pod>::m_pool;
+
 static void* __CreatePlugin_interface()
 { 
 	CNoCheatZPlugin::CreateInstance();
@@ -224,28 +227,32 @@ bool CNoCheatZPlugin::Load(SourceSdk::CreateInterfaceFn _interfaceFactory, Sourc
 
 	for(int i = 1; i < MAX_PLAYERS; ++i)
 	{
-		PlayerHandler const * const ph = NczPlayerManager::GetInstance()->GetPlayerHandlerByIndex(i);
-		if(ph->status >= BOT)
+		PlayerHandler::const_iterator ph = NczPlayerManager::GetInstance()->GetPlayerHandlerByIndex(i);
+		if(ph >= BOT)
 		{
-			HookEntity(ph->playerClass->GetEdict());
-			WeaponHookListener::HookWeapon(ph->playerClass);
+			HookEntity(ph->GetEdict());
+			WeaponHookListener::HookWeapon(ph);
 
-			if(ph->status >= PLAYER_CONNECTED)
+			if(ph >= PLAYER_CONNECTED)
 			{
-				HookBasePlayer(ph->playerClass);
-				ValidationTester::GetInstance()->ResetPlayerDataStruct(ph->playerClass);
-				JumpTester::GetInstance()->ResetPlayerDataStruct(ph->playerClass);
-				EyeAnglesTester::GetInstance()->ResetPlayerDataStruct(ph->playerClass);
-				ConVarTester::GetInstance()->ResetPlayerDataStruct(ph->playerClass);
-				ShotTester::GetInstance()->ResetPlayerDataStruct(ph->playerClass);
-				SpeedTester::GetInstance()->ResetPlayerDataStruct(ph->playerClass);
-				ConCommandTester::GetInstance()->ResetPlayerDataStruct(ph->playerClass);
-				AntiFlashbangBlocker::GetInstance()->ResetPlayerDataStruct(ph->playerClass);
-				AntiSmokeBlocker::GetInstance()->ResetPlayerDataStruct(ph->playerClass);
-				BadUserCmdBlocker::GetInstance()->ResetPlayerDataStruct(ph->playerClass);
-				WallhackBlocker::GetInstance()->ResetPlayerDataStruct(ph->playerClass);
-				SpamChangeNameTester::GetInstance()->ResetPlayerDataStruct(ph->playerClass);
-				RadarHackBlocker::GetInstance()->ResetPlayerDataStruct(ph->playerClass);
+				HookBasePlayer(ph);
+
+				int const index = ph.GetIndex();
+
+				// FIXME : They are called twice ...
+				ValidationTester::GetInstance()->ResetPlayerDataStruct(index);
+				JumpTester::GetInstance()->ResetPlayerDataStruct(index);
+				EyeAnglesTester::GetInstance()->ResetPlayerDataStruct(index);
+				ConVarTester::GetInstance()->ResetPlayerDataStruct(index);
+				ShotTester::GetInstance()->ResetPlayerDataStruct(index);
+				SpeedTester::GetInstance()->ResetPlayerDataStruct(index);
+				ConCommandTester::GetInstance()->ResetPlayerDataStruct(index);
+				AntiFlashbangBlocker::GetInstance()->ResetPlayerDataStruct(index);
+				AntiSmokeBlocker::GetInstance()->ResetPlayerDataStruct(index);
+				BadUserCmdBlocker::GetInstance()->ResetPlayerDataStruct(index);
+				WallhackBlocker::GetInstance()->ResetPlayerDataStruct(index);
+				SpamChangeNameTester::GetInstance()->ResetPlayerDataStruct(index);
+				RadarHackBlocker::GetInstance()->ResetPlayerDataStruct(index);
 			}
 		}
 	}
@@ -397,12 +404,12 @@ void CNoCheatZPlugin::ClientActive(SourceSdk::edict_t *pEntity )
 
 	NczPlayerManager::GetInstance()->ClientActive(pEntity);
 
-	PlayerHandler const * const ph = NczPlayerManager::GetInstance()->GetPlayerHandlerByEdict(pEntity);
-	if(ph->status >= PLAYER_CONNECTED) HookBasePlayer(ph->playerClass);
-	if(ph->status >= BOT)
+	PlayerHandler::const_iterator ph = NczPlayerManager::GetInstance()->GetPlayerHandlerByEdict(pEntity);
+	if(ph >= PLAYER_CONNECTED) HookBasePlayer(ph);
+	if(ph >= BOT)
 	{
-		WeaponHookListener::HookWeapon(ph->playerClass);
-		HookEntity(ph->playerClass->GetEdict());
+		WeaponHookListener::HookWeapon(ph);
+		HookEntity(ph->GetEdict());
 	}
 }
 
@@ -422,7 +429,7 @@ void CNoCheatZPlugin::ClientDisconnect(SourceSdk::edict_t *pEntity )
 //---------------------------------------------------------------------------------
 void CNoCheatZPlugin::ClientPutInServer(SourceSdk::edict_t *pEntity, char const *playername )
 {
-	SlotStatus stat = NczPlayerManager::GetInstance()->GetPlayerHandlerByEdict(pEntity)->status;
+	SlotStatus stat = NczPlayerManager::GetInstance()->GetPlayerHandlerByEdict(pEntity);
 	if (stat == INVALID)
 	{
 		ValidationTester::GetInstance()->ResetPlayerDataStruct(pEntity);
@@ -454,7 +461,7 @@ SourceSdk::PLUGIN_RESULT CNoCheatZPlugin::ClientConnect( bool *bAllowConnect, So
 #define MAX_CHARS_NAME 32
 
 	NczPlayerManager::GetInstance()->ClientConnect(pEntity);
-	NczPlayer* player = NczPlayerManager::GetInstance()->GetPlayerHandlerByEdict(pEntity)->playerClass;
+	NczPlayer* player = NczPlayerManager::GetInstance()->GetPlayerHandlerByEdict(pEntity);
 
 	SpamConnectTester::GetInstance()->ClientConnect(bAllowConnect, pEntity, pszName, pszAddress, reject, maxrejectlen);
 	SpamChangeNameTester::GetInstance()->ClientConnect(bAllowConnect, pEntity, pszName, pszAddress, reject, maxrejectlen);
@@ -495,14 +502,14 @@ SourceSdk::PLUGIN_RESULT CNoCheatZPlugin::ClientCommand(SourceSdk::edict_t *pEnt
 		return SourceSdk::PLUGIN_CONTINUE;
 	}
 
-	PlayerHandler const * const ph = NczPlayerManager::GetInstance()->GetPlayerHandlerByEdict(pEntity);
-	if(ph->status >= PLAYER_CONNECTED)
+	PlayerHandler::const_iterator ph = NczPlayerManager::GetInstance()->GetPlayerHandlerByEdict(pEntity);
+	if(ph >= PLAYER_CONNECTED)
 	{
-		if(ConCommandTester::GetInstance()->TestPlayerCommand(ph->playerClass, args.GetCommandString()))
+		if(ConCommandTester::GetInstance()->TestPlayerCommand(ph, args.GetCommandString()))
 			return SourceSdk::PLUGIN_STOP;
 		if(stricmp(args[0], "joingame") == 0 || stricmp(args[0], "jointeam") == 0 || stricmp(args[0], "joinclass") == 0)
 		{
-			if(ValidationTester::GetInstance()->JoinCallback(ph->playerClass))
+			if(ValidationTester::GetInstance()->JoinCallback(ph))
 				return SourceSdk::PLUGIN_STOP;
 		}
 	}
@@ -526,10 +533,10 @@ SourceSdk::PLUGIN_RESULT CNoCheatZPlugin::NetworkIDValidated( const char *pszUse
 //---------------------------------------------------------------------------------
 void CNoCheatZPlugin::OnQueryCvarValueFinished(SourceSdk::QueryCvarCookie_t iCookie, SourceSdk::edict_t *pPlayerEntity, SourceSdk::EQueryCvarValueStatus eStatus, const char *pCvarName, const char *pCvarValue )
 {
-	PlayerHandler const * const ph = NczPlayerManager::GetInstance()->GetPlayerHandlerByEdict(pPlayerEntity);
-	if(!ConVarTester::GetInstance()->CanProcessThisSlot(ph->status)) return;
+	PlayerHandler::const_iterator ph = NczPlayerManager::GetInstance()->GetPlayerHandlerByEdict(pPlayerEntity);
+	if(!ConVarTester::GetInstance()->CanProcessThisSlot(ph)) return;
 
-	ConVarTester::GetInstance()->OnQueryCvarValueFinished(ph->playerClass, eStatus, pCvarName, pCvarValue);
+	ConVarTester::GetInstance()->OnQueryCvarValueFinished(ph, eStatus, pCvarName, pCvarValue);
 }
 
 void CNoCheatZPlugin::OnEdictAllocated(SourceSdk::edict_t *edict )

@@ -77,8 +77,20 @@ bool GetIniAttributeValue(std::ifstream & file, basic_string const & root, basic
 
 ConfigManager::ConfigManager() :
 	singleton_class(),
-	m_vfuncs(),
-	content_version(1)
+	content_version(1),
+	m_playerdataclass(""),
+	m_smoke_radius(0.0f),
+	m_innersmoke_radius_sqr(0.0f),
+	m_smoke_timetobang(0.0f),
+	m_smoke_time(0.0f),
+	vfid_getdatadescmap(0),
+	vfid_settransmit(0),
+	vfid_mhgroundentity(0),
+	vfid_weaponequip(0),
+	vfid_weapondrop(0),
+	vfid_playerruncommand(0),
+	vfid_dispatch(0),
+	vfid_thinkpost(0)
 {
 
 }
@@ -102,32 +114,30 @@ bool ConfigManager::LoadConfig()
 		if (!GetIniAttributeValue(file, "CONFIG", "config_version", value)) return false;
 		if (atoi(value.c_str()) == content_version)
 		{
-			m_vfuncs.RemoveAll();
-
 			// load virtual functions id
 			if(!GetIniAttributeValue(file, gamename, "getdatadescmap" ATTRIB_POST, value)) return false;
-			m_vfuncs.AddToTail(virtual_function("getdatadescmap", atoi(value.c_str())));
+			vfid_getdatadescmap = atoi(value.c_str());
 
 			if (!GetIniAttributeValue(file, gamename, "settransmit" ATTRIB_POST, value)) return false;
-			m_vfuncs.AddToTail(virtual_function("settransmit", atoi(value.c_str())));
+			vfid_settransmit = atoi(value.c_str());
 
 			if (!GetIniAttributeValue(file, gamename, "mhgroundentity" ATTRIB_POST, value)) return false;
-			m_vfuncs.AddToTail(virtual_function("mhgroundentity", atoi(value.c_str())));
+			vfid_mhgroundentity = atoi(value.c_str());
 
 			if (!GetIniAttributeValue(file, gamename, "weaponequip" ATTRIB_POST, value)) return false;
-			m_vfuncs.AddToTail(virtual_function("weaponequip", atoi(value.c_str())));
+			vfid_weaponequip = atoi(value.c_str());
 
 			if (!GetIniAttributeValue(file, gamename, "weapondrop" ATTRIB_POST, value)) return false;
-			m_vfuncs.AddToTail(virtual_function("weapondrop", atoi(value.c_str())));
+			vfid_weapondrop = atoi(value.c_str());
 
 			if (!GetIniAttributeValue(file, gamename, "playerruncommand" ATTRIB_POST, value)) return false;
-			m_vfuncs.AddToTail(virtual_function("playerruncommand", atoi(value.c_str())));
+			vfid_playerruncommand = atoi(value.c_str());
 
 			if (!GetIniAttributeValue(file, gamename, "dispatch" ATTRIB_POST, value)) return false;
-			m_vfuncs.AddToTail(virtual_function("dispatch", atoi(value.c_str())));
+			vfid_dispatch = atoi(value.c_str());
 
 			if (!GetIniAttributeValue(file, gamename, "thinkpost" ATTRIB_POST, value)) return false;
-			m_vfuncs.AddToTail(virtual_function("thinkpost", atoi(value.c_str())));
+			vfid_thinkpost = atoi(value.c_str());
 
 			// load some strings
 
@@ -173,15 +183,4 @@ bool ConfigManager::LoadConfig()
 	}
 
 	return false;
-}
-
-int ConfigManager::GetVirtualFunctionId(basic_string const & name)
-{
-	int pos = m_vfuncs.Find(name);
-	if (pos > -1)
-	{
-		return m_vfuncs[pos].m_vfid;
-	}
-	Assert(0 && "vfid not found");
-	return 0;
 }

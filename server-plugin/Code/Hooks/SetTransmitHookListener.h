@@ -25,7 +25,7 @@
 // CBaseCombatCharacter::SetTransmit(CCheckTransmitInfo*, bool)
 /////////////////////////////////////////////////////////////////////////
 
-typedef void (HOOKFN_EXT *SetTransmit_t)(void * const, SourceSdk::CCheckTransmitInfo const * const, bool const);
+typedef void (HOOKFN_EXT *SetTransmit_t)(void * const, SourceSdk::CCheckTransmitInfo *, bool);
 
 class SetTransmitHookListener
 {
@@ -49,9 +49,9 @@ protected:
 
 private:
 #ifdef GNUC
-	static void HOOKFN_INT nSetTransmit(void * const This, SourceSdk::CCheckTransmitInfo const * const, bool const);
+	static void HOOKFN_INT nSetTransmit(void * const This, SourceSdk::CCheckTransmitInfo *, bool);
 #else
-	static void HOOKFN_INT nSetTransmit(void * const This, void* const, SourceSdk::CCheckTransmitInfo const * const, bool const);
+	static void HOOKFN_INT nSetTransmit(void * const This, void* const, SourceSdk::CCheckTransmitInfo *, bool);
 #endif
 };
 

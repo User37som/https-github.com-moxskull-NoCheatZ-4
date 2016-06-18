@@ -46,18 +46,18 @@ void ShotTester::Init()
 
 void ShotTester::Load()
 {
+	for (PlayerHandler::const_iterator it = PlayerHandler::begin(); it != PlayerHandler::end(); ++it)
+	{
+		if (it)
+			ResetPlayerDataStruct(*it);
+	}
+
 	PlayerRunCommandHookListener::RegisterPlayerRunCommandHookListener(this, 4);
 }
 
 void ShotTester::Unload()
 {
 	PlayerRunCommandHookListener::RemovePlayerRunCommandHookListener(this);
-
-	PLAYERS_LOOP_RUNTIME
-	{
-		ResetPlayerDataStruct(ph->playerClass);
-	}
-	END_PLAYERS_LOOP
 }
 
 void TriggerStat(ShotStatHandlerT* handler, float up_time, float down_time, size_t clicks)

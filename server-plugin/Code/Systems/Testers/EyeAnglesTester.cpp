@@ -42,6 +42,12 @@ void EyeAnglesTester::Init()
 
 void EyeAnglesTester::Load()
 {
+	for (PlayerHandler::const_iterator it = PlayerHandler::begin(); it != PlayerHandler::end(); ++it)
+	{
+		if (it)
+			ResetPlayerDataStruct(*it);
+	}
+
 	SourceSdk::InterfacesProxy::GetGameEventManager()->AddListener(this, "round_end", true);
 	PlayerRunCommandHookListener::RegisterPlayerRunCommandHookListener(this, 2);
 }
@@ -50,12 +56,6 @@ void EyeAnglesTester::Unload()
 {
 	PlayerRunCommandHookListener::RemovePlayerRunCommandHookListener(this);
 	SourceSdk::InterfacesProxy::GetGameEventManager()->RemoveListener(this);
-
-	PLAYERS_LOOP_RUNTIME
-	{
-		ResetPlayerDataStruct(ph->playerClass);
-	}
-	END_PLAYERS_LOOP
 }
 
 PlayerRunCommandRet EyeAnglesTester::PlayerRunCommandCallback(NczPlayer * const player, void * const pCmd, void * const old_cmd)
@@ -136,10 +136,12 @@ PlayerRunCommandRet EyeAnglesTester::PlayerRunCommandCallback(NczPlayer * const 
 
 void EyeAnglesTester::FireGameEvent(SourceSdk::IGameEvent *ev) // round_end
 {
-	for(int index = 1; index < MAX_PLAYERS; ++index)
+	for (PlayerHandler::const_iterator ph = PlayerHandler::begin(); ph != PlayerHandler::end(); ++ph)
 	{
-		PlayerHandler const * const ph = NczPlayerManager::GetInstance()->GetPlayerHandlerByIndex(index);
-		if(ph->status > BOT) ++(GetPlayerDataStruct(ph->playerClass)->ignore_last);
+		if (ph >= PLAYER_CONNECTED)
+		{
+			++(GetPlayerDataStruct(ph.GetIndex())->ignore_last);
+		}
 	}
 }
 
