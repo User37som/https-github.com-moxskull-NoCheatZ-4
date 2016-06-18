@@ -7,3 +7,10 @@ nocheatz.VC.db
 UpgradeLog.htm
 *.vspx
 *.diagsession
+*.obj
+*.tlog
+*.pdb
+server-plugin/nocheatzX.map
+*.log
+*.vsp
+Performance1.psess

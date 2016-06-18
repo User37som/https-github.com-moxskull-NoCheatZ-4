@@ -337,9 +337,20 @@ void NczPlayerManager::Think()
 
 PlayerHandler::const_iterator NczPlayerManager::GetPlayerHandlerByBasePlayer(void * const BasePlayer) const
 {
-	SourceSdk::edict_t const * const ent = SourceSdk::InterfacesProxy::Call_BaseEntityToEdict(BasePlayer);
-	
-	return Helpers::isValidEdict(ent) ? &FullHandlersList[Helpers::IndexOfEdict(ent)] : PlayerHandler::end();
+	SourceSdk::edict_t * tEdict;
+	for (PlayerHandler::const_iterator it = PlayerHandler::begin(); it != PlayerHandler::end(); ++it)
+	{
+		if (it)
+		{
+			tEdict = it->GetEdict();
+			if (Helpers::isValidEdict(tEdict))
+			{
+				if (tEdict->GetUnknown() == BasePlayer) return it;
+			}
+		}
+	}
+
+	return PlayerHandler::end();
 }
 
 PlayerHandler::const_iterator NczPlayerManager::GetPlayerHandlerBySteamID(const char * steamid) const
