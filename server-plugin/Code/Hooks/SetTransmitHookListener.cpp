@@ -51,31 +51,23 @@ void HOOKFN_INT SetTransmitHookListener::nSetTransmit(void * const This, SourceS
 void HOOKFN_INT SetTransmitHookListener::nSetTransmit(void * const This, void * const, SourceSdk::CCheckTransmitInfo * pInfo, bool bAlways)
 #endif
 {
-	PlayerHandler::const_iterator pplayer = NczPlayerManager::GetInstance()->GetPlayerHandlerByBasePlayer(This);
-	if (pplayer > INVALID && !bAlways)
+	if (!bAlways)
 	{
-		SourceSdk::edict_t* const pEdict_sender = pplayer->GetEdict();
-		//Assert(Helpers::isValidEdict(pEdict_sender));
-
-		SourceSdk::edict_t* const pEdict_receiver = *pInfo;
-		Assert(Helpers::isValidEdict(pEdict_receiver));
-
-		if (Helpers::IndexOfEdict(pEdict_receiver) != AutoTVRecord::GetInstance()->GetSlot())
+		NczPlayerManager const * const inst = NczPlayerManager::GetInstance();
+		PlayerHandler::const_iterator pplayer = inst->GetPlayerHandlerByBasePlayer(This);
+		if (pplayer > INVALID)
 		{
+			SourceSdk::edict_t const * const pEdict_sender = pplayer->GetEdict();
+			//Assert(Helpers::isValidEdict(pEdict_sender));
+
+			SourceSdk::edict_t const * const pEdict_receiver = *pInfo;
+			Assert(Helpers::isValidEdict(pEdict_receiver));
 
 			if (pEdict_sender != pEdict_receiver)
 			{
 				TransmitListenersListT::elem_t* it = m_listeners.GetFirst();
 
-				int maxclients;
-				if (SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive)
-				{
-					maxclients = static_cast<SourceSdk::CGlobalVars_csgo*>(SourceSdk::InterfacesProxy::Call_GetGlobalVars())->maxClients;
-				}
-				else
-				{
-					maxclients = static_cast<SourceSdk::CGlobalVars*>(SourceSdk::InterfacesProxy::Call_GetGlobalVars())->maxClients;
-				}
+				int const maxclients = inst->GetMaxIndex();
 
 				if (Helpers::IndexOfEdict(pEdict_sender) <= maxclients)
 				{
