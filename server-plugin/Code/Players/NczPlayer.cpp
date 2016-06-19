@@ -410,7 +410,7 @@ void NczPlayer::Ban(const char * msg, int minutes)
 
 void NczPlayer::GetAbsOrigin(SourceSdk::Vector & out)
 {
-	if (GetPlayerInfo())
+	if (m_playerinfo)
 	{
 		SourceSdk::VectorCopy(m_playerinfo->GetAbsOrigin(), out);
 	}

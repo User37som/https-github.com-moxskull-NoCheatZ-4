@@ -102,13 +102,17 @@ enum WpnShotType
 	PISTOL
 };
 
+class NczPlayerManager;
+
 class ALIGN16 NczPlayer : private NoCopy
 {
+	friend NczPlayerManager;
+
 private:
 	int const m_index;
 	SourceSdk::edict_t * const m_edict;
 	SourceSdk::INetChannelInfo* m_channelinfo;
-	mutable SourceSdk::IPlayerInfo * m_playerinfo;
+	SourceSdk::IPlayerInfo * m_playerinfo;
 	float m_time_connected;
 
 public:
@@ -167,10 +171,6 @@ inline SourceSdk::edict_t * const NczPlayer::GetEdict() const
 
 inline SourceSdk::IPlayerInfo * const NczPlayer::GetPlayerInfo() const
 {
-	if (m_playerinfo == nullptr)
-	{
-		m_playerinfo = (SourceSdk::IPlayerInfo *)SourceSdk::InterfacesProxy::Call_GetPlayerInfo(m_edict);
-	}
 	return m_playerinfo;
 }
 
