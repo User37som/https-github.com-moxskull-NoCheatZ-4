@@ -91,13 +91,17 @@ void HOOKFN_INT PlayerRunCommandHookListener::nPlayerRunCommand(void* This, void
 			if (ph >= it->m_value.filter)
 			{
 				ret = it->m_value.listener->PlayerRunCommandCallback(ph, pCmd, &old_cmd);
+
 				if (ret > CONTINUE) break;
 			}
 			it = it->m_next;
 		}
 		
-		// memcpy but skip the virtual table pointer : https://github.com/L-EARN/NoCheatZ-4/issues/16#issuecomment-226697469
-		memcpy((char *)(&old_cmd) + sizeof(void *), (char *)pCmd + sizeof(void *), sizeof(SourceSdk::CUserCmd_csgo) - sizeof(void *));
+		if (ret == CONTINUE) // don't copy something we block or change ...
+		{
+			// memcpy but skip the virtual table pointer : https://github.com/L-EARN/NoCheatZ-4/issues/16#issuecomment-226697469
+			memcpy((char *)(&old_cmd) + sizeof(void *), (char *)pCmd + sizeof(void *), sizeof(SourceSdk::CUserCmd_csgo) - sizeof(void *));
+		}
 	}
 
 	if(ret < BLOCK)
