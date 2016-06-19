@@ -57,11 +57,11 @@ void ConVarTester::ProcessOnTick(float const curtime)
 	PlayerHandler::const_iterator ph = GetNextPlayer();
 	if(ph)
 	{
-		ProcessPlayerTest(ph);
+		ProcessPlayerTest(ph, curtime);
 	}
 }
 
-void ConVarTester::ProcessPlayerTest(PlayerHandler::const_iterator ph)
+void ConVarTester::ProcessPlayerTest(PlayerHandler::const_iterator ph, float const curtime)
 {
 	if (!IsActive()) return;
 	if (m_convars_rules.IsEmpty()) return;
@@ -70,7 +70,7 @@ void ConVarTester::ProcessPlayerTest(PlayerHandler::const_iterator ph)
 
 	if(req->isSent && !req->isReplyed)
 	{
-		if(Plat_FloatTime() - 30.0 > req->timeStart)
+		if(curtime - 30.0 > req->timeStart)
 		{
 			ph->Kick("ConVar request timed out");
 		}

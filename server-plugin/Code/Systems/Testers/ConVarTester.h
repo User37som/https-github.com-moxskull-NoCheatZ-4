@@ -133,7 +133,7 @@ public:
 	void OnQueryCvarValueFinished(PlayerHandler::const_iterator ph, SourceSdk::EQueryCvarValueStatus eStatus, const char *pCvarName, const char *pCvarValue);
 
 private:
-	void ProcessPlayerTest(PlayerHandler::const_iterator ph);
+	void ProcessPlayerTest(PlayerHandler::const_iterator ph, float const curtime);
 
 	void AddConvarRuleset(const char * name, const char * value, ConVarRuleT rule, bool safe = true);
 
