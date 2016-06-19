@@ -93,14 +93,14 @@ PlayerRunCommandRet ShotTester::PlayerRunCommandCallback(PlayerHandler::const_it
 
 	if(cur_in_attack && !past_in_attack)
 	{
-		SystemVerbose1(Helpers::format("Player %s : IN_ATTACK button down.", ph->GetName()));
+		//SystemVerbose1(Helpers::format("Player %s : IN_ATTACK button down.", ph->GetName()));
 		playerData->down_time = Plat_FloatTime();
 	}
 	else if(past_in_attack && !cur_in_attack)
 	{
 		playerData->up_time = Plat_FloatTime();
 		TriggerStat(&(playerData->clicks), playerData->up_time, playerData->down_time, playerData->clicks.n);
-		SystemVerbose1(Helpers::format("Player %s : IN_ATTACK button up.", ph->GetName()));
+		//SystemVerbose1(Helpers::format("Player %s : IN_ATTACK button up.", ph->GetName()));
 
 		if(playerData->up_time - playerData->down_time <= SHORT_TIME)
 		{
