@@ -9,6 +9,13 @@
 typedef SourceSdk::datamap_t* (HOOKFN_EXT *GetDataDescMap_t)(SourceSdk::CBaseEntity*);
 
 template <>
+basic_string const & EntityProps::PropIdToString<PROP_OWNER>()
+{
+	static basic_string const v("CBaseEntity.m_hOwnerEntity");
+	return v;
+}
+
+template <>
 basic_string const & EntityProps::PropIdToString<PROP_VIEW_OFFSET>()
 {
 	static basic_string const v("CBasePlayer.localdata.m_vecViewOffset[0]");
