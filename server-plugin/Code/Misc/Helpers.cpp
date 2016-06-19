@@ -247,18 +247,32 @@ namespace Helpers
 
 	SourceSdk::edict_t * edictOfUnknown(void * unk)
 	{
-		SourceSdk::edict_t * cur;
-		for (int i = 65; i <= MAX_EDICTS; i++)
+		if (SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive)
 		{
-			cur = PEntityOfEntIndex(i);
-			if (isValidEdict(cur))
+			SourceSdk::edict_t_csgo * cur = PEntityOfEntIndex(65);
+			SourceSdk::edict_t_csgo * const max_cur = cur + MAX_EDICTS - 65;
+			do
+			{
+				if (cur->m_pUnk == unk)
+					return (SourceSdk::edict_t *)cur;
+			} while (++cur <= max_cur);
+
+			Assert("Helpers::edictOfUnknown failed" && 0);
+			return nullptr;
+		}
+		else
+		{
+			SourceSdk::edict_t * cur = PEntityOfEntIndex(65);
+			SourceSdk::edict_t * const max_cur = cur + MAX_EDICTS - 65;
+			do
 			{
 				if (cur->m_pUnk == unk)
 					return cur;
-			}
+			} while (++cur <= max_cur);
+
+			Assert("Helpers::edictOfUnknown failed" && 0);
+			return nullptr;
 		}
-		Assert("Helpers::edictOfUnknown failed" && 0);
-		return nullptr;
 	}
 
 	// At this point, steamid is from a valid human player.
