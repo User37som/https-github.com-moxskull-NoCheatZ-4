@@ -100,9 +100,9 @@ private:
 
 	virtual void ProcessOnTick(float const curtime) override final;
 
-	virtual void ProcessPlayerTestOnTick(NczPlayer* const player, float const curtime) override final {};
+	virtual void ProcessPlayerTestOnTick(PlayerHandler::const_iterator ph, float const curtime) override final {};
 
-	virtual bool SetTransmitCallback(SourceSdk::edict_t const * const ea, SourceSdk::edict_t const * const eb) override final;
+	virtual bool SetTransmitCallback(PlayerHandler::const_iterator sender, PlayerHandler::const_iterator receiver) override final;
 };
 
 #endif // ANTIFLASHBANGBLOCKER_H

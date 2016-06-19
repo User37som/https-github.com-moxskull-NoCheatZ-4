@@ -262,9 +262,9 @@ void AutoTVRecord::SendTVChatMessage(basic_string const & msg)
 	}
 }
 
-bool AutoTVRecord::ConCommandCallback(NczPlayer * player, void * cmd, const SourceSdk::CCommand & args)
+bool AutoTVRecord::ConCommandCallback(PlayerHandler::const_iterator ph, void * cmd, const SourceSdk::CCommand & args)
 {
-	if (!m_expectedtvconfigchange || player != nullptr)
+	if (!m_expectedtvconfigchange || ph != PlayerHandler::end())
 	{
 		Logger::GetInstance()->Msg<MSG_LOG>("Intercepted unexpected SourceTV configuration change.");
 		return true;

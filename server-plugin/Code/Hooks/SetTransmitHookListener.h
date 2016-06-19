@@ -44,8 +44,8 @@ protected:
 	static void RegisterSetTransmitHookListener(SetTransmitHookListener const * const listener, size_t const priority);
 	static void RemoveSetTransmitHookListener(SetTransmitHookListener const * const listener);
 
-	virtual bool SetTransmitCallback(SourceSdk::edict_t const * const, SourceSdk::edict_t const * const) = 0;
-	virtual bool SetTransmitWeaponCallback(SourceSdk::edict_t const *  const, SourceSdk::edict_t const * const) {return false;};
+	virtual bool SetTransmitCallback(PlayerHandler::const_iterator sender, PlayerHandler::const_iterator receiver) = 0;
+	virtual bool SetTransmitWeaponCallback(SourceSdk::edict_t const *  const, PlayerHandler::const_iterator) {return false;};
 
 private:
 #ifdef GNUC

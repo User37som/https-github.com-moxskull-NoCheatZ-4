@@ -47,8 +47,7 @@ void AntiFlashbangBlocker::Load()
 {
 	for (PlayerHandler::const_iterator it = PlayerHandler::begin(); it != PlayerHandler::end(); ++it)
 	{
-		if(it)
-			ResetPlayerDataStruct(*it);
+		ResetPlayerDataStruct(it.GetIndex());
 	}
 
 	SourceSdk::InterfacesProxy::GetGameEventManager()->AddListener(this, "player_blind", true);
@@ -61,19 +60,17 @@ void AntiFlashbangBlocker::Unload()
 	SourceSdk::InterfacesProxy::GetGameEventManager()->RemoveListener(this);
 }
 
-bool AntiFlashbangBlocker::SetTransmitCallback(SourceSdk::edict_t const * const ea, SourceSdk::edict_t const* const eb)
+bool AntiFlashbangBlocker::SetTransmitCallback(PlayerHandler::const_iterator sender, PlayerHandler::const_iterator receiver)
 {
 	METRICS_ENTER_SECTION("AntiFlashbangBlocker::SetTransmitCallback");
 	
-	NczPlayerManager * const inst = NczPlayerManager::GetInstance();
-	if(inst->GetPlayerHandlerByEdict(eb) == INVALID)
+	if(!receiver)
 	{
 		METRICS_LEAVE_SECTION("AntiFlashbangBlocker::SetTransmitCallback");
 		return false;
 	}
 
-	NczPlayer* const pPlayer = inst->GetPlayerHandlerByEdict(eb);
-	SourceSdk::IPlayerInfo * const player_info = pPlayer->GetPlayerInfo();
+	SourceSdk::IPlayerInfo * const player_info = receiver->GetPlayerInfo();
 	if(!player_info) return false;
 
 	if (player_info->IsFakeClient())
@@ -82,7 +79,7 @@ bool AntiFlashbangBlocker::SetTransmitCallback(SourceSdk::edict_t const * const 
 		return false;
 	}
 
-	FlashInfoT* const pInfo = GetPlayerDataStruct(pPlayer);
+	FlashInfoT* const pInfo = GetPlayerDataStruct(receiver);
 
 	if (pInfo->flash_end_time != 0.0)
 	{
@@ -92,8 +89,8 @@ bool AntiFlashbangBlocker::SetTransmitCallback(SourceSdk::edict_t const * const 
 			return true;
 		}
 		
-		Helpers::FadeUser(eb, 0);
-		ResetPlayerDataStruct(eb);
+		Helpers::FadeUser(receiver->GetEdict(), 0);
+		ResetPlayerDataStruct(receiver);
 	}
 
 	METRICS_LEAVE_SECTION("AntiFlashbangBlocker::SetTransmitCallback");
@@ -105,7 +102,7 @@ void AntiFlashbangBlocker::FireGameEvent(SourceSdk::IGameEvent* ev) // player_bl
 	METRICS_ENTER_SECTION("AntiFlashbangBlocker::FireGameEvent");
 
 	PlayerHandler::const_iterator ph = NczPlayerManager::GetInstance()->GetPlayerHandlerByUserId(ev->GetInt("userid", 0));
-	if(ph == INVALID)
+	if(!ph)
 	{
 		METRICS_LEAVE_SECTION("AntiFlashbangBlocker::FireGameEvent");
 		return;
@@ -117,14 +114,14 @@ void AntiFlashbangBlocker::FireGameEvent(SourceSdk::IGameEvent* ev) // player_bl
 		const float flash_alpha = *EntityProps::GetInstance()->GetPropValue<float, PROP_FLASH_MAX_ALPHA>(ph->GetEdict());
 		const float flash_duration = *EntityProps::GetInstance()->GetPropValue<float, PROP_FLASH_DURATION>(ph->GetEdict());
 		
-		if (flash_alpha < 255.0)
+		if (flash_alpha < 255.0f)
 		{
 			ResetPlayerDataStruct(ph);
 			METRICS_LEAVE_SECTION("AntiFlashbangBlocker::FireGameEvent");
 			return;
 		}
 		
-		if (flash_duration > 2.9)
+		if (flash_duration > 2.9f)
 		{
 			pInfo->flash_end_time = Plat_FloatTime() + flash_duration - 2.9f;
 		}

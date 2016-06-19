@@ -43,15 +43,20 @@ PlayerRunCommandHookListener::~PlayerRunCommandHookListener()
 {
 }
 
-void* PlayerRunCommandHookListener::GetLastUserCmd(NczPlayer const * const player)
+void* PlayerRunCommandHookListener::GetLastUserCmd(PlayerHandler::const_iterator ph)
 {
-	return &(m_lastCUserCmd[player->GetIndex()]);
+	return &(m_lastCUserCmd[ph.GetIndex()]);
 }
 
-void PlayerRunCommandHookListener::HookPlayerRunCommand(NczPlayer const * const player)
+void* PlayerRunCommandHookListener::GetLastUserCmd(int index)
 {
-	Assert(Helpers::isValidEdict(player->GetEdict()));
-	SourceSdk::IServerUnknown* unk = player->GetEdict()->m_pUnk;
+	return &(m_lastCUserCmd[index]);
+}
+
+void PlayerRunCommandHookListener::HookPlayerRunCommand(PlayerHandler::const_iterator ph)
+{
+	Assert(Helpers::isValidEdict(ph->GetEdict()));
+	SourceSdk::IServerUnknown* unk = ph->GetEdict()->m_pUnk;
 
 	HookInfo info(unk, ConfigManager::GetInstance()->vfid_playerruncommand, (DWORD)nPlayerRunCommand);
 	HookGuard::GetInstance()->VirtualTableHook(info);
@@ -86,13 +91,17 @@ void HOOKFN_INT PlayerRunCommandHookListener::nPlayerRunCommand(void* This, void
 			if (ph >= it->m_value.filter)
 			{
 				ret = it->m_value.listener->PlayerRunCommandCallback(ph, pCmd, &old_cmd);
+
 				if (ret > CONTINUE) break;
 			}
 			it = it->m_next;
 		}
 		
-		// memcpy but skip the virtual table pointer : https://github.com/L-EARN/NoCheatZ-4/issues/16#issuecomment-226697469
-		memcpy((char *)(&old_cmd) + sizeof(void *), (char *)pCmd + sizeof(void *), sizeof(SourceSdk::CUserCmd_csgo) - sizeof(void *));
+		if (ret == CONTINUE) // don't copy something we block or change ...
+		{
+			// memcpy but skip the virtual table pointer : https://github.com/L-EARN/NoCheatZ-4/issues/16#issuecomment-226697469
+			memcpy((char *)(&old_cmd) + sizeof(void *), (char *)pCmd + sizeof(void *), sizeof(SourceSdk::CUserCmd_csgo) - sizeof(void *));
+		}
 	}
 
 	if(ret < BLOCK)

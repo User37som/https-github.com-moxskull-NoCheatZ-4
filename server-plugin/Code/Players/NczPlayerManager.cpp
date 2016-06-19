@@ -161,6 +161,10 @@ void NczPlayerManager::ClientActive(SourceSdk::edict_t* pEntity)
 		ph.status = PLAYER_CONNECTED;
 	}
 
+	ph.playerClass->m_playerinfo = (SourceSdk::IPlayerInfo *)SourceSdk::InterfacesProxy::Call_GetPlayerInfo(ph.playerClass->m_edict);
+
+	Assert(ph.playerClass->m_playerinfo);
+
 	if(index > m_max_index) m_max_index = index;
 
 	PlayerHandler::first = (&FullHandlersList[1]);

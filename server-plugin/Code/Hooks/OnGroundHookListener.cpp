@@ -32,10 +32,10 @@ OnGroundHookListener::~OnGroundHookListener()
 {
 }
 
-void OnGroundHookListener::HookOnGround(NczPlayer const * const player)
+void OnGroundHookListener::HookOnGround(PlayerHandler::const_iterator ph)
 {
-	Assert(Helpers::isValidEdict(player->GetEdict()));
-	void* unk = player->GetEdict()->m_pUnk;
+	Assert(Helpers::isValidEdict(ph->GetEdict()));
+	void* unk = ph->GetEdict()->m_pUnk;
 
 	HookInfo info(unk, ConfigManager::GetInstance()->vfid_mhgroundentity, (DWORD)nNetworkStateChanged_m_hGroundEntity);
 	HookGuard::GetInstance()->VirtualTableHook(info);

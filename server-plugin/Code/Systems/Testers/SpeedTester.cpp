@@ -40,8 +40,7 @@ void SpeedTester::Load()
 {
 	for (PlayerHandler::const_iterator it = PlayerHandler::begin(); it != PlayerHandler::end(); ++it)
 	{
-		if (it)
-			ResetPlayerDataStruct(*it);
+		ResetPlayerDataStruct(it.GetIndex());
 	}
 
 	OnTickListener::RegisterOnTickListener(this);
@@ -54,12 +53,12 @@ void SpeedTester::Unload()
 	PlayerRunCommandHookListener::RemovePlayerRunCommandHookListener(this);
 }
 
-void SpeedTester::ProcessPlayerTestOnTick(NczPlayer* const player, float const curtime)
+void SpeedTester::ProcessPlayerTestOnTick(PlayerHandler::const_iterator ph, float const curtime)
 {
-	SpeedHolderT* const pInfo = this->GetPlayerDataStruct(player);
+	SpeedHolderT* const pInfo = this->GetPlayerDataStruct(ph.GetIndex());
 	float const tick_interval = SourceSdk::InterfacesProxy::Call_GetTickInterval();
 	const float newTicks = ceil((curtime - pInfo->lastTest) / tick_interval);
-	SourceSdk::INetChannelInfo* const netchan = player->GetChannelInfo();
+	SourceSdk::INetChannelInfo* const netchan = ph->GetChannelInfo();
 	if(netchan == nullptr) return;
 
 	const float latency = netchan->GetLatency(FLOW_OUTGOING);
@@ -68,13 +67,13 @@ void SpeedTester::ProcessPlayerTestOnTick(NczPlayer* const player, float const c
 	{
 		++(pInfo->detections);
 
-		SystemVerbose1(Helpers::format("Player %s :  Speedhack pre-detection #%ud", player->GetName(), pInfo->detections));
+		SystemVerbose1(Helpers::format("Player %s :  Speedhack pre-detection #%ud", ph->GetName(), pInfo->detections));
 
 		if (pInfo->detections >= 30 && curtime > pInfo->lastDetectionTime + 30.0f)
 		{
 			Detection_SpeedHack pDetection = Detection_SpeedHack();
 			pDetection.PrepareDetectionData(pInfo);
-			pDetection.PrepareDetectionLog(player, this);
+			pDetection.PrepareDetectionLog(ph, this);
 			pDetection.Log();
 
 			pInfo->lastDetectionTime = curtime;
@@ -95,9 +94,9 @@ void SpeedTester::ProcessPlayerTestOnTick(NczPlayer* const player, float const c
 	pInfo->lastTest = curtime;
 }
 
-PlayerRunCommandRet SpeedTester::PlayerRunCommandCallback(NczPlayer* player, void* pCmd, void* old_cmd)
+PlayerRunCommandRet SpeedTester::PlayerRunCommandCallback(PlayerHandler::const_iterator ph, void* pCmd, void* old_cmd)
 {
-	float& tl = this->GetPlayerDataStruct(player)->ticksLeft;
+	float& tl = this->GetPlayerDataStruct(ph.GetIndex())->ticksLeft;
 
 	if(!tl) return BLOCK;
 

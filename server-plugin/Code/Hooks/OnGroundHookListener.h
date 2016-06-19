@@ -46,7 +46,7 @@ public:
 	virtual ~OnGroundHookListener();
 
 protected:
-	virtual void m_hGroundEntityStateChangedCallback(NczPlayer * const player, bool const new_isOnGround) = 0;
+	virtual void m_hGroundEntityStateChangedCallback(PlayerHandler::const_iterator ph, bool const new_isOnGround) = 0;
 
 public:
 
@@ -61,7 +61,7 @@ public:
 
 		This is a single instance hook. The plugin calls this when there is at least one player in game.
 	*/
-	static void HookOnGround(NczPlayer const * const player);
+	static void HookOnGround(PlayerHandler::const_iterator ph);
 
 protected:
 	static void RegisterOnGroundHookListener(OnGroundHookListener const * const listener);

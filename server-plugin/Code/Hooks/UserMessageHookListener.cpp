@@ -35,17 +35,18 @@ void UserMessageHookListener::HookUserMessage()
 {
 	if (SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive)
 	{
-		HookInfo sendusermessage_info(SourceSdk::InterfacesProxy::m_engineserver, 45, (DWORD)nSendUserMessage);
-		HookGuard::GetInstance()->VirtualTableHook(sendusermessage_info);
+		//HookInfo sendusermessage_info(SourceSdk::InterfacesProxy::m_engineserver, 45, (DWORD)nSendUserMessage);
+		//HookGuard::GetInstance()->VirtualTableHook(sendusermessage_info);
 	}
 	else
 	{
 		HookInfo usermessagebegin_info(SourceSdk::InterfacesProxy::m_engineserver, 43, (DWORD)nUserMessageBegin);
 		HookGuard::GetInstance()->VirtualTableHook(usermessagebegin_info);
+		HookInfo messageend_info(SourceSdk::InterfacesProxy::m_engineserver, 44, (DWORD)nMessageEnd);
+		HookGuard::GetInstance()->VirtualTableHook(messageend_info);
 	}
 
-	HookInfo messageend_info(SourceSdk::InterfacesProxy::m_engineserver, 44, (DWORD)nMessageEnd);
-	HookGuard::GetInstance()->VirtualTableHook(messageend_info);
+	
 }
 
 void UserMessageHookListener::RegisterUserMessageHookListener(UserMessageHookListener const * const listener)

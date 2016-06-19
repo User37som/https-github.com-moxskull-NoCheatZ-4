@@ -146,10 +146,10 @@ CNoCheatZPlugin::~CNoCheatZPlugin()
 	DestroySingletons();
 }
 
-void HookBasePlayer(NczPlayer* player)
+void HookBasePlayer(PlayerHandler::const_iterator ph)
 {
-	OnGroundHookListener::HookOnGround(player);
-	PlayerRunCommandHookListener::HookPlayerRunCommand(player);
+	OnGroundHookListener::HookOnGround(ph);
+	PlayerRunCommandHookListener::HookPlayerRunCommand(ph);
 	//TeleportHookListener::HookTeleport(player);
 }
 
@@ -236,23 +236,6 @@ bool CNoCheatZPlugin::Load(SourceSdk::CreateInterfaceFn _interfaceFactory, Sourc
 			if(ph >= PLAYER_CONNECTED)
 			{
 				HookBasePlayer(ph);
-
-				int const index = ph.GetIndex();
-
-				// FIXME : They are called twice ...
-				ValidationTester::GetInstance()->ResetPlayerDataStruct(index);
-				JumpTester::GetInstance()->ResetPlayerDataStruct(index);
-				EyeAnglesTester::GetInstance()->ResetPlayerDataStruct(index);
-				ConVarTester::GetInstance()->ResetPlayerDataStruct(index);
-				ShotTester::GetInstance()->ResetPlayerDataStruct(index);
-				SpeedTester::GetInstance()->ResetPlayerDataStruct(index);
-				ConCommandTester::GetInstance()->ResetPlayerDataStruct(index);
-				AntiFlashbangBlocker::GetInstance()->ResetPlayerDataStruct(index);
-				AntiSmokeBlocker::GetInstance()->ResetPlayerDataStruct(index);
-				BadUserCmdBlocker::GetInstance()->ResetPlayerDataStruct(index);
-				WallhackBlocker::GetInstance()->ResetPlayerDataStruct(index);
-				SpamChangeNameTester::GetInstance()->ResetPlayerDataStruct(index);
-				RadarHackBlocker::GetInstance()->ResetPlayerDataStruct(index);
 			}
 		}
 	}
@@ -420,7 +403,7 @@ void CNoCheatZPlugin::ClientDisconnect(SourceSdk::edict_t *pEntity )
 {
 	DebugMessage("CNoCheatZPlugin::ClientDisconnect");
 
-	WallhackBlocker::GetInstance()->ClientDisconnect(pEntity);
+	WallhackBlocker::GetInstance()->ClientDisconnect(Helpers::IndexOfEdict(pEntity));
 	NczPlayerManager::GetInstance()->ClientDisconnect(pEntity);
 }
 

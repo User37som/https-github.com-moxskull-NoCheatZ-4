@@ -89,11 +89,11 @@ private:
 
 	virtual void Unload() override final;
 
-	virtual void ProcessPlayerTestOnTick(NczPlayer * const player, float const curtime) override final;
+	virtual void ProcessPlayerTestOnTick(PlayerHandler::const_iterator ph, float const curtime) override final;
 
 	virtual void ProcessOnTick(float const curtime) override final {};
 
-	virtual PlayerRunCommandRet PlayerRunCommandCallback(NczPlayer * const player, void * const cmd, void * const old_cmd) override final;
+	virtual PlayerRunCommandRet PlayerRunCommandCallback(PlayerHandler::const_iterator ph, void * const cmd, void * const old_cmd) override final;
 };
 
 #endif // SPEEDTESTER_H

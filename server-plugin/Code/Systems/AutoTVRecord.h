@@ -56,7 +56,7 @@ private:
 
 	virtual void Unload() override final;
 
-	virtual bool ConCommandCallback(NczPlayer * const player, void * const cmd, SourceSdk::CCommand const & args) override final;
+	virtual bool ConCommandCallback(PlayerHandler::const_iterator ph, void * const cmd, SourceSdk::CCommand const & args) override final;
 
 	void StartRecord();
 

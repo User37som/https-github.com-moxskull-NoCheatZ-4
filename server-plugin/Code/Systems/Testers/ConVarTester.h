@@ -127,13 +127,13 @@ private:
 	/* Nouvelle version de la fonction qui va faire en sorte de ne tester qu'un seul joueur par frame */
 	virtual void ProcessOnTick(float const curtime) override final;
 
-	virtual void ProcessPlayerTestOnTick(NczPlayer * const player, float const curtime) override final {};
+	virtual void ProcessPlayerTestOnTick(PlayerHandler::const_iterator ph, float const curtime) override final {};
 
 public:
-	void OnQueryCvarValueFinished(NczPlayer * const player, SourceSdk::EQueryCvarValueStatus eStatus, const char *pCvarName, const char *pCvarValue);
+	void OnQueryCvarValueFinished(PlayerHandler::const_iterator ph, SourceSdk::EQueryCvarValueStatus eStatus, const char *pCvarName, const char *pCvarValue);
 
 private:
-	void ProcessPlayerTest(NczPlayer * const player);
+	void ProcessPlayerTest(PlayerHandler::const_iterator ph, float const curtime);
 
 	void AddConvarRuleset(const char * name, const char * value, ConVarRuleT rule, bool safe = true);
 

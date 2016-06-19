@@ -129,7 +129,7 @@ private:
 
 	virtual void FireGameEvent(SourceSdk::IGameEvent *ev) override final;
 
-	virtual PlayerRunCommandRet PlayerRunCommandCallback(NczPlayer * const player, void * const cmd, void * const old_cmd) override final;
+	virtual PlayerRunCommandRet PlayerRunCommandCallback(PlayerHandler::const_iterator ph, void * const cmd, void * const old_cmd) override final;
 };
 
 #endif

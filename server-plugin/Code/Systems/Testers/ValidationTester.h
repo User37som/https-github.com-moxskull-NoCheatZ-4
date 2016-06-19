@@ -110,22 +110,22 @@ private:
 
 	virtual void Unload() override final;
 	
-	virtual void ProcessPlayerTestOnTick(NczPlayer * const player, float const curtime) override final;
+	virtual void ProcessPlayerTestOnTick(PlayerHandler::const_iterator ph, float const curtime) override final;
 
 	virtual void ProcessOnTick(float const curtime) override final;
 
 	virtual void FireGameEvent(SourceSdk::IGameEvent* ev) override final;
 
-	void SetValidated(NczPlayer const * const player);
+	void SetValidated(PlayerHandler::const_iterator ph);
 
 public:
 	void AddPendingValidation(const char *pszUserName, const char* steamid);
 
 private:
-	bool WasPreviouslyValidated(NczPlayer const * const player);
+	bool WasPreviouslyValidated(PlayerHandler::const_iterator ph);
 
 public:
-	bool JoinCallback(NczPlayer const * const player);
+	bool JoinCallback(PlayerHandler::const_iterator ph);
 };
 
 #endif // VALIDATIONTESTER_H

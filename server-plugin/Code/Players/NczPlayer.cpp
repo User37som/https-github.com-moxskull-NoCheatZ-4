@@ -410,7 +410,7 @@ void NczPlayer::Ban(const char * msg, int minutes)
 
 void NczPlayer::GetAbsOrigin(SourceSdk::Vector & out)
 {
-	if (GetPlayerInfo())
+	if (m_playerinfo)
 	{
 		SourceSdk::VectorCopy(m_playerinfo->GetAbsOrigin(), out);
 	}
@@ -437,5 +437,5 @@ void NczPlayer::GetAbsEyePos(SourceSdk::Vector & out)
 
 void NczPlayer::GetEyeAngles(SourceSdk::QAngle & out) const
 {
-	SourceSdk::VectorCopy(static_cast<SourceSdk::CUserCmd const *>(PlayerRunCommandHookListener::GetLastUserCmd(this))->viewangles, out);
+	SourceSdk::VectorCopy(static_cast<SourceSdk::CUserCmd const *>(PlayerRunCommandHookListener::GetLastUserCmd(m_index))->viewangles, out);
 }

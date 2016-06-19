@@ -44,8 +44,7 @@ void EyeAnglesTester::Load()
 {
 	for (PlayerHandler::const_iterator it = PlayerHandler::begin(); it != PlayerHandler::end(); ++it)
 	{
-		if (it)
-			ResetPlayerDataStruct(*it);
+		ResetPlayerDataStruct(it.GetIndex());
 	}
 
 	SourceSdk::InterfacesProxy::GetGameEventManager()->AddListener(this, "round_end", true);
@@ -58,9 +57,9 @@ void EyeAnglesTester::Unload()
 	SourceSdk::InterfacesProxy::GetGameEventManager()->RemoveListener(this);
 }
 
-PlayerRunCommandRet EyeAnglesTester::PlayerRunCommandCallback(NczPlayer * const player, void * const pCmd, void * const old_cmd)
+PlayerRunCommandRet EyeAnglesTester::PlayerRunCommandCallback(PlayerHandler::const_iterator ph, void * const pCmd, void * const old_cmd)
 {	
-	int const * const flags = EntityProps::GetInstance()->GetPropValue<int, PROP_FLAGS>(player->GetEdict());
+	int const * const flags = EntityProps::GetInstance()->GetPropValue<int, PROP_FLAGS>(ph->GetEdict());
 	
 	/*
 		FL_FROZEN			(1 << 5)
@@ -70,7 +69,7 @@ PlayerRunCommandRet EyeAnglesTester::PlayerRunCommandCallback(NczPlayer * const 
 
 	PlayerRunCommandRet drop_cmd = CONTINUE;
 
-	EyeAngleInfoT* playerData = GetPlayerDataStruct(player);
+	EyeAngleInfoT* playerData = GetPlayerDataStruct(ph.GetIndex());
 	playerData->x.abs_value = fabs(    playerData->x.value = static_cast<SourceSdk::CUserCmd_csgo*>(pCmd)->viewangles.x    );
 	playerData->y.abs_value = fabs(    playerData->y.value = static_cast<SourceSdk::CUserCmd_csgo*>(pCmd)->viewangles.y    );
 	playerData->z.abs_value = fabs(    playerData->z.value = static_cast<SourceSdk::CUserCmd_csgo*>(pCmd)->viewangles.z    );
@@ -78,7 +77,7 @@ PlayerRunCommandRet EyeAnglesTester::PlayerRunCommandCallback(NczPlayer * const 
 	if (playerData->x.abs_value > 89.0f || playerData->z.abs_value > 0.0f || playerData->y.abs_value > 180.0f)
 	{
 #		ifdef DEBUG
-			printf("Player %s : Bad Eye Angles %f, %f, %f\n", player->GetName(), playerData->x.value, playerData->y.value, playerData->z.value);
+			printf("Player %s : Bad Eye Angles %f, %f, %f\n", ph->GetName(), playerData->x.value, playerData->y.value, playerData->z.value);
 #		endif
 		if(playerData->ignore_last) --(playerData->ignore_last);
 		else drop_cmd = INERT;
@@ -87,7 +86,7 @@ PlayerRunCommandRet EyeAnglesTester::PlayerRunCommandCallback(NczPlayer * const 
 	if(drop_cmd)
 	{
 #		ifdef DEBUG
-			printf("Player %s : Droping command #%d\n", player->GetName(), static_cast<SourceSdk::CUserCmd_csgo*>(pCmd)->command_number);
+			printf("Player %s : Droping command #%d\n", ph->GetName(), static_cast<SourceSdk::CUserCmd_csgo*>(pCmd)->command_number);
 #		endif
 		if(playerData->x.abs_value > 89.0f)
 		{
@@ -98,7 +97,7 @@ PlayerRunCommandRet EyeAnglesTester::PlayerRunCommandCallback(NczPlayer * const 
 
 				Detection_EyeAngleX pDetection = Detection_EyeAngleX();
 				pDetection.PrepareDetectionData(playerData);
-				pDetection.PrepareDetectionLog(player, this);
+				pDetection.PrepareDetectionLog(ph, this);
 				pDetection.Log();
 			}
 		}
@@ -111,7 +110,7 @@ PlayerRunCommandRet EyeAnglesTester::PlayerRunCommandCallback(NczPlayer * const 
 
 				Detection_EyeAngleY pDetection = Detection_EyeAngleY();
 				pDetection.PrepareDetectionData(playerData);
-				pDetection.PrepareDetectionLog(player, this);
+				pDetection.PrepareDetectionLog(ph, this);
 				pDetection.Log();
 			}
 		}
@@ -124,12 +123,12 @@ PlayerRunCommandRet EyeAnglesTester::PlayerRunCommandCallback(NczPlayer * const 
 
 				Detection_EyeAngleZ pDetection = Detection_EyeAngleZ();
 				pDetection.PrepareDetectionData(playerData);
-				pDetection.PrepareDetectionLog(player, this);
+				pDetection.PrepareDetectionLog(ph, this);
 				pDetection.Log();
 			}
 		}
 		
-		BanRequest::GetInstance()->AddAsyncBan(player, 0, "Banned by NoCheatZ 4");
+		BanRequest::GetInstance()->AddAsyncBan(ph, 0, "Banned by NoCheatZ 4");
 	}
 	return drop_cmd;
 }

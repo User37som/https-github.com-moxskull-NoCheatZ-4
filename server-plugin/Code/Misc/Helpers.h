@@ -59,6 +59,8 @@ namespace Helpers
 	bool isValidEdict(const SourceSdk::edict_t * const p_entity);
 
 	int IndexOfEdict(const SourceSdk::edict_t * const p_pEdict);
+
+	SourceSdk::edict_t * edictOfUnknown(void * unk);
 	
 
 	int GetPlayerCount();
