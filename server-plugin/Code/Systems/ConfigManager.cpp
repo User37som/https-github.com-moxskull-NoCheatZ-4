@@ -5,8 +5,9 @@
 #include "Interfaces/InterfacesProxy.h"
 
 #include "BaseSystem.h"
+#include "Systems/Logger.h"
 
-#define FILE_LINE_BUFFER 64
+#define FILE_LINE_BUFFER 1024
 
 #ifdef WIN32
 #	define ATTRIB_POST "_windows"
@@ -170,6 +171,11 @@ bool ConfigManager::LoadConfig()
 				if (system)
 				{
 					system->SetDisabledByConfigIni();
+					Logger::GetInstance()->Msg<MSG_CONSOLE>(Helpers::format("ConfigManager : Disabled system %s", it->c_str()));
+				}
+				else
+				{
+					Logger::GetInstance()->Msg<MSG_ERROR>(Helpers::format("ConfigManager : Unable to disable system %s -> system not known", it->c_str()));
 				}
 			}
 
