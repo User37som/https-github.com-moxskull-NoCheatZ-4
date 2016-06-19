@@ -13,6 +13,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{B72A5FE7-C33C-4A02-9204-16B0C755FD03}"
 	ProjectSection(SolutionItems) = preProject
 		Performance1.psess = Performance1.psess
+		Performance2.psess = Performance2.psess
 	EndProjectSection
 EndProject
 Global
@@ -21,15 +22,20 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
+		Profiler|Win32 = Profiler|Win32
 		Release|Win32 = Release|Win32
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{B6572CBE-7C7F-4FFF-94DE-AFBBBAB11C64}.Debug|Win32.ActiveCfg = Debug|Win32
 		{B6572CBE-7C7F-4FFF-94DE-AFBBBAB11C64}.Debug|Win32.Build.0 = Debug|Win32
+		{B6572CBE-7C7F-4FFF-94DE-AFBBBAB11C64}.Profiler|Win32.ActiveCfg = Profiler|Win32
+		{B6572CBE-7C7F-4FFF-94DE-AFBBBAB11C64}.Profiler|Win32.Build.0 = Profiler|Win32
 		{B6572CBE-7C7F-4FFF-94DE-AFBBBAB11C64}.Release|Win32.ActiveCfg = Release|Win32
 		{B6572CBE-7C7F-4FFF-94DE-AFBBBAB11C64}.Release|Win32.Build.0 = Release|Win32
 		{3E283F37-A4ED-41B7-A3E6-A2D89D131A30}.Debug|Win32.ActiveCfg = Debug|Win32
 		{3E283F37-A4ED-41B7-A3E6-A2D89D131A30}.Debug|Win32.Build.0 = Debug|Win32
+		{3E283F37-A4ED-41B7-A3E6-A2D89D131A30}.Profiler|Win32.ActiveCfg = Release|Win32
+		{3E283F37-A4ED-41B7-A3E6-A2D89D131A30}.Profiler|Win32.Build.0 = Release|Win32
 		{3E283F37-A4ED-41B7-A3E6-A2D89D131A30}.Release|Win32.ActiveCfg = Release|Win32
 		{3E283F37-A4ED-41B7-A3E6-A2D89D131A30}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
