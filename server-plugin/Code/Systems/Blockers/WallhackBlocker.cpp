@@ -130,17 +130,23 @@ bool WallhackBlocker::SetTransmitCallback(PlayerHandler::const_iterator sender_p
 		SourceSdk::CBaseHandle &bh = *EntityProps::GetInstance()->GetPropValue<SourceSdk::CBaseHandle, PROP_OBSERVER_TARGET>(receiver_player->GetEdict(), false);
 		PlayerHandler::const_iterator spec_player(bh.GetEntryIndex());
 
-		Assert(spec_player > INVALID);
-
-		if(!cache.IsValid(sender_player, spec_player))
+		if (spec_player)
 		{
-			cache.SetVisibility(sender_player, spec_player, IsAbleToSee(sender_player, spec_player));
-		}
 
-		bool rt = !cache.IsVisible(sender_player, spec_player);
-		METRICS_LEAVE_SECTION("WallhackBlocker::SetTransmitCallback");
-		//SystemVerbose2(Helpers::format("%s can see %s ? : %s", spec_player->playerClass->GetName(), sender_player->playerClass->GetName(), Helpers::boolToString(!rt)));
-		return rt;
+			if (!cache.IsValid(sender_player, spec_player))
+			{
+				cache.SetVisibility(sender_player, spec_player, IsAbleToSee(sender_player, spec_player));
+			}
+
+			bool rt = !cache.IsVisible(sender_player, spec_player);
+			METRICS_LEAVE_SECTION("WallhackBlocker::SetTransmitCallback");
+			//SystemVerbose2(Helpers::format("%s can see %s ? : %s", spec_player->playerClass->GetName(), sender_player->playerClass->GetName(), Helpers::boolToString(!rt)));
+			return rt;
+		}
+		else
+		{
+			return false;
+		}
 	}
 	
 	if(!cache.IsValid(sender_player, receiver_player))
