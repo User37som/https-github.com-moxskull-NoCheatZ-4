@@ -236,23 +236,6 @@ bool CNoCheatZPlugin::Load(SourceSdk::CreateInterfaceFn _interfaceFactory, Sourc
 			if(ph >= PLAYER_CONNECTED)
 			{
 				HookBasePlayer(ph);
-
-				int const index = ph.GetIndex();
-
-				// FIXME : They are called twice ...
-				ValidationTester::GetInstance()->ResetPlayerDataStruct(index);
-				JumpTester::GetInstance()->ResetPlayerDataStruct(index);
-				EyeAnglesTester::GetInstance()->ResetPlayerDataStruct(index);
-				ConVarTester::GetInstance()->ResetPlayerDataStruct(index);
-				ShotTester::GetInstance()->ResetPlayerDataStruct(index);
-				SpeedTester::GetInstance()->ResetPlayerDataStruct(index);
-				ConCommandTester::GetInstance()->ResetPlayerDataStruct(index);
-				AntiFlashbangBlocker::GetInstance()->ResetPlayerDataStruct(index);
-				AntiSmokeBlocker::GetInstance()->ResetPlayerDataStruct(index);
-				BadUserCmdBlocker::GetInstance()->ResetPlayerDataStruct(index);
-				WallhackBlocker::GetInstance()->ResetPlayerDataStruct(index);
-				SpamChangeNameTester::GetInstance()->ResetPlayerDataStruct(index);
-				RadarHackBlocker::GetInstance()->ResetPlayerDataStruct(index);
 			}
 		}
 	}
