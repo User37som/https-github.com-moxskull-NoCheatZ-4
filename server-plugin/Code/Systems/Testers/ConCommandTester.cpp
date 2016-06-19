@@ -42,8 +42,7 @@ void ConCommandTester::Load()
 {
 	for (PlayerHandler::const_iterator it = PlayerHandler::begin(); it != PlayerHandler::end(); ++it)
 	{
-		if (it)
-			ResetPlayerDataStruct(*it);
+		ResetPlayerDataStruct(it.GetIndex());
 	}
 
 	AddCommandInfo("ai_test_los", false);

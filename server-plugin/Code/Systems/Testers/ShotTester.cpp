@@ -48,8 +48,7 @@ void ShotTester::Load()
 {
 	for (PlayerHandler::const_iterator it = PlayerHandler::begin(); it != PlayerHandler::end(); ++it)
 	{
-		if (it)
-			ResetPlayerDataStruct(*it);
+		ResetPlayerDataStruct(it.GetIndex());
 	}
 
 	PlayerRunCommandHookListener::RegisterPlayerRunCommandHookListener(this, 4);

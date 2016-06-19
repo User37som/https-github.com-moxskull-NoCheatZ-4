@@ -50,8 +50,7 @@ void JumpTester::Load()
 {
 	for (PlayerHandler::const_iterator it = PlayerHandler::begin(); it != PlayerHandler::end(); ++it)
 	{
-		if (it)
-			ResetPlayerDataStruct(*it);
+		ResetPlayerDataStruct(it.GetIndex());
 	}
 
 	OnGroundHookListener::RegisterOnGroundHookListener(this);

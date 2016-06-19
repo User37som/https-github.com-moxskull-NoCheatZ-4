@@ -73,8 +73,7 @@ void ValidationTester::Load()
 {
 	for (PlayerHandler::const_iterator it = PlayerHandler::begin(); it != PlayerHandler::end(); ++it)
 	{
-		if (it)
-			ResetPlayerDataStruct(*it);
+		ResetPlayerDataStruct(it.GetIndex());
 	}
 
 	OnTickListener::RegisterOnTickListener(this);
