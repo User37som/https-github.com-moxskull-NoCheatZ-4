@@ -17,6 +17,8 @@
 
 #include "Interfaces/InterfacesProxy.h"
 
+#include "Systems/Logger.h"
+
 BadUserCmdBlocker::BadUserCmdBlocker() :
 	BaseSystem("BadUserCmdBlocker", PLAYER_CONNECTED, PLAYER_CONNECTING, STATUS_EQUAL_OR_BETTER),
 	playerdatahandler_class(),
@@ -40,8 +42,7 @@ void BadUserCmdBlocker::Load()
 {
 	for (PlayerHandler::const_iterator it = PlayerHandler::begin(); it != PlayerHandler::end(); ++it)
 	{
-		if (it)
-			ResetPlayerDataStruct(*it);
+		ResetPlayerDataStruct(it.GetIndex());
 	}
 
 	RegisterPlayerRunCommandHookListener(this, 0, PLAYER_CONNECTED);
@@ -56,7 +57,10 @@ PlayerRunCommandRet BadUserCmdBlocker::PlayerRunCommandCallback(PlayerHandler::c
 {
 	METRICS_ENTER_SECTION("BadUserCmdBlocker::PlayerRunCommandCallback");
 
-	if(static_cast<SourceSdk::CUserCmd_csgo*>(pCmd)->command_number <= 0)
+	SourceSdk::CUserCmd_csgo const * const k_oldcmd = (SourceSdk::CUserCmd_csgo const * const)old_cmd;
+	SourceSdk::CUserCmd_csgo const * const k_newcmd = (SourceSdk::CUserCmd_csgo const * const)pCmd;
+
+	if(k_newcmd->command_number <= 0)
 	{
 		METRICS_LEAVE_SECTION("BadUserCmdBlocker::PlayerRunCommandCallback");
 		return BLOCK;
@@ -64,7 +68,7 @@ PlayerRunCommandRet BadUserCmdBlocker::PlayerRunCommandCallback(PlayerHandler::c
 
 	UserCmdInfo* const pInfo = GetPlayerDataStruct(ph);
 
-	if (static_cast<SourceSdk::CUserCmd_csgo*>(pCmd)->tick_count <= 0)
+	if (k_newcmd->tick_count <= 0)
 		pInfo->m_tick_status = IN_RESET;
 
 	bool isDead = true;
@@ -74,11 +78,11 @@ PlayerRunCommandRet BadUserCmdBlocker::PlayerRunCommandCallback(PlayerHandler::c
 		isDead = player_info->IsDead();
 	}
 
-	if (isDead || pInfo->m_prev_dead || Plat_FloatTime() <= pInfo->m_detected_time)
+	if ((isDead | pInfo->m_prev_dead) || Plat_FloatTime() <= pInfo->m_detected_time)
 	{
 		pInfo->m_prev_dead = isDead;
 		
-		if (static_cast<SourceSdk::CUserCmd_csgo*>(old_cmd)->command_number >= static_cast<SourceSdk::CUserCmd_csgo*>(pCmd)->command_number)
+		if (k_oldcmd->command_number >= k_newcmd->command_number)
 		{
 			if (pInfo->m_tick_status == IN_RESET)
 				pInfo->m_tick_status = RESET;
@@ -93,12 +97,13 @@ PlayerRunCommandRet BadUserCmdBlocker::PlayerRunCommandCallback(PlayerHandler::c
 		return CONTINUE;
 	}
 
-	if (static_cast<SourceSdk::CUserCmd_csgo*>(old_cmd)->command_number > static_cast<SourceSdk::CUserCmd_csgo*>(pCmd)->command_number)
+	if (k_oldcmd->command_number > k_newcmd->command_number)
 	{
 		if (pInfo->m_tick_status != OK)
 		{
 			pInfo->m_tick_status = RESET;
 			METRICS_LEAVE_SECTION("BadUserCmdBlocker::PlayerRunCommandCallback");
+			DebugMessage(Helpers::format("System %s blocked CUserCmd of %s (decremented command_number L112)", GetName(), ph->GetName()));
 			return BLOCK;
 		}
 	
@@ -107,31 +112,37 @@ PlayerRunCommandRet BadUserCmdBlocker::PlayerRunCommandCallback(PlayerHandler::c
 		// Push detection for reusing command
 
 		METRICS_LEAVE_SECTION("BadUserCmdBlocker::PlayerRunCommandCallback");
+		DebugMessage(Helpers::format("System %s blocked CUserCmd of %s (DETECTION reusing command decremented command_number L121)", GetName(), ph->GetName()));
 		return BLOCK;
 	}
 
-	if (static_cast<SourceSdk::CUserCmd_csgo*>(old_cmd)->command_number == static_cast<SourceSdk::CUserCmd_csgo*>(pCmd)->command_number)
+	if (k_oldcmd->command_number == k_newcmd->command_number)
 	{
 		if (pInfo->m_tick_status != OK)
 		{
 			pInfo->m_tick_status = RESET;
 
 			METRICS_LEAVE_SECTION("BadUserCmdBlocker::PlayerRunCommandCallback");
+			DebugMessage(Helpers::format("System %s blocked CUserCmd of %s (command number is same L132)", GetName(), ph->GetName()));
 			return BLOCK;
 		}
 	
-		if (static_cast<SourceSdk::CUserCmd_csgo*>(old_cmd)->tick_count+1 != static_cast<SourceSdk::CUserCmd_csgo*>(pCmd)->tick_count)
+		if (k_oldcmd->tick_count+1 != k_newcmd->tick_count)
 		{
 			pInfo->m_detected_time = Plat_FloatTime() + 10.0f;
 			
 			// Push detection, reusing command
 			
 			METRICS_LEAVE_SECTION("BadUserCmdBlocker::PlayerRunCommandCallback");
+			DebugMessage(Helpers::format("System %s blocked CUserCmd of %s (DETECTION reusing command command number is same L143)", GetName(), ph->GetName()));
 			return BLOCK;
 		}
 	}
 
-	int z;
+	if (pInfo->m_tick_status == RESET)
+		pInfo->m_tick_status = OK;
+
+	/*int z;
 	if (SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive)
 	{
 		z = static_cast<SourceSdk::CGlobalVars_csgo*>(SourceSdk::InterfacesProxy::Call_GetGlobalVars())->tickcount;
@@ -142,11 +153,12 @@ PlayerRunCommandRet BadUserCmdBlocker::PlayerRunCommandCallback(PlayerHandler::c
 	}
 	z += 8;
 
-	if(static_cast<SourceSdk::CUserCmd_csgo*>(pCmd)->tick_count > z)
+	if(k_newcmd->tick_count > z)
 	{
 		METRICS_LEAVE_SECTION("BadUserCmdBlocker::PlayerRunCommandCallback");
+		DebugMessage(Helpers::format("System %s inerted CUserCmd of %s", GetName(), ph->GetName()));
 		return INERT;
-	}
+	}*/
 
 	METRICS_LEAVE_SECTION("BadUserCmdBlocker::PlayerRunCommandCallback");
 	return CONTINUE;
