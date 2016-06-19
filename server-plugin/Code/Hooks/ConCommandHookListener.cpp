@@ -48,16 +48,28 @@ void HOOKFN_INT ConCommandHookListener::nDispatch(void* cmd, void*, SourceSdk::C
 	if(index >= PLUGIN_MIN_COMMAND_INDEX && index <= PLUGIN_MAX_COMMAND_INDEX)
 	{
 		PlayerHandler::const_iterator ph = NczPlayerManager::GetInstance()->GetPlayerHandlerByIndex(index);
-	
-		ConCommandListenersListT::elem_t* it = m_listeners.GetFirst();
-		while (it != nullptr)
+
+		if (ph > INVALID)
 		{
-			int const c = it->m_value.listener->m_mycommands.Find(cmd);
-			if (c != -1)
+
+#ifdef DEBUG
+		printf("Testing ConCommand %s of %s\n", SourceSdk::InterfacesProxy::ConCommand_GetName(cmd), ph->GetName());
+#endif
+
+			ConCommandListenersListT::elem_t* it = m_listeners.GetFirst();
+			while (it != nullptr)
 			{
-				bypass |= it->m_value.listener->ConCommandCallback(ph, cmd, args);
+				int const c = it->m_value.listener->m_mycommands.Find(cmd);
+				if (c != -1)
+				{
+					bypass |= it->m_value.listener->ConCommandCallback(ph, cmd, args);
+				}
+				it = it->m_next;
 			}
-			it = it->m_next;
+
+#ifdef DEBUG
+			printf("Bypassed ConCommand %s of %s\n", SourceSdk::InterfacesProxy::ConCommand_GetName(cmd), ph->GetName());
+#endif
 		}
 	}
 	else if(index == 0)
@@ -75,10 +87,6 @@ void HOOKFN_INT ConCommandHookListener::nDispatch(void* cmd, void*, SourceSdk::C
 			it = it->m_next;
 		}
 	}
-	else
-	{
-		bypass = true; // just in case ...
-	}
 
 	if(!bypass)
 	{
@@ -87,6 +95,12 @@ void HOOKFN_INT ConCommandHookListener::nDispatch(void* cmd, void*, SourceSdk::C
 		ST_W_STATIC Dispatch_t gpOldFn;
 		*(DWORD*)&(gpOldFn) = HookGuard::GetInstance()->GetOldFunction(cmd, ConfigManager::GetInstance()->vfid_dispatch);
 		gpOldFn(cmd, args);
+	}
+	else
+	{
+#ifdef DEBUG
+		printf("Bypassed ConCommand %s of %d\n", SourceSdk::InterfacesProxy::ConCommand_GetName(cmd), index);
+#endif
 	}
 }
 
