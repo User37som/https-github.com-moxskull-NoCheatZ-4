@@ -44,29 +44,29 @@ void ValidationTester::Init()
 	InitDataStruct();
 }
 
-void ValidationTester::SetValidated(NczPlayer const * const player)
+void ValidationTester::SetValidated(PlayerHandler::const_iterator ph)
 {
-	GetPlayerDataStruct(player)->b = true;
-	DebugMessage(Helpers::format("%s SteamID validated\n", player->GetName()));
-	SystemVerbose1(Helpers::format("%s SteamID validated", player->GetName()));
+	GetPlayerDataStruct(ph.GetIndex())->b = true;
+	DebugMessage(Helpers::format("%s SteamID validated\n", ph->GetName()));
+	SystemVerbose1(Helpers::format("%s SteamID validated", ph->GetName()));
 
-	Assert(player->GetPlayerInfo());
+	Assert(ph->GetPlayerInfo());
 
-	ValidatedIdsT::elem_t const * const it = m_validated_ids.Find(ValidatedInfo(player->GetSteamID()));
+	ValidatedIdsT::elem_t const * const it = m_validated_ids.Find(ValidatedInfo(ph->GetSteamID()));
 
-	if (it == nullptr) m_validated_ids.Add(ValidatedInfo(player->GetSteamID(), player->GetIPAddress()));
+	if (it == nullptr) m_validated_ids.Add(ValidatedInfo(ph->GetSteamID(), ph->GetIPAddress()));
 }
 
-void ValidationTester::ProcessPlayerTestOnTick(NczPlayer* const player, float const curtime)
+void ValidationTester::ProcessPlayerTestOnTick(PlayerHandler::const_iterator ph, float const curtime)
 {
 	if(!SteamGameServer_BSecure()) return;
-	if(GetPlayerDataStruct(player)->b)
+	if(GetPlayerDataStruct(ph.GetIndex())->b)
 		return;
 
-	SystemVerbose1(Helpers::format("%s SteamID not validated, validation time left : %f", player->GetName(), 20.0f - player->GetTimeConnected()));
+	SystemVerbose1(Helpers::format("%s SteamID not validated, validation time left : %f", ph->GetName(), 20.0f - ph->GetTimeConnected()));
 
-	if(player->GetTimeConnected() < 20.0f) return;
-	player->Kick();
+	if(ph->GetTimeConnected() < 20.0f) return;
+	ph->Kick();
 }
 
 void ValidationTester::Load()
@@ -87,20 +87,20 @@ void ValidationTester::Unload()
 	SourceSdk::InterfacesProxy::GetGameEventManager()->RemoveListener(this);
 }
 
-bool ValidationTester::JoinCallback(NczPlayer const * const player)
+bool ValidationTester::JoinCallback(PlayerHandler::const_iterator ph)
 {
 	if(IsActive() && SteamGameServer_BSecure())
 	{
-		if(!GetPlayerDataStruct(player)->b)
+		if(!GetPlayerDataStruct(ph)->b)
 		{
-			if (!WasPreviouslyValidated(player))
+			if (!WasPreviouslyValidated(ph))
 			{
-				Helpers::tell(player->GetEdict(), "You can't join the game now because your Steam ID is not validated yet.\nRetry with the F9 button or activate Steam and restart the game.");
+				Helpers::tell(ph->GetEdict(), "You can't join the game now because your Steam ID is not validated yet.\nRetry with the F9 button or activate Steam and restart the game.");
 			}
 			else
 			{
-				DebugMessage(Helpers::format("%s SteamID was previously validated with the same IP. Plugin will flag this player as validated.\n", player->GetName()));
-				SetValidated(player);
+				DebugMessage(Helpers::format("%s SteamID was previously validated with the same IP. Plugin will flag this player as validated.\n", ph->GetName()));
+				SetValidated(ph);
 			}
 			return true;
 		}
@@ -113,14 +113,14 @@ void ValidationTester::AddPendingValidation(const char *pszUserName, const char*
 	m_pending_validations.Add(steamid);
 }
 
-bool ValidationTester::WasPreviouslyValidated(NczPlayer const * const player)
+bool ValidationTester::WasPreviouslyValidated(PlayerHandler::const_iterator ph)
 {
-	Assert(player->GetPlayerInfo());
+	Assert(ph->GetPlayerInfo());
 
-	ValidatedIdsT::elem_t const * const it = m_validated_ids.Find(ValidatedInfo(player->GetSteamID()));
+	ValidatedIdsT::elem_t const * const it = m_validated_ids.Find(ValidatedInfo(ph->GetSteamID()));
 
 	if (it == nullptr) return false;
-	else if (strcmp(it->m_value.m_ipaddress, player->GetIPAddress()) == 0) return true;
+	else if (strcmp(it->m_value.m_ipaddress, ph->GetIPAddress()) == 0) return true;
 	else return false;
 }
 

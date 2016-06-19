@@ -54,25 +54,25 @@ void ConVarTester::ProcessOnTick(float const curtime)
 		SystemVerbose2("sv_cheats set to 1. Skipping ConVarTest ...");
 		return;
 	}
-	NczPlayer* player = GetNextPlayer();
-	if(player)
+	PlayerHandler::const_iterator ph = GetNextPlayer();
+	if(ph)
 	{
-		ProcessPlayerTest(player);
+		ProcessPlayerTest(ph);
 	}
 }
 
-void ConVarTester::ProcessPlayerTest(NczPlayer* player)
+void ConVarTester::ProcessPlayerTest(PlayerHandler::const_iterator ph)
 {
 	if (!IsActive()) return;
 	if (m_convars_rules.IsEmpty()) return;
 
-	CurrentConVarRequestT* const req = GetPlayerDataStruct(player);
+	CurrentConVarRequestT* const req = GetPlayerDataStruct(ph.GetIndex());
 
 	if(req->isSent && !req->isReplyed)
 	{
 		if(Plat_FloatTime() - 30.0 > req->timeStart)
 		{
-			player->Kick("ConVar request timed out");
+			ph->Kick("ConVar request timed out");
 		}
 		return;
 	}
@@ -90,11 +90,11 @@ void ConVarTester::ProcessPlayerTest(NczPlayer* player)
 		 req->answer_status = "NO STATUS";
 	}
 
-	SourceSdk::InterfacesProxy::GetServerPluginHelpers()->StartQueryCvarValue(player->GetEdict(), m_convars_rules[req->ruleset].name);
+	SourceSdk::InterfacesProxy::GetServerPluginHelpers()->StartQueryCvarValue(ph->GetEdict(), m_convars_rules[req->ruleset].name);
 	req->isSent = true;
 	req->isReplyed = false;
 	req->timeStart = Plat_FloatTime();
-	SystemVerbose1(Helpers::format("Sending %s ConVar request to ent-id %d", m_convars_rules[req->ruleset].name, player->GetIndex()));
+	SystemVerbose1(Helpers::format("Sending %s ConVar request to ent-id %d", m_convars_rules[req->ruleset].name, ph.GetIndex()));
 }
 
 ConVarInfoT* ConVarTester::FindConvarRuleset(const char * name)
@@ -188,10 +188,10 @@ void ConVarTester::AddConvarRuleset(const char * name, const char * value, ConVa
 	}
 }
 
-void ConVarTester::OnQueryCvarValueFinished(NczPlayer* player, SourceSdk::EQueryCvarValueStatus eStatus, const char *pCvarName, const char *pCvarValue)
+void ConVarTester::OnQueryCvarValueFinished(PlayerHandler::const_iterator ph, SourceSdk::EQueryCvarValueStatus eStatus, const char *pCvarName, const char *pCvarValue)
 {
 	if(!IsActive()) return;
-	SystemVerbose1(Helpers::format("Received %s ConVar reply for ent-id %d", pCvarName, player->GetIndex()));
+	SystemVerbose1(Helpers::format("Received %s ConVar reply for ent-id %d", pCvarName, ph.GetIndex()));
 
 	if(SourceSdk::InterfacesProxy::ConVar_GetBool(var_sv_cheats))
 	{
@@ -207,7 +207,7 @@ unexpected:
 		return;
 	}
 
-	CurrentConVarRequest* const req = GetPlayerDataStruct(player);
+	CurrentConVarRequest* const req = GetPlayerDataStruct(ph.GetIndex());
 
 	if(!req->isSent) goto unexpected;
 	if(!Helpers::bStriEq(m_convars_rules[req->ruleset].name, ruleset->name)) goto unexpected;
@@ -225,9 +225,9 @@ unexpected:
 				SystemVerbose2("Was expecting eQueryCvarValueStatus_CvarNotFound");
 				Detection_ConVar pDetection = Detection_ConVar();
 				pDetection.PrepareDetectionData(req);
-				pDetection.PrepareDetectionLog(player, this);
+				pDetection.PrepareDetectionLog(ph, this);
 				pDetection.Log();
-				BanRequest::GetInstance()->AddAsyncBan(player, 0, "Banned by NoCheatZ 4");
+				BanRequest::GetInstance()->AddAsyncBan(ph, 0, "Banned by NoCheatZ 4");
 			}
 			else if(ruleset->rule == SAME)
 			{
@@ -240,9 +240,9 @@ unexpected:
 					SystemVerbose2(Helpers::format("Value %s is NOT correct\n", pCvarValue));
 					Detection_ConVar pDetection = Detection_ConVar();
 					pDetection.PrepareDetectionData(req);
-					pDetection.PrepareDetectionLog(player, this);
+					pDetection.PrepareDetectionLog(ph, this);
 					pDetection.Log();
-					BanRequest::GetInstance()->AddAsyncBan(player, 0, "Banned by NoCheatZ 4");
+					BanRequest::GetInstance()->AddAsyncBan(ph, 0, "Banned by NoCheatZ 4");
 				}
 			}
 			else if(ruleset->rule == SAME_AS_SERVER)
@@ -256,9 +256,9 @@ unexpected:
 					SystemVerbose2(Helpers::format("Value %s is NOT correct\n", pCvarValue));
 					Detection_ConVar pDetection = Detection_ConVar();
 					pDetection.PrepareDetectionData(req);
-					pDetection.PrepareDetectionLog(player, this);
+					pDetection.PrepareDetectionLog(ph, this);
 					pDetection.Log();
-					BanRequest::GetInstance()->AddAsyncBan(player, 0, "Banned by NoCheatZ 4");
+					BanRequest::GetInstance()->AddAsyncBan(ph, 0, "Banned by NoCheatZ 4");
 				}
 			}
 			else if(ruleset->rule == SAME_FLOAT)
@@ -274,9 +274,9 @@ unexpected:
 					SystemVerbose2(Helpers::format("Value %s is NOT correct\n", pCvarValue));
 					Detection_ConVar pDetection = Detection_ConVar();
 					pDetection.PrepareDetectionData(req);
-					pDetection.PrepareDetectionLog(player, this);
+					pDetection.PrepareDetectionLog(ph, this);
 					pDetection.Log();
-					BanRequest::GetInstance()->AddAsyncBan(player, 0, "Banned by NoCheatZ 4");
+					BanRequest::GetInstance()->AddAsyncBan(ph, 0, "Banned by NoCheatZ 4");
 				}
 			}
 			else if(ruleset->rule == SAME_FLOAT_AS_SERVER)
@@ -292,9 +292,9 @@ unexpected:
 					SystemVerbose2(Helpers::format("Value %s is NOT correct\n", pCvarValue));
 					Detection_ConVar pDetection = Detection_ConVar();
 					pDetection.PrepareDetectionData(req);
-					pDetection.PrepareDetectionLog(player, this);
+					pDetection.PrepareDetectionLog(ph, this);
 					pDetection.Log();
-					BanRequest::GetInstance()->AddAsyncBan(player, 0, "Banned by NoCheatZ 4");
+					BanRequest::GetInstance()->AddAsyncBan(ph, 0, "Banned by NoCheatZ 4");
 				}
 			}
 			break;
@@ -310,9 +310,9 @@ unexpected:
 				SystemVerbose2("Was expecting eQueryCvarValueStatus_ValueIntact");
 				Detection_ConVar pDetection = Detection_ConVar();
 				pDetection.PrepareDetectionData(req);
-				pDetection.PrepareDetectionLog(player, this);
+				pDetection.PrepareDetectionLog(ph, this);
 				pDetection.Log();
-				BanRequest::GetInstance()->AddAsyncBan(player, 0, "Banned by NoCheatZ 4");
+				BanRequest::GetInstance()->AddAsyncBan(ph, 0, "Banned by NoCheatZ 4");
 			}
 			break;
 		}
@@ -347,9 +347,9 @@ unexpected2:
 	SystemVerbose2("Was expecting eQueryCvarValueStatus_ValueIntact");
 	Detection_ConVar pDetection = Detection_ConVar();
 	pDetection.PrepareDetectionData(req);
-	pDetection.PrepareDetectionLog(player, this);
+	pDetection.PrepareDetectionLog(ph, this);
 	pDetection.Log();
-	BanRequest::GetInstance()->AddAsyncBan(player, 0, "Banned by NoCheatZ 4");
+	BanRequest::GetInstance()->AddAsyncBan(ph, 0, "Banned by NoCheatZ 4");
 }
 
 void ConVarTester::Load()

@@ -72,11 +72,11 @@ void OutputStat(ShotStatHandlerT* handler)
 	printf("{ count %u, ratio %3.2f, avg %3.2f }", handler->n, handler->ratio, handler->avg_time);
 }
 
-PlayerRunCommandRet ShotTester::PlayerRunCommandCallback(NczPlayer* player, void* pCmd, void* lastcmd)
+PlayerRunCommandRet ShotTester::PlayerRunCommandCallback(PlayerHandler::const_iterator ph, void* pCmd, void* lastcmd)
 {	
 	PlayerRunCommandRet drop_cmd = CONTINUE;
 
-	ShotStatsT* playerData = GetPlayerDataStruct(player);
+	ShotStatsT * const playerData = GetPlayerDataStruct(ph.GetIndex());
 
 	bool cur_in_attack;
 	bool past_in_attack;
@@ -94,14 +94,14 @@ PlayerRunCommandRet ShotTester::PlayerRunCommandCallback(NczPlayer* player, void
 
 	if(cur_in_attack && !past_in_attack)
 	{
-		SystemVerbose1(Helpers::format("Player %s : IN_ATTACK button down.", player->GetName()));
+		SystemVerbose1(Helpers::format("Player %s : IN_ATTACK button down.", ph->GetName()));
 		playerData->down_time = Plat_FloatTime();
 	}
 	else if(past_in_attack && !cur_in_attack)
 	{
 		playerData->up_time = Plat_FloatTime();
 		TriggerStat(&(playerData->clicks), playerData->up_time, playerData->down_time, playerData->clicks.n);
-		SystemVerbose1(Helpers::format("Player %s : IN_ATTACK button up.", player->GetName()));
+		SystemVerbose1(Helpers::format("Player %s : IN_ATTACK button up.", ph->GetName()));
 
 		if(playerData->up_time - playerData->down_time <= SHORT_TIME)
 		{
@@ -113,7 +113,7 @@ PlayerRunCommandRet ShotTester::PlayerRunCommandCallback(NczPlayer* player, void
 					{
 						Detection_TriggerBot pDetection = Detection_TriggerBot();
 						pDetection.PrepareDetectionData(playerData);
-						pDetection.PrepareDetectionLog(player, this);
+						pDetection.PrepareDetectionLog(ph, this);
 						pDetection.Log();
 					}
 				}
@@ -125,7 +125,7 @@ PlayerRunCommandRet ShotTester::PlayerRunCommandCallback(NczPlayer* player, void
 				{
 					Detection_AutoPistol pDetection = Detection_AutoPistol();
 					pDetection.PrepareDetectionData(playerData);
-					pDetection.PrepareDetectionLog(player, this);
+					pDetection.PrepareDetectionLog(ph, this);
 					pDetection.Log();
 				}
 			}
@@ -133,10 +133,10 @@ PlayerRunCommandRet ShotTester::PlayerRunCommandCallback(NczPlayer* player, void
 			++(playerData->row);
 
 			TriggerStat(&(playerData->short_clicks), playerData->up_time, playerData->down_time, playerData->clicks.n);
-			if(player->GetWpnShotType() == HAND) TriggerStat(&(playerData->with_hand), playerData->up_time, playerData->down_time, playerData->clicks.n);
-			else if(player->GetWpnShotType() == PISTOL) TriggerStat(&(playerData->with_pistol), playerData->up_time, playerData->down_time, playerData->clicks.n);
+			if(ph->GetWpnShotType() == HAND) TriggerStat(&(playerData->with_hand), playerData->up_time, playerData->down_time, playerData->clicks.n);
+			else if(ph->GetWpnShotType() == PISTOL) TriggerStat(&(playerData->with_pistol), playerData->up_time, playerData->down_time, playerData->clicks.n);
 			else TriggerStat(&(playerData->with_auto), playerData->up_time, playerData->down_time, playerData->clicks.n);
-			if(player->aimingAt() > 0) TriggerStat(&(playerData->on_target), playerData->up_time, playerData->down_time, playerData->clicks.n);
+			if(ph->aimingAt() > 0) TriggerStat(&(playerData->on_target), playerData->up_time, playerData->down_time, playerData->clicks.n);
 			drop_cmd = INERT;
 
 			if(this->m_verbose)

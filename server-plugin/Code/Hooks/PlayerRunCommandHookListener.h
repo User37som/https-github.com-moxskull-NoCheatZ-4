@@ -53,12 +53,13 @@ public:
 	virtual ~PlayerRunCommandHookListener();
 
 protected:
-	virtual PlayerRunCommandRet PlayerRunCommandCallback(NczPlayer * const  player, void * const cmd, void * const old_cmd) = 0;
+	virtual PlayerRunCommandRet PlayerRunCommandCallback(PlayerHandler::const_iterator ph, void * const cmd, void * const old_cmd) = 0;
 
 public:
-	static void HookPlayerRunCommand(NczPlayer const * const player);
+	static void HookPlayerRunCommand(PlayerHandler::const_iterator ph);
 
-	static void* GetLastUserCmd(NczPlayer const * const player);
+	static void* GetLastUserCmd(PlayerHandler::const_iterator ph);
+	static void* GetLastUserCmd(int index);
 
 protected:
 	static void RegisterPlayerRunCommandHookListener(PlayerRunCommandHookListener const * const listener, size_t const priority = std::numeric_limits<size_t>::max(), SlotStatus filter = PLAYER_IN_TESTS);

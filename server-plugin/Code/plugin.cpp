@@ -146,10 +146,10 @@ CNoCheatZPlugin::~CNoCheatZPlugin()
 	DestroySingletons();
 }
 
-void HookBasePlayer(NczPlayer* player)
+void HookBasePlayer(PlayerHandler::const_iterator ph)
 {
-	OnGroundHookListener::HookOnGround(player);
-	PlayerRunCommandHookListener::HookPlayerRunCommand(player);
+	OnGroundHookListener::HookOnGround(ph);
+	PlayerRunCommandHookListener::HookPlayerRunCommand(ph);
 	//TeleportHookListener::HookTeleport(player);
 }
 
@@ -420,7 +420,7 @@ void CNoCheatZPlugin::ClientDisconnect(SourceSdk::edict_t *pEntity )
 {
 	DebugMessage("CNoCheatZPlugin::ClientDisconnect");
 
-	WallhackBlocker::GetInstance()->ClientDisconnect(pEntity);
+	WallhackBlocker::GetInstance()->ClientDisconnect(Helpers::IndexOfEdict(pEntity));
 	NczPlayerManager::GetInstance()->ClientDisconnect(pEntity);
 }
 

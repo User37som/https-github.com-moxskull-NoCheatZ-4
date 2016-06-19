@@ -76,31 +76,31 @@ int GetGameTickCount()
 	}
 }
 
-void JumpTester::m_hGroundEntityStateChangedCallback(NczPlayer* player, bool new_isOnGround)
+void JumpTester::m_hGroundEntityStateChangedCallback(PlayerHandler::const_iterator ph, bool new_isOnGround)
 {
-	JumpInfoT* playerData = GetPlayerDataStruct(player);
+	JumpInfoT* playerData = GetPlayerDataStruct(ph.GetIndex());
 
 	if(new_isOnGround)
 	{
 		playerData->onGroundHolder.onGround_Tick = GetGameTickCount();
 		playerData->isOnGround = true;
-		SystemVerbose1(Helpers::format("Player %s touched the ground.", player->GetName()));
+		SystemVerbose1(Helpers::format("Player %s touched the ground.", ph->GetName()));
 		if(playerData->jumpCmdHolder.outsideJumpCmdCount > 10) // Il serait plus judicieux d'utiliser le RMS
 		{
 			Detection_BunnyHopScript pDetection = Detection_BunnyHopScript();
 			pDetection.PrepareDetectionData(playerData);
-			pDetection.PrepareDetectionLog(player, this);
+			pDetection.PrepareDetectionLog(ph, this);
 			pDetection.Log();
-			player->Kick("You have to turn off your BunnyHop Script to play on this server.");
+			ph->Kick("You have to turn off your BunnyHop Script to play on this server.");
 		}
 		else if(playerData->jumpCmdHolder.outsideJumpCmdCount == 0 && playerData->perfectBhopsCount > 5)
 		{
 			Detection_BunnyHopProgram pDetection = Detection_BunnyHopProgram();
 			pDetection.PrepareDetectionData(playerData);
-			pDetection.PrepareDetectionLog(player, this);
+			pDetection.PrepareDetectionLog(ph, this);
 			pDetection.Log();
 
-			player->Ban("[NoCheatZ 4] You have been banned for using BunnyHop on this server.");
+			ph->Ban("[NoCheatZ 4] You have been banned for using BunnyHop on this server.");
 		}
 		playerData->jumpCmdHolder.outsideJumpCmdCount = 0;
 	}
@@ -109,15 +109,15 @@ void JumpTester::m_hGroundEntityStateChangedCallback(NczPlayer* player, bool new
 		playerData->onGroundHolder.notOnGround_Tick = GetGameTickCount();
 		++playerData->onGroundHolder.jumpCount;
 		playerData->isOnGround = false;
-		SystemVerbose1(Helpers::format("Player %s leaved the ground.", player->GetName()));
+		SystemVerbose1(Helpers::format("Player %s leaved the ground.", ph->GetName()));
 	}
 }
 
-PlayerRunCommandRet JumpTester::PlayerRunCommandCallback(NczPlayer* player, void* pCmd, void* old_cmd)
+PlayerRunCommandRet JumpTester::PlayerRunCommandCallback(PlayerHandler::const_iterator ph, void* pCmd, void* old_cmd)
 {
 	PlayerRunCommandRet drop_cmd = CONTINUE;
 
-	JumpInfoT* playerData = GetPlayerDataStruct(player);
+	JumpInfoT* playerData = GetPlayerDataStruct(ph.GetIndex());
 
 	bool cur_in_jump;
 
@@ -140,13 +140,13 @@ PlayerRunCommandRet JumpTester::PlayerRunCommandCallback(NczPlayer* player, void
 			{
 				++playerData->total_bhopCount;
 #				ifdef DEBUG
-					printf("Player %s : total_bhopCount = %d\n", player->GetName(), playerData->total_bhopCount);
+					printf("Player %s : total_bhopCount = %d\n", ph->GetName(), playerData->total_bhopCount);
 #				endif
 				if(diff < 3 && diff > 0)
 				{
 					++playerData->goodBhopsCount;
 #					ifdef DEBUG
-						printf("Player %s : goodBhopsCount = %d\n", player->GetName(), playerData->goodBhopsCount);
+						printf("Player %s : goodBhopsCount = %d\n", ph->GetName(), playerData->goodBhopsCount);
 #					endif
 					drop_cmd = INERT;
 				}
@@ -154,18 +154,18 @@ PlayerRunCommandRet JumpTester::PlayerRunCommandCallback(NczPlayer* player, void
 				{
 					++playerData->perfectBhopsCount;
 #					ifdef DEBUG
-						printf("Player %s : perfectBhopsCount = %d\n", player->GetName(), playerData->perfectBhopsCount);
+						printf("Player %s : perfectBhopsCount = %d\n", ph->GetName(), playerData->perfectBhopsCount);
 #					endif
 					drop_cmd = INERT;
 				}
 			}
 
-			SystemVerbose1(Helpers::format("Player %s pushed the jump button.", player->GetName()));
+			SystemVerbose1(Helpers::format("Player %s pushed the jump button.", ph->GetName()));
 		}
 		else
 		{
 			++playerData->jumpCmdHolder.outsideJumpCmdCount;
-			SystemVerbose1(Helpers::format("Player %s pushed the jump button while flying.", player->GetName()));
+			SystemVerbose1(Helpers::format("Player %s pushed the jump button while flying.", ph->GetName()));
 		}
 		playerData->jumpCmdHolder.lastJumpCmdState = true;
 	}
@@ -173,7 +173,7 @@ PlayerRunCommandRet JumpTester::PlayerRunCommandCallback(NczPlayer* player, void
 	{
 		playerData->jumpCmdHolder.lastJumpCmdState = false;
 		playerData->jumpCmdHolder.JumpUp_Tick = GetGameTickCount();
-		SystemVerbose1(Helpers::format("Player %s released the jump button.", player->GetName()));
+		SystemVerbose1(Helpers::format("Player %s released the jump button.", ph->GetName()));
 	}
 	return drop_cmd;
 }

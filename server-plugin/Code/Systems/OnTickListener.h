@@ -49,7 +49,7 @@ protected:
 	virtual void ProcessTestsOnTick(float const curtime);
 
 	/* Appelé par ProcessTestsOnTick() lorsque le joueur correspond au filtre */
-	virtual void ProcessPlayerTestOnTick(NczPlayer* const player, float const curtime) = 0;
+	virtual void ProcessPlayerTestOnTick(PlayerHandler::const_iterator ph, float const curtime) = 0;
 
 	virtual void ProcessOnTick(float const curtime) = 0;
 

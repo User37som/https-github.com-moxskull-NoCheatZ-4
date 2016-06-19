@@ -51,49 +51,50 @@ void HOOKFN_INT SetTransmitHookListener::nSetTransmit(void * const This, SourceS
 void HOOKFN_INT SetTransmitHookListener::nSetTransmit(void * const This, void * const, SourceSdk::CCheckTransmitInfo * pInfo, bool bAlways)
 #endif
 {
-	if (!bAlways)
+	PlayerHandler::const_iterator receiver_assumed_player(Helpers::IndexOfEdict(*pInfo));
+
+	if (!bAlways && !(m_listeners.GetFirst() == nullptr) && receiver_assumed_player > PLAYER_CONNECTING)
 	{
-		NczPlayerManager const * const inst = NczPlayerManager::GetInstance();
-		PlayerHandler::const_iterator pplayer = inst->GetPlayerHandlerByBasePlayer(This);
-		if (pplayer > INVALID)
+		NczPlayerManager const * const inst(NczPlayerManager::GetInstance());
+		PlayerHandler::const_iterator sender_assumed_client(inst->GetPlayerHandlerByBasePlayer(This));
+
+		if (sender_assumed_client)
 		{
-			SourceSdk::edict_t const * const pEdict_sender = pplayer->GetEdict();
-			//Assert(Helpers::isValidEdict(pEdict_sender));
-
-			SourceSdk::edict_t const * const pEdict_receiver = *pInfo;
-			Assert(Helpers::isValidEdict(pEdict_receiver));
-
-			if (pEdict_sender != pEdict_receiver)
+			if (sender_assumed_client != receiver_assumed_player)
 			{
 				TransmitListenersListT::elem_t* it = m_listeners.GetFirst();
 
-				int const maxclients = inst->GetMaxIndex();
-
-				if (Helpers::IndexOfEdict(pEdict_sender) <= maxclients)
+				while (it != nullptr)
 				{
-					while (it != nullptr)
+					if (it->m_value.listener->SetTransmitCallback(sender_assumed_client, receiver_assumed_player))
 					{
-						if (it->m_value.listener->SetTransmitCallback(pEdict_sender, pEdict_receiver))
-						{
-							return;
-						}
-						it = it->m_next;
+						return;
 					}
+					it = it->m_next;
 				}
-				else /*if(sender_type == WEAPON)*/
+			}
+		}
+		else // is not a player
+		{
+			SourceSdk::edict_t const * const pEdict_sender = Helpers::edictOfUnknown(This);
+			TransmitListenersListT::elem_t* it = m_listeners.GetFirst();
+
+			Assert(Helpers::IndexOfEdict(pEdict_sender) > inst->GetMaxIndex());
+
+			if (receiver_assumed_player > PLAYER_CONNECTING)
+			{
+				while (it != nullptr)
 				{
-					while (it != nullptr)
+					if (it->m_value.listener->SetTransmitWeaponCallback(pEdict_sender, receiver_assumed_player))
 					{
-						if (it->m_value.listener->SetTransmitWeaponCallback(pEdict_sender, pEdict_receiver))
-						{
-							return;
-						}
-						it = it->m_next;
+						return;
 					}
+					it = it->m_next;
 				}
 			}
 		}
 	}
+
 	SetTransmit_t gpOldFn;
 	*(uint32_t*)&(gpOldFn) = HookGuard::GetInstance()->GetOldFunction(This, ConfigManager::GetInstance()->vfid_settransmit);
 	gpOldFn(This, pInfo, bAlways);

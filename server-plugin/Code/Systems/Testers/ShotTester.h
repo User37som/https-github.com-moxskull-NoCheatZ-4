@@ -100,7 +100,7 @@ public:
 
 	virtual void Unload() override final;
 
-	virtual PlayerRunCommandRet PlayerRunCommandCallback(NczPlayer * const player, void * const pCmd, void * const old_cmd) override final;
+	virtual PlayerRunCommandRet PlayerRunCommandCallback(PlayerHandler::const_iterator ph, void * const pCmd, void * const old_cmd) override final;
 };
 
 class ShotDetection : public LogDetection<ShotStats>

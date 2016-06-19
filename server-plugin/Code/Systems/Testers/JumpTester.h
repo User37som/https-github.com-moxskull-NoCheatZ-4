@@ -146,9 +146,9 @@ public:
 
 	virtual void Unload() override final;
 
-	virtual void m_hGroundEntityStateChangedCallback(NczPlayer * const player, bool const new_isOnGround) override final;
+	virtual void m_hGroundEntityStateChangedCallback(PlayerHandler::const_iterator ph, bool const new_isOnGround) override final;
 
-	virtual PlayerRunCommandRet PlayerRunCommandCallback(NczPlayer * const player, void * const cmd, void * const old_cmd) override final;
+	virtual PlayerRunCommandRet PlayerRunCommandCallback(PlayerHandler::const_iterator ph, void * const cmd, void * const old_cmd) override final;
 };
 
 #endif // JUMPTESTER_H

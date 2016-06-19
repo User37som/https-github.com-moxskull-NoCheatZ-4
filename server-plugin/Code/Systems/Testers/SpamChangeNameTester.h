@@ -65,7 +65,7 @@ public:
 
 	virtual void ProcessOnTick(float const curtime) override final;
 
-	virtual void ProcessPlayerTestOnTick(NczPlayer * const player, float const curtime) override final {};
+	virtual void ProcessPlayerTestOnTick(PlayerHandler::const_iterator ph, float const curtime) override final {};
 
 	void ClientConnect(bool *bAllowConnect, SourceSdk::edict_t const * const pEntity, const char *pszName, const char *pszAddress, char *reject, int maxrejectlen);
 };

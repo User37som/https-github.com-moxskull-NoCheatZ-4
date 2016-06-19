@@ -70,7 +70,7 @@ void HOOKFN_INT ConCommandHookListener::nDispatch(void* cmd, void*, SourceSdk::C
 			int const c = it->m_value.listener->m_mycommands.Find(cmd);
 			if (c != -1)
 			{
-				bypass |= it->m_value.listener->ConCommandCallback(nullptr, cmd, args);
+				bypass |= it->m_value.listener->ConCommandCallback(PlayerHandler::end(), cmd, args);
 			}
 			it = it->m_next;
 		}

@@ -33,10 +33,10 @@ WeaponHookListener::~WeaponHookListener()
 {
 }
 
-void WeaponHookListener::HookWeapon(NczPlayer const * const player)
+void WeaponHookListener::HookWeapon(PlayerHandler::const_iterator ph)
 {
-	Assert(Helpers::isValidEdict(player->GetEdict()));
-	void* unk = player->GetEdict()->m_pUnk;
+	Assert(Helpers::isValidEdict(ph->GetEdict()));
+	void* unk = ph->GetEdict()->m_pUnk;
 
 	HookInfo info_equip(unk, ConfigManager::GetInstance()->vfid_weaponequip, (DWORD)nWeapon_Equip);
 	HookInfo info_drop(unk, ConfigManager::GetInstance()->vfid_weapondrop, (DWORD)nWeapon_Drop);

@@ -148,20 +148,20 @@ private:
 	virtual void Unload() override final;
 
 	virtual void ProcessOnTick(float const curtime) override final;
-	virtual void ProcessPlayerTestOnTick(NczPlayer * const player, float const curtime) override final {};
+	virtual void ProcessPlayerTestOnTick(PlayerHandler::const_iterator ph, float const curtime) override final {};
 
-	virtual bool SetTransmitCallback(SourceSdk::edict_t const * const sender, SourceSdk::edict_t const * const receiver) override final;
-	virtual bool SetTransmitWeaponCallback(SourceSdk::edict_t const * const sender, SourceSdk::edict_t const * const receiver) override final;
-	virtual void WeaponEquipCallback(NczPlayer * const player, SourceSdk::edict_t const * const weapon) override final;
-	virtual void WeaponDropCallback(NczPlayer * const player, SourceSdk::edict_t const * const weapon) override final;
+	virtual bool SetTransmitCallback(PlayerHandler::const_iterator sender, PlayerHandler::const_iterator receiver) override final;
+	virtual bool SetTransmitWeaponCallback(SourceSdk::edict_t const * const sender, PlayerHandler::const_iterator receiver) override final;
+	virtual void WeaponEquipCallback(PlayerHandler::const_iterator ph, SourceSdk::edict_t const * const weapon) override final;
+	virtual void WeaponDropCallback(PlayerHandler::const_iterator ph, SourceSdk::edict_t const * const weapon) override final;
 
 public:
-	void ClientDisconnect(SourceSdk::edict_t const * const client);
+	void ClientDisconnect(PlayerHandler::const_iterator client);
 
 	void OnMapStart();
 
 private:
-	bool IsAbleToSee(NczPlayer* const sender, NczPlayer* const receiver);
+	bool IsAbleToSee(PlayerHandler::const_iterator sender, PlayerHandler::const_iterator receiver);
 	bool IsInFOV(const SourceSdk::Vector& origin, const SourceSdk::QAngle& dir, const SourceSdk::Vector& target);
 	bool IsVisible(const SourceSdk::Vector& origin, const SourceSdk::Vector& target);
 	bool IsVisible(const SourceSdk::Vector& origin, const SourceSdk::QAngle& dir, const SourceSdk::Vector& target);

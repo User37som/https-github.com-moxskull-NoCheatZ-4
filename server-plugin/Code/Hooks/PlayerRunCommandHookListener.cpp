@@ -43,15 +43,20 @@ PlayerRunCommandHookListener::~PlayerRunCommandHookListener()
 {
 }
 
-void* PlayerRunCommandHookListener::GetLastUserCmd(NczPlayer const * const player)
+void* PlayerRunCommandHookListener::GetLastUserCmd(PlayerHandler::const_iterator ph)
 {
-	return &(m_lastCUserCmd[player->GetIndex()]);
+	return &(m_lastCUserCmd[ph.GetIndex()]);
 }
 
-void PlayerRunCommandHookListener::HookPlayerRunCommand(NczPlayer const * const player)
+void* PlayerRunCommandHookListener::GetLastUserCmd(int index)
 {
-	Assert(Helpers::isValidEdict(player->GetEdict()));
-	SourceSdk::IServerUnknown* unk = player->GetEdict()->m_pUnk;
+	return &(m_lastCUserCmd[index]);
+}
+
+void PlayerRunCommandHookListener::HookPlayerRunCommand(PlayerHandler::const_iterator ph)
+{
+	Assert(Helpers::isValidEdict(ph->GetEdict()));
+	SourceSdk::IServerUnknown* unk = ph->GetEdict()->m_pUnk;
 
 	HookInfo info(unk, ConfigManager::GetInstance()->vfid_playerruncommand, (DWORD)nPlayerRunCommand);
 	HookGuard::GetInstance()->VirtualTableHook(info);

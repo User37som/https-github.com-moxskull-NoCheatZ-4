@@ -60,7 +60,7 @@ private:
 
 	virtual void FireGameEvent(SourceSdk::IGameEvent* ev) override final;
 
-	virtual bool SetTransmitCallback(SourceSdk::edict_t const * const ea, SourceSdk::edict_t const * const eb) override final;
+	virtual bool SetTransmitCallback(PlayerHandler::const_iterator sender, PlayerHandler::const_iterator receiver) override final;
 	
 };
 

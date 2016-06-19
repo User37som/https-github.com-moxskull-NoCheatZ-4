@@ -96,7 +96,7 @@ private:
 
 	virtual void ProcessOnTick(float const curtime) override final;
 
-	virtual void ProcessPlayerTestOnTick(NczPlayer* const player, float const curtime) override final {};
+	virtual void ProcessPlayerTestOnTick(PlayerHandler::const_iterator ph, float const curtime) override final {};
 
 	virtual void ThinkPostCallback(SourceSdk::edict_t const * const pent) override final;
 

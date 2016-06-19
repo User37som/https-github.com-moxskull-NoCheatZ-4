@@ -245,6 +245,22 @@ namespace Helpers
 		else return isspace(*c) > 0;
 	}
 
+	SourceSdk::edict_t * edictOfUnknown(void * unk)
+	{
+		SourceSdk::edict_t * cur;
+		for (int i = 65; i <= MAX_EDICTS; i++)
+		{
+			cur = PEntityOfEntIndex(i);
+			if (isValidEdict(cur))
+			{
+				if (cur->m_pUnk == unk)
+					return cur;
+			}
+		}
+		Assert("Helpers::edictOfUnknown failed" && 0);
+		return nullptr;
+	}
+
 	// At this point, steamid is from a valid human player.
 	SourceSdk::edict_t * getEdictFromSteamID(const char *SteamID)
 	{
@@ -257,6 +273,7 @@ namespace Helpers
 				return pEntity;
 			}
 		}
+		Assert("Helpers::getEdictFromSteamID failed" && 0);
 		return nullptr;
 	}
 

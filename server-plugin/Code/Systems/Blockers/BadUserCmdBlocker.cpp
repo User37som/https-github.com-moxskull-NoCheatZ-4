@@ -52,7 +52,7 @@ void BadUserCmdBlocker::Unload()
 	RemovePlayerRunCommandHookListener(this);
 }
 
-PlayerRunCommandRet BadUserCmdBlocker::PlayerRunCommandCallback(NczPlayer* player, void* pCmd, void* old_cmd)
+PlayerRunCommandRet BadUserCmdBlocker::PlayerRunCommandCallback(PlayerHandler::const_iterator ph, void* pCmd, void* old_cmd)
 {
 	METRICS_ENTER_SECTION("BadUserCmdBlocker::PlayerRunCommandCallback");
 
@@ -62,13 +62,13 @@ PlayerRunCommandRet BadUserCmdBlocker::PlayerRunCommandCallback(NczPlayer* playe
 		return BLOCK;
 	}
 
-	UserCmdInfo* const pInfo = GetPlayerDataStruct(player);
+	UserCmdInfo* const pInfo = GetPlayerDataStruct(ph);
 
 	if (static_cast<SourceSdk::CUserCmd_csgo*>(pCmd)->tick_count <= 0)
 		pInfo->m_tick_status = IN_RESET;
 
 	bool isDead = true;
-	SourceSdk::IPlayerInfo * const player_info = player->GetPlayerInfo();
+	SourceSdk::IPlayerInfo * const player_info = ph->GetPlayerInfo();
 	if (player_info)
 	{
 		isDead = player_info->IsDead();

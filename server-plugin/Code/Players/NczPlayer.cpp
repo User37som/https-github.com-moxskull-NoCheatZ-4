@@ -437,5 +437,5 @@ void NczPlayer::GetAbsEyePos(SourceSdk::Vector & out)
 
 void NczPlayer::GetEyeAngles(SourceSdk::QAngle & out) const
 {
-	SourceSdk::VectorCopy(static_cast<SourceSdk::CUserCmd const *>(PlayerRunCommandHookListener::GetLastUserCmd(this))->viewangles, out);
+	SourceSdk::VectorCopy(static_cast<SourceSdk::CUserCmd const *>(PlayerRunCommandHookListener::GetLastUserCmd(m_index))->viewangles, out);
 }

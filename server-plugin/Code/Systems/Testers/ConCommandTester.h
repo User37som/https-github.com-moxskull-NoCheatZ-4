@@ -154,22 +154,22 @@ private:
 
 	virtual void Unload() override final;
 
-	virtual bool ConCommandCallback(NczPlayer * const player, void * const cmd, SourceSdk::CCommand const & args) override final;
+	virtual bool ConCommandCallback(PlayerHandler::const_iterator ph, void * const cmd, SourceSdk::CCommand const & args) override final;
 
 public:
 	/* Called by the plugin */
-	bool TestPlayerCommand(NczPlayer* player, const basic_string& command);
+	bool TestPlayerCommand(PlayerHandler::const_iterator ph, const basic_string& command);
 
 private:
 	void AddCommandInfo(const basic_string& name, const bool ignore = false, const bool ban = false);
 
 	void RemoveCommandInfo(const basic_string& name);
 
-	void AddPlayerCommand(NczPlayer* player, const basic_string& command);
+	void AddPlayerCommand(PlayerHandler::const_iterator ph, const basic_string& command);
 
-	static bool HookSayCallback(NczPlayer* const player, const void* const command, const SourceSdk::CCommand & args);
+	static bool HookSayCallback(PlayerHandler::const_iterator ph, const void* const command, const SourceSdk::CCommand & args);
 
-	static bool HookEntCallback(NczPlayer* const player, const void* const command, const SourceSdk::CCommand & args);
+	static bool HookEntCallback(PlayerHandler::const_iterator ph, const void* const command, const SourceSdk::CCommand & args);
 };
 
 class Detection_CmdFlood : public LogDetection<LastPlayerCommandsT>

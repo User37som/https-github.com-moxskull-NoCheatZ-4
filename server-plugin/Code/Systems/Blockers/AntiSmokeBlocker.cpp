@@ -153,16 +153,14 @@ void AntiSmokeBlocker::ProcessOnTick(float const curtime)
 	METRICS_LEAVE_SECTION("AntiSmokeBlocker::OnFrame");
 }
 
-bool AntiSmokeBlocker::SetTransmitCallback(SourceSdk::edict_t const * const ea, SourceSdk::edict_t const * const eb)
+bool AntiSmokeBlocker::SetTransmitCallback(PlayerHandler::const_iterator sender, PlayerHandler::const_iterator receiver)
 {
-	PlayerHandler::const_iterator pPlayer_b = NczPlayerManager::GetInstance()->GetPlayerHandlerByEdict(eb);
+	//if(!receiver) return false;
 
-	if(!pPlayer_b) return false;
-
-	if(GetPlayerDataStruct(pPlayer_b.GetIndex())->is_in_smoke)
+	if(GetPlayerDataStruct(receiver.GetIndex())->is_in_smoke)
 		return true;
 
-	if(GetPlayerDataStruct(pPlayer_b.GetIndex())->can_not_see_this_player[Helpers::IndexOfEdict(ea)] == true)
+	if(GetPlayerDataStruct(receiver.GetIndex())->can_not_see_this_player[sender.GetIndex()] == true)
 		return true;
 
 	return false;
@@ -198,7 +196,4 @@ void AntiSmokeBlocker::FireGameEvent(SourceSdk::IGameEvent * ev)
 	{
 		it = m_smokes.Remove(it);
 	}
-
-	//ST_R_STATIC SmokeInfoT default_smoke = SmokeInfoT();
-	//ResetAll(&default_smoke);
 }

@@ -103,14 +103,11 @@ void WallhackBlocker::OnMapStart()
 	}
 }
 
-bool WallhackBlocker::SetTransmitCallback(SourceSdk::edict_t const * const sender, SourceSdk::edict_t const * const receiver)
+bool WallhackBlocker::SetTransmitCallback(PlayerHandler::const_iterator sender_player, PlayerHandler::const_iterator receiver_player)
 {
 	METRICS_ENTER_SECTION("WallhackBlocker::SetTransmitCallback");
-	PlayerHandler::const_iterator sender_player = NczPlayerManager::GetInstance()->GetPlayerHandlerByEdict(sender);
-	PlayerHandler::const_iterator receiver_player = NczPlayerManager::GetInstance()->GetPlayerHandlerByEdict(receiver);
 
 	bool can_not_process = sender_player < BOT || sender_player == PLAYER_CONNECTING;
-	can_not_process |= receiver_player < PLAYER_CONNECTED; // Also process spectators but not bots when they are receivers
 
 	if(can_not_process)
 	{
@@ -155,27 +152,32 @@ bool WallhackBlocker::SetTransmitCallback(SourceSdk::edict_t const * const sende
 	return rt;
 }
 
-bool WallhackBlocker::SetTransmitWeaponCallback(SourceSdk::edict_t const * const sender, SourceSdk::edict_t const * const receiver)
+bool WallhackBlocker::SetTransmitWeaponCallback(SourceSdk::edict_t const * const sender, PlayerHandler::const_iterator receiver)
 {
 	const int weapon_index = Helpers::IndexOfEdict(sender);
 	NczPlayer const * const owner_player = WallhackBlocker::GetInstance()->m_weapon_owner[weapon_index];
 	if(!owner_player) return false;
 
-	PlayerHandler::const_iterator receiver_player = NczPlayerManager::GetInstance()->GetPlayerHandlerByEdict(receiver);
+	if(owner_player == receiver) return false;
 
-	if(owner_player == receiver_player) return false;
-
-	return SetTransmitCallback(owner_player->GetEdict(), receiver);
+	if (receiver > PLAYER_CONNECTING)
+	{
+		return SetTransmitCallback(owner_player->GetIndex(), receiver);
+	}
+	else
+	{
+		return false;
+	}
 }
 
-void WallhackBlocker::WeaponEquipCallback(NczPlayer * player, SourceSdk::edict_t const * const weapon)
+void WallhackBlocker::WeaponEquipCallback(PlayerHandler::const_iterator ph, SourceSdk::edict_t const * const weapon)
 {
 	const int weapon_index = Helpers::IndexOfEdict(weapon);
-	WallhackBlocker::GetInstance()->m_weapon_owner[weapon_index] = player;
+	WallhackBlocker::GetInstance()->m_weapon_owner[weapon_index] = ph;
 	SetTransmitHookListener::HookSetTransmit(weapon);
 }
 
-void WallhackBlocker::WeaponDropCallback(NczPlayer* player, SourceSdk::edict_t const * const weapon)
+void WallhackBlocker::WeaponDropCallback(PlayerHandler::const_iterator ph, SourceSdk::edict_t const * const weapon)
 {
 	const int weapon_index = Helpers::IndexOfEdict(weapon);
 	WallhackBlocker::GetInstance()->m_weapon_owner[weapon_index] = nullptr;
@@ -210,15 +212,14 @@ void WallhackBlocker::ProcessOnTick(float const curtime)
 	{
 		if(ph != BOT && ph != PLAYER_IN_TESTS) continue;
 
-		NczPlayer* const pPlayer = ph;
-		SourceSdk::IPlayerInfo * const playerinfo = pPlayer->GetPlayerInfo();
+		SourceSdk::IPlayerInfo * const playerinfo = ph->GetPlayerInfo();
 		if (playerinfo == nullptr) continue;
-		SourceSdk::INetChannelInfo* const netchan = pPlayer->GetChannelInfo();
+		SourceSdk::INetChannelInfo* const netchan = ph->GetChannelInfo();
 		if (netchan == nullptr && ph == PLAYER_IN_TESTS) continue;
 
-		MathInfo const & player_maths = MathCache::GetInstance()->GetCachedMaths(pPlayer->GetIndex());
+		MathInfo const & player_maths = MathCache::GetInstance()->GetCachedMaths(ph.GetIndex());
 
-		ClientDataS* const pData = GetPlayerDataStruct(pPlayer);
+		ClientDataS* const pData = GetPlayerDataStruct(ph.GetIndex());
 
 		SourceSdk::VectorCopy(player_maths.m_mins, pData->bbox_min);
 		SourceSdk::VectorCopy(player_maths.m_maxs, pData->bbox_max);
@@ -244,10 +245,10 @@ void WallhackBlocker::ProcessOnTick(float const curtime)
 			}
 			else
 			{
-				const int lerp_ticks = (int)( 0.5f + *EntityProps::GetInstance()->GetPropValue<float, PROP_LERP_TIME>(pPlayer->GetEdict(), true) / tick_interval );
+				const int lerp_ticks = (int)( 0.5f + *EntityProps::GetInstance()->GetPropValue<float, PROP_LERP_TIME>(ph->GetEdict(), true) / tick_interval );
 				const float fCorrect = netchan->GetLatency(FLOW_OUTGOING) + fmodf(lerp_ticks * tick_interval, 1.0f);
 
-				target_tick = static_cast<SourceSdk::CUserCmd_csgo*>(PlayerRunCommandHookListener::GetLastUserCmd(pPlayer))->tick_count - lerp_ticks;
+				target_tick = static_cast<SourceSdk::CUserCmd_csgo*>(PlayerRunCommandHookListener::GetLastUserCmd(ph))->tick_count - lerp_ticks;
 
 				diff_time = (game_tick - target_tick) * tick_interval;
 
@@ -298,13 +299,11 @@ void WallhackBlocker::ProcessOnTick(float const curtime)
 	METRICS_LEAVE_SECTION("WallhackBlocker::OnFrame");
 }
 
-void WallhackBlocker::ClientDisconnect(SourceSdk::edict_t const * const client)
+void WallhackBlocker::ClientDisconnect(PlayerHandler::const_iterator ph)
 {
-	NczPlayer * const pPlayer = NczPlayerManager::GetInstance()->GetPlayerHandlerByEdict(client);
-	Assert(pPlayer);
 	for(int x = 0; x < MAX_EDICTS; ++x)
 	{
-		if(m_weapon_owner[x] == pPlayer) 
+		if(m_weapon_owner[x] == ph) 
 			m_weapon_owner[x] = nullptr;
 	}
 	m_viscache.Invalidate();
@@ -437,15 +436,15 @@ bool WallhackBlocker::IsVisible(const SourceSdk::Vector& origin, const SourceSdk
 	return false;
 }
 
-bool WallhackBlocker::IsAbleToSee(NczPlayer* const sender, NczPlayer* const receiver)
+bool WallhackBlocker::IsAbleToSee(PlayerHandler::const_iterator sender, PlayerHandler::const_iterator receiver)
 {
-	const ClientDataS* const sender_data = GetPlayerDataStruct(sender);
-	const ClientDataS* const receiver_data = GetPlayerDataStruct(receiver);
+	const ClientDataS* const sender_data = GetPlayerDataStruct(sender.GetIndex());
+	const ClientDataS* const receiver_data = GetPlayerDataStruct(receiver.GetIndex());
 
 	const SourceSdk::Vector& receiver_ear_pos = receiver_data->ear_pos;
 	const SourceSdk::Vector& sender_origin = sender_data->abs_origin;
 
-	if (IsInFOV(receiver_ear_pos, MathCache::GetInstance()->GetCachedMaths(receiver->GetIndex()).m_eyeangles, sender_origin))
+	if (IsInFOV(receiver_ear_pos, MathCache::GetInstance()->GetCachedMaths(receiver.GetIndex()).m_eyeangles, sender_origin))
 	{
 		if (IsVisible(receiver_ear_pos, sender_origin))
 			return true;
