@@ -428,7 +428,7 @@ namespace Helpers
 				pBuffer->set_flags(0x0011); // FFADE_PURGE | FFADE_IN
 			}
 			CMsgRGBA* clr = new CMsgRGBA();
-#ifdef DEBUG
+#ifdef DEBUG // Have a different color in debug mode
 			clr->set_r(0xFF);
 			clr->set_g(0x00);
 			clr->set_b(0x00);
