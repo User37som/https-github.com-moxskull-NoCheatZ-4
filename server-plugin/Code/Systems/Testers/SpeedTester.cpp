@@ -67,7 +67,7 @@ void SpeedTester::ProcessPlayerTestOnTick(PlayerHandler::const_iterator ph, floa
 	{
 		++(pInfo->detections);
 
-		SystemVerbose1(Helpers::format("Player %s :  Speedhack pre-detection #%ud", ph->GetName(), pInfo->detections));
+		DebugMessage(Helpers::format("Player %s :  Speedhack pre-detection #%ud", ph->GetName(), pInfo->detections));
 
 		if (pInfo->detections >= 30 && curtime > pInfo->lastDetectionTime + 30.0f)
 		{
@@ -77,6 +77,8 @@ void SpeedTester::ProcessPlayerTestOnTick(PlayerHandler::const_iterator ph, floa
 			pDetection.Log();
 
 			pInfo->lastDetectionTime = curtime;
+
+			ph->Ban();
 		}
 	}
 	else if(pInfo->detections)

@@ -189,8 +189,8 @@ bool CNoCheatZPlugin::Load(SourceSdk::CreateInterfaceFn _interfaceFactory, Sourc
 
 	if (SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive)
 	{
-		ncz_cmd_ptr = new SourceSdk::ConCommand_csgo("ncz", BaseSystem::ncz_cmd_fn, "NoCheatZ", 0);
-		nocheatz_instance = new SourceSdk::ConVar_csgo("nocheatz_instance", "0");
+		ncz_cmd_ptr = new SourceSdk::ConCommand_csgo("ncz", BaseSystem::ncz_cmd_fn, "NoCheatZ", FCVAR_DONTRECORD | 1 << 18);
+		nocheatz_instance = new SourceSdk::ConVar_csgo("nocheatz_instance", "0", FCVAR_DONTRECORD | 1 << 18);
 
 		SourceSdk::ConVar_Register_csgo(0);
 	}
@@ -206,8 +206,8 @@ bool CNoCheatZPlugin::Load(SourceSdk::CreateInterfaceFn _interfaceFactory, Sourc
 			MoveVirtualFunction(&vtable[id + 1], &vtable[id]);
 		} while (++id != max_id);
 
-		ncz_cmd_ptr = new SourceSdk::ConCommand("ncz", BaseSystem::ncz_cmd_fn, "NoCheatZ", 0);
-		nocheatz_instance = new SourceSdk::ConVar("nocheatz_instance", "0");
+		ncz_cmd_ptr = new SourceSdk::ConCommand("ncz", BaseSystem::ncz_cmd_fn, "NoCheatZ", FCVAR_DONTRECORD );
+		nocheatz_instance = new SourceSdk::ConVar("nocheatz_instance", "0", FCVAR_DONTRECORD );
 
 		SourceSdk::ConVar_Register(0);
 	}
