@@ -114,6 +114,8 @@ PlayerRunCommandRet ShotTester::PlayerRunCommandCallback(PlayerHandler::const_it
 						pDetection.PrepareDetectionData(playerData);
 						pDetection.PrepareDetectionLog(ph, this);
 						pDetection.Log();
+
+						ph->Ban();
 					}
 				}
 				playerData->row = 0;
@@ -126,6 +128,8 @@ PlayerRunCommandRet ShotTester::PlayerRunCommandCallback(PlayerHandler::const_it
 					pDetection.PrepareDetectionData(playerData);
 					pDetection.PrepareDetectionLog(ph, this);
 					pDetection.Log();
+
+					ph->Ban();
 				}
 			}
 			playerData->last_detection = Plat_FloatTime();
