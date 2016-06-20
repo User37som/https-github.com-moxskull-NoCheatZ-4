@@ -414,13 +414,29 @@ namespace Helpers
 		if (SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive)
 		{
 			CCSUsrMsg_Fade* pBuffer = (CCSUsrMsg_Fade *)g_Cstrike15UsermessageHelpers.GetPrototype(CS_UM_Fade)->New();
-			pBuffer->set_duration((time > 0) ? time : 50);
-			pBuffer->set_hold_time((time > 0) ? 1000 : 0);
-			pBuffer->set_flags(0x11);
+
+			if (time > 0)
+			{
+				pBuffer->set_duration(0);
+				pBuffer->set_hold_time(0);
+				pBuffer->set_flags(0x0008); // FFADE_STAYOUT
+			}
+			else
+			{
+				pBuffer->set_duration(10);
+				pBuffer->set_hold_time(0);
+				pBuffer->set_flags(0x0011); // FFADE_PURGE | FFADE_IN
+			}
 			CMsgRGBA* clr = new CMsgRGBA();
+#ifdef DEBUG
+			clr->set_r(0xFF);
+			clr->set_g(0x00);
+			clr->set_b(0x00);
+#else
 			clr->set_r(0xFF);
 			clr->set_g(0xFF);
 			clr->set_b(0xFF);
+#endif
 			clr->set_a(0xFF);
 			pBuffer->set_allocated_clr(clr);
 			SourceSdk::InterfacesProxy::Call_SendUserMessage(&filter, CS_UM_Fade, *pBuffer);
