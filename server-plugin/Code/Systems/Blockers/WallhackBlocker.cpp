@@ -106,7 +106,15 @@ bool WallhackBlocker::SetTransmitCallback(PlayerHandler::const_iterator sender_p
 {
 	METRICS_ENTER_SECTION("WallhackBlocker::SetTransmitCallback");
 
-	bool can_not_process = sender_player < BOT || sender_player == PLAYER_CONNECTING;
+	VisCache& cache = WallhackBlocker::GetInstance()->m_viscache;
+
+	bool can_not_process = sender_player < BOT;
+	can_not_process |= sender_player == PLAYER_CONNECTING;
+	if (!can_not_process)
+	{
+		can_not_process |= sender_player->GetPlayerInfo() == nullptr;
+		can_not_process |= receiver_player->GetPlayerInfo() == nullptr;
+	}
 
 	if(can_not_process)
 	{
@@ -116,20 +124,19 @@ bool WallhackBlocker::SetTransmitCallback(PlayerHandler::const_iterator sender_p
 
 	if (sender_player->GetPlayerInfo()->GetTeamIndex() == receiver_player->GetPlayerInfo()->GetTeamIndex())
 	{
+		cache.SetVisibility(sender_player, receiver_player, true);
 		METRICS_LEAVE_SECTION("WallhackBlocker::SetTransmitCallback");
 		return false;
 	}
 
 	SpectatorMode receiver_spec = *EntityProps::GetInstance()->GetPropValue<SpectatorMode, PROP_OBSERVER_MODE>(receiver_player->GetEdict(), false);
 
-	VisCache& cache = WallhackBlocker::GetInstance()->m_viscache;
-
 	if(receiver_spec == OBS_MODE_IN_EYE)
 	{
 		SourceSdk::CBaseHandle &bh = *EntityProps::GetInstance()->GetPropValue<SourceSdk::CBaseHandle, PROP_OBSERVER_TARGET>(receiver_player->GetEdict(), false);
 		PlayerHandler::const_iterator spec_player(bh.GetEntryIndex());
 
-		if (spec_player)
+		if (spec_player && sender_player != spec_player)
 		{
 
 			if (!cache.IsValid(sender_player, spec_player))
@@ -163,7 +170,7 @@ bool WallhackBlocker::SetTransmitWeaponCallback(SourceSdk::edict_t const * const
 	NczPlayer const * const owner_player = WallhackBlocker::GetInstance()->m_weapon_owner[weapon_index];
 	if(!owner_player) return false;
 
-	if(owner_player == receiver) return false;
+	if(owner_player == *receiver) return false;
 
 	if (receiver > PLAYER_CONNECTING)
 	{

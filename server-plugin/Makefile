@@ -152,7 +152,9 @@ prepare-build:
 	@mkdir -p $(BUILD_DIR)/addons/NoCheatZ/
 	@mkdir -p $(BUILD_DIR)/cfg/
 	@mkdir -p $(BUILD_DIR)/logs/NoCheatZ_4_Logs/
+	@mkdir -p $(BUILD_DIR)/NoCheatZ-autorecords
 	@touch $(BUILD_DIR)/logs/NoCheatZ_4_Logs/.gitignore
+	@touch $(BUILD_DIR)/NoCheatZ-autorecords/.gitignore
 	@cp ./Res/nocheatz.vdf $(BUILD_DIR)/addons/
 	@cp ./Res/config.ini $(BUILD_DIR)/addons/NoCheatZ/
 	@cp ./Res/nocheatz.cfg $(BUILD_DIR)/cfg/nocheatz.cfg ;true

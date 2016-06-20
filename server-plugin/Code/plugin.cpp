@@ -361,9 +361,9 @@ void CNoCheatZPlugin::GameFrame( bool simulating )
 		OnTickListener::OnTick();
 
 		TimerListener::OnTick();
-	}
 
-	AutoTVRecord::GetInstance()->OnTick();
+		AutoTVRecord::GetInstance()->OnTick();
+	}
 }
 
 //---------------------------------------------------------------------------------
@@ -394,6 +394,8 @@ void CNoCheatZPlugin::ClientActive(SourceSdk::edict_t *pEntity )
 		WeaponHookListener::HookWeapon(ph);
 		HookEntity(ph->GetEdict());
 	}
+
+	if(NczPlayerManager::GetInstance()->GetPlayerCount(PLAYER_CONNECTED) == 1) AutoTVRecord::GetInstance()->SpawnTV();
 }
 
 //---------------------------------------------------------------------------------

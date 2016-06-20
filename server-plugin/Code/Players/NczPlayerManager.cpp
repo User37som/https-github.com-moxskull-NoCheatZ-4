@@ -23,6 +23,7 @@
 #include "Systems/Logger.h"
 #include "plugin.h"
 #include "Systems/BaseSystem.h"
+#include "Systems/AutoTVRecord.h"
 
 PlayerHandler::const_iterator PlayerHandler::invalid = nullptr;
 PlayerHandler::const_iterator PlayerHandler::first = PlayerHandler::invalid;
@@ -216,8 +217,12 @@ void NczPlayerManager::FireGameEvent(SourceSdk::IGameEvent* ev)
 			if(pstat == PLAYER_IN_TESTS)
 				pstat = PLAYER_CONNECTED;
 		}
+
+		if (GetPlayerCount(PLAYER_CONNECTED) == 0) AutoTVRecord::GetInstance()->StopRecord();
+
 		BaseSystem::ManageSystems();
 		Logger::GetInstance()->Flush();
+
 		return;
 	}
 	/*else*/ if(*event_name == 'f') // round_freeze_end = round_start
@@ -243,6 +248,7 @@ void NczPlayerManager::FireGameEvent(SourceSdk::IGameEvent* ev)
 				}
 			}
 		}
+
 		BaseSystem::ManageSystems();
 		return;
 	}
@@ -322,6 +328,8 @@ void NczPlayerManager::Think()
 
 	const int maxcl = m_max_index;
 	const float gametime = Plat_FloatTime();
+
+	int in_tests_count = 0;
 	for(int x = 1; x <= maxcl; ++x)
 	{
 		PlayerHandler& ph = FullHandlersList[x];
@@ -330,12 +338,14 @@ void NczPlayerManager::Think()
 		if(gametime > ph.in_tests_time)
 		{
 			ph.status = PLAYER_IN_TESTS;
+			++in_tests_count;
 		}
 		else
 		{
 			ph.status = PLAYER_CONNECTED;
 		}
 	}
+	if(in_tests_count >= 1) AutoTVRecord::GetInstance()->StartRecord();
 }
 
 PlayerHandler::const_iterator NczPlayerManager::GetPlayerHandlerByBasePlayer(void * const BasePlayer) const
