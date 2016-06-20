@@ -8,9 +8,16 @@
 AutoTVRecord::AutoTVRecord() :
 	BaseSystem("AutoTVRecord", PLAYER_CONNECTED, INVALID, STATUS_EQUAL_OR_BETTER, "Enable - Disable - Verbose - SetMinPlayers - SetPrefix"),
 	ConCommandHookListener(),
-	singleton_class()
+	singleton_class(),
+	m_demofile(""),
+	m_prefix("NoCheatZ-autorecords/"),
+	m_recordtickcount(0),
+	m_waitfortv_time(0.0f),
+	m_minplayers(1),
+	m_recording(false),
+	m_expectedtvconfigchange(false),
+	m_spawn_once(true)
 {
-	m_expectedtvconfigchange = false;
 }
 
 AutoTVRecord::~AutoTVRecord()
@@ -20,11 +27,6 @@ AutoTVRecord::~AutoTVRecord()
 
 void AutoTVRecord::Init()
 {
-	m_prefix = "NoCheatZ-autorecord";
-	m_demofile = "";
-	m_tvslot = 0;
-	m_minplayers = 1;
-	m_recording = false;
 }
 
 void AutoTVRecord::Load()
@@ -83,7 +85,7 @@ void AutoTVRecord::StartRecord()
 
 		m_expectedtvconfigchange = true;
 
-		m_demofile = Helpers::format("%s-%s-%s", m_prefix.c_str(), mapname.c_str(), Helpers::getStrDateTime("%x_%X").replace("\\/:?\"<>|", '-').c_str());
+		m_demofile = Helpers::format("%s-%s-%s", m_prefix.c_str(), mapname.c_str(), Helpers::getStrDateTime("%x_%X").replace("/\\:?\"<>|", '-').c_str());
 		Logger::GetInstance()->Msg<MSG_LOG>(Helpers::format("Starting to record the game in %s.dem", m_demofile.c_str()));
 
 		SourceSdk::InterfacesProxy::Call_ServerCommand(basic_string("tv_record ").append(m_demofile).append('\n').c_str());
