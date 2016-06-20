@@ -108,7 +108,13 @@ bool WallhackBlocker::SetTransmitCallback(PlayerHandler::const_iterator sender_p
 
 	VisCache& cache = WallhackBlocker::GetInstance()->m_viscache;
 
-	bool can_not_process = sender_player < BOT || sender_player == PLAYER_CONNECTING;
+	bool can_not_process = sender_player < BOT;
+	can_not_process |= sender_player == PLAYER_CONNECTING;
+	if (!can_not_process)
+	{
+		can_not_process |= sender_player->GetPlayerInfo() == nullptr;
+		can_not_process |= receiver_player->GetPlayerInfo() == nullptr;
+	}
 
 	if(can_not_process)
 	{

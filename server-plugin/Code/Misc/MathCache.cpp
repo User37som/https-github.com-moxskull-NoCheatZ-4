@@ -45,21 +45,29 @@ MathInfo& MathCache::GetCachedMaths(int const player_index, bool const force_upd
 
 		SourceSdk::IPlayerInfo * const playerinfo = ph->GetPlayerInfo();
 
-		SourceSdk::VectorCopy(playerinfo->GetAbsOrigin(), info.m_abs_origin);
-		ph->GetAbsEyePos(info.m_eyepos);
-		if (playerinfo->IsFakeClient())
+		if (playerinfo)
 		{
-			SourceSdk::VectorCopy(playerinfo->GetAbsAngles(), info.m_eyeangles);
+
+			SourceSdk::VectorCopy(playerinfo->GetAbsOrigin(), info.m_abs_origin);
+			ph->GetAbsEyePos(info.m_eyepos);
+			if (playerinfo->IsFakeClient())
+			{
+				SourceSdk::VectorCopy(playerinfo->GetAbsAngles(), info.m_eyeangles);
+			}
+			else
+			{
+				ph->GetEyeAngles(info.m_eyeangles);
+			}
+			SourceSdk::VectorCopy(*EntityProps::GetInstance()->GetPropValue<SourceSdk::Vector, PROP_ABS_VELOCITY>(ph->GetEdict(), true), info.m_velocity);
+			SourceSdk::VectorMultiply(info.m_velocity, 0.01f);
+			SourceSdk::VectorAbs(info.m_velocity, info.m_abs_velocity);
+			SourceSdk::VectorCopy(playerinfo->GetPlayerMins(), info.m_mins);
+			SourceSdk::VectorCopy(playerinfo->GetPlayerMaxs(), info.m_maxs);
 		}
 		else
 		{
-			ph->GetEyeAngles(info.m_eyeangles);
+			DebugMessage("Encountered null playerinfo in MathCache");
 		}
-		SourceSdk::VectorCopy(*EntityProps::GetInstance()->GetPropValue<SourceSdk::Vector, PROP_ABS_VELOCITY>(ph->GetEdict(), true), info.m_velocity);
-		SourceSdk::VectorMultiply(info.m_velocity, 0.01f);
-		SourceSdk::VectorAbs(info.m_velocity, info.m_abs_velocity);
-		SourceSdk::VectorCopy(playerinfo->GetPlayerMins(), info.m_mins);
-		SourceSdk::VectorCopy(playerinfo->GetPlayerMaxs(), info.m_maxs);
 	}
 	return info;
 }
