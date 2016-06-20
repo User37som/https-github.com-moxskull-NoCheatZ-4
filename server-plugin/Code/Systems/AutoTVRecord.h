@@ -40,10 +40,10 @@ private:
 	basic_string m_prefix;
 	size_t m_recordtickcount;
 	float m_waitfortv_time;
-	int m_tvslot;
 	int m_minplayers;
 	bool m_recording;
 	bool m_expectedtvconfigchange;
+	bool m_spawn_once;
 
 public:
 	AutoTVRecord();
@@ -58,11 +58,11 @@ private:
 
 	virtual bool ConCommandCallback(PlayerHandler::const_iterator ph, void * const cmd, SourceSdk::CCommand const & args) override final;
 
+public:
 	void StartRecord();
 
 	void StopRecord();
 
-public:
 	void OnTick();
 
 	// How much human players must be in the game before we start recording. 1 or 2 are great values.
@@ -76,9 +76,10 @@ public:
 
 	bool IsRecording() const;
 
-	// The index of SourceTV
-	int GetSlot();
+	// Tell if TV is present
+	bool IsTVPresent() const;
 
+	//	Will try to spawn the TV once and once a client connects (ClientActive)
 	void SpawnTV();
 
 	// The current filename, only the filename.

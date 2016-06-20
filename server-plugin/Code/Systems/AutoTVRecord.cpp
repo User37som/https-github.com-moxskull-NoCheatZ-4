@@ -32,7 +32,6 @@ void AutoTVRecord::Init()
 void AutoTVRecord::Load()
 {
 	m_demofile = "";
-	m_tvslot = 0;
 	m_recording = false;
 
 	m_mycommands.AddToTail(SourceSdk::InterfacesProxy::ICvar_FindCommand("tv_record"));
@@ -41,14 +40,11 @@ void AutoTVRecord::Load()
 	ConCommandHookListener::RegisterConCommandHookListener(this);
 
 	m_waitfortv_time = Plat_FloatTime() + 5.0f;
-
-	//SpawnTV();
 }
 
 void AutoTVRecord::Unload()
 {
 	m_demofile = "";
-	m_tvslot = 0;
 	m_recording = false;
 
 	ConCommandHookListener::RemoveConCommandHookListener(this);
@@ -58,11 +54,7 @@ void AutoTVRecord::StartRecord()
 {
 	if (m_recording) return;
 
-	if (GetSlot() == 0)
-	{
-		SpawnTV();
-	}
-	else
+	if (IsTVPresent())
 	{
 		m_recordtickcount = 0;
 		basic_string mapname;
@@ -75,9 +67,8 @@ void AutoTVRecord::StartRecord()
 			mapname = static_cast<SourceSdk::CGlobalVars*>(SourceSdk::InterfacesProxy::Call_GetGlobalVars())->mapname;
 		}
 
-
 		size_t const strip = mapname.find_last_of("/\\");
-		if(strip != basic_string::npos) mapname = mapname.c_str() + strip + 1;
+		if (strip != basic_string::npos) mapname = mapname.c_str() + strip + 1;
 
 		mapname.replace(":?\"<>|", '-');
 
@@ -114,52 +105,7 @@ void AutoTVRecord::StopRecord()
 
 void AutoTVRecord::OnTick()
 {
-	if (GetSlot() == 0)
-	{
-		if (Plat_FloatTime() > m_waitfortv_time)
-		{
-			SpawnTV();
-			m_waitfortv_time = std::numeric_limits<float>::max();
-		}
-	}
-	else
-	{
-		int player_count = 0;
-
-		for (PlayerHandler::const_iterator ph = PlayerHandler::begin(); ph != PlayerHandler::end(); ++ph)
-		{
-			if (ph >= PLAYER_CONNECTED)
-			{
-				SourceSdk::IPlayerInfo * const pinfo = ph->GetPlayerInfo();
-				if (pinfo != nullptr)
-				{
-					if (pinfo->GetTeamIndex() > 1)
-					{
-						++player_count;
-					}
-				}
-			}
-		}
-
-		if (player_count >= m_minplayers)
-		{
-			if (!m_recording)
-			{
-				StartRecord();
-			}
-			else
-			{
-				++m_recordtickcount;
-			}
-		}
-		else
-		{
-			if (m_recording)
-			{
-				StopRecord();
-			}
-		}
-	}
+	++m_recordtickcount;
 }
 
 void AutoTVRecord::SetMinPlayers(int min)
@@ -182,38 +128,17 @@ bool AutoTVRecord::IsRecording() const
 	return m_recording;
 }
 
-int AutoTVRecord::GetSlot()
+bool AutoTVRecord::IsTVPresent() const
 {
-	if (m_tvslot == 0)
+	for(PlayerHandler::const_iterator it = PlayerHandler::begin(); it != PlayerHandler::end(); ++it)
 	{
-		size_t const maxcl = NczPlayerManager::GetInstance()->GetMaxIndex();
-		for (size_t index = 1; index <= maxcl; ++index)
+		if (it == BOT)
 		{
-			SourceSdk::edict_t * pEntity = Helpers::PEntityOfEntIndex(index);
-			if (Helpers::isValidEdict(pEntity))
-			{
-				void* player = SourceSdk::InterfacesProxy::Call_GetPlayerInfo(pEntity);
-				if (player)
-				{
-					bool ishltv;
-					if (SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive)
-					{
-						ishltv = static_cast<SourceSdk::IPlayerInfo_csgo*>(player)->IsHLTV();
-					}
-					else
-					{
-						ishltv = static_cast<SourceSdk::IPlayerInfo*>(player)->IsHLTV();
-					}
-					if (ishltv)
-					{
-						m_tvslot = index;
-						break;
-					}
-				}
-			}
+			if (it->GetPlayerInfo()->IsHLTV())
+				return true;
 		}
 	}
-	return m_tvslot;
+	return false;
 }
 
 void AutoTVRecord::SpawnTV()
@@ -225,29 +150,34 @@ void AutoTVRecord::SpawnTV()
 	SourceSdk::InterfacesProxy::Call_ServerCommand("tv_autorecord 0\n");
 	SourceSdk::InterfacesProxy::Call_ServerCommand("tv_enable 1\n");
 
-	SourceSdk::InterfacesProxy::Call_ServerExecute();
-
 	m_expectedtvconfigchange = false;
 
-	if (GetSlot() == 0)
+	if (!IsTVPresent())
 	{
-		Logger::GetInstance()->Msg<MSG_LOG>("SourceTV not detected. Reloading the map ...");
-		
-		basic_string mapname;
-		if (SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive)
+		if (m_spawn_once)
 		{
-			mapname = static_cast<SourceSdk::CGlobalVars_csgo*>(SourceSdk::InterfacesProxy::Call_GetGlobalVars())->mapname;
-			size_t const strip = mapname.find_last_of("/\\");
-			if (strip != basic_string::npos) mapname = mapname.c_str() + strip + 1;
-			SourceSdk::InterfacesProxy::Call_ServerCommand(Helpers::format("map %s\n", mapname.c_str()).c_str());
+			Logger::GetInstance()->Msg<MSG_LOG>("TV not detected. Reloading the map ...");
+
+			basic_string mapname;
+			if (SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive)
+			{
+				mapname = static_cast<SourceSdk::CGlobalVars_csgo*>(SourceSdk::InterfacesProxy::Call_GetGlobalVars())->mapname;
+				size_t const strip = mapname.find_last_of("/\\");
+				if (strip != basic_string::npos) mapname = mapname.c_str() + strip + 1;
+				SourceSdk::InterfacesProxy::Call_ServerCommand(Helpers::format("map %s\n", mapname.c_str()).c_str());
+			}
+			else
+			{
+				mapname = static_cast<SourceSdk::CGlobalVars*>(SourceSdk::InterfacesProxy::Call_GetGlobalVars())->mapname;
+				SourceSdk::InterfacesProxy::Call_ServerCommand(Helpers::format("changelevel %s\n", mapname.c_str()).c_str());
+			}
+
+			m_spawn_once = false;
 		}
 		else
 		{
-			mapname = static_cast<SourceSdk::CGlobalVars*>(SourceSdk::InterfacesProxy::Call_GetGlobalVars())->mapname;
-			SourceSdk::InterfacesProxy::Call_ServerCommand(Helpers::format("changelevel %s\n", mapname.c_str()).c_str());
+			Logger::GetInstance()->Msg<MSG_ERROR>("Was unable to spawn the TV.");
 		}
-
-		
 	}
 }
 
@@ -258,9 +188,14 @@ basic_string const & AutoTVRecord::GetRecordFilename() const
 
 void AutoTVRecord::SendTVChatMessage(basic_string const & msg)
 {
-	if (GetSlot() > 0)
+	for (PlayerHandler::const_iterator it = PlayerHandler::begin(); it != PlayerHandler::end(); ++it)
 	{
-		Helpers::tell(Helpers::PEntityOfEntIndex(m_tvslot), msg);
+		if (it == BOT)
+		{
+			if (it->GetPlayerInfo()->IsHLTV())
+				Helpers::tell(it->GetEdict(), msg);
+			// We don't break because it seems we can have multiple GOTV instances ... I don't know if it means multiple entities though ...
+		}
 	}
 }
 
@@ -268,7 +203,7 @@ bool AutoTVRecord::ConCommandCallback(PlayerHandler::const_iterator ph, void * c
 {
 	if (!m_expectedtvconfigchange || ph != PlayerHandler::end())
 	{
-		Logger::GetInstance()->Msg<MSG_LOG>("Intercepted unexpected SourceTV configuration change.");
+		Logger::GetInstance()->Msg<MSG_LOG>("Intercepted unexpected TV configuration change.");
 		return true;
 	}
 	return false;
