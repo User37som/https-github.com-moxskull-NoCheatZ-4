@@ -361,9 +361,9 @@ void CNoCheatZPlugin::GameFrame( bool simulating )
 		OnTickListener::OnTick();
 
 		TimerListener::OnTick();
-	}
 
-	AutoTVRecord::GetInstance()->OnTick();
+		AutoTVRecord::GetInstance()->OnTick();
+	}
 }
 
 //---------------------------------------------------------------------------------
