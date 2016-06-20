@@ -264,12 +264,10 @@ void RadarHackBlocker::UpdatePlayerData(NczPlayer* pPlayer)
 
 void RadarHackBlocker::ProcessOnTick(float const curtime)
 {
-	AutoTVRecord* tv_inst = AutoTVRecord::GetInstance();
 	for (PlayerHandler::const_iterator ph = PlayerHandler::begin(); ph != PlayerHandler::end(); ++ph)
 	{
 		if (!CanProcessThisSlot(ph) && ph != BOT) continue;
 		int const index = ph.GetIndex();
-		if (tv_inst->GetSlot() == index) continue;
 
 		ClientRadarData * pData = GetPlayerDataStruct(index);
 
