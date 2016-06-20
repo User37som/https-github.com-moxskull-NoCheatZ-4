@@ -271,8 +271,11 @@ inline PlayerHandler::const_iterator NczPlayerManager::GetPlayerHandlerByUserId(
 	{
 		if (it)
 		{
-			if (it->GetPlayerInfo()->GetUserID() == userid)
+			if (it->m_playerinfo)
+			{
+				it->m_playerinfo->GetUserID() == userid)
 				return it;
+			}
 		}
 	}
 	return PlayerHandler::end();
