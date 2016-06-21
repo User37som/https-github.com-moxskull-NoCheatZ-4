@@ -40,7 +40,7 @@ void SpeedTester::Load()
 {
 	for (PlayerHandler::const_iterator it = PlayerHandler::begin(); it != PlayerHandler::end(); ++it)
 	{
-		ResetPlayerDataStruct(it.GetIndex());
+		ResetPlayerDataStructByIndex(it.GetIndex());
 	}
 
 	OnTickListener::RegisterOnTickListener(this);
@@ -55,7 +55,7 @@ void SpeedTester::Unload()
 
 void SpeedTester::ProcessPlayerTestOnTick(PlayerHandler::const_iterator ph, float const curtime)
 {
-	SpeedHolderT* const pInfo = this->GetPlayerDataStruct(ph.GetIndex());
+	SpeedHolderT* const pInfo = this->GetPlayerDataStructByIndex(ph.GetIndex());
 	float const tick_interval = SourceSdk::InterfacesProxy::Call_GetTickInterval();
 	const float newTicks = ceil((curtime - pInfo->lastTest) / tick_interval);
 	SourceSdk::INetChannelInfo* const netchan = ph->GetChannelInfo();
@@ -98,7 +98,7 @@ void SpeedTester::ProcessPlayerTestOnTick(PlayerHandler::const_iterator ph, floa
 
 PlayerRunCommandRet SpeedTester::PlayerRunCommandCallback(PlayerHandler::const_iterator ph, void* pCmd, void* old_cmd)
 {
-	float& tl = this->GetPlayerDataStruct(ph.GetIndex())->ticksLeft;
+	float& tl = this->GetPlayerDataStructByIndex(ph.GetIndex())->ticksLeft;
 
 	if(!tl) return BLOCK;
 

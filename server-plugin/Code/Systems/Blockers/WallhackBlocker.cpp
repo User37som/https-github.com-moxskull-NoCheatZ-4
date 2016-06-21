@@ -53,7 +53,7 @@ void WallhackBlocker::Load()
 {
 	for (PlayerHandler::const_iterator it = PlayerHandler::begin(); it != PlayerHandler::end(); ++it)
 	{
-		ResetPlayerDataStruct(it.GetIndex());
+		ResetPlayerDataStructByIndex(it.GetIndex());
 	}
 
 	m_viscache.Invalidate();
@@ -231,7 +231,7 @@ void WallhackBlocker::ProcessOnTick(float const curtime)
 
 		MathInfo const & player_maths = MathCache::GetInstance()->GetCachedMaths(ph.GetIndex());
 
-		ClientDataS* const pData = GetPlayerDataStruct(ph.GetIndex());
+		ClientDataS* const pData = GetPlayerDataStructByIndex(ph.GetIndex());
 
 		SourceSdk::VectorCopy(player_maths.m_mins, pData->bbox_min);
 		SourceSdk::VectorCopy(player_maths.m_maxs, pData->bbox_max);
@@ -450,8 +450,8 @@ bool WallhackBlocker::IsVisible(const SourceSdk::Vector& origin, const SourceSdk
 
 bool WallhackBlocker::IsAbleToSee(PlayerHandler::const_iterator sender, PlayerHandler::const_iterator receiver)
 {
-	const ClientDataS* const sender_data = GetPlayerDataStruct(sender.GetIndex());
-	const ClientDataS* const receiver_data = GetPlayerDataStruct(receiver.GetIndex());
+	const ClientDataS* const sender_data = GetPlayerDataStructByIndex(sender.GetIndex());
+	const ClientDataS* const receiver_data = GetPlayerDataStructByIndex(receiver.GetIndex());
 
 	const SourceSdk::Vector& receiver_ear_pos = receiver_data->ear_pos;
 	const SourceSdk::Vector& sender_origin = sender_data->abs_origin;

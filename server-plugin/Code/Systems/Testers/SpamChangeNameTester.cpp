@@ -46,7 +46,7 @@ void SpamChangeNameTester::Load()
 {
 	for (PlayerHandler::const_iterator it = PlayerHandler::begin(); it != PlayerHandler::end(); ++it)
 	{
-		ResetPlayerDataStruct(it.GetIndex());
+		ResetPlayerDataStructByIndex(it.GetIndex());
 	}
 
 	SourceSdk::InterfacesProxy::GetGameEventManager()->AddListener(this, "player_changename", true);

@@ -49,7 +49,7 @@ void AntiSmokeBlocker::Load()
 {
 	for (PlayerHandler::const_iterator it = PlayerHandler::begin(); it != PlayerHandler::end(); ++it)
 	{
-		ResetPlayerDataStruct(it.GetIndex());
+		ResetPlayerDataStructByIndex(it.GetIndex());
 	}
 
 	SourceSdk::InterfacesProxy::GetGameEventManager()->AddListener(this, "smokegrenade_detonate", true);
@@ -108,7 +108,7 @@ void AntiSmokeBlocker::ProcessOnTick(float const curtime)
 				SourceSdk::VectorDistanceSqr(x_math.m_eyepos, it->m_value.pos, delta, dst);
 				if(dst < ConfigManager::GetInstance()->m_innersmoke_radius_sqr)
 				{
-					GetPlayerDataStruct(ph.GetIndex())->is_in_smoke = true;
+					GetPlayerDataStructByIndex(ph.GetIndex())->is_in_smoke = true;
 				}
 
 				/* Players can't see eachother if they are behind a smoke */
@@ -139,7 +139,7 @@ void AntiSmokeBlocker::ProcessOnTick(float const curtime)
 
 						if (angle_player < ang_smoke)
 						{
-							GetPlayerDataStruct(ph.GetIndex())->can_not_see_this_player[other_ph.GetIndex()] = true;
+							GetPlayerDataStructByIndex(ph.GetIndex())->can_not_see_this_player[other_ph.GetIndex()] = true;
 						}
 					}
 				}
@@ -156,10 +156,10 @@ bool AntiSmokeBlocker::SetTransmitCallback(PlayerHandler::const_iterator sender,
 {
 	//if(!receiver) return false;
 
-	if(GetPlayerDataStruct(receiver.GetIndex())->is_in_smoke)
+	if(GetPlayerDataStructByIndex(receiver.GetIndex())->is_in_smoke)
 		return true;
 
-	if(GetPlayerDataStruct(receiver.GetIndex())->can_not_see_this_player[sender.GetIndex()] == true)
+	if(GetPlayerDataStructByIndex(receiver.GetIndex())->can_not_see_this_player[sender.GetIndex()] == true)
 		return true;
 
 	return false;

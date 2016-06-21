@@ -48,7 +48,7 @@ void ShotTester::Load()
 {
 	for (PlayerHandler::const_iterator it = PlayerHandler::begin(); it != PlayerHandler::end(); ++it)
 	{
-		ResetPlayerDataStruct(it.GetIndex());
+		ResetPlayerDataStructByIndex(it.GetIndex());
 	}
 
 	PlayerRunCommandHookListener::RegisterPlayerRunCommandHookListener(this, 4);
@@ -75,7 +75,7 @@ PlayerRunCommandRet ShotTester::PlayerRunCommandCallback(PlayerHandler::const_it
 {	
 	PlayerRunCommandRet drop_cmd = CONTINUE;
 
-	ShotStatsT * const playerData = GetPlayerDataStruct(ph.GetIndex());
+	ShotStatsT * const playerData = GetPlayerDataStructByIndex(ph.GetIndex());
 
 	bool cur_in_attack;
 	bool past_in_attack;
