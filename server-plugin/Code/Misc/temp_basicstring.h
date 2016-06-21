@@ -230,6 +230,12 @@ public:
 		assign(src.c_str());
 	}
 
+	String(String<pod> && src) : String()
+	{
+		memcpy(this, &src, sizeof(String<pod>));
+		memset(&src, 0, sizeof(String<pod>));
+	}
+
 	String(String<pod> const &src, size_t start, size_t count = std::numeric_limits<size_t>::max()) : String()
 	{
 		assign(src.c_str()+start, count);
@@ -238,6 +244,17 @@ public:
 	String & operator = (String<pod> const &src)
 	{
 		assign(src);
+		return *this;
+	}
+
+	String & operator = (String<pod> && src)
+	{
+		if (this != &src)
+		{
+			Dealloc();
+			memcpy(this, &src, sizeof(String<pod>));
+			memset(&src, 0, sizeof(String<pod>));
+		}
 		return *this;
 	}
 
