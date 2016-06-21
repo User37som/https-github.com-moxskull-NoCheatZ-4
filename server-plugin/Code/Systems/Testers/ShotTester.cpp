@@ -208,5 +208,5 @@ basic_string ShotDetection::GetDataDump()
 							GetDataStruct()->with_pistol.n, GetDataStruct()->with_pistol.ratio, GetDataStruct()->with_pistol.avg_time, 
 							GetDataStruct()->with_auto.n, GetDataStruct()->with_auto.ratio, GetDataStruct()->with_auto.avg_time, 
 							GetDataStruct()->on_target.n, GetDataStruct()->on_target.ratio, GetDataStruct()->on_target.avg_time, 
-							GetDataStruct()->row, GetDataStruct()->last_detection).c_str();
+							GetDataStruct()->row, GetDataStruct()->last_detection);
 }

@@ -362,16 +362,16 @@ namespace Helpers
 		}
 	}
 
-	basic_string format(const char *fmt, ...)
+	const char * format(const char *fmt, ...)
 	{
 		va_list		argptr;
-		static char		string[FORMAT_STRING_BUFFER_SIZE];
+		static char		string[FORMAT_STRING_BUFFER_SIZE] = { '\0' };
 
 		va_start(argptr, fmt);
-		vsnprintf(string, sizeof(string), fmt, argptr);
+		vsnprintf(string, FORMAT_STRING_BUFFER_SIZE, fmt, argptr);
 		va_end (argptr);
 
-		return basic_string(string);
+		return string;
 	}
 
 	const char* boolToString(bool v)

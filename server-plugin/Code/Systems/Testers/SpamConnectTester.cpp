@@ -69,7 +69,7 @@ void SpamConnectTester::ClientConnect( bool *bAllowConnect, SourceSdk::edict_t c
 			*bAllowConnect = false;
 			if(!Helpers::bStrEq("127.0.0.1", pszAddress))
 			{
-				SourceSdk::InterfacesProxy::Call_ServerCommand(Helpers::format("addip 20 \"%s\"\n", pszAddress).c_str());
+				SourceSdk::InterfacesProxy::Call_ServerCommand(Helpers::format("addip 20 \"%s\"\n", pszAddress));
 			}
 			strncpy(reject, "You are spam connecting. Please wait 20 minutes.", 48);
 			m_connect_list.FindAndRemove(v);

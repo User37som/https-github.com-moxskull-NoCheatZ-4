@@ -70,7 +70,7 @@ namespace Helpers
 	int GetTickCount();
 
 	/* Permet d'avoir un format style C dans un conteneur C++ */
-	basic_string format(const char *fmt, ...);
+	const char * format(const char *fmt, ...);
 	
 	/* Retourne vrai si la valeur est impaire ... */
 	bool isOdd(const int value);

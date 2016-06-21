@@ -120,5 +120,5 @@ basic_string Detection_SpeedHack::GetDataDump()
 						GetDataStruct()->detections,
 						GetDataStruct()->lastDetectionTime,
 						GetDataStruct()->previousLatency,
-						GetDataStruct()->lastTest).c_str();					
+						GetDataStruct()->lastTest);					
 }

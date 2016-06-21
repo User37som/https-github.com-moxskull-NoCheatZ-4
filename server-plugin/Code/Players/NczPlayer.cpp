@@ -395,7 +395,7 @@ void NczPlayer::Kick(const char * msg)
 				"Kicked %s with reason : %s\n", this->GetReadableIdentity().c_str(), msg));
 
 	SourceSdk::InterfacesProxy::Call_ServerCommand(
-				Helpers::format("kickid %d [NoCheatZ 4] %s\n", SourceSdk::InterfacesProxy::Call_GetPlayerUserid(m_edict), msg).c_str()
+				Helpers::format("kickid %d [NoCheatZ 4] %s\n", SourceSdk::InterfacesProxy::Call_GetPlayerUserid(m_edict), msg)
 				);
 }
 

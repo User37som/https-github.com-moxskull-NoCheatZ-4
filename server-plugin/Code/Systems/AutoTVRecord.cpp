@@ -166,12 +166,12 @@ void AutoTVRecord::SpawnTV()
 				mapname = static_cast<SourceSdk::CGlobalVars_csgo*>(SourceSdk::InterfacesProxy::Call_GetGlobalVars())->mapname;
 				size_t const strip = mapname.find_last_of("/\\");
 				if (strip != basic_string::npos) mapname = mapname.c_str() + strip + 1;
-				SourceSdk::InterfacesProxy::Call_ServerCommand(Helpers::format("map %s\n", mapname.c_str()).c_str());
+				SourceSdk::InterfacesProxy::Call_ServerCommand(Helpers::format("map %s\n", mapname.c_str()));
 			}
 			else
 			{
 				mapname = static_cast<SourceSdk::CGlobalVars*>(SourceSdk::InterfacesProxy::Call_GetGlobalVars())->mapname;
-				SourceSdk::InterfacesProxy::Call_ServerCommand(Helpers::format("changelevel %s\n", mapname.c_str()).c_str());
+				SourceSdk::InterfacesProxy::Call_ServerCommand(Helpers::format("changelevel %s\n", mapname.c_str()));
 			}
 
 			m_spawn_once = false;
