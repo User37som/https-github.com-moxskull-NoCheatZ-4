@@ -49,7 +49,7 @@ namespace Helpers
 	void writeToLogfile(const basic_string &p_text);
 
 	/* Retourne la date selon le format */
-	basic_string getStrDateTime(const char *p_format);
+	const char * getStrDateTime(const char *p_format);
 
 
 	SourceSdk::edict_t * getEdictFromSteamID(const char *p_SteamID);

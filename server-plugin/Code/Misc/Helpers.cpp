@@ -64,19 +64,18 @@ namespace Helpers
 
 		SourceSdk::InterfacesProxy::Call_LogPrint(finalString.c_str());
 
-		writeToLogfile(getStrDateTime("%x %X : ").append(finalString));
+		writeToLogfile(basic_string(getStrDateTime("%x %X : ")).append(finalString));
 	}
 
-	basic_string getStrDateTime(const char *format)
+	const char * getStrDateTime(const char *format)
 	{
 		time_t rawtime;
 		struct tm * timeinfo;
-		char date[256];
+		static char date[256];
 		time(&rawtime);
 		timeinfo = localtime(&rawtime);
-		strftime(date, sizeof(date), format, timeinfo);
-		date[255] = '\0';
-		return basic_string(date);
+		strftime(date, 256, format, timeinfo);
+		return date;
 	}
 
 	bool bStrEq(const char *sz1, const char *sz2, size_t start_offset, size_t length)
