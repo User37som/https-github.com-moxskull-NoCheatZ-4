@@ -542,6 +542,9 @@
     <ClInclude Include="Code\Misc\MathCache.h">
       <Filter>Code\Misc</Filter>
     </ClInclude>
+    <ClInclude Include="version.h">
+      <Filter>Code</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Library Include="SourceSdk\Interfaces\Protobuf\protobuf-2.5.0\vsprojects\Debug\libprotobuf.lib">
