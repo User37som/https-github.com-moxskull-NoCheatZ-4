@@ -542,7 +542,7 @@
     <ClInclude Include="Code\Misc\MathCache.h">
       <Filter>Code\Misc</Filter>
     </ClInclude>
-    <ClInclude Include="version.h">
+    <ClInclude Include="Code\version.h">
       <Filter>Code</Filter>
     </ClInclude>
   </ItemGroup>

@@ -93,12 +93,16 @@ INCLUDE =       -I$(SRC_DIR) \
 # Output rules                                            #
 ###########################################################
 
+VERSION_GIT=\"$(shell git describe --tags --always --dirty)\"
+VERSION_GIT_SHORT=\"$(shell git describe --tags --abbrev=0)\"
+
 ifeq "$(DEBUG)" "false"
 	CFLAGS = $(OPT_FLAGS)
 else
 	CFLAGS = $(DEBUG_FLAGS)
 endif
-CFLAGS += $(USER_CFLAGS) $(BASE_CFLAGS) $(ARCH_CFLAGS)
+
+CFLAGS += $(USER_CFLAGS) $(BASE_CFLAGS) $(ARCH_CFLAGS) -DNCZ_VERSION_GIT=$(VERSION_GIT) -DNCZ_VERSION_GIT_SHORT=$(VERSION_GIT_SHORT)
 
 CPP_MAJOR := $(shell $(CXX) -dumpversion >&1 | cut -b1)
 CPP_MINOR := $(shell $(CXX) -dumpversion >&1 | cut -b3)
