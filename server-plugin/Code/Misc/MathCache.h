@@ -33,7 +33,7 @@ struct MathInfo
 	SourceSdk::Vector m_maxs;
 };
 
-class MathCache : 
+class MathCache :
 	public Singleton<MathCache>
 {
 private:
@@ -43,26 +43,26 @@ private:
 		bool m_is_not_expired;
 	};
 
-	CacheInfo m_cache[66];
+	CacheInfo m_cache[ 66 ];
 
 public:
-	MathCache();
-	virtual ~MathCache() final;
+	MathCache ();
+	virtual ~MathCache () final;
 
 	/*
 		This will update internal cache if it is expired or if force is specified
 	*/
-	MathInfo & GetCachedMaths(int const player_index, bool const force_update = false);
+	MathInfo & RT_GetCachedMaths ( int const player_index, bool const force_update = false );
 
 	/*
 		Set all cache as expired, this is done once per tick
 	*/
-	inline void SetCacheExpired();
+	inline void RT_SetCacheExpired ();
 };
 
-inline void MathCache::SetCacheExpired()
+inline void MathCache::RT_SetCacheExpired ()
 {
-	memset(m_cache, 0, (uint8_t*)(&m_cache[66]) - (uint8_t*)(m_cache));
+	memset ( m_cache, 0, ( uint8_t* ) ( &m_cache[ 66 ] ) - ( uint8_t* ) ( m_cache ) );
 }
 
 #endif

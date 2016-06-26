@@ -4,7 +4,7 @@
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
-       http://www.apache.org/licenses/LICENSE-2.0
+	   http://www.apache.org/licenses/LICENSE-2.0
 
    Unless required by applicable law or agreed to in writing, software
    distributed under the License is distributed on an "AS IS" BASIS,
@@ -39,6 +39,13 @@
 #	define NCZ_VERSION_STR	"4 Beta r1"
 #endif
 
+#ifdef GNUC
+#	define __assume(cond) if (!(cond)) __builtin_unreachable()
+#	define __unreachable() __builtin_unreachable()
+#else
+#	define __unreachable() __assume(0)
+#endif
+
 
 #define NCZ_PLUGIN_NAME			"NoCheatZ" // Name of the plugin
 
@@ -71,7 +78,7 @@
 #ifndef nullptr
 #	define nullptr 0
 #endif
-	typedef unsigned long DWORD;
+typedef unsigned long DWORD;
 #endif
 
 #ifdef WIN32

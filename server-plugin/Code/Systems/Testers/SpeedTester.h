@@ -4,7 +4,7 @@
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
-       http://www.apache.org/licenses/LICENSE-2.0
+	   http://www.apache.org/licenses/LICENSE-2.0
 
    Unless required by applicable law or agreed to in writing, software
    distributed under the License is distributed on an "AS IS" BASIS,
@@ -39,18 +39,18 @@ typedef struct SpeedHolder
 	float previousLatency;
 	float lastTest;
 
-	SpeedHolder()
+	SpeedHolder ()
 	{
-		if (SourceSdk::InterfacesProxy::_vfptr_GetTickInterval)
-			ticksLeft = ceil((1.0f / SourceSdk::InterfacesProxy::Call_GetTickInterval()) * 2.0f);
+		if( SourceSdk::InterfacesProxy::_vfptr_GetTickInterval )
+			ticksLeft = ceil ( ( 1.0f / SourceSdk::InterfacesProxy::Call_GetTickInterval () ) * 2.0f );
 		else
 			ticksLeft = 0;
 		detections = 0;
 		lastDetectionTime = previousLatency = lastTest = 0.0;
 	};
-	SpeedHolder(const SpeedHolder& other)
+	SpeedHolder ( const SpeedHolder& other )
 	{
-		memset(this, 0, sizeof(SpeedHolder));
+		memset ( this, 0, sizeof ( SpeedHolder ) );
 	};
 } SpeedHolderT;
 
@@ -58,11 +58,13 @@ class Detection_SpeedHack : public LogDetection<SpeedHolderT>
 {
 	typedef LogDetection<SpeedHolderT> hClass;
 public:
-	Detection_SpeedHack() : hClass() {};
-	virtual ~Detection_SpeedHack() final {};
+	Detection_SpeedHack () : hClass ()
+	{};
+	virtual ~Detection_SpeedHack () final
+	{};
 
-	virtual basic_string GetDataDump() final;
-	virtual basic_string GetDetectionLogMessage() final
+	virtual basic_string GetDataDump () final;
+	virtual basic_string GetDetectionLogMessage () final
 	{
 		return "SpeedHack";
 	};
@@ -79,21 +81,22 @@ class SpeedTester :
 	typedef Singleton<SpeedTester> singleton_class;
 
 public:
-	SpeedTester();
-	virtual ~SpeedTester() final;
+	SpeedTester ();
+	virtual ~SpeedTester () final;
 
 private:
-	virtual void Init() override final;
+	virtual void Init () override final;
 
-	virtual void Load() override final;
+	virtual void Load () override final;
 
-	virtual void Unload() override final;
+	virtual void Unload () override final;
 
-	virtual void ProcessPlayerTestOnTick(PlayerHandler::const_iterator ph, float const curtime) override final;
+	virtual void RT_ProcessPlayerTestOnTick ( PlayerHandler::const_iterator ph, float const curtime ) override final;
 
-	virtual void ProcessOnTick(float const curtime) override final {};
+	virtual void RT_ProcessOnTick ( float const curtime ) override final
+	{};
 
-	virtual PlayerRunCommandRet PlayerRunCommandCallback(PlayerHandler::const_iterator ph, void * const cmd, void * const old_cmd) override final;
+	virtual PlayerRunCommandRet RT_PlayerRunCommandCallback ( PlayerHandler::const_iterator ph, void * const cmd, void * const old_cmd ) override final;
 };
 
 #endif // SPEEDTESTER_H

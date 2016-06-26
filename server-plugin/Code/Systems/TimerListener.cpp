@@ -4,7 +4,7 @@
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
-       http://www.apache.org/licenses/LICENSE-2.0
+	   http://www.apache.org/licenses/LICENSE-2.0
 
    Unless required by applicable law or agreed to in writing, software
    distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,44 +18,44 @@
 #include "Interfaces/InterfacesProxy.h"
 
 timer_listeners_list_t TimerListener::m_listeners;
-bool TimerListener::m_undersample = false;
+bool TimerListener::m_undersample ( false );
 
-TimerListener::TimerListener()
+TimerListener::TimerListener ()
 {
 
 }
 
-TimerListener::~TimerListener()
+TimerListener::~TimerListener ()
 {
 
 }
 
-void TimerListener::OnTick()
+void TimerListener::RT_OnTick ()
 {
 	m_undersample = !m_undersample;
 
-	if(m_undersample)
+	if( m_undersample )
 	{
-		float const cur_time = Plat_FloatTime();
+		float const cur_time ( Plat_FloatTime () );
 
-		timer_listeners_list_t::elem_t* it1 = m_listeners.GetFirst();
-		while(it1 != nullptr)
+		timer_listeners_list_t::elem_t* it1 ( m_listeners.GetFirst () );
+		while( it1 != nullptr )
 		{
-			timer_list_t & child = it1->m_value->m_timers;
+			timer_list_t & child ( it1->m_value->m_timers );
 
-			size_t pos = 0;
-			size_t max = child.Size();
-			while(pos < max)
+			size_t pos ( 0 );
+			size_t max ( child.Size () );
+			while( pos < max )
 			{
-				TimerInfo& v = child[pos];
+				TimerInfo& v ( child[ pos ] );
 
-				if(cur_time - v.m_last_exec >= v.m_period_seconds)
+				if( cur_time - v.m_last_exec >= v.m_period_seconds )
 				{
-					it1->m_value->TimerCallback(v.m_name);
+					it1->m_value->RT_TimerCallback ( v.m_name );
 
-					if(v.m_once)
+					if( v.m_once )
 					{
-						child.FindAndRemove(v);
+						child.FindAndRemove ( v );
 						--max;
 						continue;
 					}
@@ -67,33 +67,33 @@ void TimerListener::OnTick()
 	}
 }
 
-void TimerListener::AddTimerListener(TimerListener* listener)
+void TimerListener::AddTimerListener ( TimerListener* listener )
 {
-	if(m_listeners.Find(listener) == nullptr)
-		m_listeners.Add(listener);
+	if( m_listeners.Find ( listener ) == nullptr )
+		m_listeners.Add ( listener );
 }
 
-void TimerListener::RemoveTimerListener(TimerListener* listener)
+void TimerListener::RemoveTimerListener ( TimerListener* listener )
 {
-	m_listeners.Remove(listener);
+	m_listeners.Remove ( listener );
 }
 
-void TimerListener::AddTimer(float period_seconds, char const * const name, bool single_time)
+void TimerListener::AddTimer ( float period_seconds, char const * const name, bool single_time )
 {
-	Assert(period_seconds >= 2.0 * SourceSdk::InterfacesProxy::Call_GetTickInterval() && "You can't use a timer that is under the resolution of 2 game-ticks.");
+	Assert ( period_seconds >= 2.0 * SourceSdk::InterfacesProxy::Call_GetTickInterval () && "You can't use a timer that is under the resolution of 2 game-ticks." );
 
-	TimerInfo t(name, period_seconds, single_time);
+	TimerInfo t ( name, period_seconds, single_time );
 
-	if(m_timers.Find(t) == -1)
-		m_timers.AddToTail(t);
+	if( m_timers.Find ( t ) == -1 )
+		m_timers.AddToTail ( t );
 }
 
-void TimerListener::RemoveTimer(char const * const name)
+void TimerListener::RemoveTimer ( char const * const name )
 {
-	m_timers.FindAndRemove(TimerInfo(name));
+	m_timers.FindAndRemove ( TimerInfo ( name ) );
 }
 
-void TimerListener::ClearTimers()
+void TimerListener::ClearTimers ()
 {
-	m_timers.RemoveAll();
+	m_timers.RemoveAll ();
 }

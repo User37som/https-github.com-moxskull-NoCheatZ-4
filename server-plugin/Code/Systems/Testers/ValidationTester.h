@@ -4,7 +4,7 @@
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
-       http://www.apache.org/licenses/LICENSE-2.0
+	   http://www.apache.org/licenses/LICENSE-2.0
 
    Unless required by applicable law or agreed to in writing, software
    distributed under the License is distributed on an "AS IS" BASIS,
@@ -32,53 +32,60 @@ typedef struct ValidationInfo
 {
 	bool b;
 
-	ValidationInfo()
-	{
-		b = false;
-	};
-	ValidationInfo(const ValidationInfo& other)
-	{
-		b = other.b;
-	};
+	ValidationInfo () :
+		b ( false )
+	{};
+	ValidationInfo ( const ValidationInfo& other ) :
+		b ( other.b )
+	{};
 } ValidationInfoT;
 
 typedef struct ValidatedInfo
 {
-	char m_steamid[64];
-	char m_ipaddress[64];
+	char m_steamid[ 64 ];
+	char m_ipaddress[ 64 ];
 
-	ValidatedInfo()
+	ValidatedInfo () :
+		m_steamid  { 0 } ,
+		m_ipaddress  { 0 } 
+	{}
+
+	ValidatedInfo ( char const * steamid )
 	{
-		memset(this, 0, sizeof(ValidatedInfo));
+		strncpy ( m_steamid, steamid, 64 );
 	}
 
-	ValidatedInfo(char const * steamid)
+	ValidatedInfo ( char const * steamid, char const * ip )
 	{
-		strncpy(m_steamid, steamid, 64);
+		strncpy ( m_steamid, steamid, 64 );
+		strncpy ( m_ipaddress, ip, 64 );
 	}
 
-	ValidatedInfo(char const * steamid, char const * ip)
+	ValidatedInfo ( ValidatedInfo const & other )
 	{
-		strncpy(m_steamid, steamid, 64);
-		strncpy(m_ipaddress, ip, 64);
+		memcpy ( this, &other, sizeof ( ValidatedInfo ) );
 	}
 
-	ValidatedInfo(ValidatedInfo const & other)
+	ValidatedInfo ( ValidatedInfo && other )
 	{
-		memcpy(m_steamid, other.m_steamid, 64);
-		memcpy(m_ipaddress, other.m_ipaddress, 64);
+		memcpy ( this, &other, sizeof ( ValidatedInfo ) );
 	}
 
-	ValidatedInfo & operator=(ValidatedInfo const & other)
+	ValidatedInfo & operator=( ValidatedInfo const & other )
 	{
-		memcpy(m_steamid, other.m_steamid, 64);
-		memcpy(m_ipaddress, other.m_ipaddress, 64);
+		memcpy ( this, &other, sizeof ( ValidatedInfo ) );
 		return *this;
 	}
 
-	bool operator==(ValidatedInfo const & other) const
+	ValidatedInfo & operator=( ValidatedInfo && other )
 	{
-		return strcmp(m_steamid, other.m_steamid) == 0;
+		memcpy ( this, &other, sizeof ( ValidatedInfo ) );
+		return *this;
+	}
+
+	bool operator==( ValidatedInfo const & other ) const
+	{
+		return strcmp ( m_steamid, other.m_steamid ) == 0;
 	}
 } ValidatedInfoT;
 
@@ -100,32 +107,32 @@ private:
 	ValidatedIdsT m_validated_ids;
 
 public:
-	ValidationTester();
-	virtual ~ValidationTester() final;
+	ValidationTester ();
+	virtual ~ValidationTester () final;
 
 private:
-	virtual void Init() override final;
+	virtual void Init () override final;
 
-	virtual void Load() override final;
+	virtual void Load () override final;
 
-	virtual void Unload() override final;
-	
-	virtual void ProcessPlayerTestOnTick(PlayerHandler::const_iterator ph, float const curtime) override final;
+	virtual void Unload () override final;
 
-	virtual void ProcessOnTick(float const curtime) override final;
+	virtual void RT_ProcessPlayerTestOnTick ( PlayerHandler::const_iterator ph, float const curtime ) override final;
 
-	virtual void FireGameEvent(SourceSdk::IGameEvent* ev) override final;
+	virtual void RT_ProcessOnTick ( float const curtime ) override final;
 
-	void SetValidated(PlayerHandler::const_iterator ph);
+	virtual void FireGameEvent ( SourceSdk::IGameEvent* ev ) override final;
+
+	void SetValidated ( PlayerHandler::const_iterator ph );
 
 public:
-	void AddPendingValidation(const char *pszUserName, const char* steamid);
+	void AddPendingValidation ( const char *pszUserName, const char* steamid );
 
 private:
-	bool WasPreviouslyValidated(PlayerHandler::const_iterator ph);
+	bool WasPreviouslyValidated ( PlayerHandler::const_iterator ph );
 
 public:
-	bool JoinCallback(PlayerHandler::const_iterator ph);
+	bool JoinCallback ( PlayerHandler::const_iterator ph );
 };
 
 #endif // VALIDATIONTESTER_H

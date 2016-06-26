@@ -4,7 +4,7 @@
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
-       http://www.apache.org/licenses/LICENSE-2.0
+	   http://www.apache.org/licenses/LICENSE-2.0
 
    Unless required by applicable law or agreed to in writing, software
    distributed under the License is distributed on an "AS IS" BASIS,
@@ -34,13 +34,13 @@ struct UserCmdInfo
 	bool m_prev_dead;
 	float m_detected_time;
 
-	UserCmdInfo()
+	UserCmdInfo ()
 	{
 		m_tick_status = IN_RESET;
 		m_prev_dead = true;
 		m_detected_time = 0.0;
 	};
-	UserCmdInfo(const UserCmdInfo& other)
+	UserCmdInfo ( const UserCmdInfo& other )
 	{
 		m_tick_status = other.m_tick_status;
 		m_prev_dead = other.m_prev_dead;
@@ -58,16 +58,16 @@ class BadUserCmdBlocker :
 	typedef PlayerDataStructHandler<UserCmdInfo> playerdatahandler_class;
 
 public:
-	BadUserCmdBlocker();
-	virtual ~BadUserCmdBlocker() final;
+	BadUserCmdBlocker ();
+	virtual ~BadUserCmdBlocker () final;
 
-	virtual void Init() override final;
+	virtual void Init () override final;
 
-	virtual void Load() override final;
+	virtual void Load () override final;
 
-	virtual void Unload() override final;
+	virtual void Unload () override final;
 
-	virtual PlayerRunCommandRet PlayerRunCommandCallback(PlayerHandler::const_iterator ph, void * const cmd, void * const old_cmd) override final;
+	virtual PlayerRunCommandRet RT_PlayerRunCommandCallback ( PlayerHandler::const_iterator ph, void * const cmd, void * const old_cmd ) override final;
 };
 
 #endif // BADUSERCMDBLOCKER_H

@@ -4,7 +4,7 @@
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
-       http://www.apache.org/licenses/LICENSE-2.0
+	   http://www.apache.org/licenses/LICENSE-2.0
 
    Unless required by applicable law or agreed to in writing, software
    distributed under the License is distributed on an "AS IS" BASIS,
@@ -30,7 +30,7 @@
 // ConVarTester
 /////////////////////////////////////////////////////////////////////////
 
-typedef enum ConVarRule
+typedef enum class ConVarRule : unsigned int
 {
 	SAME = 0,
 	SAME_FLOAT,
@@ -41,27 +41,27 @@ typedef enum ConVarRule
 
 typedef struct ConVarInfo
 {
-	char name[64];
-	char value[64];
+	char name[ 64 ];
+	char value[ 64 ];
 	ConVarRuleT rule;
 	bool safe;
 	void* sv_var;
 
-	ConVarInfo()
+	ConVarInfo ()
 	{
-		memset(this, 0, sizeof(ConVarInfo));
+		memset ( this, 0, sizeof ( ConVarInfo ) );
 	};
-	ConVarInfo(const char* pname, const char* pvalue, ConVarRuleT prule, bool psafe, void* sv = nullptr)
+	ConVarInfo ( const char* pname, const char* pvalue, ConVarRuleT prule, bool psafe, void* sv = nullptr )
 	{
-		strncpy(name, pname, 64);
-		strncpy(value, pvalue, 64);
-		rule=prule;
-		safe=psafe;
+		strncpy ( name, pname, 64 );
+		strncpy ( value, pvalue, 64 );
+		rule = prule;
+		safe = psafe;
 		sv_var = sv;
 	};
-	ConVarInfo(const ConVarInfo& other)
+	ConVarInfo ( const ConVarInfo& other )
 	{
-		memcpy(this, &other, sizeof(ConVarInfo));
+		memcpy ( this, &other, sizeof ( ConVarInfo ) );
 	};
 } ConVarInfoT;
 
@@ -76,8 +76,14 @@ typedef struct CurrentConVarRequest
 	basic_string answer;
 	basic_string answer_status;
 
-	CurrentConVarRequest(){isSent=false;isReplyed=false;timeStart=0.0;};
-	CurrentConVarRequest(const CurrentConVarRequest& other){isSent=other.isSent;isReplyed=other.isReplyed;timeStart=other.timeStart;ruleset=other.ruleset;answer=other.answer;answer_status=other.answer_status;};
+	CurrentConVarRequest ()
+	{
+		isSent = false; isReplyed = false; timeStart = 0.0;
+	};
+	CurrentConVarRequest ( const CurrentConVarRequest& other )
+	{
+		isSent = other.isSent; isReplyed = other.isReplyed; timeStart = other.timeStart; ruleset = other.ruleset; answer = other.answer; answer_status = other.answer_status;
+	};
 } CurrentConVarRequestT;
 
 class ConVarTester;
@@ -87,11 +93,13 @@ class Detection_ConVar : public LogDetection<CurrentConVarRequestT>
 	friend ConVarTester;
 	typedef LogDetection<CurrentConVarRequestT> hClass;
 public:
-	Detection_ConVar() : hClass() {};
-	~Detection_ConVar(){};
+	Detection_ConVar () : hClass ()
+	{};
+	~Detection_ConVar ()
+	{};
 
-	virtual basic_string GetDataDump();
-	virtual basic_string GetDetectionLogMessage();
+	virtual basic_string GetDataDump ();
+	virtual basic_string GetDetectionLogMessage ();
 };
 
 class ConVarTester :
@@ -112,32 +120,33 @@ private:
 	void* var_sv_cheats;
 
 public:
-	ConVarTester();
-	virtual ~ConVarTester() final;
+	ConVarTester ();
+	virtual ~ConVarTester () final;
 
 private:
-	virtual void Init() override final;
+	virtual void Init () override final;
 
-	virtual void Load() override final;
+	virtual void Load () override final;
 
-	virtual void Unload() override final;
+	virtual void Unload () override final;
 
-	virtual bool sys_cmd_fn(SourceSdk::CCommand const &args) override final;
+	virtual bool sys_cmd_fn ( SourceSdk::CCommand const &args ) override final;
 
 	/* Nouvelle version de la fonction qui va faire en sorte de ne tester qu'un seul joueur par frame */
-	virtual void ProcessOnTick(float const curtime) override final;
+	virtual void RT_ProcessOnTick ( float const curtime ) override final;
 
-	virtual void ProcessPlayerTestOnTick(PlayerHandler::const_iterator ph, float const curtime) override final {};
+	virtual void RT_ProcessPlayerTestOnTick ( PlayerHandler::const_iterator ph, float const curtime ) override final
+	{};
 
 public:
-	void OnQueryCvarValueFinished(PlayerHandler::const_iterator ph, SourceSdk::EQueryCvarValueStatus eStatus, const char *pCvarName, const char *pCvarValue);
+	void RT_OnQueryCvarValueFinished ( PlayerHandler::const_iterator ph, SourceSdk::EQueryCvarValueStatus eStatus, const char *pCvarName, const char *pCvarValue );
 
 private:
-	void ProcessPlayerTest(PlayerHandler::const_iterator ph, float const curtime);
+	void RT_ProcessPlayerTest ( PlayerHandler::const_iterator ph, float const curtime );
 
-	void AddConvarRuleset(const char * name, const char * value, ConVarRuleT rule, bool safe = true);
+	void AddConvarRuleset ( const char * name, const char * value, ConVarRuleT rule, bool safe = true );
 
-	ConVarInfoT* FindConvarRuleset(const char * name);
+	ConVarInfoT* RT_FindConvarRuleset ( const char * name );
 };
 
 #endif // CONVARTESTER_H

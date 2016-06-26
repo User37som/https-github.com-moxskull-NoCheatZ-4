@@ -4,7 +4,7 @@
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
-       http://www.apache.org/licenses/LICENSE-2.0
+	   http://www.apache.org/licenses/LICENSE-2.0
 
    Unless required by applicable law or agreed to in writing, software
    distributed under the License is distributed on an "AS IS" BASIS,
@@ -33,8 +33,8 @@ namespace SourceSdk
 	class CBaseEntity;
 }
 
-typedef void (HOOKFN_EXT *WeaponEquip_t)(void * const, void * const);
-typedef void (HOOKFN_EXT *WeaponDrop_t)(void * const, void * const, SourceSdk::Vector const * const, SourceSdk::Vector const * const);
+typedef void ( HOOKFN_EXT *WeaponEquip_t )( void * const, void * const );
+typedef void ( HOOKFN_EXT *WeaponDrop_t )( void * const, void * const, SourceSdk::Vector const * const, SourceSdk::Vector const * const );
 
 class WeaponHookListener
 {
@@ -44,29 +44,29 @@ private:
 	static WeaponHookListenersListT m_listeners;
 
 public:
-	WeaponHookListener();
-	virtual ~WeaponHookListener();
+	WeaponHookListener ();
+	virtual ~WeaponHookListener ();
 
 	/*
 		Hook and unhook functions.
 		FIXME : May not works well with others plugins ...
 	*/
-	static void HookWeapon(PlayerHandler::const_iterator ph);
+	static void HookWeapon ( PlayerHandler::const_iterator ph );
 
 protected:
-	static void RegisterWeaponHookListener(WeaponHookListener const * const listener);
-	static void RemoveWeaponHookListener(WeaponHookListener const * const listener);
-	
-	virtual void WeaponEquipCallback(PlayerHandler::const_iterator ph, SourceSdk::edict_t const * const weapon) = 0;
-	virtual void WeaponDropCallback(PlayerHandler::const_iterator ph, SourceSdk::edict_t const * const weapon) = 0;
+	static void RegisterWeaponHookListener ( WeaponHookListener const * const listener );
+	static void RemoveWeaponHookListener ( WeaponHookListener const * const listener );
+
+	virtual void RT_WeaponEquipCallback ( PlayerHandler::const_iterator ph, SourceSdk::edict_t const * const weapon ) = 0;
+	virtual void RT_WeaponDropCallback ( PlayerHandler::const_iterator ph, SourceSdk::edict_t const * const weapon ) = 0;
 
 private:
 #ifdef GNUC
-	static void HOOKFN_INT nWeapon_Equip(void * const basePlayer, void * const weapon);
-	static void HOOKFN_INT nWeapon_Drop(void * const basePlayer, void * const weapon, SourceSdk::Vector const * const targetVec, SourceSdk::Vector const * const velocity);
+	static void HOOKFN_INT RT_nWeapon_Equip ( void * const basePlayer, void * const weapon );
+	static void HOOKFN_INT RT_nWeapon_Drop ( void * const basePlayer, void * const weapon, SourceSdk::Vector const * const targetVec, SourceSdk::Vector const * const velocity );
 #else
-	static void HOOKFN_INT nWeapon_Equip(void * const basePlayer, void * const, void * const weapon);
-	static void HOOKFN_INT nWeapon_Drop(void * const basePlayer,  void * const, void * const weapon, SourceSdk::Vector const * const targetVec, SourceSdk::Vector const * const velocity);
+	static void HOOKFN_INT RT_nWeapon_Equip ( void * const basePlayer, void * const, void * const weapon );
+	static void HOOKFN_INT RT_nWeapon_Drop ( void * const basePlayer, void * const, void * const weapon, SourceSdk::Vector const * const targetVec, SourceSdk::Vector const * const velocity );
 #endif
 };
 

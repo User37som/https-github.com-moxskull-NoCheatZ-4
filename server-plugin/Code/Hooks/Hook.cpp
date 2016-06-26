@@ -4,7 +4,7 @@
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
-       http://www.apache.org/licenses/LICENSE-2.0
+	   http://www.apache.org/licenses/LICENSE-2.0
 
    Unless required by applicable law or agreed to in writing, software
    distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,78 +21,78 @@
 #include "Systems/Logger.h"
 #include "Misc/Helpers.h"
 
-void HookGuard::VirtualTableHook(HookInfo& info, bool force /* = false*/ )
-{ 
-	if (m_list.HasElement(info) && !force) return;
+void HookGuard::VirtualTableHook ( HookInfo& info, bool force /* = false*/ )
+{
+	if( m_list.HasElement ( info ) && !force ) return;
 
 	//info.oldFn = 0;
 #ifdef WIN32
-		DWORD dwOld;
-		if(!VirtualProtect(info.vf_entry, 2 * sizeof(DWORD*), PAGE_EXECUTE_READWRITE, &dwOld ))
-		{
-			return;
-		}
+	DWORD dwOld;
+	if( !VirtualProtect ( info.vf_entry, 2 * sizeof ( DWORD* ), PAGE_EXECUTE_READWRITE, &dwOld ) )
+	{
+		return;
+	}
 #else // LINUX
-        uint32_t psize = sysconf(_SC_PAGESIZE);
-		void *p = (void *)((DWORD)(info.vf_entry) & ~(psize-1));
-		if(mprotect(p, ((2 * sizeof(void *)) + ((DWORD)(info.vf_entry) & (psize-1))), PROT_READ | PROT_WRITE | PROT_EXEC ) < 0)
-		{
-			return;
-		}
+	uint32_t psize ( sysconf ( _SC_PAGESIZE ) );
+	void *p ( ( void * ) ( ( DWORD ) ( info.vf_entry ) & ~( psize - 1 ) ) );
+	if( mprotect ( p, ( ( 2 * sizeof ( void * ) ) + ( ( DWORD ) ( info.vf_entry ) & ( psize - 1 ) ) ), PROT_READ | PROT_WRITE | PROT_EXEC ) < 0 )
+	{
+		return;
+	}
 #endif // WIN32
-		
-		if(info.oldFn && info.oldFn != *info.vf_entry)
-			Logger::GetInstance()->Msg<MSG_WARNING>("Unexpected virtual table value in VirtualTableHook. Another plugin might be in conflict.");
-		if(info.newFn == *info.vf_entry)
-		{
-			Logger::GetInstance()->Msg<MSG_WARNING>("Virtual function pointer was the same ...");
-			return;
-		}
 
-		info.oldFn = *info.vf_entry;
-		*info.vf_entry = info.newFn;
+	if( info.oldFn && info.oldFn != *info.vf_entry )
+		Logger::GetInstance ()->Msg<MSG_WARNING> ( "Unexpected virtual table value in VirtualTableHook. Another plugin might be in conflict." );
+	if( info.newFn == *info.vf_entry )
+	{
+		Logger::GetInstance ()->Msg<MSG_WARNING> ( "Virtual function pointer was the same ..." );
+		return;
+	}
+
+	info.oldFn = *info.vf_entry;
+	*info.vf_entry = info.newFn;
 
 #ifdef WIN32
-		VirtualProtect(info.vf_entry, 2 * sizeof(DWORD*), dwOld, &dwOld);
+	VirtualProtect ( info.vf_entry, 2 * sizeof ( DWORD* ), dwOld, &dwOld );
 #else // LINUX
-		mprotect(p, ((2 * sizeof(void *)) + ((DWORD)(info.vf_entry) & (psize - 1))), PROT_READ | PROT_EXEC);
+	mprotect ( p, ( ( 2 * sizeof ( void * ) ) + ( ( DWORD ) ( info.vf_entry ) & ( psize - 1 ) ) ), PROT_READ | PROT_EXEC );
 #endif // WIN32
-		DebugMessage(Helpers::format("VirtualTableHook : function 0x%X at 0x%X replaced by 0x%X.", info.oldFn, info.vf_entry, info.newFn));
+	DebugMessage ( Helpers::format ( "VirtualTableHook : function 0x%X at 0x%X replaced by 0x%X.", info.oldFn, info.vf_entry, info.newFn ) );
 
-		if (!m_list.HasElement(info)) m_list.AddToTail(info);
+	if( !m_list.HasElement ( info ) ) m_list.AddToTail ( info );
 }
 
-void MoveVirtualFunction(DWORD const * const from, DWORD * const to)
+void MoveVirtualFunction ( DWORD const * const from, DWORD * const to )
 {
 #ifdef WIN32
 	DWORD dwOld;
-	if (!VirtualProtect(to, sizeof(DWORD), PAGE_EXECUTE_READWRITE, &dwOld))
+	if( !VirtualProtect ( to, sizeof ( DWORD ), PAGE_EXECUTE_READWRITE, &dwOld ) )
 	{
 		return;
 	}
 #else // LINUX
-	uint32_t psize = sysconf(_SC_PAGESIZE);
-	void *p = (void *)((DWORD)(to) & ~(psize - 1));
-	if (mprotect(p, sizeof(DWORD) & (psize - 1), PROT_READ | PROT_WRITE | PROT_EXEC) < 0)
+	uint32_t psize ( sysconf ( _SC_PAGESIZE ) );
+	void *p = ( void * ) ( ( DWORD ) ( to ) & ~( psize - 1 ) );
+	if( mprotect ( p, sizeof ( DWORD ) & ( psize - 1 ), PROT_READ | PROT_WRITE | PROT_EXEC ) < 0 )
 	{
 		return;
 	}
 #endif // WIN32
-	DebugMessage(Helpers::format("MoveVirtualFunction : function 0x%X replaced by 0x%X.", *to, *from));
+	DebugMessage ( Helpers::format ( "MoveVirtualFunction : function 0x%X replaced by 0x%X.", *to, *from ) );
 	*to = *from;
 #ifdef WIN32
-	VirtualProtect(to, sizeof(DWORD), dwOld, &dwOld);
+	VirtualProtect ( to, sizeof ( DWORD ), dwOld, &dwOld );
 #else // LINUX
-	mprotect(p, sizeof(DWORD) & (psize - 1), PROT_READ | PROT_EXEC);
+	mprotect ( p, sizeof ( DWORD ) & ( psize - 1 ), PROT_READ | PROT_EXEC );
 #endif // WIN32
 }
 
-DWORD HookGuard::GetOldFunction(void* class_ptr, int vfid) const
+DWORD HookGuard::RT_GetOldFunction ( void* class_ptr, int vfid ) const
 {
-	int it = m_list.Find(HookInfo(class_ptr, vfid));
-	if (it != -1)
+	int it ( m_list.Find ( HookInfo ( class_ptr, vfid ) ) );
+	if( it != -1 )
 	{
-		return m_list[it].oldFn;
+		return m_list[ it ].oldFn;
 	}
 	else
 	{
@@ -100,12 +100,12 @@ DWORD HookGuard::GetOldFunction(void* class_ptr, int vfid) const
 	}
 }
 
-DWORD HookGuard::GetOldFunctionByVirtualTable(void * class_ptr) const
+DWORD HookGuard::RT_GetOldFunctionByVirtualTable ( void * class_ptr ) const
 {
-	DWORD* vt = ((DWORD*)*(DWORD*)class_ptr);
-	for (hooked_list_t::const_iterator it = m_list.begin(); it != m_list.end(); ++it)
+	DWORD* vt ( ( ( DWORD* )*( DWORD* ) class_ptr ) );
+	for( hooked_list_t::const_iterator it ( m_list.begin () ); it != m_list.end (); ++it )
 	{
-		if (it->pInterface == vt)
+		if( it->pInterface == vt )
 		{
 			return it->oldFn;
 		}
@@ -113,11 +113,11 @@ DWORD HookGuard::GetOldFunctionByVirtualTable(void * class_ptr) const
 	return 0;
 }
 
-DWORD HookGuard::GetOldFunctionByInstance(void * class_ptr) const
+DWORD HookGuard::RT_GetOldFunctionByInstance ( void * class_ptr ) const
 {
-	for (hooked_list_t::const_iterator it = m_list.begin(); it != m_list.end(); ++it)
+	for( hooked_list_t::const_iterator it ( m_list.begin () ); it != m_list.end (); ++it )
 	{
-		if (it->origEnt == class_ptr)
+		if( it->origEnt == class_ptr )
 		{
 			return it->oldFn;
 		}
@@ -125,9 +125,9 @@ DWORD HookGuard::GetOldFunctionByInstance(void * class_ptr) const
 	return 0;
 }
 
-void HookGuard::GuardHooks()
+void HookGuard::RT_GuardHooks ()
 {
-	Assert(0);
+	Assert ( 0 );
 	/*for (hooked_list_t::iterator it = m_list.begin(); it != m_list.end(); ++it)
 	{
 		if (*it->vf_entry != it->newFn)
@@ -139,12 +139,12 @@ void HookGuard::GuardHooks()
 	}*/
 }
 
-void HookGuard::UnhookAll()
+void HookGuard::UnhookAll ()
 {
-	for (hooked_list_t::iterator it = m_list.begin(); it != m_list.end(); ++it)
+	for( hooked_list_t::iterator it ( m_list.begin () ); it != m_list.end (); ++it )
 	{
-		std::swap(it->newFn, it->oldFn);
-		VirtualTableHook(*it, true); // unhook
+		std::swap ( it->newFn, it->oldFn );
+		VirtualTableHook ( *it, true ); // unhook
 	}
-	m_list.RemoveAll();
+	m_list.RemoveAll ();
 }

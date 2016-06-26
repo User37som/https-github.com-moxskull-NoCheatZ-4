@@ -20,7 +20,7 @@ limitations under the License.
 #include "Hook.h"
 
 // The function declaration we will call
-typedef void (HOOKFN_EXT *PostThink_t)(void * const);
+typedef void ( HOOKFN_EXT *PostThink_t )( void * const );
 
 class ThinkPostHookListener
 {
@@ -30,8 +30,8 @@ private:
 	static ListenersList_t m_listeners;
 
 public:
-	ThinkPostHookListener();
-	virtual ~ThinkPostHookListener();
+	ThinkPostHookListener ();
+	virtual ~ThinkPostHookListener ();
 
 	/*
 	Hook and unhook functions.
@@ -44,19 +44,19 @@ public:
 
 	This is a single instance hook. The plugin calls this when there is at least one player in game.
 	*/
-	static void HookThinkPost(SourceSdk::edict_t const * const entity);
+	static void HookThinkPost ( SourceSdk::edict_t const * const entity );
 
 protected:
-	static void RegisterThinkPostHookListener(ThinkPostHookListener const * const listener);
-	static void RemoveThinkPostHookListener(ThinkPostHookListener const * const listener);
+	static void RegisterThinkPostHookListener ( ThinkPostHookListener const * const listener );
+	static void RemoveThinkPostHookListener ( ThinkPostHookListener const * const listener );
 
-	virtual void ThinkPostCallback(SourceSdk::edict_t const * const) = 0;
+	virtual void RT_ThinkPostCallback ( SourceSdk::edict_t const * const ) = 0;
 
 private:
 #ifdef GNUC
-	static void HOOKFN_INT nThinkPost(void * const baseentity);
+	static void HOOKFN_INT RT_nThinkPost ( void * const baseentity );
 #else
-	static void HOOKFN_INT nThinkPost(void * const baseentity, void * const);
+	static void HOOKFN_INT RT_nThinkPost ( void * const baseentity, void * const );
 #endif
 };
 

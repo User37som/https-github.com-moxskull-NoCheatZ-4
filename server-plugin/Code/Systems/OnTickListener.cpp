@@ -24,7 +24,7 @@ OnTickListener::TickListenersListT OnTickListener::m_tickTestersList;
 
 OnTickListener::OnTickListener()
 {
-	m_filter = PLAYER_IN_TESTS;
+	m_filter = SlotStatus::PLAYER_IN_TESTS;
 }
 
 void OnTickListener::ProcessTestsOnTick(float const curtime)
@@ -33,7 +33,7 @@ void OnTickListener::ProcessTestsOnTick(float const curtime)
 	{
 		if (it >= GetFilter())
 		{
-			ProcessPlayerTestOnTick(it, curtime);
+			RT_ProcessPlayerTestOnTick(it, curtime);
 		}
 	}
 }
@@ -48,13 +48,13 @@ void OnTickListener::RemoveOnTickListener(OnTickListener const * const tester)
 	m_tickTestersList.Remove(const_cast<OnTickListener*const>(tester));
 }
 
-void OnTickListener::OnTick()
+void OnTickListener::RT_OnTick()
 {
 	float const curtime = Plat_FloatTime();
 	TickListenersListT::elem_t* it = m_tickTestersList.GetFirst();
 	while(it != nullptr)
 	{
-		it->m_value->ProcessOnTick(curtime);
+		it->m_value->RT_ProcessOnTick(curtime);
 		it->m_value->ProcessTestsOnTick(curtime);
 
 		it = it->m_next;

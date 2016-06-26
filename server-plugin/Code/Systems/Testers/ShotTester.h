@@ -30,21 +30,18 @@ typedef struct ShotStatHandler
 	float avg_time;
 	float ratio;
 
-	ShotStatHandler()
+	ShotStatHandler ()
 	{
-		n = 0;
-		avg_time = ratio = 0.0;
+		memset ( this, 0, sizeof ( ShotStatHandler ) );
 	};
-	ShotStatHandler(const ShotStatHandler& other)
+	ShotStatHandler ( const ShotStatHandler& other )
 	{
-		n = other.n;
-		avg_time = other.avg_time;
-		ratio = other.ratio;
+		memcpy ( this, &other, sizeof ( ShotStatHandler ) );
 	};
 } ShotStatHandlerT;
 
-void TriggerStat(ShotStatHandlerT* handler);
-void OutputStat(ShotStatHandlerT* handler);
+void TriggerStat ( ShotStatHandlerT* handler );
+void OutputStat ( ShotStatHandlerT* handler );
 
 typedef struct ShotStats
 {
@@ -59,24 +56,13 @@ typedef struct ShotStats
 	size_t row; // D�tections cons�cutives
 	float last_detection; // Heure de la derni�re d�tection
 
-	ShotStats()
+	ShotStats ()
 	{
-		up_time = down_time = last_detection = 0;
-		row = 0;
-		clicks = short_clicks = with_hand = with_pistol = with_auto = on_target = ShotStatHandler();
+		memset ( this, 0, sizeof ( ShotStats ) );
 	};
-	ShotStats(const ShotStats& other)
+	ShotStats ( const ShotStats& other )
 	{
-		up_time = other.up_time;
-		down_time = other.down_time;
-		clicks = other.clicks;
-		short_clicks = other.short_clicks;
-		with_hand = other.with_hand;
-		with_pistol = other.with_pistol;
-		with_auto = other.with_auto;
-		on_target = other.on_target;
-		row = other.row;
-		last_detection = other.last_detection;
+		memcpy ( this, &other, sizeof ( ShotStats ) );
 	};
 } ShotStatsT;
 
@@ -90,28 +76,30 @@ class ShotTester :
 	typedef Singleton<ShotTester> singleton_class;
 
 public:
-	ShotTester();
+	ShotTester ();
 
-	virtual ~ShotTester() final;
+	virtual ~ShotTester () final;
 
-	virtual void Init() override final;
+	virtual void Init () override final;
 
-	virtual void Load() override final;
+	virtual void Load () override final;
 
-	virtual void Unload() override final;
+	virtual void Unload () override final;
 
-	virtual PlayerRunCommandRet PlayerRunCommandCallback(PlayerHandler::const_iterator ph, void * const pCmd, void * const old_cmd) override final;
+	virtual PlayerRunCommandRet RT_PlayerRunCommandCallback ( PlayerHandler::const_iterator ph, void * const pCmd, void * const old_cmd ) override final;
 };
 
 class ShotDetection : public LogDetection<ShotStats>
 {
 	typedef LogDetection<ShotStats> hClass;
 public:
-	ShotDetection() : hClass() {};
-	virtual ~ShotDetection() override {};
+	ShotDetection () : hClass ()
+	{};
+	virtual ~ShotDetection () override
+	{};
 
-	virtual basic_string GetDataDump() override final;
-	virtual basic_string GetDetectionLogMessage() override
+	virtual basic_string GetDataDump () override final;
+	virtual basic_string GetDetectionLogMessage () override
 	{
 		return "ShotDetection";
 	};
@@ -120,10 +108,12 @@ public:
 class Detection_TriggerBot : public ShotDetection
 {
 public:
-	Detection_TriggerBot() : ShotDetection() {};
-	virtual ~Detection_TriggerBot() override final {};
+	Detection_TriggerBot () : ShotDetection ()
+	{};
+	virtual ~Detection_TriggerBot () override final
+	{};
 
-	virtual basic_string GetDetectionLogMessage() override final
+	virtual basic_string GetDetectionLogMessage () override final
 	{
 		return "TriggerBot";
 	};
@@ -132,10 +122,12 @@ public:
 class Detection_AutoPistol : public ShotDetection
 {
 public:
-	Detection_AutoPistol() : ShotDetection() {};
-	virtual ~Detection_AutoPistol() override final {};
+	Detection_AutoPistol () : ShotDetection ()
+	{};
+	virtual ~Detection_AutoPistol () override final
+	{};
 
-	virtual basic_string GetDetectionLogMessage() override final
+	virtual basic_string GetDetectionLogMessage () override final
 	{
 		return "AutoPistol";
 	};

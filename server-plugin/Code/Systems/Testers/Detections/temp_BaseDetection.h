@@ -4,7 +4,7 @@
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
-       http://www.apache.org/licenses/LICENSE-2.0
+	   http://www.apache.org/licenses/LICENSE-2.0
 
    Unless required by applicable law or agreed to in writing, software
    distributed under the License is distributed on an "AS IS" BASIS,
@@ -27,42 +27,48 @@
 class BaseDetection
 {
 public:
-	BaseDetection(){};
-	virtual ~BaseDetection(){};
+	BaseDetection ()
+	{};
+	virtual ~BaseDetection ()
+	{};
 };
 
 template <typename playerDataStructT>
 class SubDetection : public BaseDetection
 {
 public:
-	SubDetection()
+	SubDetection ()
 	{
 		this->m_timestamp = 0.0;
 		this->m_tick = 0;
-		this->m_dataStruct = playerDataStructT();
+		this->m_dataStruct = playerDataStructT ();
 	};
-	virtual ~SubDetection() override {};
+	virtual ~SubDetection () override
+	{};
 
-	void PrepareDetectionData(playerDataStructT* dataStruct)
+	void PrepareDetectionData ( playerDataStructT* dataStruct )
 	{
-		this->m_timestamp = Plat_FloatTime();
-		if (SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive)
+		this->m_timestamp = Plat_FloatTime ();
+		if( SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive )
 		{
-			this->m_tick = static_cast<SourceSdk::CGlobalVars_csgo*>(SourceSdk::InterfacesProxy::Call_GetGlobalVars())->tickcount;
+			this->m_tick = static_cast< SourceSdk::CGlobalVars_csgo* >( SourceSdk::InterfacesProxy::Call_GetGlobalVars () )->tickcount;
 		}
 		else
 		{
-			this->m_tick = static_cast<SourceSdk::CGlobalVars*>(SourceSdk::InterfacesProxy::Call_GetGlobalVars())->tickcount;
+			this->m_tick = static_cast< SourceSdk::CGlobalVars* >( SourceSdk::InterfacesProxy::Call_GetGlobalVars () )->tickcount;
 		}
 		this->m_dataStruct = *dataStruct;
 	};
 
-	playerDataStructT* GetDataStruct() const
+	playerDataStructT* GetDataStruct () const
 	{
-		return (playerDataStructT*)(&(this->m_dataStruct));
+		return ( playerDataStructT* ) ( &( this->m_dataStruct ) );
 	};
 
-	virtual basic_string GetDataDump(){return "";};
+	virtual basic_string GetDataDump ()
+	{
+		return "";
+	};
 
 protected:
 	float m_timestamp;
@@ -75,32 +81,35 @@ class LogDetection : public SubDetection<playerDataStructT>
 {
 	typedef SubDetection<playerDataStructT> BaseClass;
 public:
-	LogDetection() : BaseClass()
+	LogDetection () : BaseClass ()
 	{
 		this->m_testerName = nullptr;
 	};
-	virtual ~LogDetection() override {};
+	virtual ~LogDetection () override
+	{};
 
-	virtual basic_string GetDetectionLogMessage(){return "";};
-
-	virtual void Log()
+	virtual basic_string GetDetectionLogMessage ()
 	{
-		basic_string msg;
-		msg = Helpers::format("%s triggered a detection : %s is using a %s.", this->m_testerName, this->m_playerIdentity.c_str(), this->GetDetectionLogMessage().c_str()); 
-		Helpers::writeToLogfile(msg);
-		msg = Helpers::format("[" NCZ_PLUGIN_NAME "] %s\0", msg.c_str());
-		SourceSdk::InterfacesProxy::Call_LogPrint(msg.c_str());
-		Helpers::chatprintf(msg);
+		return "";
+	};
 
-		Helpers::writeToLogfile(this->GetDataDump());
+	virtual void Log ()
+	{
+		basic_string msg ( Helpers::format ( "%s triggered a detection : %s is using a %s.", this->m_testerName, this->m_playerIdentity.c_str (), this->GetDetectionLogMessage ().c_str () ) );
+		Helpers::writeToLogfile ( msg );
+		char const * text2 ( Helpers::format ( "[" NCZ_PLUGIN_NAME "] %s\0", msg.c_str () ) );
+		SourceSdk::InterfacesProxy::Call_LogPrint ( text2 );
+		Helpers::chatprintf ( text2 );
+
+		Helpers::writeToLogfile ( this->GetDataDump () );
 
 	};
 
-	void PrepareDetectionLog(NczPlayer* player, BaseSystem* tester)
+	void PrepareDetectionLog ( NczPlayer* player, BaseSystem* tester )
 	{
-		m_testerName = tester->GetName();
-		
-		m_playerIdentity = player->GetReadableIdentity();
+		m_testerName = tester->GetName ();
+
+		m_playerIdentity = player->GetReadableIdentity ();
 
 	};
 

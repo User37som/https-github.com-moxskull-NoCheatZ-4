@@ -4,7 +4,7 @@
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
-       http://www.apache.org/licenses/LICENSE-2.0
+	   http://www.apache.org/licenses/LICENSE-2.0
 
    Unless required by applicable law or agreed to in writing, software
    distributed under the License is distributed on an "AS IS" BASIS,
@@ -25,186 +25,184 @@
 // BaseSystem
 /////////////////////////////////////////////////////////////////////////
 
-BaseSystem::BaseSystem(char const * const name, SlotStatus filter, SlotStatus load_filter, SlotFilterBehavior filter_behavior, char const * const commands) : 
-	ListMeClass(),
-	SlotFilter(filter, load_filter, filter_behavior),
-	m_name(name),
-	m_cmd_list(commands),
-	m_isActive(false),
-	m_isDisabled(false),
-	m_configState(true),
-	m_verbose(false)
-{
-}
+BaseSystem::BaseSystem ( char const * const name, SlotStatus filter, SlotStatus load_filter, SlotFilterBehavior filter_behavior, char const * const commands ) :
+	ListMeClass (),
+	SlotFilter ( filter, load_filter, filter_behavior ),
+	m_name ( name ),
+	m_cmd_list ( commands ),
+	m_isActive ( false ),
+	m_isDisabled ( false ),
+	m_configState ( true ),
+	m_verbose ( false )
+{}
 
-BaseSystem::~BaseSystem()
-{
-}
+BaseSystem::~BaseSystem ()
+{}
 
-void BaseSystem::UnloadAllSystems()
+void BaseSystem::UnloadAllSystems ()
 {
-	BaseSystem* it = GetFirst();
-	while (it != nullptr)
+	BaseSystem* it ( GetFirst () );
+	while( it != nullptr )
 	{
-		it->SetActive(false);
-		GetNext(it);
+		it->SetActive ( false );
+		GetNext ( it );
 	}
 }
 
-void BaseSystem::TryUnloadSystems()
+void BaseSystem::TryUnloadSystems ()
 {
-	BaseSystem* it = GetFirst();
-	while (it != nullptr)
+	BaseSystem* it ( GetFirst () );
+	while( it != nullptr )
 	{
-		if(it->ShouldUnload()) it->SetActive(false);
-		GetNext(it);
+		if( it->ShouldUnload () ) it->SetActive ( false );
+		GetNext ( it );
 	}
 }
 
-void BaseSystem::TryLoadSystems()
+void BaseSystem::TryLoadSystems ()
 {
-	BaseSystem* it = GetFirst();
-	while (it != nullptr)
+	BaseSystem* it ( GetFirst () );
+	while( it != nullptr )
 	{
-		it->SetActive(true);
-		GetNext(it);
+		it->SetActive ( true );
+		GetNext ( it );
 	}
 }
 
-void BaseSystem::InitSystems()
+void BaseSystem::InitSystems ()
 {
-	BaseSystem* it = GetFirst();
-	while (it != nullptr)
+	BaseSystem* it ( GetFirst () );
+	while( it != nullptr )
 	{
-		it->Init();
-		GetNext(it);
+		it->Init ();
+		GetNext ( it );
 	}
 }
 
-BaseSystem * BaseSystem::FindSystemByName(const char * name)
+BaseSystem * BaseSystem::FindSystemByName ( const char * name )
 {
-	BaseSystem* it = GetFirst();
-	while (it != nullptr)
+	BaseSystem* it ( GetFirst () );
+	while( it != nullptr )
 	{
-		if (stricmp(it->GetName(), name) == 0)
+		if( stricmp ( it->GetName (), name ) == 0 )
 			return it;
-		GetNext(it);
+		GetNext ( it );
 	}
 	return nullptr;
 }
 
-bool BaseSystem::ShouldUnload()
+bool BaseSystem::ShouldUnload ()
 {
 	//if(GetTargetSlotStatus() == INVALID) return false;
 
-	return (NczPlayerManager::GetInstance()->GetPlayerCount(GetLoadFilter(), STATUS_EQUAL_OR_BETTER) == 0);
+	return ( NczPlayerManager::GetInstance ()->GetPlayerCount ( GetLoadFilter (), STATUS_EQUAL_OR_BETTER ) == 0 );
 }
 
-void BaseSystem::SetActive(bool active)
+void BaseSystem::SetActive ( bool active )
 {
-	if(m_isActive == active) return;
-	else if(active)
+	if( m_isActive == active ) return;
+	else if( active )
 	{
-		if(!m_isDisabled)
+		if( !m_isDisabled )
 		{
-			if(m_configState)
+			if( m_configState )
 			{
 				// Should load
-				if(NczPlayerManager::GetInstance()->GetPlayerCount(GetLoadFilter(), STATUS_EQUAL_OR_BETTER) > 0)
+				if( NczPlayerManager::GetInstance ()->GetPlayerCount ( GetLoadFilter (), STATUS_EQUAL_OR_BETTER ) > 0 )
 				{
-					Logger::GetInstance()->Msg<MSG_HINT>(Helpers::format("Starting %s", GetName()));
-					Load();
+					Logger::GetInstance ()->Msg<MSG_HINT> ( Helpers::format ( "Starting %s", GetName () ) );
+					Load ();
 					m_isActive = true;
 				}
 			}
 			else
 			{
-				SystemVerbose1(Helpers::format("Wont start system %s : Disabled by server configuration file", GetName()));
+				SystemVerbose1 ( Helpers::format ( "Wont start system %s : Disabled by server configuration file", GetName () ) );
 			}
 		}
 	}
 	else
 	{
-		Logger::GetInstance()->Msg<MSG_HINT>(Helpers::format("Stoping %s", GetName()));
+		Logger::GetInstance ()->Msg<MSG_HINT> ( Helpers::format ( "Stoping %s", GetName () ) );
 		m_isActive = false;
-		Unload();
+		Unload ();
 	}
 }
 
 void BaseSystem::ncz_cmd_fn ( const SourceSdk::CCommand &args )
 {
-	if(args.ArgC() > 1)
+	if( args.ArgC () > 1 )
 	{
-		BaseSystem* it = GetFirst();
-		while (it != nullptr)
+		BaseSystem* it = GetFirst ();
+		while( it != nullptr )
 		{
-			if(Helpers::bStriEq(it->GetName(), args.Arg(1)))
+			if( stricmp ( it->GetName (), args.Arg ( 1 ) ) == 0 )
 			{
-				if(Helpers::bStriEq("enable", args.Arg(2)))
+				if( stricmp ( "enable", args.Arg ( 2 ) ) == 0 )
 				{
-					it->SetConfig(true);
-					it->SetActive(true);
+					it->SetConfig ( true );
+					it->SetActive ( true );
 				}
-				else if(Helpers::bStriEq("disable", args.Arg(2)))
+				else if( stricmp ( "disable", args.Arg ( 2 ) ) == 0 )
 				{
-					it->SetConfig(false);
-					it->SetActive(false);
+					it->SetConfig ( false );
+					it->SetActive ( false );
 				}
-				else if(Helpers::bStriEq("verbose", args.Arg(2)))
+				else if( stricmp ( "verbose", args.Arg ( 2 ) ) == 0 )
 				{
-					if(args.ArgC() > 2)
+					if( args.ArgC () > 2 )
 					{
-						it->m_verbose = atoi(args.Arg(3));
+						it->m_verbose = atoi ( args.Arg ( 3 ) );
 					}
 					return;
 				}
 #ifdef NCZ_USE_METRICS
-				else if(Helpers::bStriEq("printmetrics", args.Arg(2)))
+				else if( Helpers::bStriEq ( "printmetrics", args.Arg ( 2 ) ) )
 				{
-					(*it)->GetMetrics().PrintAll();
+					( *it )->GetMetrics ().PrintAll ();
 				}
-				else if(Helpers::bStriEq("resetmetrics", args.Arg(2)))
+				else if( Helpers::bStriEq ( "resetmetrics", args.Arg ( 2 ) ) )
 				{
-					(*it)->GetMetrics().ResetAll();
+					( *it )->GetMetrics ().ResetAll ();
 				}
 #endif
-				else if(!it->sys_cmd_fn(args))
+				else if( !it->sys_cmd_fn ( args ) )
 				{
-					printf("action %s not found.\nTry : %s\n", args.Arg(2), it->cmd_list());
+					printf ( "action %s not found.\nTry : %s\n", args.Arg ( 2 ), it->cmd_list () );
 				}
 
 				return;
-			}	
-			GetNext(it);
+			}
+			GetNext ( it );
 		}
-		printf("System %s not found.\n", args.Arg(1));
+		printf ( "System %s not found.\n", args.Arg ( 1 ) );
 	}
 	else
 	{
-		printf("Usage: ncz system arg1 arg2 ...\n");
-		printf("Systems list :\n");
-		BaseSystem* it = GetFirst();
-		while (it != nullptr)
+		printf ( "Usage: ncz system arg1 arg2 ...\n" );
+		printf ( "Systems list :\n" );
+		BaseSystem* it ( GetFirst () );
+		while( it != nullptr )
 		{
-			printf("%s", it->GetName());
-			if(it->IsActive())
+			printf ( "%s", it->GetName () );
+			if( it->IsActive () )
 			{
-				printf(" (Running)\n");
+				printf ( " (Running)\n" );
 			}
-			else if(!it->IsEnabledByConfig())
+			else if( !it->IsEnabledByConfig () )
 			{
-				printf(" (Disabled manually)\n");
+				printf ( " (Disabled manually)\n" );
 			}
-			else if(it->GetDisabledByConfigIni())
+			else if( it->GetDisabledByConfigIni () )
 			{
-				printf(" (Disabled by config.ini)\n");
+				printf ( " (Disabled by config.ini)\n" );
 			}
 			else
 			{
-				printf(" (Sleeping - Waiting for players)\n");
+				printf ( " (Sleeping - Waiting for players)\n" );
 			}
-			printf("\tCommands : %s\n", it->cmd_list());
-			GetNext(it);
+			printf ( "\tCommands : %s\n", it->cmd_list () );
+			GetNext ( it );
 		}
 	}
 }

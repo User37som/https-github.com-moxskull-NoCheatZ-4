@@ -6,6 +6,7 @@
 #include <limits>
 
 #include "Containers/utlvector.h"
+#include "Misc/temp_singleton.h"
 
 #define STRING_POOL_SIZE 64
 #define AVERAGE_STRING_SIZE 64 // must be a power of 2
@@ -15,57 +16,56 @@ Use a pool of pointers to prevent re-allocations.
 */
 
 template <typename pod>
-struct ALIGN4 memory_info
+struct ALIGN4 memory_info :
+	protected NoCopy,
+	protected NoMove
 {
 	size_t m_capacity;
 	pod * m_ptr;
 	bool m_in_use;
 
-	memory_info() : m_capacity(0), m_ptr(nullptr), m_in_use(false)
-	{
-	}
-
-	memory_info(memory_info const & other) = delete;
-	memory_info & operator= (memory_info const & other) = delete;
+	memory_info () : m_capacity ( 0 ), m_ptr ( nullptr ), m_in_use ( false )
+	{}
 
 } ALIGN4_POST;
 
 template <typename pod>
 class string_memory_pool
 {
-	
+
 private:
-	memory_info<pod> m_alloc_pool[STRING_POOL_SIZE]; // list of free memory actually not removed from heap
+	memory_info<pod> m_alloc_pool[ STRING_POOL_SIZE ]; // list of free memory actually not removed from heap
 	size_t m_pool_elements;
 
 public:
 
-	string_memory_pool() : m_alloc_pool(), m_pool_elements(0)
+	string_memory_pool () : m_alloc_pool (), m_pool_elements ( 0 )
 	{
-		memset(m_alloc_pool, 0, sizeof(memory_info<pod>) * STRING_POOL_SIZE);
+		memset ( m_alloc_pool, 0, sizeof ( memory_info<pod> ) * STRING_POOL_SIZE );
 	}
 
-	~string_memory_pool()
+	~string_memory_pool ()
 	{
-		size_t index(0);
+		size_t index ( 0 );
 		do
 		{
-			if (m_alloc_pool[index].m_in_use)
+			if( m_alloc_pool[ index ].m_in_use )
 			{
-				delete[] m_alloc_pool[index].m_ptr;
+				delete[] m_alloc_pool[ index ].m_ptr;
 			}
-		} while (++index < STRING_POOL_SIZE);
+		}
+		while( ++index < STRING_POOL_SIZE );
 	}
 
 public:
 	// True if the pool can store a free pointer, so the string must call DeclareFreeMemory instead of delete[]
-	inline bool StringShouldNotDealloc() const;
+	inline bool StringShouldNotDealloc () const;
 
 	// Add a free pointer to the pool.
-	void DeclareFreeMemory(pod * ptr, size_t capacity);
+	void DeclareFreeMemory ( pod * ptr, size_t capacity );
 
 	// Re-use a free pointer if we have capacity, otherwise return nullptr. The pool will delete element if there is a match.
-	pod * GetFreeMemory(size_t target_min_capacity, size_t & got_capacity);
+	pod * GetFreeMemory ( size_t target_min_capacity, size_t & got_capacity );
 };
 
 template <typename pod = char>
@@ -75,7 +75,7 @@ class String
 	friend String<wchar_t>;
 
 public:
-	constexpr static size_t const npos = std::numeric_limits<size_t>::max();
+	constexpr static size_t const npos = std::numeric_limits<size_t>::max ();
 
 private:
 
@@ -88,24 +88,24 @@ private:
 
 private:
 
-	inline pod * Alloc(size_t wanted_capacity, size_t & got_capacity)
+	inline pod * Alloc ( size_t wanted_capacity, size_t & got_capacity )
 	{
-		pod * t(m_pool.GetFreeMemory(wanted_capacity, got_capacity));
-		if (t == nullptr)
+		pod * t ( m_pool.GetFreeMemory ( wanted_capacity, got_capacity ) );
+		if( t == nullptr )
 		{
 			got_capacity = wanted_capacity;
-			return new pod[wanted_capacity];
+			return new pod[ wanted_capacity ];
 		}
 		else return t;
 	}
 
-	inline void Dealloc()
+	inline void Dealloc ()
 	{
-		if (m_alloc)
+		if( m_alloc )
 		{
-			if (m_pool.StringShouldNotDealloc())
+			if( m_pool.StringShouldNotDealloc () )
 			{
-				m_pool.DeclareFreeMemory(m_alloc, m_capacity);
+				m_pool.DeclareFreeMemory ( m_alloc, m_capacity );
 			}
 			else
 			{
@@ -116,24 +116,24 @@ private:
 	}
 
 	/*  -need- always contains the zero char. */
-	void Grow(size_t need, bool copy = true)
+	void Grow ( size_t need, bool copy = true )
 	{
-		if (need <= m_capacity)
+		if( need <= m_capacity )
 			return;
 
-		size_t new_capacity(AVERAGE_STRING_SIZE);
-		while (new_capacity < need) new_capacity <<= 1;
+		size_t new_capacity ( AVERAGE_STRING_SIZE );
+		while( new_capacity < need ) new_capacity <<= 1;
 
-		pod * n(Alloc(new_capacity, new_capacity));
-		
-		if (m_alloc)
+		pod * n ( Alloc ( new_capacity, new_capacity ) );
+
+		if( m_alloc )
 		{
-			if(copy) memcpy(n, m_alloc, m_size * sizeof(pod));
-			Dealloc();
+			if( copy ) memcpy ( n, m_alloc, m_size * sizeof ( pod ) );
+			Dealloc ();
 		}
 		else
 		{
-			n[0] = 0;
+			n[ 0 ] = 0;
 			m_size = 0;
 		}
 
@@ -141,254 +141,258 @@ private:
 		m_capacity = new_capacity;
 	}
 
-	inline size_t autolen(pod const * string) const
+	inline size_t autolen ( pod const * string ) const
 	{
-		return strlen(string);
+		return strlen ( string );
 	}
 
-	inline size_t autonlen(pod const * string, size_t max) const
+	inline size_t autonlen ( pod const * string, size_t max ) const
 	{
-		return strnlen(string, max);
+		return strnlen ( string, max );
 	}
 
-	inline pod const * autoempty() const
+	inline pod const * autoempty () const
 	{
 		return "";
 	}
 
 public:
 
-	String()
+	String ()
 	{
-		memset(this, 0, sizeof(String));
+		memset ( this, 0, sizeof ( String ) );
 	}
 
-	~String()
+	~String ()
 	{
-		Dealloc();
+		Dealloc ();
 #ifdef DEBUG
-		memset(this, 0xCCCCCCCC, sizeof(String));
+		memset ( this, 0xCCCCCCCC, sizeof ( String ) );
 #endif
 	}
 
-	const pod *c_str() const
+	const pod *c_str () const
 	{
-		return m_alloc ? m_alloc : autoempty();
+		return m_alloc ? m_alloc : autoempty ();
 	}
 
-	void assign(const String<pod> &src)
+	void assign ( const String<pod> &src )
 	{
-		assign(src.c_str());
+		assign ( src.c_str () );
 	}
 
-	void clear()
+	void clear ()
 	{
-		if (m_alloc)
-			m_alloc[0] = 0;
+		if( m_alloc )
+			m_alloc[ 0 ] = 0;
 		m_size = 0;
 	}
 
-	void assign(pod const *d)
+	void assign ( pod const *d )
 	{
-		if (!d)
+		if( !d )
 		{
-			clear();
+			clear ();
 		}
 		else
 		{
-			size_t const len(autolen(d) + 1);
-			Grow(len, false);
-			memcpy(m_alloc, d, len * sizeof(pod));
-			m_size = autolen(m_alloc);
+			size_t const len ( autolen ( d ) + 1 );
+			Grow ( len, false );
+			memcpy ( m_alloc, d, len * sizeof ( pod ) );
+			m_size = autolen ( m_alloc );
 		}
 	}
 
-	void assign(pod const *d, size_t count)
+	void assign ( pod const *d, size_t count )
 	{
-		if (!d)
+		if( !d )
 		{
-			clear();
+			clear ();
 		}
 		else
 		{
-			size_t const len(autonlen(d, count) + 1);
-			Grow(len, false);
-			memcpy(m_alloc, d, len * sizeof(pod));
-			m_alloc[len] = 0;
-			m_size = autolen(m_alloc);
+			size_t const len ( autonlen ( d, count ) + 1 );
+			Grow ( len, false );
+			memcpy ( m_alloc, d, len * sizeof ( pod ) );
+			m_alloc[ len ] = 0;
+			m_size = autolen ( m_alloc );
 		}
 	}
 
-	String(pod const *src) : String()
+	String ( pod const *src ) : String ()
 	{
-		assign(src);
+		assign ( src );
 	}
 
-	String(pod const *src, size_t start, size_t count = std::numeric_limits<size_t>::max()) : String()
+	String ( pod const *src, size_t start, size_t count = std::numeric_limits<size_t>::max () ) : String ()
 	{
-		assign(src+start, count);
+		assign ( src + start, count );
 	}
 
-	String(String<pod> const &src) : String()
+	String ( String<pod> const &src ) : String ()
 	{
-		assign(src.c_str());
+		assign ( src.c_str () );
 	}
 
-	String(String<pod> && src) : String()
+	String ( String<pod> && src ) : String ()
 	{
-		memcpy(this, &src, sizeof(String<pod>));
-		memset(&src, 0, sizeof(String<pod>));
+		memcpy ( this, &src, sizeof ( String<pod> ) );
+		memset ( &src, 0, sizeof ( String<pod> ) );
 	}
 
-	String(String<pod> const &src, size_t start, size_t count = std::numeric_limits<size_t>::max()) : String()
+	String ( String<pod> const &src, size_t start, size_t count = std::numeric_limits<size_t>::max () ) : String ()
 	{
-		assign(src.c_str()+start, count);
+		assign ( src.c_str () + start, count );
 	}
 
-	String & operator = (String<pod> const &src)
+	String & operator = ( String<pod> const &src )
 	{
-		assign(src);
+		assign ( src );
 		return *this;
 	}
 
-	String & operator = (String<pod> && src)
+	String & operator = ( String<pod> && src )
 	{
-		if (this != &src)
+		if( this != &src )
 		{
-			Dealloc();
-			memcpy(this, &src, sizeof(String<pod>));
-			memset(&src, 0, sizeof(String<pod>));
+			Dealloc ();
+			memcpy ( this, &src, sizeof ( String<pod> ) );
+			memset ( &src, 0, sizeof ( String<pod> ) );
 		}
 		return *this;
 	}
 
-	String & operator = (pod const *src)
+	String & operator = ( pod const *src )
 	{
-		assign(src);
+		assign ( src );
 		return *this;
 	}
 
-	bool operator ==(const String<pod> &other) const
+	bool operator ==( const String<pod> &other ) const
 	{
-		if (m_size != other.m_size) return false;
+		if( m_size != other.m_size ) return false;
 
-		pod const * me(m_alloc);
-		pod const * other_c(other.m_alloc);
+		pod const * me ( m_alloc );
+		pod const * other_c ( other.m_alloc );
 		do
 		{
-			if (*me != *other_c) return false;
+			if( *me != *other_c ) return false;
 			++other_c;
-		} while (*me++ != 0);
+		}
+		while( *me++ != 0 );
 
 		return true;
 	}
 
-	inline bool operator !=(const String<pod> &other) const
+	inline bool operator !=( const String<pod> &other ) const
 	{
-		return !this->operator==(other);
+		return !this->operator==( other );
 	}
 
-	void reserve(size_t len)
+	void reserve ( size_t len )
 	{
-		Grow(len+1);
+		Grow ( len + 1 );
 	}
 
-	bool operator ==(pod const * other) const
+	bool operator ==( pod const * other ) const
 	{
-		if (m_size != autolen(other)) return false;
+		if( m_size != autolen ( other ) ) return false;
 
-		pod const * me(m_alloc);
+		pod const * me ( m_alloc );
 		do
 		{
-			if (*me != *other) return false;
+			if( *me != *other ) return false;
 			++other;
-		} while (*me++ != 0);
+		}
+		while( *me++ != 0 );
 
 		return true;
 	}
 
-	inline bool operator !=(pod const * other) const
+	inline bool operator !=( pod const * other ) const
 	{
-		return !this->operator==(other);
+		return !this->operator==( other );
 	}
 
-	String<pod>& append(pod const * t)
+	String<pod>& append ( pod const * t )
 	{
-		size_t const len(autolen(t) + 1);
-		Grow(m_size + len);
-		memcpy(m_alloc + m_size, t, sizeof(pod) * len);
-		m_size = strlen(m_alloc);
+		size_t const len ( autolen ( t ) + 1 );
+		Grow ( m_size + len );
+		memcpy ( m_alloc + m_size, t, sizeof ( pod ) * len );
+		m_size = strlen ( m_alloc );
 		return *this;
 	}
 
-	String<pod>& append(pod const c)
+	String<pod>& append ( pod const c )
 	{
-		size_t pos(m_size);
-		Grow(pos + 2); // should be + 1 but when m_alloc is not allocated we also need to add '\0'
-		m_alloc[pos] = c;
+		size_t pos ( m_size );
+		Grow ( pos + 2 ); // should be + 1 but when m_alloc is not allocated we also need to add '\0'
+		m_alloc[ pos ] = c;
 		++pos;
-		m_alloc[pos] = 0;
+		m_alloc[ pos ] = 0;
 		++m_size;
 		return *this;
 	}
 
-	String<pod>& append(String<pod> const & d)
+	String<pod>& append ( String<pod> const & d )
 	{
-		append(d.c_str());
+		append ( d.c_str () );
 		return *this;
 	}
 
-	bool isempty() const
+	bool isempty () const
 	{
 		return m_size == 0;
 	}
 
-	size_t size() const
+	size_t size () const
 	{
 		return m_size;
 	}
 
-	size_t length() const
+	size_t length () const
 	{
 		return m_size;
 	}
 
-	String<pod>& replace(pod const replace_this, pod const replace_by)
+	String<pod>& replace ( pod const replace_this, pod const replace_by )
 	{
-		if (m_size > 0)
+		if( m_size > 0 )
 		{
-			pod * me(m_alloc);
+			pod * me ( m_alloc );
 			do
 			{
-				if (*me == replace_this) *me = replace_by;
-			} while (*++me != 0);
+				if( *me == replace_this ) *me = replace_by;
+			}
+			while( *++me != 0 );
 		}
 
 		return *this;
 	}
 
-	String<pod>& replace_insensitive(pod const replace_this, pod const replace_by)
+	String<pod>& replace_insensitive ( pod const replace_this, pod const replace_by )
 	{
-		constexpr auto const replace_this_insensitive = (pod)toupper(replace_this);
-		if (m_size > 0)
+		constexpr auto const replace_this_insensitive = ( pod ) toupper ( replace_this );
+		if( m_size > 0 )
 		{
-			pod * me(m_alloc);
+			pod * me ( m_alloc );
 			do
 			{
-				if (touppder(*me) == replace_this_insensitive) *me = replace_by;
-			} while (*++me != 0);
+				if( touppder ( *me ) == replace_this_insensitive ) *me = replace_by;
+			}
+			while( *++me != 0 );
 		}
 
 		return *this;
 	}
 
-	String<pod>& replace(pod const * replace_list, pod const replace_by)
+	String<pod>& replace ( pod const * replace_list, pod const replace_by )
 	{
-		if (m_size > 0)
+		if( m_size > 0 )
 		{
-			while (*replace_list != 0)
+			while( *replace_list != 0 )
 			{
-				replace(*replace_list, replace_by);
+				replace ( *replace_list, replace_by );
 				++replace_list;
 			}
 		}
@@ -396,13 +400,13 @@ public:
 		return *this;
 	}
 
-	String<pod>& replace_insensitive(pod const * replace_list, pod const replace_by)
+	String<pod>& replace_insensitive ( pod const * replace_list, pod const replace_by )
 	{
-		if (m_size > 0)
+		if( m_size > 0 )
 		{
-			while (*replace_list != 0)
+			while( *replace_list != 0 )
 			{
-				replace(*replace_list, replace_by);
+				replace ( *replace_list, replace_by );
 				++replace_list;
 			}
 		}
@@ -410,314 +414,332 @@ public:
 		return *this;
 	}
 
-	String<pod>& remove(size_t pos)
+	String<pod>& remove ( size_t pos )
 	{
-		if (pos < m_size)
+		if( pos < m_size )
 		{
 			do
 			{
-				m_alloc[pos] = m_alloc[pos + 1];
-			} while (m_alloc[++pos] != 0);
+				m_alloc[ pos ] = m_alloc[ pos + 1 ];
+			}
+			while( m_alloc[ ++pos ] != 0 );
 			--m_size;
 		}
 		return *this;
 	}
 
-	String<pod>& remove(size_t const start, size_t end)
+	String<pod>& remove ( size_t const start, size_t end )
 	{
-		if (start > end) return remove(end, start);
-		if (end < m_size)
+		if( start > end ) return remove ( end, start );
+		if( end < m_size )
 		{
 			do
 			{
-				remove(end);
-			} while (end-- - start != 0);
+				remove ( end );
+			}
+			while( end-- - start != 0 );
 		}
 		return *this;
 	}
 
-	String<pod>& replace(String<pod> const & replace_this, String<pod> const & replace_by)
+	String<pod>& replace ( String<pod> const & replace_this, String<pod> const & replace_by )
 	{
-		int const diff(replace_by.m_size - replace_this.m_size);
-		size_t pos(find(replace_this));
-		while (pos != npos)
+		int const diff ( replace_by.m_size - replace_this.m_size );
+		size_t pos ( find ( replace_this ) );
+		while( pos != npos )
 		{
-			if (diff <= 0)
+			if( diff <= 0 )
 			{
-				memcpy(m_alloc + pos, replace_by.m_alloc, sizeof(pod) * replace_by.m_size - 1);
-				if(diff < 0) remove(pos + replace_by.m_size, pos + replace_this.m_size - 1);
+				memcpy ( m_alloc + pos, replace_by.m_alloc, sizeof ( pod ) * replace_by.m_size - 1 );
+				if( diff < 0 ) remove ( pos + replace_by.m_size, pos + replace_this.m_size - 1 );
 			}
-			else if (diff > 0)
+			else if( diff > 0 )
 			{
-				memcpy(m_alloc + pos, replace_by.m_alloc, sizeof(pod) * replace_this.m_size - 1);
-				Grow(m_size + diff + 1);
-				size_t move_from_here(m_size + diff);
-				size_t const move_until_here(pos + replace_this.m_size - 1);
+				memcpy ( m_alloc + pos, replace_by.m_alloc, sizeof ( pod ) * replace_this.m_size - 1 );
+				Grow ( m_size + diff + 1 );
+				size_t move_from_here ( m_size + diff );
+				size_t const move_until_here ( pos + replace_this.m_size - 1 );
 				do
 				{
-					m_alloc[move_from_here] = m_alloc[move_from_here - diff];
-				} while (--move_from_here != move_until_here);
-				memcpy(m_alloc + pos + replace_this.m_size, replace_by.m_alloc + replace_this.m_size, sizeof(pod) * diff);
+					m_alloc[ move_from_here ] = m_alloc[ move_from_here - diff ];
+				}
+				while( --move_from_here != move_until_here );
+				memcpy ( m_alloc + pos + replace_this.m_size, replace_by.m_alloc + replace_this.m_size, sizeof ( pod ) * diff );
 				m_size += diff;
 			}
-			pos = find(replace_this, pos);
+			pos = find ( replace_this, pos );
 		}
 		return *this;
 	}
 
-	String<pod>& replace_insensitive(String<pod> const & replace_this, String<pod> const & replace_by)
+	String<pod>& replace_insensitive ( String<pod> const & replace_this, String<pod> const & replace_by )
 	{
-		int const diff(replace_by.m_size - replace_this.m_size);
-		size_t pos(find_insensitive(replace_this));
-		while (pos != npos)
+		int const diff ( replace_by.m_size - replace_this.m_size );
+		size_t pos ( find_insensitive ( replace_this ) );
+		while( pos != npos )
 		{
-			if (diff <= 0)
+			if( diff <= 0 )
 			{
-				memcpy(m_alloc + pos, replace_by.m_alloc, sizeof(pod) * replace_by.m_size - 1);
-				if (diff < 0) remove(pos + replace_by.m_size, pos + replace_this.m_size - 1);
+				memcpy ( m_alloc + pos, replace_by.m_alloc, sizeof ( pod ) * replace_by.m_size - 1 );
+				if( diff < 0 ) remove ( pos + replace_by.m_size, pos + replace_this.m_size - 1 );
 			}
-			else if (diff > 0)
+			else if( diff > 0 )
 			{
-				memcpy(m_alloc + pos, replace_by.m_alloc, sizeof(pod) * replace_this.m_size - 1);
-				Grow(m_size + diff + 1);
-				size_t move_from_here(m_size + diff);
-				size_t const move_until_here(pos + replace_this.m_size - 1);
+				memcpy ( m_alloc + pos, replace_by.m_alloc, sizeof ( pod ) * replace_this.m_size - 1 );
+				Grow ( m_size + diff + 1 );
+				size_t move_from_here ( m_size + diff );
+				size_t const move_until_here ( pos + replace_this.m_size - 1 );
 				do
 				{
-					m_alloc[move_from_here] = m_alloc[move_from_here - diff];
-				} while (--move_from_here != move_until_here);
-				memcpy(m_alloc + pos + replace_this.m_size, replace_by.m_alloc + replace_this.m_size, sizeof(pod) * diff);
+					m_alloc[ move_from_here ] = m_alloc[ move_from_here - diff ];
+				}
+				while( --move_from_here != move_until_here );
+				memcpy ( m_alloc + pos + replace_this.m_size, replace_by.m_alloc + replace_this.m_size, sizeof ( pod ) * diff );
 				m_size += diff;
 			}
-			pos = find(replace_this, pos);
+			pos = find ( replace_this, pos );
 		}
 		return *this;
 	}
 
-	size_t find(pod const c, size_t start = 0) const
+	size_t find ( pod const c, size_t start = 0 ) const
 	{
-		size_t a(m_size);
-		if (a == 0) return npos;
-		if (start >= a) return npos;
+		size_t a ( m_size );
+		if( a == 0 ) return npos;
+		if( start >= a ) return npos;
 		a = start;
-		pod const * me(m_alloc + start);
+		pod const * me ( m_alloc + start );
 		do
 		{
-			if (*me == c) return a;
+			if( *me == c ) return a;
 			++a;
-		} while (*(++me) != 0);
+		}
+		while( *( ++me ) != 0 );
 
 		return npos;
 	}
 
-	size_t find_insensitive(pod const c, size_t start = 0) const
+	size_t find_insensitive ( pod const c, size_t start = 0 ) const
 	{
-		constexpr auto const ic(toupper(*c));
-		size_t a(m_size);
-		if (a == 0) return npos;
-		if (start >= a) return npos;
+		constexpr auto const ic ( toupper ( *c ) );
+		size_t a ( m_size );
+		if( a == 0 ) return npos;
+		if( start >= a ) return npos;
 		a = start;
-		pod const * me(m_alloc + start);
+		pod const * me ( m_alloc + start );
 		do
 		{
-			if (toupper(*me) == ic) return a;
+			if( toupper ( *me ) == ic ) return a;
 			++a;
-		} while (*(++me) != 0);
+		}
+		while( *( ++me ) != 0 );
 
 		return npos;
 	}
 
 private:
-	bool cmp(pod const * c, size_t const start = 0) const
+	bool cmp ( pod const * c, size_t const start = 0 ) const
 	{
 		// this function is confident with the caller -> no extra check
 
-		pod const * me(m_alloc + start);
+		pod const * me ( m_alloc + start );
 		do
 		{
-			if (*c != *me) return false;
+			if( *c != *me ) return false;
 			else ++c;
-		} while (++me != 0);
+		}
+		while( ++me != 0 );
+
+		return true;
 	}
 
-	bool cmp_insensitive(pod const * c, size_t const start = 0) const
+	bool cmp_insensitive ( pod const * c, size_t const start = 0 ) const
 	{
 		// this function is confident with the caller -> no extra check
 
-		pod const * me(m_alloc + start);
+		pod const * me ( m_alloc + start );
 		do
 		{
-			if (toupper(*c) != toupper(*me)) return false;
+			if( toupper ( *c ) != toupper ( *me ) ) return false;
 			else ++c;
-		} while (++me != 0);
+		}
+		while( ++me != 0 );
+
+		return true;
 	}
 
 public:
-	size_t find(pod const * const c, size_t start = 0) const
+	size_t find ( pod const * const c, size_t start = 0 ) const
 	{
-		size_t csize(autolen(c) + start);
-		if (csize > m_size) return npos;
+		size_t csize ( autolen ( c ) + start );
+		if( csize > m_size ) return npos;
 
-		while (cmp(c, start++) == false)
+		while( cmp ( c, start++ ) == false )
 		{
-			if (++csize > m_size) return npos;
+			if( ++csize > m_size ) return npos;
 		}
 
 		return start;
 	}
 
-	size_t find_insensitive(pod const * const c, size_t start = 0) const
+	size_t find_insensitive ( pod const * const c, size_t start = 0 ) const
 	{
-		size_t csize(autolen(c) + start);
-		if (csize > m_size) return npos;
+		size_t csize ( autolen ( c ) + start );
+		if( csize > m_size ) return npos;
 
-		while (cmp_insensitive(c, start++) == false)
+		while( cmp_insensitive ( c, start++ ) == false )
 		{
-			if (++csize > m_size) return npos;
+			if( ++csize > m_size ) return npos;
 		}
 
 		return start;
 	}
 
-	size_t find(String<pod> const & c, size_t start = 0) const
+	size_t find ( String<pod> const & c, size_t start = 0 ) const
 	{
-		return find(c.c_str());
+		return find ( c.c_str () );
 	}
 
-	size_t find_insensitive(String<pod> const & c, size_t start = 0) const
+	size_t find_insensitive ( String<pod> const & c, size_t start = 0 ) const
 	{
-		return find(c.c_str());
+		return find ( c.c_str () );
 	}
 
-	size_t find_last_of(pod const * const c, size_t start = npos) const
+	size_t find_last_of ( pod const * const c, size_t start = npos ) const
 	{
-		size_t a(m_size);
-		if (a == 0) return npos;
-		if (start == 0) return npos;
-		if (*c == 0) return npos;
+		size_t a ( m_size );
+		if( a == 0 ) return npos;
+		if( start == 0 ) return npos;
+		if( *c == 0 ) return npos;
 
-		pod const * me(m_alloc + a - 1);
-		pod const * temp_c(c);
+		pod const * me ( m_alloc + a - 1 );
+		pod const * temp_c ( c );
 		do
 		{
 			do
 			{
-				if (*me == *temp_c++) return a;
-			} while (*temp_c != 0);
+				if( *me == *temp_c++ ) return a;
+			}
+			while( *temp_c != 0 );
 			temp_c = c;
 			--a;
-		} while (me-- != m_alloc);
+		}
+		while( me-- != m_alloc );
 
 		return npos;
 	}
 
-	size_t find_last_of_insensitive(pod const * const c, size_t start = npos) const
+	size_t find_last_of_insensitive ( pod const * const c, size_t start = npos ) const
 	{
-		size_t a(m_size);
-		if (a == 0) return npos;
-		if (start == 0) return npos;
-		if (*c == 0) return npos;
+		size_t a ( m_size );
+		if( a == 0 ) return npos;
+		if( start == 0 ) return npos;
+		if( *c == 0 ) return npos;
 
-		pod const * me(m_alloc + a - 1);
-		pod const * temp_c(c);
+		pod const * me ( m_alloc + a - 1 );
+		pod const * temp_c ( c );
 		do
 		{
 			do
 			{
-				if (toupper(*me) == toupper(*temp_c++)) return a;
-			} while (*temp_c != 0);
+				if( toupper ( *me ) == toupper ( *temp_c++ ) ) return a;
+			}
+			while( *temp_c != 0 );
 			temp_c = c;
 			--a;
-		} while (me-- != m_alloc);
+		}
+		while( me-- != m_alloc );
 
 		return npos;
 	}
 
-	size_t find_last_of(pod const c, size_t start = npos) const
+	size_t find_last_of ( pod const c, size_t start = npos ) const
 	{
-		size_t a(m_size);
-		if (a == 0) return npos;
-		if (start == 0) return npos;
+		size_t a ( m_size );
+		if( a == 0 ) return npos;
+		if( start == 0 ) return npos;
 
-		pod const * me(m_alloc + a - 1);
+		pod const * me ( m_alloc + a - 1 );
 		do
 		{
-			if (*me == c) return a;
+			if( *me == c ) return a;
 			--a;
-		} while (me-- != m_alloc);
+		}
+		while( me-- != m_alloc );
 
 		return npos;
 	}
 
-	size_t find_last_of_insensitive(pod const c, size_t start = npos) const
+	size_t find_last_of_insensitive ( pod const c, size_t start = npos ) const
 	{
-		size_t a(m_size);
-		pod const test(toupper(c));
-		if (a == 0) return npos;
-		if (start == 0) return npos;
+		size_t a ( m_size );
+		pod const test ( toupper ( c ) );
+		if( a == 0 ) return npos;
+		if( start == 0 ) return npos;
 
-		pod const * me(m_alloc + a - 1);
+		pod const * me ( m_alloc + a - 1 );
 		do
 		{
-			if (toupper(*me) == test) return a;
+			if( toupper ( *me ) == test ) return a;
 			--a;
-		} while (me-- != m_alloc);
+		}
+		while( me-- != m_alloc );
 
 		return npos;
 	}
 
-	void lower()
+	void lower ()
 	{
-		if (!m_alloc)
+		if( !m_alloc )
 			return;
-		pod * me(m_alloc);
-		while (*me != 0)
+		pod * me ( m_alloc );
+		while( *me != 0 )
 		{
-			*me = (pod)tolower(*me);
-			++me;
-		} 
-	}
-
-	void upper()
-	{
-		if (!m_alloc)
-			return;
-		pod * me(m_alloc);
-		while (*me != 0)
-		{
-			*me = (pod)toupper(*me);
+			*me = ( pod ) tolower ( *me );
 			++me;
 		}
 	}
 
-	pod& operator[] (size_t const index) const
+	void upper ()
 	{
-		return m_alloc[index];
+		if( !m_alloc )
+			return;
+		pod * me ( m_alloc );
+		while( *me != 0 )
+		{
+			*me = ( pod ) toupper ( *me );
+			++me;
+		}
 	}
 
-	static void ConvertToWideChar(String<char> const & in, String<wchar_t> & out)
+	pod& operator[] ( size_t const index ) const
 	{
-		out.Grow(in.m_size, false);
-		size_t const cpsize(mbstowcs(out.m_alloc, in.m_alloc, out.m_capacity));
-		Assert(cpsize < std::numeric_limits<size_t>::max());
+		return m_alloc[ index ];
+	}
+
+	static void ConvertToWideChar ( String<char> const & in, String<wchar_t> & out )
+	{
+		out.Grow ( in.m_size, false );
+		size_t const cpsize ( mbstowcs ( out.m_alloc, in.m_alloc, out.m_capacity ) );
+		Assert ( cpsize < std::numeric_limits<size_t>::max () );
 		out.m_size = cpsize;
 	}
 };
 
 template <>
-inline size_t String<wchar_t>::autolen(wchar_t const * string) const
+inline size_t String<wchar_t>::autolen ( wchar_t const * string ) const
 {
-	return wcslen(string);
+	return wcslen ( string );
 }
 
 template <>
-inline size_t String<wchar_t>::autonlen(wchar_t const * string, size_t max) const
+inline size_t String<wchar_t>::autonlen ( wchar_t const * string, size_t max ) const
 {
-	return wcsnlen(string, max);
+	return wcsnlen ( string, max );
 }
 
 template <>
-inline wchar_t const * String<wchar_t>::autoempty() const
+inline wchar_t const * String<wchar_t>::autoempty () const
 {
 	return L"";
 }
@@ -726,70 +748,72 @@ typedef String<char> basic_string;
 typedef String<wchar_t> basic_wstring;
 
 template <typename pod>
-inline bool string_memory_pool<pod>::StringShouldNotDealloc() const
+inline bool string_memory_pool<pod>::StringShouldNotDealloc () const
 {
 	return m_pool_elements != STRING_POOL_SIZE;
 }
 
 template <typename pod>
-void string_memory_pool<pod>::DeclareFreeMemory(pod * ptr, size_t capacity)
+void string_memory_pool<pod>::DeclareFreeMemory ( pod * ptr, size_t capacity )
 {
-	size_t index(0);
+	size_t index ( 0 );
 	do
 	{
-		if (!m_alloc_pool[index].m_in_use)
+		if( !m_alloc_pool[ index ].m_in_use )
 		{
-			m_alloc_pool[index].m_capacity = capacity;
-			m_alloc_pool[index].m_ptr = ptr;
-			m_alloc_pool[index].m_in_use = true;
+			m_alloc_pool[ index ].m_capacity = capacity;
+			m_alloc_pool[ index ].m_ptr = ptr;
+			m_alloc_pool[ index ].m_in_use = true;
 			++m_pool_elements;
 			return;
 		}
-	} while (++index < STRING_POOL_SIZE);
+	}
+	while( ++index < STRING_POOL_SIZE );
 }
 
 template <typename pod>
-pod * string_memory_pool<pod>::GetFreeMemory(size_t target_min_capacity, size_t & got_capacity)
+pod * string_memory_pool<pod>::GetFreeMemory ( size_t target_min_capacity, size_t & got_capacity )
 {
-	if (m_pool_elements > 0)
+	if( m_pool_elements > 0 )
 	{
-		size_t index(0);
+		size_t index ( 0 );
 		do
 		{
-			if (m_alloc_pool[index].m_in_use && m_alloc_pool[index].m_capacity >= target_min_capacity)
+			if( m_alloc_pool[ index ].m_in_use && m_alloc_pool[ index ].m_capacity >= target_min_capacity )
 			{
-				m_alloc_pool[index].m_in_use = false;
+				m_alloc_pool[ index ].m_in_use = false;
 				--m_pool_elements;
-				got_capacity = m_alloc_pool[index].m_capacity;
-				return m_alloc_pool[index].m_ptr;
+				got_capacity = m_alloc_pool[ index ].m_capacity;
+				return m_alloc_pool[ index ].m_ptr;
 			}
-		} while (++index < STRING_POOL_SIZE);
+		}
+		while( ++index < STRING_POOL_SIZE );
 	}
 
 	return nullptr;
 }
 
 template <typename pod>
-void SplitString(String<pod> const & string, pod const delim, CUtlVector < String<pod> > & out)
+void SplitString ( String<pod> const & string, pod const delim, CUtlVector < String<pod> > & out )
 {
-	out.RemoveAll();
-	out.EnsureCapacity(8);
+	out.RemoveAll ();
+	out.EnsureCapacity ( 8 );
 
-	size_t start(0);
+	size_t start ( 0 );
 	size_t end;
-	for(;;)
+	for( ;;)
 	{
-		end = string.find(delim, start);
-		if (end == String<pod>::npos)
+		end = string.find ( delim, start );
+		if( end == String<pod>::npos )
 		{
-			out.AddToTail(String<pod>(string, start));
+			out.AddToTail ( String<pod> ( string, start ) );
 			break;
 		}
 		else
 		{
-			out.AddToTail(String<pod>(string, start, end - 1 - start));
+			out.AddToTail ( String<pod> ( string, start, end - 1 - start ) );
 		}
-		start = end+1;
+		start = end + 1;
 	}
 
 }

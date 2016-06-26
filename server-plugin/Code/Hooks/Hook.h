@@ -4,7 +4,7 @@
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
-       http://www.apache.org/licenses/LICENSE-2.0
+	   http://www.apache.org/licenses/LICENSE-2.0
 
    Unless required by applicable law or agreed to in writing, software
    distributed under the License is distributed on an "AS IS" BASIS,
@@ -33,12 +33,12 @@
 
 #include "Players/NczPlayerManager.h"
 
-/* 
+/*
 	Used to replace a pointer in one virtual table.
 	Returns the old function pointer or 0 in case of error.
 */
 
-void MoveVirtualFunction(DWORD const * const from, DWORD * const to);
+void MoveVirtualFunction ( DWORD const * const from, DWORD * const to );
 
 class CBaseEntity;
 
@@ -54,38 +54,35 @@ struct HookInfo
 	void* origEnt; // Address of the class used to determine virtual table base
 	DWORD* pInterface; // Virtual table base
 	DWORD newFn; // New function address that will be at *vf_entry after hook
-	
-	HookInfo()
+
+	HookInfo ()
 	{
-		memset(this, 0, sizeof(HookInfo));
+		memset ( this, 0, sizeof ( HookInfo ) );
 	}
-	HookInfo(const HookInfo& other)
+	HookInfo ( const HookInfo& other )
 	{
-		memcpy(this, &other, sizeof(HookInfo));
+		memcpy ( this, &other, sizeof ( HookInfo ) );
 	}
-	HookInfo& operator=(const HookInfo& other)
+	HookInfo& operator=( const HookInfo& other )
 	{
-		memcpy(this, &other, sizeof(HookInfo));
+		memcpy ( this, &other, sizeof ( HookInfo ) );
 		return *this;
 	}
-	HookInfo(void* class_ptr, int vfid, DWORD new_fn)
-	{
-		origEnt = class_ptr;
-		pInterface = ((DWORD*)*(DWORD*)origEnt);
-		vf_entry = &(pInterface[vfid]);
-		newFn = new_fn;
-		oldFn = 0;
-	}
-	HookInfo(void* class_ptr, int vfid)
-	{
-		origEnt = class_ptr;
-		pInterface = ((DWORD*)*(DWORD*)origEnt);
-		vf_entry = &(pInterface[vfid]);
-	}
+	HookInfo ( void* class_ptr, int vfid, DWORD new_fn ) :
+		oldFn ( 0 ),
+		pInterface ( ( DWORD* )*( DWORD* ) origEnt ),
+		vf_entry ( &( pInterface[ vfid ] ) ),
+		newFn ( new_fn )
+	{}
+	HookInfo ( void* class_ptr, int vfid ) :
+		origEnt ( class_ptr ),
+		pInterface ( ( DWORD* )*( DWORD* ) origEnt ),
+		vf_entry ( &( pInterface[ vfid ] ) )
+	{}
 
-	bool operator== (const HookInfo& other) const
+	bool operator== ( const HookInfo& other ) const
 	{
-		return (vf_entry == other.vf_entry);
+		return ( vf_entry == other.vf_entry );
 	}
 };
 
@@ -99,23 +96,25 @@ private:
 	hooked_list_t m_list;
 
 public:
-	HookGuard() : singleton_class() {}
-	virtual ~HookGuard() final {};
+	HookGuard () : singleton_class ()
+	{}
+	virtual ~HookGuard () final
+	{};
 
-	void VirtualTableHook(HookInfo& info, bool force = false);
+	void VirtualTableHook ( HookInfo& info, bool force = false );
 
 	// Find by virtual table entry address
-	DWORD GetOldFunction(void* class_ptr, int vfid) const;
+	DWORD RT_GetOldFunction ( void* class_ptr, int vfid ) const;
 
 	// Only find by virtual table base (Remove need to call ConfigManager), class_ptr is converted to virtual table base
-	DWORD GetOldFunctionByVirtualTable(void* class_ptr) const;
+	DWORD RT_GetOldFunctionByVirtualTable ( void* class_ptr ) const;
 
 	// Only find by virtual table base (Remove need to call ConfigManager), class_ptr is the original instance
-	DWORD GetOldFunctionByInstance(void* class_ptr) const;
+	DWORD RT_GetOldFunctionByInstance ( void* class_ptr ) const;
 
-	void GuardHooks();
+	void RT_GuardHooks ();
 
-	void UnhookAll();
+	void UnhookAll ();
 };
 
 /*
@@ -137,7 +136,7 @@ class HookListenersList
 public:
 	struct elem_t
 	{
-		elem_t()
+		elem_t ()
 		{
 			m_next = nullptr;
 		}
@@ -152,19 +151,19 @@ private:
 
 public:
 
-	HookListenersList()
+	HookListenersList ()
 	{
 		m_first = nullptr;
 	}
-	~HookListenersList()
+	~HookListenersList ()
 	{
-		while (m_first != nullptr)
+		while( m_first != nullptr )
 		{
-			Remove(m_first->m_value.listener);
+			Remove ( m_first->m_value.listener );
 		}
 	}
 
-	elem_t* GetFirst() const
+	elem_t* GetFirst () const
 	{
 		return m_first;
 	}
@@ -172,12 +171,12 @@ public:
 	/*
 		Add a listener sorted by priority.
 	*/
-	elem_t* Add(C const * const listener, size_t const priority = 0, SlotStatus const filter = PLAYER_IN_TESTS)
+	elem_t* Add ( C const * const listener, size_t const priority = 0, SlotStatus const filter = SlotStatus::PLAYER_IN_TESTS )
 	{
-		if (m_first == nullptr)
+		if( m_first == nullptr )
 		{
-			m_first = new elem_t();
-			m_first->m_value.listener = const_cast<C * const>(listener);
+			m_first = new elem_t ();
+			m_first->m_value.listener = const_cast< C * const >( listener );
 			m_first->m_value.priority = priority;
 			m_first->m_value.filter = filter;
 			return m_first;
@@ -188,25 +187,25 @@ public:
 			elem_t* prev = nullptr;
 			do
 			{
-				if (priority <= iterator->m_value.priority)
+				if( priority <= iterator->m_value.priority )
 				{
 					// Insert here
 
-					if (prev == nullptr) // iterator == m_first
+					if( prev == nullptr ) // iterator == m_first
 					{
 						elem_t* const old_first = m_first;
-						m_first = new elem_t();
+						m_first = new elem_t ();
 						m_first->m_next = old_first;
-						m_first->m_value.listener = const_cast<C * const>(listener);
+						m_first->m_value.listener = const_cast< C * const >( listener );
 						m_first->m_value.priority = priority;
 						m_first->m_value.filter = filter;
 						return m_first;
 					}
 					else
 					{
-						prev->m_next = new elem_t();
+						prev->m_next = new elem_t ();
 						prev->m_next->m_next = iterator;
-						prev->m_next->m_value.listener = const_cast<C * const>(listener);
+						prev->m_next->m_value.listener = const_cast< C * const >( listener );
 						prev->m_next->m_value.priority = priority;
 						prev->m_next->m_value.filter = filter;
 						return prev->m_next;
@@ -216,10 +215,10 @@ public:
 				prev = iterator;
 				iterator = iterator->m_next;
 			}
-			while (iterator != nullptr);
+			while( iterator != nullptr );
 
-			prev->m_next = new elem_t();
-			prev->m_next->m_value.listener = const_cast<C * const>(listener);
+			prev->m_next = new elem_t ();
+			prev->m_next->m_value.listener = const_cast< C * const >( listener );
 			prev->m_next->m_value.priority = priority;
 			prev->m_next->m_value.filter = filter;
 			return prev->m_next;
@@ -229,16 +228,16 @@ public:
 	/*
 		Find this listener and remove it from list
 	*/
-	void Remove(C const * const listener)
+	void Remove ( C const * const listener )
 	{
 		elem_t* iterator = m_first;
 		elem_t* prev = nullptr;
-		while (iterator != nullptr)
+		while( iterator != nullptr )
 		{
-			if (iterator->m_value.listener == listener)
+			if( iterator->m_value.listener == listener )
 			{
 				elem_t* to_remove = iterator;
-				if (prev == nullptr)
+				if( prev == nullptr )
 				{
 					m_first = iterator->m_next;
 				}
@@ -258,14 +257,14 @@ public:
 	/*
 		Find by listener
 	*/
-	elem_t* const FindByListener(C const * const listener, C const * const exclude_me = nullptr) const
+	elem_t* const FindByListener ( C const * const listener, C const * const exclude_me = nullptr ) const
 	{
 		elem_t* iterator = m_first;
-		while (iterator != nullptr)
+		while( iterator != nullptr )
 		{
-			if (iterator->m_value.listener != exclude_me)
+			if( iterator->m_value.listener != exclude_me )
 			{
-				if (iterator->m_value.listener == listener)
+				if( iterator->m_value.listener == listener )
 				{
 					return iterator;
 				}

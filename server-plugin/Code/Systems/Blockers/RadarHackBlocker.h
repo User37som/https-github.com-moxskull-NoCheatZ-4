@@ -44,23 +44,25 @@ struct ClientRadarData
 	int m_team;
 	//float m_next_update;
 
-	ClientRadarData()
+	ClientRadarData ()
 	{
-		memset(this, 0, sizeof(ClientRadarData));
+		memset ( this, 0, sizeof ( ClientRadarData ) );
 	}
-	ClientRadarData(int x) : ClientRadarData()
+	ClientRadarData ( int x ) :
+		m_last_spotted_status(false),
+		m_origin_index(x),
+		m_team(0)
 	{
-		m_origin_index = x;
-	}
-
-	ClientRadarData(ClientRadarData const & other)
-	{
-		memcpy(this, &other, sizeof(ClientRadarData));
 	}
 
-	ClientRadarData& operator=(ClientRadarData const & other)
+	ClientRadarData ( ClientRadarData const & other )
 	{
-		memcpy(this, &other, sizeof(ClientRadarData));
+		memcpy ( this, &other, sizeof ( ClientRadarData ) );
+	}
+
+	ClientRadarData& operator=( ClientRadarData const & other )
+	{
+		memcpy ( this, &other, sizeof ( ClientRadarData ) );
 		return *this;
 	}
 };
@@ -86,35 +88,36 @@ private:
 	float m_next_process;
 
 public:
-	RadarHackBlocker();
-	virtual ~RadarHackBlocker() final;
+	RadarHackBlocker ();
+	virtual ~RadarHackBlocker () final;
 
 private:
-	virtual void Init() override final;
-	virtual void Load() override final;
-	virtual void Unload() override final;
+	virtual void Init () override final;
+	virtual void Load () override final;
+	virtual void Unload () override final;
 
-	virtual void ProcessOnTick(float const curtime) override final;
+	virtual void RT_ProcessOnTick ( float const curtime ) override final;
 
-	virtual void ProcessPlayerTestOnTick(PlayerHandler::const_iterator ph, float const curtime) override final {};
+	virtual void RT_ProcessPlayerTestOnTick ( PlayerHandler::const_iterator ph, float const curtime ) override final
+	{};
 
-	virtual void ThinkPostCallback(SourceSdk::edict_t const * const pent) override final;
+	virtual void RT_ThinkPostCallback ( SourceSdk::edict_t const * const pent ) override final;
 
-	virtual bool SendUserMessageCallback(SourceSdk::IRecipientFilter const &, int const, google::protobuf::Message const &) override final;
-	
-	virtual bool UserMessageBeginCallback(SourceSdk::IRecipientFilter const * const, int const) override final;
+	virtual bool RT_SendUserMessageCallback ( SourceSdk::IRecipientFilter const &, int const, google::protobuf::Message const & ) override final;
+
+	virtual bool RT_UserMessageBeginCallback ( SourceSdk::IRecipientFilter const * const, int const ) override final;
 
 public:
-	void OnMapStart();
+	void OnMapStart ();
 
 private:
-	void SendApproximativeRadarUpdate(MRecipientFilter & filter, ClientRadarData const * data) const;
+	void RT_SendApproximativeRadarUpdate ( MRecipientFilter & filter, ClientRadarData const * data ) const;
 
-	void SendRandomRadarUpdate(MRecipientFilter & filter, ClientRadarData const * data) const;
+	void RT_SendRandomRadarUpdate ( MRecipientFilter & filter, ClientRadarData const * data ) const;
 
-	void ProcessEntity(SourceSdk::edict_t const * const pent);
+	void RT_ProcessEntity ( SourceSdk::edict_t const * const pent );
 
-	void UpdatePlayerData(NczPlayer* player);
+	void RT_UpdatePlayerData ( NczPlayer* player );
 };
 
 #endif // RADARHACKBLOCKER_H

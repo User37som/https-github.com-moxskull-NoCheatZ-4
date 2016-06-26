@@ -46,7 +46,7 @@ public:
 	virtual ~OnGroundHookListener();
 
 protected:
-	virtual void m_hGroundEntityStateChangedCallback(PlayerHandler::const_iterator ph, bool const new_isOnGround) = 0;
+	virtual void RT_m_hGroundEntityStateChangedCallback(PlayerHandler::const_iterator ph, bool const new_isOnGround) = 0;
 
 public:
 
@@ -69,9 +69,9 @@ protected:
 
 private:
 #ifdef GNUC
-	static void HOOKFN_INT nNetworkStateChanged_m_hGroundEntity(void * const basePlayer, int const * const new_m_hGroundEntity);
+	static void HOOKFN_INT RT_nNetworkStateChanged_m_hGroundEntity(void * const basePlayer, int const * const new_m_hGroundEntity);
 #else
-	static void HOOKFN_INT nNetworkStateChanged_m_hGroundEntity(void * const basePlayer, void* const, int const * const new_m_hGroundEntity);
+	static void HOOKFN_INT RT_nNetworkStateChanged_m_hGroundEntity(void * const basePlayer, void* const, int const * const new_m_hGroundEntity);
 #endif
 	
 };

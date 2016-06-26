@@ -28,15 +28,30 @@ class NoCopy
 {
 protected:
 	NoCopy() {}
-	virtual ~NoCopy() {}
+	~NoCopy() {}
 
 private:
 	NoCopy(NoCopy const &) = delete;
 	NoCopy& operator=(NoCopy const &) = delete;
 };
 
+class NoMove
+{
+protected:
+	NoMove ()
+	{}
+	~NoMove ()
+	{}
+
+private:
+	NoMove ( NoMove && ) = delete;
+	NoMove& operator=( NoMove && ) = delete;
+};
+
 template <class C>
-class Singleton : protected NoCopy
+class Singleton :
+	protected NoCopy,
+	protected NoMove
 {
 	typedef Singleton<C> hClass;
 
@@ -48,14 +63,14 @@ protected:
 	{
 	}
 
-	virtual ~Singleton() override
+	virtual ~Singleton()
 	{
 	}
 
 public:
 	static void CreateInstance()
 	{
-		//Assert(hClass::instance == nullptr);
+		Assert(hClass::instance == nullptr);
 		void* ptr = _mm_malloc(sizeof(C), 16);
 		hClass::instance = new(ptr) C();
 	}
@@ -70,11 +85,9 @@ public:
 
 	static void DestroyInstance()
 	{
-		if (hClass::instance)
-		{
-			hClass::instance->~C();
-			_mm_free(hClass::instance);
-		}
+		Assert ( hClass::instance );
+		hClass::instance->~C ();
+		_mm_free ( hClass::instance );
 		hClass::instance = nullptr;
 	}
 };

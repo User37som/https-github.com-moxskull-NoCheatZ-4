@@ -4,7 +4,7 @@
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
-       http://www.apache.org/licenses/LICENSE-2.0
+	   http://www.apache.org/licenses/LICENSE-2.0
 
    Unless required by applicable law or agreed to in writing, software
    distributed under the License is distributed on an "AS IS" BASIS,
@@ -28,36 +28,37 @@ class ALIGN16 PlayerDataStructHandler :
 	typedef BaseDataStructHandler<DataT, MAX_PLAYERS> BaseClass;
 
 public:
-	inline void ResetPlayerDataStructByIndex(int const index)
+	inline void ResetPlayerDataStructByIndex ( int const index )
 	{
-		this->m_dataStruct[index] = DataT();
+		this->m_dataStruct[ index ] = DataT ();
 	};
-	inline void ResetPlayerDataStruct(SourceSdk::edict_t const * const player)
+	inline void ResetPlayerDataStruct ( SourceSdk::edict_t const * const player )
 	{
-		ResetPlayerDataStructByIndex(Helpers::IndexOfEdict(player));
+		ResetPlayerDataStructByIndex ( Helpers::IndexOfEdict ( player ) );
 	};
-	inline void ResetPlayerDataStruct(NczPlayer const * const player)
+	inline void ResetPlayerDataStruct ( NczPlayer const * const player )
 	{
-		ResetPlayerDataStructByIndex(player->GetIndex());
+		ResetPlayerDataStructByIndex ( player->GetIndex () );
 	};
 
 protected:
-	PlayerDataStructHandler()
-	{
-	};
-	virtual ~PlayerDataStructHandler() override {};
+	PlayerDataStructHandler () :
+		BaseClass ()
+	{};
+	virtual ~PlayerDataStructHandler () override
+	{};
 
-	inline DataT* GetPlayerDataStructByIndex(int const index) const
+	inline DataT* GetPlayerDataStructByIndex ( int const index ) const
 	{
-		return (DataT*)(&(this->m_dataStruct[index]));
+		return ( DataT* ) ( &( this->m_dataStruct[ index ] ) );
 	};
-	inline DataT* GetPlayerDataStruct(NczPlayer const * const player) const
+	inline DataT* GetPlayerDataStruct ( NczPlayer const * const player ) const
 	{
-		return GetPlayerDataStructByIndex(player->GetIndex());
+		return GetPlayerDataStructByIndex ( player->GetIndex () );
 	};
-	inline DataT* GetPlayerDataStruct(SourceSdk::edict_t const * const player) const
+	inline DataT* GetPlayerDataStruct ( SourceSdk::edict_t const * const player ) const
 	{
-		return GetPlayerDataStructByIndex(Helpers::IndexOfEdict(player));
+		return GetPlayerDataStructByIndex ( Helpers::IndexOfEdict ( player ) );
 	};
 } ALIGN16_POST;
 

@@ -4,7 +4,7 @@
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
-       http://www.apache.org/licenses/LICENSE-2.0
+	   http://www.apache.org/licenses/LICENSE-2.0
 
    Unless required by applicable law or agreed to in writing, software
    distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,21 +24,19 @@
 
 OnGroundHookListener::OnGroundListenersListT OnGroundHookListener::m_listeners;
 
-OnGroundHookListener::OnGroundHookListener()
-{
-}
+OnGroundHookListener::OnGroundHookListener ()
+{}
 
-OnGroundHookListener::~OnGroundHookListener()
-{
-}
+OnGroundHookListener::~OnGroundHookListener ()
+{}
 
-void OnGroundHookListener::HookOnGround(PlayerHandler::const_iterator ph)
+void OnGroundHookListener::HookOnGround ( PlayerHandler::const_iterator ph )
 {
-	Assert(Helpers::isValidEdict(ph->GetEdict()));
-	void* unk = ph->GetEdict()->m_pUnk;
+	Assert ( Helpers::isValidEdict ( ph->GetEdict () ) );
+	void* unk ( ph->GetEdict ()->m_pUnk );
 
-	HookInfo info(unk, ConfigManager::GetInstance()->vfid_mhgroundentity, (DWORD)nNetworkStateChanged_m_hGroundEntity);
-	HookGuard::GetInstance()->VirtualTableHook(info);
+	HookInfo info ( unk, ConfigManager::GetInstance ()->vfid_mhgroundentity, ( DWORD ) RT_nNetworkStateChanged_m_hGroundEntity );
+	HookGuard::GetInstance ()->VirtualTableHook ( info );
 }
 
 /*void OnGroundHookListener::UnhookOnGround()
@@ -52,37 +50,37 @@ void OnGroundHookListener::HookOnGround(PlayerHandler::const_iterator ph)
 }*/
 
 #ifdef GNUC
-void HOOKFN_INT OnGroundHookListener::nNetworkStateChanged_m_hGroundEntity(void * const basePlayer, int const * const new_m_hGroundEntity)
+void HOOKFN_INT OnGroundHookListener::RT_nNetworkStateChanged_m_hGroundEntity ( void * const basePlayer, int const * const new_m_hGroundEntity )
 #else
-void HOOKFN_INT OnGroundHookListener::nNetworkStateChanged_m_hGroundEntity(void * const basePlayer, void * const, int const * const new_m_hGroundEntity)
+void HOOKFN_INT OnGroundHookListener::RT_nNetworkStateChanged_m_hGroundEntity ( void * const basePlayer, void * const, int const * const new_m_hGroundEntity )
 #endif
 {
-	PlayerHandler::const_iterator  ph = NczPlayerManager::GetInstance()->GetPlayerHandlerByBasePlayer(basePlayer);
-	bool new_isOnground = true;
+	PlayerHandler::const_iterator  ph ( NczPlayerManager::GetInstance ()->GetPlayerHandlerByBasePlayer ( basePlayer ) );
+	bool new_isOnground ( true );
 
-	if(ph >= PLAYER_CONNECTED)
+	if( ph >= SlotStatus::PLAYER_CONNECTED )
 	{
-		if(*new_m_hGroundEntity != -1) new_isOnground = false;
+		if( *new_m_hGroundEntity != -1 ) new_isOnground = false;
 
-		OnGroundListenersListT::elem_t* it = m_listeners.GetFirst();
-		while (it != nullptr)
+		OnGroundListenersListT::elem_t* it ( m_listeners.GetFirst () );
+		while( it != nullptr )
 		{
-			it->m_value.listener->m_hGroundEntityStateChangedCallback(ph, new_isOnground);
+			it->m_value.listener->RT_m_hGroundEntityStateChangedCallback ( ph, new_isOnground );
 			it = it->m_next;
 		}
 	}
 
 	ST_W_STATIC GroundEntity_t gpOldFn;
-	*(DWORD*)&(gpOldFn) = HookGuard::GetInstance()->GetOldFunction(basePlayer, ConfigManager::GetInstance()->vfid_mhgroundentity);
-	gpOldFn(basePlayer, new_m_hGroundEntity);
+	*( DWORD* )&( gpOldFn ) = HookGuard::GetInstance ()->RT_GetOldFunction ( basePlayer, ConfigManager::GetInstance ()->vfid_mhgroundentity );
+	gpOldFn ( basePlayer, new_m_hGroundEntity );
 }
 
-void OnGroundHookListener::RegisterOnGroundHookListener(OnGroundHookListener const * const listener)
+void OnGroundHookListener::RegisterOnGroundHookListener ( OnGroundHookListener const * const listener )
 {
-	m_listeners.Add(listener);
+	m_listeners.Add ( listener );
 }
 
-void OnGroundHookListener::RemoveOnGroundHookListener(OnGroundHookListener const * const listener)
+void OnGroundHookListener::RemoveOnGroundHookListener ( OnGroundHookListener const * const listener )
 {
-	m_listeners.Remove(listener);
+	m_listeners.Remove ( listener );
 }

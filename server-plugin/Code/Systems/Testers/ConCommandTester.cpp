@@ -4,7 +4,7 @@
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
-       http://www.apache.org/licenses/LICENSE-2.0
+	   http://www.apache.org/licenses/LICENSE-2.0
 
    Unless required by applicable law or agreed to in writing, software
    distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,361 +19,369 @@
 #include "Systems/BanRequest.h"
 #include "Systems/Logger.h"
 
-ConCommandTester::ConCommandTester() :
-	BaseSystem("ConCommandTester", PLAYER_CONNECTING, PLAYER_CONNECTING, STATUS_EQUAL_OR_BETTER),
-	ConCommandHookListener(),
-	playerdatahandler_class(),
-	singleton_class(),
-	m_commands_list()
+ConCommandTester::ConCommandTester () :
+	BaseSystem ( "ConCommandTester", SlotStatus::PLAYER_CONNECTING, SlotStatus::PLAYER_CONNECTING, STATUS_EQUAL_OR_BETTER ),
+	ConCommandHookListener (),
+	playerdatahandler_class (),
+	singleton_class (),
+	m_commands_list ()
+{}
+
+ConCommandTester::~ConCommandTester ()
 {
+	Unload ();
 }
 
-ConCommandTester::~ConCommandTester()
+void ConCommandTester::Init ()
 {
-	Unload();
+	InitDataStruct ();
 }
 
-void ConCommandTester::Init()
+void ConCommandTester::Load ()
 {
-	InitDataStruct();
-}
-
-void ConCommandTester::Load()
-{
-	for (PlayerHandler::const_iterator it = PlayerHandler::begin(); it != PlayerHandler::end(); ++it)
+	for( PlayerHandler::const_iterator it ( PlayerHandler::begin () ); it != PlayerHandler::end (); ++it )
 	{
-		ResetPlayerDataStructByIndex(it.GetIndex());
+		ResetPlayerDataStructByIndex ( it.GetIndex () );
 	}
 
-	AddCommandInfo("ai_test_los", false);
-	AddCommandInfo("changelevel", false, true);
-	AddCommandInfo("cl_fullupdate", false);
-	AddCommandInfo("dbghist_addline", false);
-	AddCommandInfo("dbghist_dump", false);
-	AddCommandInfo("drawcross", false);
-	AddCommandInfo("drawline", false);
-	AddCommandInfo("dump_entity_sizes", false);
-	AddCommandInfo("dump_globals", false);
-	AddCommandInfo("dump_panels", false);
-	AddCommandInfo("dump_terrain", false);
-	AddCommandInfo("dumpcountedstrings", false);
-	AddCommandInfo("dumpentityfactories", false);
-	AddCommandInfo("dumpeventqueue", false);
-	AddCommandInfo("dumpgamestringtable", false);
-	AddCommandInfo("editdemo", false);
-	AddCommandInfo("endround", false);
-	AddCommandInfo("groundlist", false);
-	AddCommandInfo("listdeaths", false);
-	AddCommandInfo("listmodels", false);
-	AddCommandInfo("map_showspawnpoints", false);
-	AddCommandInfo("mem_dump", false);
-	AddCommandInfo("mp_dump_timers", false);
-	AddCommandInfo("npc_ammo_deplete", false);
-	AddCommandInfo("npc_heal", false);
-	AddCommandInfo("npc_speakall", false);
-	AddCommandInfo("npc_thinknow", false);
-	AddCommandInfo("physics_budget", false);
-	AddCommandInfo("physics_debug_entity", false);
-	AddCommandInfo("physics_highlight_active", false);
-	AddCommandInfo("physics_report_active", false);
-	AddCommandInfo("physics_select", false);
-	AddCommandInfo("q_sndrcn", false, true);
-	AddCommandInfo("report_entities", false);
-	AddCommandInfo("report_touchlinks", false);
-	AddCommandInfo("report_simthinklist", false);
-	AddCommandInfo("respawn_entities", false);
-	AddCommandInfo("rr_reloadresponsesystems", false);
-	AddCommandInfo("scene_flush", false);
-	AddCommandInfo("send_me_rcon", false, true);
-	AddCommandInfo("snd_digital_surround", false);
-	AddCommandInfo("snd_restart", false);
-	AddCommandInfo("soundlist", false);
-	AddCommandInfo("soundscape_flush", false);
-	AddCommandInfo("speed.toggle", false, true);
-	AddCommandInfo("sv_benchmark_force_start", false);
-	AddCommandInfo("sv_findsoundname", false);
-	AddCommandInfo("sv_soundemitter_filecheck", false);
-	AddCommandInfo("sv_soundemitter_flush", false);
-	AddCommandInfo("sv_soundscape_printdebuginfo", false);
-	AddCommandInfo("wc_update_entity", false);
+	AddCommandInfo ( "ai_test_los", false );
+	AddCommandInfo ( "changelevel", false, true );
+	AddCommandInfo ( "cl_fullupdate", false );
+	AddCommandInfo ( "dbghist_addline", false );
+	AddCommandInfo ( "dbghist_dump", false );
+	AddCommandInfo ( "drawcross", false );
+	AddCommandInfo ( "drawline", false );
+	AddCommandInfo ( "dump_entity_sizes", false );
+	AddCommandInfo ( "dump_globals", false );
+	AddCommandInfo ( "dump_panels", false );
+	AddCommandInfo ( "dump_terrain", false );
+	AddCommandInfo ( "dumpcountedstrings", false );
+	AddCommandInfo ( "dumpentityfactories", false );
+	AddCommandInfo ( "dumpeventqueue", false );
+	AddCommandInfo ( "dumpgamestringtable", false );
+	AddCommandInfo ( "editdemo", false );
+	AddCommandInfo ( "endround", false );
+	AddCommandInfo ( "groundlist", false );
+	AddCommandInfo ( "listdeaths", false );
+	AddCommandInfo ( "listmodels", false );
+	AddCommandInfo ( "map_showspawnpoints", false );
+	AddCommandInfo ( "mem_dump", false );
+	AddCommandInfo ( "mp_dump_timers", false );
+	AddCommandInfo ( "npc_ammo_deplete", false );
+	AddCommandInfo ( "npc_heal", false );
+	AddCommandInfo ( "npc_speakall", false );
+	AddCommandInfo ( "npc_thinknow", false );
+	AddCommandInfo ( "physics_budget", false );
+	AddCommandInfo ( "physics_debug_entity", false );
+	AddCommandInfo ( "physics_highlight_active", false );
+	AddCommandInfo ( "physics_report_active", false );
+	AddCommandInfo ( "physics_select", false );
+	AddCommandInfo ( "q_sndrcn", false, true );
+	AddCommandInfo ( "report_entities", false );
+	AddCommandInfo ( "report_touchlinks", false );
+	AddCommandInfo ( "report_simthinklist", false );
+	AddCommandInfo ( "respawn_entities", false );
+	AddCommandInfo ( "rr_reloadresponsesystems", false );
+	AddCommandInfo ( "scene_flush", false );
+	AddCommandInfo ( "send_me_rcon", false, true );
+	AddCommandInfo ( "snd_digital_surround", false );
+	AddCommandInfo ( "snd_restart", false );
+	AddCommandInfo ( "soundlist", false );
+	AddCommandInfo ( "soundscape_flush", false );
+	AddCommandInfo ( "speed.toggle", false, true );
+	AddCommandInfo ( "sv_benchmark_force_start", false );
+	AddCommandInfo ( "sv_findsoundname", false );
+	AddCommandInfo ( "sv_soundemitter_filecheck", false );
+	AddCommandInfo ( "sv_soundemitter_flush", false );
+	AddCommandInfo ( "sv_soundscape_printdebuginfo", false );
+	AddCommandInfo ( "wc_update_entity", false );
 
-	AddCommandInfo("buy",				true);
-	AddCommandInfo("buyammo1",			true);
-	AddCommandInfo("buyammo2",			true);
-	AddCommandInfo("spec_mode",			true);
-	AddCommandInfo("spec_next",			true);
-	AddCommandInfo("spec_prev",			true);
-	AddCommandInfo("use",				true);
-	AddCommandInfo("vmodenable",		true);
-	AddCommandInfo("vban",				true);
+	AddCommandInfo ( "buy", true );
+	AddCommandInfo ( "buyammo1", true );
+	AddCommandInfo ( "buyammo2", true );
+	AddCommandInfo ( "spec_mode", true );
+	AddCommandInfo ( "spec_next", true );
+	AddCommandInfo ( "spec_prev", true );
+	AddCommandInfo ( "use", true );
+	AddCommandInfo ( "vmodenable", true );
+	AddCommandInfo ( "vban", true );
 
-	m_mycommands.AddToTail(SourceSdk::InterfacesProxy::ICvar_FindCommand("ent_create"));
-	m_mycommands.AddToTail(SourceSdk::InterfacesProxy::ICvar_FindCommand("ent_fire"));
-	m_mycommands.AddToTail(SourceSdk::InterfacesProxy::ICvar_FindCommand("say"));
-	m_mycommands.AddToTail(SourceSdk::InterfacesProxy::ICvar_FindCommand("say_team"));
+	m_mycommands.AddToTail ( SourceSdk::InterfacesProxy::ICvar_FindCommand ( "ent_create" ) );
+	m_mycommands.AddToTail ( SourceSdk::InterfacesProxy::ICvar_FindCommand ( "ent_fire" ) );
+	m_mycommands.AddToTail ( SourceSdk::InterfacesProxy::ICvar_FindCommand ( "say" ) );
+	m_mycommands.AddToTail ( SourceSdk::InterfacesProxy::ICvar_FindCommand ( "say_team" ) );
 
-	ConCommandHookListener::RegisterConCommandHookListener(this);
+	ConCommandHookListener::RegisterConCommandHookListener ( this );
 }
 
-void ConCommandTester::Unload()
+void ConCommandTester::Unload ()
 {
-	m_commands_list.RemoveAll();
-	ConCommandHookListener::RemoveConCommandHookListener(this);
+	m_commands_list.RemoveAll ();
+	ConCommandHookListener::RemoveConCommandHookListener ( this );
 }
 
-void ConCommandTester::AddPlayerCommand(PlayerHandler::const_iterator ph, const basic_string& command)
+void ConCommandTester::RT_AddPlayerCommand ( PlayerHandler::const_iterator ph, const basic_string& command )
 {
-	LastPlayerCommandsT* playerData = this->GetPlayerDataStructByIndex(ph.GetIndex());
+	LastPlayerCommandsT* playerData ( this->GetPlayerDataStructByIndex ( ph.GetIndex () ) );
 
-	playerData->AddCmd(command, false);
+	playerData->AddCmd ( command, false );
 
-	const size_t cmd_count = playerData->GetSpamCmdCount();
+	const size_t cmd_count ( playerData->GetSpamCmdCount () );
 
-	if(cmd_count > 32)
+	if( cmd_count > 32 )
 	{
 		Detection_CmdFlood pDetection;
-		pDetection.PrepareDetectionData(playerData);
-		pDetection.PrepareDetectionLog(ph, this);
-		pDetection.Log();
+		pDetection.PrepareDetectionData ( playerData );
+		pDetection.PrepareDetectionLog ( ph, this );
+		pDetection.Log ();
 
-		ph->Kick("ConCommand flood");
+		ph->Kick ( "ConCommand flood" );
 	}
 }
 
-inline bool StriCmpOffset(const char * s1, const char* s2, size_t offset)
+inline bool StriCmpOffset ( const char * s1, const char* s2, size_t offset )
 {
-	if(strlen(s1)-offset < strlen(s2)) return false;
+	if( strlen ( s1 ) - offset < strlen ( s2 ) ) return false;
 
-	for(s1+=offset; *s2; ++s1, ++s2)
+	for( s1 += offset; *s2; ++s1, ++s2 )
 	{
 		char k = *s1;
-		if(k >= 'A' && k <= 'Z') k += 0x20;
-		if(k != *s2) return false;
+		if( k >= 'A' && k <= 'Z' ) k += 0x20;
+		if( k != *s2 ) return false;
 	}
 	return true;
 }
 
-void ConCommandTester::AddCommandInfo(const basic_string& name, const bool ignore/* = false*/, const bool ban/* = false*/)
+void ConCommandTester::AddCommandInfo ( const basic_string& name, const bool ignore/* = false*/, const bool ban/* = false*/ )
 {
-	m_commands_list.AddToTail(CommandInfoS(name, ignore, ban));
+	m_commands_list.AddToTail ( CommandInfoS ( name, ignore, ban ) );
 }
 
-void ConCommandTester::RemoveCommandInfo(const basic_string& name)
+void ConCommandTester::RemoveCommandInfo ( const basic_string& name )
 {
 	CommandInfoS temp;
 	temp.command_name = name;
-	m_commands_list.FindAndRemove(temp);
+	m_commands_list.FindAndRemove ( temp );
 }
 
-bool ConCommandTester::TestPlayerCommand(PlayerHandler::const_iterator ph, const basic_string& command)
+bool ConCommandTester::RT_TestPlayerCommand ( PlayerHandler::const_iterator ph, const basic_string& command )
 {
 	// To lower
-	basic_string lower_cmd(command);
-	lower_cmd.lower();
+	basic_string lower_cmd ( command );
+	lower_cmd.lower ();
 
-	size_t id = 0;
-	size_t const max = m_commands_list.Size();
-	for(CommandInfoT* cmd_test = &m_commands_list[id]; id != max; cmd_test = &m_commands_list[++id])
+	size_t id ( 0 );
+	size_t const max ( m_commands_list.Size () );
+	for( CommandInfoT* cmd_test ( &m_commands_list[ id ] ); id != max; cmd_test = &m_commands_list[ ++id ] )
 	{
-		for(size_t x = 0; x < lower_cmd.size(); ++x)
+		for( size_t x ( 0 ); x < lower_cmd.size (); ++x )
 		{
-			if(StriCmpOffset(lower_cmd.c_str(), cmd_test->command_name.c_str(), x))
+			if( StriCmpOffset ( lower_cmd.c_str (), cmd_test->command_name.c_str (), x ) )
 			{
 				// Ignored cmds are always at the end of the set
-				if(cmd_test->ignore) return false;
+				if( cmd_test->ignore ) return false;
 
-				AddPlayerCommand(ph, command);
+				RT_AddPlayerCommand ( ph, command );
 				Detection_CmdViolation pDetection;
-				pDetection.PrepareDetectionData(GetPlayerDataStructByIndex(ph.GetIndex()));
-				pDetection.PrepareDetectionLog(ph, this);
-				pDetection.Log();
+				pDetection.PrepareDetectionData ( GetPlayerDataStructByIndex ( ph.GetIndex () ) );
+				pDetection.PrepareDetectionLog ( ph, this );
+				pDetection.Log ();
 
-				if(cmd_test->ban) ph->Ban("ConCommand exploit");
-				else ph->Kick("ConCommand exploit");
+				if( cmd_test->ban ) ph->Ban ( "ConCommand exploit" );
+				else ph->Kick ( "ConCommand exploit" );
 				return true;
 			}
 		}
 	}
 
-	AddPlayerCommand(ph, command);
+	RT_AddPlayerCommand ( ph, command );
 	return false;
 }
 
-bool ConCommandTester::HookEntCallback(PlayerHandler::const_iterator ph, const void* const command, const SourceSdk::CCommand & args)
+bool ConCommandTester::RT_HookEntCallback ( PlayerHandler::const_iterator ph, const void* const command, const SourceSdk::CCommand & args )
 {
-	char cmd_str[512];
-	strcpy_s(cmd_str, 512*sizeof(char), args.GetCommandString());
-	cmd_str[511] = '\0';
-	const size_t cmd_len = strlen(cmd_str);
-	char const * command_name = SourceSdk::InterfacesProxy::ConCommand_GetName(command);
+	char cmd_str[ 512 ];
+	strcpy_s ( cmd_str, 512 * sizeof ( char ), args.GetCommandString () );
+	cmd_str[ 511 ] = '\0';
+	const size_t cmd_len ( strlen ( cmd_str ) );
+	char const * command_name ( SourceSdk::InterfacesProxy::ConCommand_GetName ( command ) );
 
-	if(cmd_len > 500)
+	if( cmd_len > 500 )
 	{
-		ConCommandTester::GetInstance()->AddPlayerCommand(ph, command_name);
+		ConCommandTester::GetInstance ()->RT_AddPlayerCommand ( ph, command_name );
 		Detection_CmdViolation pDetection;
-		pDetection.PrepareDetectionData(ConCommandTester::GetInstance()->GetPlayerDataStructByIndex(ph.GetIndex()));
-		pDetection.PrepareDetectionLog(ph, ConCommandTester::GetInstance());
-		pDetection.Log();
-		ph->Kick("ConCommand exploit");
+		pDetection.PrepareDetectionData ( ConCommandTester::GetInstance ()->GetPlayerDataStructByIndex ( ph.GetIndex () ) );
+		pDetection.PrepareDetectionLog ( ph, ConCommandTester::GetInstance () );
+		pDetection.Log ();
+		ph->Kick ( "ConCommand exploit" );
 		return true;
 	}
 
-	for(size_t x = 0; x < cmd_len-3; ++x)
+	for( size_t x ( 0 ); x < cmd_len - 3; ++x )
 	{
-		if(StriCmpOffset(cmd_str, "point_", x)){
-			ConCommandTester::GetInstance()->AddPlayerCommand(ph, command_name);
-			Detection_CmdViolation pDetection;
-			pDetection.PrepareDetectionData(ConCommandTester::GetInstance()->GetPlayerDataStructByIndex(ph.GetIndex()));
-			pDetection.PrepareDetectionLog(ph, ConCommandTester::GetInstance());
-			pDetection.Log();
-			ph->Kick("ConCommand exploit");
-			return true;
-		}
-		if(StriCmpOffset(cmd_str, "quit", x)){
-			ConCommandTester::GetInstance()->AddPlayerCommand(ph, command_name);
-			Detection_CmdViolation pDetection;
-			pDetection.PrepareDetectionData(ConCommandTester::GetInstance()->GetPlayerDataStructByIndex(ph.GetIndex()));
-			pDetection.PrepareDetectionLog(ph, ConCommandTester::GetInstance());
-			pDetection.Log();
-			ph->Kick("ConCommand exploit");
-			return true;
-		}
-		if(StriCmpOffset(cmd_str, "exit", x)){
-			ConCommandTester::GetInstance()->AddPlayerCommand(ph, command_name);
-			Detection_CmdViolation pDetection;
-			pDetection.PrepareDetectionData(ConCommandTester::GetInstance()->GetPlayerDataStructByIndex(ph.GetIndex()));
-			pDetection.PrepareDetectionLog(ph, ConCommandTester::GetInstance());
-			pDetection.Log();
-			ph->Kick("ConCommand exploit");
-			return true;
-		}
-		if(StriCmpOffset(cmd_str, "restart", x)){
-			ConCommandTester::GetInstance()->AddPlayerCommand(ph, command_name);
-			Detection_CmdViolation pDetection;
-			pDetection.PrepareDetectionData(ConCommandTester::GetInstance()->GetPlayerDataStructByIndex(ph.GetIndex()));
-			pDetection.PrepareDetectionLog(ph, ConCommandTester::GetInstance());
-			pDetection.Log();
-			ph->Kick("ConCommand exploit");
-			return true;
-		}
-		if(StriCmpOffset(cmd_str, "rcon", x)){
-			ConCommandTester::GetInstance()->AddPlayerCommand(ph, command_name);
-			Detection_CmdViolation pDetection;
-			pDetection.PrepareDetectionData(ConCommandTester::GetInstance()->GetPlayerDataStructByIndex(ph.GetIndex()));
-			pDetection.PrepareDetectionLog(ph, ConCommandTester::GetInstance());
-			pDetection.Log();
-			ph->Kick();
-			return true;
-		}
-		if(StriCmpOffset(cmd_str, "mp_", x)){
-			ConCommandTester::GetInstance()->AddPlayerCommand(ph, command_name);
-			Detection_CmdViolation pDetection;
-			pDetection.PrepareDetectionData(ConCommandTester::GetInstance()->GetPlayerDataStructByIndex(ph.GetIndex()));
-			pDetection.PrepareDetectionLog(ph, ConCommandTester::GetInstance());
-			pDetection.Log();
-			ph->Kick("ConCommand exploit");
-			return true;
-		}
-		if(StriCmpOffset(cmd_str, "taketimer", x)){
-			ConCommandTester::GetInstance()->AddPlayerCommand(ph, command_name);
-			Detection_CmdViolation pDetection;
-			pDetection.PrepareDetectionData(ConCommandTester::GetInstance()->GetPlayerDataStructByIndex(ph.GetIndex()));
-			pDetection.PrepareDetectionLog(ph, ConCommandTester::GetInstance());
-			pDetection.Log();
-			ph->Kick("ConCommand exploit");
-			return true;
-		}
-		if(StriCmpOffset(cmd_str, "logic_", x)){
-			ConCommandTester::GetInstance()->AddPlayerCommand(ph, command_name);
-			Detection_CmdViolation pDetection;
-			pDetection.PrepareDetectionData(ConCommandTester::GetInstance()->GetPlayerDataStructByIndex(ph.GetIndex()));
-			pDetection.PrepareDetectionLog(ph, ConCommandTester::GetInstance());
-			pDetection.Log();
-			ph->Kick("ConCommand exploit");
-			return true;
-		}
-		if(StriCmpOffset(cmd_str, "sv_", x)){
-			ConCommandTester::GetInstance()->AddPlayerCommand(ph, command_name);
-			Detection_CmdViolation pDetection;
-			pDetection.PrepareDetectionData(ConCommandTester::GetInstance()->GetPlayerDataStructByIndex(ph.GetIndex()));
-			pDetection.PrepareDetectionLog(ph, ConCommandTester::GetInstance());
-			pDetection.Log();
-			ph->Kick("ConCommand exploit");
-			return true;
-		}
-	}
-
-	ConCommandTester::GetInstance()->AddPlayerCommand(ph, cmd_str);
-	return false;
-}
-
-bool ConCommandTester::HookSayCallback(PlayerHandler::const_iterator ph, const void* const command, const SourceSdk::CCommand & args)
-{
-	char cmd_str[256];
-	strcpy_s(cmd_str, 256*sizeof(char), args.GetCommandString());
-	cmd_str[255] = '\0';
-	const size_t cmd_len = strlen(cmd_str);
-	char const * command_name = SourceSdk::InterfacesProxy::ConCommand_GetName(command);
-
-	if(cmd_len > 250)
-	{
-		ConCommandTester::GetInstance()->AddPlayerCommand(ph, command_name);
-		Detection_CmdViolation pDetection;
-		pDetection.PrepareDetectionData(ConCommandTester::GetInstance()->GetPlayerDataStructByIndex(ph.GetIndex()));
-		pDetection.PrepareDetectionLog(ph, ConCommandTester::GetInstance());
-		pDetection.Log();
-		ph->Kick("ConCommand exploit");
-		return true;
-	}
-
-	size_t spacenum = 0;
-	for(size_t x = 0; x < 251; ++x)
-	{
-		const char k = cmd_str[x];
-		if(k == '\0') break;
-
-		if(k == ' ')
+		if( StriCmpOffset ( cmd_str, "point_", x ) )
 		{
-			if(++spacenum > 64)
+			ConCommandTester::GetInstance ()->RT_AddPlayerCommand ( ph, command_name );
+			Detection_CmdViolation pDetection;
+			pDetection.PrepareDetectionData ( ConCommandTester::GetInstance ()->GetPlayerDataStructByIndex ( ph.GetIndex () ) );
+			pDetection.PrepareDetectionLog ( ph, ConCommandTester::GetInstance () );
+			pDetection.Log ();
+			ph->Kick ( "ConCommand exploit" );
+			return true;
+		}
+		if( StriCmpOffset ( cmd_str, "quit", x ) )
+		{
+			ConCommandTester::GetInstance ()->RT_AddPlayerCommand ( ph, command_name );
+			Detection_CmdViolation pDetection;
+			pDetection.PrepareDetectionData ( ConCommandTester::GetInstance ()->GetPlayerDataStructByIndex ( ph.GetIndex () ) );
+			pDetection.PrepareDetectionLog ( ph, ConCommandTester::GetInstance () );
+			pDetection.Log ();
+			ph->Kick ( "ConCommand exploit" );
+			return true;
+		}
+		if( StriCmpOffset ( cmd_str, "exit", x ) )
+		{
+			ConCommandTester::GetInstance ()->RT_AddPlayerCommand ( ph, command_name );
+			Detection_CmdViolation pDetection;
+			pDetection.PrepareDetectionData ( ConCommandTester::GetInstance ()->GetPlayerDataStructByIndex ( ph.GetIndex () ) );
+			pDetection.PrepareDetectionLog ( ph, ConCommandTester::GetInstance () );
+			pDetection.Log ();
+			ph->Kick ( "ConCommand exploit" );
+			return true;
+		}
+		if( StriCmpOffset ( cmd_str, "restart", x ) )
+		{
+			ConCommandTester::GetInstance ()->RT_AddPlayerCommand ( ph, command_name );
+			Detection_CmdViolation pDetection;
+			pDetection.PrepareDetectionData ( ConCommandTester::GetInstance ()->GetPlayerDataStructByIndex ( ph.GetIndex () ) );
+			pDetection.PrepareDetectionLog ( ph, ConCommandTester::GetInstance () );
+			pDetection.Log ();
+			ph->Kick ( "ConCommand exploit" );
+			return true;
+		}
+		if( StriCmpOffset ( cmd_str, "rcon", x ) )
+		{
+			ConCommandTester::GetInstance ()->RT_AddPlayerCommand ( ph, command_name );
+			Detection_CmdViolation pDetection;
+			pDetection.PrepareDetectionData ( ConCommandTester::GetInstance ()->GetPlayerDataStructByIndex ( ph.GetIndex () ) );
+			pDetection.PrepareDetectionLog ( ph, ConCommandTester::GetInstance () );
+			pDetection.Log ();
+			ph->Kick ();
+			return true;
+		}
+		if( StriCmpOffset ( cmd_str, "mp_", x ) )
+		{
+			ConCommandTester::GetInstance ()->RT_AddPlayerCommand ( ph, command_name );
+			Detection_CmdViolation pDetection;
+			pDetection.PrepareDetectionData ( ConCommandTester::GetInstance ()->GetPlayerDataStructByIndex ( ph.GetIndex () ) );
+			pDetection.PrepareDetectionLog ( ph, ConCommandTester::GetInstance () );
+			pDetection.Log ();
+			ph->Kick ( "ConCommand exploit" );
+			return true;
+		}
+		if( StriCmpOffset ( cmd_str, "taketimer", x ) )
+		{
+			ConCommandTester::GetInstance ()->RT_AddPlayerCommand ( ph, command_name );
+			Detection_CmdViolation pDetection;
+			pDetection.PrepareDetectionData ( ConCommandTester::GetInstance ()->GetPlayerDataStructByIndex ( ph.GetIndex () ) );
+			pDetection.PrepareDetectionLog ( ph, ConCommandTester::GetInstance () );
+			pDetection.Log ();
+			ph->Kick ( "ConCommand exploit" );
+			return true;
+		}
+		if( StriCmpOffset ( cmd_str, "logic_", x ) )
+		{
+			ConCommandTester::GetInstance ()->RT_AddPlayerCommand ( ph, command_name );
+			Detection_CmdViolation pDetection;
+			pDetection.PrepareDetectionData ( ConCommandTester::GetInstance ()->GetPlayerDataStructByIndex ( ph.GetIndex () ) );
+			pDetection.PrepareDetectionLog ( ph, ConCommandTester::GetInstance () );
+			pDetection.Log ();
+			ph->Kick ( "ConCommand exploit" );
+			return true;
+		}
+		if( StriCmpOffset ( cmd_str, "sv_", x ) )
+		{
+			ConCommandTester::GetInstance ()->RT_AddPlayerCommand ( ph, command_name );
+			Detection_CmdViolation pDetection;
+			pDetection.PrepareDetectionData ( ConCommandTester::GetInstance ()->GetPlayerDataStructByIndex ( ph.GetIndex () ) );
+			pDetection.PrepareDetectionLog ( ph, ConCommandTester::GetInstance () );
+			pDetection.Log ();
+			ph->Kick ( "ConCommand exploit" );
+			return true;
+		}
+	}
+
+	ConCommandTester::GetInstance ()->RT_AddPlayerCommand ( ph, cmd_str );
+	return false;
+}
+
+bool ConCommandTester::RT_HookSayCallback ( PlayerHandler::const_iterator ph, const void* const command, const SourceSdk::CCommand & args )
+{
+	char cmd_str[ 256 ];
+	strcpy_s ( cmd_str, 256 * sizeof ( char ), args.GetCommandString () );
+	cmd_str[ 255 ] = '\0';
+	const size_t cmd_len ( strlen ( cmd_str ) );
+	char const * command_name ( SourceSdk::InterfacesProxy::ConCommand_GetName ( command ) );
+
+	if( cmd_len > 250 )
+	{
+		ConCommandTester::GetInstance ()->RT_AddPlayerCommand ( ph, command_name );
+		Detection_CmdViolation pDetection;
+		pDetection.PrepareDetectionData ( ConCommandTester::GetInstance ()->GetPlayerDataStructByIndex ( ph.GetIndex () ) );
+		pDetection.PrepareDetectionLog ( ph, ConCommandTester::GetInstance () );
+		pDetection.Log ();
+		ph->Kick ( "ConCommand exploit" );
+		return true;
+	}
+
+	size_t spacenum ( 0 );
+	for( size_t x ( 0 ); x < 251; ++x )
+	{
+		const char k ( cmd_str[ x ] );
+		if( k == '\0' ) break;
+
+		if( k == ' ' )
+		{
+			if( ++spacenum > 64 )
 			{
-				ConCommandTester::GetInstance()->AddPlayerCommand(ph, command_name);
+				ConCommandTester::GetInstance ()->RT_AddPlayerCommand ( ph, command_name );
 				Detection_CmdViolation pDetection;
-				pDetection.PrepareDetectionData(ConCommandTester::GetInstance()->GetPlayerDataStructByIndex(ph.GetIndex()));
-				pDetection.PrepareDetectionLog(ph, ConCommandTester::GetInstance());
-				pDetection.Log();
-				ph->Kick("ConCommand exploit");
+				pDetection.PrepareDetectionData ( ConCommandTester::GetInstance ()->GetPlayerDataStructByIndex ( ph.GetIndex () ) );
+				pDetection.PrepareDetectionLog ( ph, ConCommandTester::GetInstance () );
+				pDetection.Log ();
+				ph->Kick ( "ConCommand exploit" );
 				return true;
 			}
 		}
-		if(k < 0x20 && !(Helpers::GetUTF8Bytes(&k) > 1))
+		if( k < 0x20 && !( Helpers::GetUTF8Bytes ( &k ) > 1 ) )
 		{
-			ConCommandTester::GetInstance()->AddPlayerCommand(ph, command_name);
+			ConCommandTester::GetInstance ()->RT_AddPlayerCommand ( ph, command_name );
 			Detection_CmdViolation pDetection;
-			pDetection.PrepareDetectionData(ConCommandTester::GetInstance()->GetPlayerDataStructByIndex(ph.GetIndex()));
-			pDetection.PrepareDetectionLog(ph, ConCommandTester::GetInstance());
-			pDetection.Log();
-			ph->Kick("ConCommand exploit");
+			pDetection.PrepareDetectionData ( ConCommandTester::GetInstance ()->GetPlayerDataStructByIndex ( ph.GetIndex () ) );
+			pDetection.PrepareDetectionLog ( ph, ConCommandTester::GetInstance () );
+			pDetection.Log ();
+			ph->Kick ( "ConCommand exploit" );
 			return true;
 		}
 	}
 
-	ConCommandTester::GetInstance()->AddPlayerCommand(ph, cmd_str);
+	ConCommandTester::GetInstance ()->RT_AddPlayerCommand ( ph, cmd_str );
 	return false;
 }
 
-bool ConCommandTester::ConCommandCallback(PlayerHandler::const_iterator ph, void* cmd, const SourceSdk::CCommand & args)
+bool ConCommandTester::RT_ConCommandCallback ( PlayerHandler::const_iterator ph, void* cmd, const SourceSdk::CCommand & args )
 {
-	char const * const command_name = SourceSdk::InterfacesProxy::ConCommand_GetName(cmd);
+	char const * const command_name ( SourceSdk::InterfacesProxy::ConCommand_GetName ( cmd ) );
 
-	if (ph != PlayerHandler::end()) /// https://github.com/L-EARN/NoCheatZ-4/issues/16#issuecomment-225543330
+	if( ph != PlayerHandler::end () ) /// https://github.com/L-EARN/NoCheatZ-4/issues/16#issuecomment-225543330
 	{
-		if (Helpers::bStriEq(command_name, "ent_create") | Helpers::bStriEq(command_name, "ent_fire"))
+		if( stricmp ( command_name, "ent_create" ) == 0 || stricmp ( command_name, "ent_fire" ) == 0 )
 		{
-			return HookEntCallback(ph, cmd, args);
+			return RT_HookEntCallback ( ph, cmd, args );
 		}
-		else if (Helpers::bStriEq(command_name, "say") | Helpers::bStriEq(command_name, "say_team"))
+		else if( stricmp ( command_name, "say" ) == 0 || stricmp ( command_name, "say_team" ) == 0 )
 		{
-			return HookSayCallback(ph, cmd, args);
+			return RT_HookSayCallback ( ph, cmd, args );
 		}
 		else
 		{
@@ -382,32 +390,20 @@ bool ConCommandTester::ConCommandCallback(PlayerHandler::const_iterator ph, void
 	}
 	else
 	{
-		Logger::GetInstance()->Msg<MSG_ERROR>(Helpers::format("ConCommandTester::ConCommandCallback : Intercepted a ConCommand because player class is not ready. Command name : %s\n", command_name));
+		Logger::GetInstance ()->Msg<MSG_ERROR> ( Helpers::format ( "ConCommandTester::ConCommandCallback : Intercepted a ConCommand because player class is not ready. Command name : %s\n", command_name ) );
 		return true; // Always block the command if the plugin is not ready to test this player (player class not already created)
 	}
 }
 
-basic_string Detection_CmdFlood::GetDataDump()
+basic_string Detection_CmdFlood::GetDataDump ()
 {
-	basic_string ret = ":::: List of commands entered last second {";
-	size_t id = 0;
-	size_t const max = GetDataStruct()->commands.Size();
-	for(PlayerConCommandS* it = &(GetDataStruct()->commands[id]); id != max; it = &(GetDataStruct()->commands[++id]))
+	basic_string ret ( ":::: List of commands entered last second {" );
+	size_t id ( 0 );
+	size_t const max ( GetDataStruct ()->commands.Size () );
+	for( PlayerConCommandS* it ( &( GetDataStruct ()->commands[ id ] ) ); id != max; it = &( GetDataStruct ()->commands[ ++id ] ) )
 	{
-		ret.append(Helpers::format("\n:::::::: PlayerConCommandS {\n:::::::::::: ConCommand String : %s,\n:::::::::::: Is ConCommand Spam Ignored : %s,\n:::::::::::: Insertion Time %f\n::::::::}", it->cmd.c_str(), Helpers::boolToString(it->isSpamIgnored), it->time));
+		ret.append ( Helpers::format ( "\n:::::::: PlayerConCommandS {\n:::::::::::: ConCommand String : %s,\n:::::::::::: Is ConCommand Spam Ignored : %s,\n:::::::::::: Insertion Time %f\n::::::::}", it->cmd.c_str (), Helpers::boolToString ( it->isSpamIgnored ), it->time ) );
 	}
-	ret.append("\n:::: }");
+	ret.append ( "\n:::: }" );
 	return ret;
 }
-
-/* Require sv_allow_wait_command 1 */
-//static ConCommandHook hook_wait("wait", ConCommandTester::AlwaysBlockCallback);
-/* OLD
-static ConCommandHook hook_ent_create("ent_create", ConCommandTester::HookEntCallback);
-
-static ConCommandHook hook_ent_fire("ent_fire", ConCommandTester::HookEntCallback);
-
-static ConCommandHook hook_say("say", ConCommandTester::HookSayCallback);
-
-static ConCommandHook hook_say_team("say_team", ConCommandTester::HookSayCallback);
-*/

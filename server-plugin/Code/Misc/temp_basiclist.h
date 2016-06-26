@@ -11,7 +11,8 @@ class basic_slist
 public:
 	struct elem_t
 	{
-		elem_t(inner_type const & newvalue) : m_value(newvalue) {}
+		elem_t ( inner_type const & newvalue ) : m_value ( newvalue )
+		{}
 
 		mutable inner_type m_value;
 		elem_t* m_next;
@@ -23,20 +24,18 @@ private:
 
 public:
 
-	basic_slist()
-	{
-		m_first = nullptr;
-	}
+	basic_slist () : m_first ( nullptr )
+	{}
 
-	~basic_slist()
+	~basic_slist ()
 	{
-		while (m_first != nullptr)
+		while( m_first != nullptr )
 		{
-			Remove(m_first);
+			Remove ( m_first );
 		}
 	}
 
-	constexpr elem_t* GetFirst() const
+	constexpr elem_t* GetFirst () const
 	{
 		return m_first;
 	}
@@ -44,17 +43,17 @@ public:
 	/*
 	Add an element to front.
 	*/
-	elem_t* Add(inner_type const & value)
+	elem_t* Add ( inner_type const & value )
 	{
-		if (m_first != nullptr)
+		if( m_first != nullptr )
 		{
-			elem_t* const old_first = m_first;
-			m_first = new elem_t(value);
+			elem_t* const old_first ( m_first );
+			m_first = new elem_t ( value );
 			m_first->m_next = old_first;
 		}
 		else
 		{
-			m_first = new elem_t(value);
+			m_first = new elem_t ( value );
 			m_first->m_next = nullptr;
 		}
 		return m_first;
@@ -63,17 +62,17 @@ public:
 	/*
 	Find this iterator and remove it from list. Returns the new iterator at this position.
 	*/
-	elem_t* Remove(elem_t* it)
+	elem_t* Remove ( elem_t* it )
 	{
-		elem_t* iterator = m_first;
-		elem_t* prev = nullptr;
-		elem_t* return_value = nullptr;
-		while (iterator != nullptr)
+		elem_t* iterator ( m_first );
+		elem_t* prev ( nullptr );
+		elem_t* return_value ( nullptr );
+		while( iterator != nullptr )
 		{
-			if (iterator == it)
+			if( iterator == it )
 			{
 				return_value = iterator->m_next;
-				if (prev == nullptr)
+				if( prev == nullptr )
 				{
 					m_first = iterator->m_next;
 				}
@@ -94,16 +93,16 @@ public:
 	/*
 	Find this value and remove it from list. Returns the new iterator at this position.
 	*/
-	void Remove(inner_type const & value)
+	void Remove ( inner_type const & value )
 	{
-		elem_t* iterator = m_first;
-		elem_t* prev = nullptr;
-		while (iterator != nullptr)
+		elem_t* iterator ( m_first );
+		elem_t* prev ( nullptr );
+		while( iterator != nullptr )
 		{
-			if (iterator->m_value == value)
+			if( iterator->m_value == value )
 			{
-				elem_t* save = iterator->m_next;
-				if (prev == nullptr)
+				elem_t* save ( iterator->m_next );
+				if( prev == nullptr )
 				{
 					m_first = iterator->m_next;
 				}
@@ -123,12 +122,12 @@ public:
 	/*
 	Find this value
 	*/
-	elem_t* const Find(inner_type const & value) const
+	elem_t* const Find ( inner_type const & value ) const
 	{
-		elem_t* iterator = m_first;
-		while (iterator != nullptr)
+		elem_t* iterator ( m_first );
+		while( iterator != nullptr )
 		{
-			if (iterator->m_value == value)
+			if( iterator->m_value == value )
 			{
 				return iterator;
 			}
@@ -147,34 +146,37 @@ private:
 	static me* m_first;
 	me* m_next;
 
-	me const * const GetMe(void) const { return static_cast<me const * const>(this); }
+	me const * const GetMe ( void ) const
+	{
+		return static_cast< me const * const >( this );
+	}
 
 protected:
-	ListMe(void)
+	ListMe ( void )
 	{
-		if (hClass::m_first == nullptr)
+		if( hClass::m_first == nullptr )
 		{
-			hClass::m_first = const_cast<me*>(GetMe());
+			hClass::m_first = const_cast< me* >( GetMe () );
 			m_next = nullptr;
 		}
 		else
 		{
-			me * const old = hClass::m_first;
-			hClass::m_first = const_cast<me*>(GetMe());
+			me * const old ( hClass::m_first );
+			hClass::m_first = const_cast< me* >( GetMe () );
 			m_next = old;
 		}
 	}
 
-	virtual ~ListMe(void)
+	virtual ~ListMe ( void )
 	{
-		me* iterator = hClass::m_first;
-		me* prev = nullptr;
-		while (iterator != nullptr)
+		me* iterator ( hClass::m_first);
+		me* prev ( nullptr );
+		while( iterator != nullptr )
 		{
-			if (iterator->GetMe() == GetMe())
+			if( iterator->GetMe () == GetMe () )
 			{
-				me* save = iterator->m_next;
-				if (prev == nullptr)
+				me* save ( iterator->m_next );
+				if( prev == nullptr )
 				{
 					hClass::m_first = iterator->m_next;
 				}
@@ -191,13 +193,22 @@ protected:
 	};
 
 public:
-	static me * const GetFirst(void) { return hClass::m_first; }
-	me * const GetNext(void) const { return m_next; };
-	static void GetNext(me*& ptr) { ptr = ptr->m_next; };
+	static me * const GetFirst ( void )
+	{
+		return hClass::m_first;
+	}
+	me * const GetNext ( void ) const
+	{
+		return m_next;
+	};
+	static void GetNext ( me*& ptr )
+	{
+		ptr = ptr->m_next;
+	};
 };
 
 template <class me>
-me* ListMe<me>::m_first = nullptr;
+me* ListMe<me>::m_first ( nullptr );
 
 #endif
 
