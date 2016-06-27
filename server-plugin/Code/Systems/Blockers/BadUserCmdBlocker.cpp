@@ -20,7 +20,7 @@
 #include "Systems/Logger.h"
 
 BadUserCmdBlocker::BadUserCmdBlocker () :
-	BaseSystem ( "BadUserCmdBlocker", SlotStatus::PLAYER_CONNECTED, SlotStatus::PLAYER_CONNECTING, STATUS_EQUAL_OR_BETTER ),
+	BaseSystem ( "BadUserCmdBlocker" ),
 	playerdatahandler_class (),
 	PlayerRunCommandHookListener (),
 	singleton_class ()
@@ -51,6 +51,16 @@ void BadUserCmdBlocker::Load ()
 void BadUserCmdBlocker::Unload ()
 {
 	RemovePlayerRunCommandHookListener ( this );
+}
+
+bool BadUserCmdBlocker::GotJob () const
+{
+	// Create a filter
+	ProcessFilter::HumanAtLeastConnecting const filter_class;
+	// Initiate the iterator at the first match in the filter
+	PlayerHandler::const_iterator it ( &filter_class );
+	// Return if we have job to do or not ...
+	return it != PlayerHandler::end ();
 }
 
 PlayerRunCommandRet BadUserCmdBlocker::RT_PlayerRunCommandCallback ( PlayerHandler::const_iterator ph, void* pCmd, void* old_cmd )

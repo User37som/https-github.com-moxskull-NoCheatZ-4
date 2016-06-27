@@ -144,16 +144,21 @@ public:
 
 private:
 	virtual void Init () override final;
+
 	virtual void Load () override final;
+
 	virtual void Unload () override final;
 
+	virtual bool GotJob () const override final;
+
 	virtual void RT_ProcessOnTick ( float const curtime ) override final;
-	virtual void RT_ProcessPlayerTestOnTick ( PlayerHandler::const_iterator ph, float const curtime ) override final
-	{};
 
 	virtual bool RT_SetTransmitCallback ( PlayerHandler::const_iterator sender, PlayerHandler::const_iterator receiver ) override final;
+
 	virtual bool RT_SetTransmitWeaponCallback ( SourceSdk::edict_t const * const sender, PlayerHandler::const_iterator receiver ) override final;
+
 	virtual void RT_WeaponEquipCallback ( PlayerHandler::const_iterator ph, SourceSdk::edict_t const * const weapon ) override final;
+
 	virtual void RT_WeaponDropCallback ( PlayerHandler::const_iterator ph, SourceSdk::edict_t const * const weapon ) override final;
 
 public:
@@ -163,9 +168,13 @@ public:
 
 private:
 	bool RT_IsAbleToSee ( PlayerHandler::const_iterator sender, PlayerHandler::const_iterator receiver );
+
 	bool RT_IsInFOV ( const SourceSdk::Vector& origin, const SourceSdk::QAngle& dir, const SourceSdk::Vector& target );
+
 	bool RT_IsVisible ( const SourceSdk::Vector& origin, const SourceSdk::Vector& target );
+
 	bool RT_IsVisible ( const SourceSdk::Vector& origin, const SourceSdk::QAngle& dir, const SourceSdk::Vector& target );
+
 	bool RT_IsVisible ( const SourceSdk::Vector& origin, const SourceSdk::Vector& target, const SourceSdk::Vector& mins, const SourceSdk::Vector& maxs, const SourceSdk::vec_t scale = 1.0 );
 
 };

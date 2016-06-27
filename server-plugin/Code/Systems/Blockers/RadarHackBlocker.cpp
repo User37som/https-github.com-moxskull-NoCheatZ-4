@@ -24,7 +24,7 @@ limitations under the License.
 #include "Systems/AutoTVRecord.h"
 
 RadarHackBlocker::RadarHackBlocker () :
-	BaseSystem ( "RadarHackBlocker", SlotStatus::PLAYER_CONNECTED, SlotStatus::PLAYER_CONNECTING, STATUS_EQUAL_OR_BETTER ),
+	BaseSystem ( "RadarHackBlocker" ),
 	OnTickListener (),
 	playerdatahandler_class (),
 	singleton_class (),
@@ -90,29 +90,38 @@ void RadarHackBlocker::Unload ()
 	ThinkPostHookListener::RemoveThinkPostHookListener ( this );
 }
 
+bool RadarHackBlocker::GotJob () const
+{
+	// Create a filter
+	ProcessFilter::HumanAtLeastConnecting const filter_class;
+	// Initiate the iterator at the first match in the filter
+	PlayerHandler::const_iterator it ( &filter_class );
+	// Return if we have job to do or not ...
+	return it != PlayerHandler::end ();
+}
+
 void RadarHackBlocker::RT_ThinkPostCallback ( SourceSdk::edict_t const * const pent )
 {
-	for( PlayerHandler::const_iterator ph ( PlayerHandler::begin () ); ph != PlayerHandler::end (); ++ph )
-	{
-		if( CanProcessThisSlot ( ph ) || ph == SlotStatus::BOT )
-		{
-			int const index ( ph.GetIndex () );
-			ClientRadarData * pData ( GetPlayerDataStructByIndex ( index ) );
-			if( pData->m_last_spotted_status != m_players_spotted[ index ] )
-			{
-				pData->m_last_spotted_status = m_players_spotted[ index ];
+	ProcessFilter::HumanAtLeastConnectedOrBot const filter_class;
 
-				if( pData->m_last_spotted_status )
-				{
-					RT_UpdatePlayerData ( ph );
-					RT_ProcessEntity ( ph->GetEdict () );
-				}
-				else
-				{
-					//pData->m_next_update = curtime + 1.0f;
-					//UpdatePlayerData(ph->playerClass);
-					//ProcessEntity(Helpers::PEntityOfEntIndex(x));
-				}
+	for( PlayerHandler::const_iterator ph ( &filter_class ); ph != PlayerHandler::end (); ph+= &filter_class )
+	{
+		int const index ( ph.GetIndex () );
+		ClientRadarData * pData ( GetPlayerDataStructByIndex ( index ) );
+		if( pData->m_last_spotted_status != m_players_spotted[ index ] )
+		{
+			pData->m_last_spotted_status = m_players_spotted[ index ];
+
+			if( pData->m_last_spotted_status )
+			{
+				RT_UpdatePlayerData ( ph );
+				RT_ProcessEntity ( ph->GetEdict () );
+			}
+			else
+			{
+				//pData->m_next_update = curtime + 1.0f;
+				//UpdatePlayerData(ph->playerClass);
+				//ProcessEntity(Helpers::PEntityOfEntIndex(x));
 			}
 		}
 	}
@@ -264,9 +273,10 @@ void RadarHackBlocker::RT_UpdatePlayerData ( NczPlayer* pPlayer )
 
 void RadarHackBlocker::RT_ProcessOnTick ( float const curtime )
 {
-	for( PlayerHandler::const_iterator ph ( PlayerHandler::begin () ); ph != PlayerHandler::end (); ++ph )
+	ProcessFilter::HumanAtLeastConnected const filter_class;
+
+	for( PlayerHandler::const_iterator ph (&filter_class ); ph != PlayerHandler::end (); ph+= &filter_class )
 	{
-		if( !CanProcessThisSlot ( ph ) && ph != SlotStatus::BOT ) continue;
 		int const index ( ph.GetIndex () );
 
 		ClientRadarData * pData ( GetPlayerDataStructByIndex ( index ) );

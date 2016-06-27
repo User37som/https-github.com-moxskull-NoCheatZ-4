@@ -25,7 +25,7 @@
 /////////////////////////////////////////////////////////////////////////
 
 ValidationTester::ValidationTester () :
-	BaseSystem ( "ValidationTester", SlotStatus::PLAYER_CONNECTED, SlotStatus::INVALID, STATUS_EQUAL_OR_BETTER ),
+	BaseSystem ( "ValidationTester" ),
 	SourceSdk::IGameEventListener002 (),
 	NczFilteredPlayersList (),
 	OnTickListener (),
@@ -41,6 +41,11 @@ ValidationTester::~ValidationTester ()
 void ValidationTester::Init ()
 {
 	InitDataStruct ();
+}
+
+bool ValidationTester::GotJob () const
+{
+	return true;
 }
 
 void ValidationTester::SetValidated ( PlayerHandler::const_iterator ph )
@@ -136,6 +141,12 @@ void ValidationTester::RT_ProcessOnTick ( float const curtime )
 
 		SetValidated ( ph );
 		it = m_pending_validations.Remove ( it );
+	}
+
+	ProcessFilter::HumanOnlyConnected filter_class;
+	for( PlayerHandler::const_iterator ph ( &filter_class ); ph != PlayerHandler::end (); ph += &filter_class )
+	{
+		RT_ProcessPlayerTestOnTick ( ph, curtime );
 	}
 }
 

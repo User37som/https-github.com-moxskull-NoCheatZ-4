@@ -58,6 +58,16 @@ void ShotTester::Unload ()
 	PlayerRunCommandHookListener::RemovePlayerRunCommandHookListener ( this );
 }
 
+bool ShotTester::GotJob () const
+{
+	// Create a filter
+	ProcessFilter::HumanAtLeastConnected const filter_class;
+	// Initiate the iterator at the first match in the filter
+	PlayerHandler::const_iterator it ( &filter_class );
+	// Return if we have job to do or not ...
+	return it != PlayerHandler::end ();
+}
+
 void TriggerStat ( ShotStatHandlerT* handler, float up_time, float down_time, size_t clicks )
 {
 	++( handler->n );

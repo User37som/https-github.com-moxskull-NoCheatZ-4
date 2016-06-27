@@ -86,6 +86,8 @@ public:
 
 	virtual void Unload () override final;
 
+	virtual bool GotJob () const override final;
+
 	virtual PlayerRunCommandRet RT_PlayerRunCommandCallback ( PlayerHandler::const_iterator ph, void * const pCmd, void * const old_cmd ) override final;
 };
 

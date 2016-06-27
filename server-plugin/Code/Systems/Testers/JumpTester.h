@@ -135,6 +135,8 @@ public:
 
 	virtual void Unload () override final;
 
+	virtual bool GotJob () const override final;
+
 	virtual void RT_m_hGroundEntityStateChangedCallback ( PlayerHandler::const_iterator ph, bool const new_isOnGround ) override final;
 
 	virtual PlayerRunCommandRet RT_PlayerRunCommandCallback ( PlayerHandler::const_iterator ph, void * const cmd, void * const old_cmd ) override final;

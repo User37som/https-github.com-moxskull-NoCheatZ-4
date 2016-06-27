@@ -25,9 +25,9 @@
 #include "Systems/BaseSystem.h"
 #include "Systems/AutoTVRecord.h"
 
-PlayerHandler::const_iterator PlayerHandler::invalid ( nullptr );
-PlayerHandler::const_iterator PlayerHandler::first ( PlayerHandler::invalid );
-PlayerHandler::const_iterator PlayerHandler::last ( PlayerHandler::invalid );
+PlayerHandler::const_iterator PlayerHandler::invalid;
+PlayerHandler::const_iterator PlayerHandler::first;
+PlayerHandler::const_iterator PlayerHandler::last;
 
 
 //---------------------------------------------------------------------------------
@@ -132,7 +132,7 @@ void NczPlayerManager::ClientConnect ( SourceSdk::edict_t* pEntity )
 	const int index ( Helpers::IndexOfEdict ( pEntity ) );
 	Assert ( index );
 	PlayerHandler& ph ( FullHandlersList[ index ] );
-	Assert ( ph.status == INVALID || ph.status == PLAYER_CONNECTING );
+	Assert ( ph.status == SlotStatus::INVALID || ph.status == SlotStatus::PLAYER_CONNECTING );
 	ph.playerClass = new NczPlayer ( index );
 	// Should not be here, but heh ...
 	//*PlayerRunCommandHookListener::GetLastUserCmd(ph.playerClass) = SourceSdk::CUserCmd();
@@ -155,17 +155,20 @@ void NczPlayerManager::ClientActive ( SourceSdk::edict_t* pEntity )
 	if( ph.status == SlotStatus::INVALID ) // Bots don't call ClientConnect
 	{
 		ph.playerClass = new NczPlayer ( index );
-		ph.status = SlotStatus::BOT;
+		ph.playerClass->m_playerinfo = ( SourceSdk::IPlayerInfo * )SourceSdk::InterfacesProxy::Call_GetPlayerInfo ( ph.playerClass->m_edict );
+		Assert ( ph.playerClass->m_playerinfo );
+		if(ph.playerClass->m_playerinfo->IsHLTV() )
+			ph.status = SlotStatus::TV;
+		else
+			ph.status = SlotStatus::BOT;
 	}
 	else
 	{
 		Assert ( ph.status == SlotStatus::PLAYER_CONNECTING );
 		ph.status = SlotStatus::PLAYER_CONNECTED;
+		ph.playerClass->m_playerinfo = ( SourceSdk::IPlayerInfo * )SourceSdk::InterfacesProxy::Call_GetPlayerInfo ( ph.playerClass->m_edict );
+		Assert ( ph.playerClass->m_playerinfo );
 	}
-
-	ph.playerClass->m_playerinfo = ( SourceSdk::IPlayerInfo * )SourceSdk::InterfacesProxy::Call_GetPlayerInfo ( ph.playerClass->m_edict );
-
-	Assert ( ph.playerClass->m_playerinfo );
 
 	if( index > m_max_index ) m_max_index = index;
 
@@ -219,7 +222,8 @@ void NczPlayerManager::FireGameEvent ( SourceSdk::IGameEvent* ev )
 				pstat = SlotStatus::PLAYER_CONNECTED;
 		}
 
-		if( GetPlayerCount ( SlotStatus::PLAYER_CONNECTED ) == 0 ) AutoTVRecord::GetInstance ()->StopRecord ();
+		ProcessFilter::HumanAtLeastConnected filter_class;
+		if( GetPlayerCount ( &filter_class ) == 0 ) AutoTVRecord::GetInstance ()->StopRecord ();
 
 		BaseSystem::ManageSystems ();
 		Logger::GetInstance ()->Flush ();
@@ -311,7 +315,7 @@ void NczPlayerManager::DeclareKickedPlayer ( int const slot )
 	FullHandlersList[ slot ].status = SlotStatus::KICK;
 }
 
-void NczPlayerManager::RT_Think ()
+void NczPlayerManager::RT_Think ( float const curtime )
 {
 	while( m_max_index > 0 && FullHandlersList[ m_max_index ].status == SlotStatus::INVALID )
 		--m_max_index;
@@ -328,7 +332,6 @@ void NczPlayerManager::RT_Think ()
 	}
 
 	const int maxcl ( m_max_index );
-	const float gametime ( Plat_FloatTime () );
 
 	int in_tests_count = 0;
 	for( int x = 1; x <= maxcl; ++x )
@@ -336,7 +339,7 @@ void NczPlayerManager::RT_Think ()
 		PlayerHandler& ph ( FullHandlersList[ x ] );
 		if( ph.status <= SlotStatus::PLAYER_CONNECTING ) continue;
 
-		if( gametime > ph.in_tests_time )
+		if( curtime > ph.in_tests_time )
 		{
 			ph.status = SlotStatus::PLAYER_IN_TESTS;
 			++in_tests_count;
@@ -399,42 +402,12 @@ PlayerHandler::const_iterator NczPlayerManager::GetPlayerHandlerByName ( const c
 	return PlayerHandler::end ();
 }
 
-short NczPlayerManager::GetPlayerCount ( SlotStatus filter, SlotFilterBehavior strict ) const
+short NczPlayerManager::GetPlayerCount ( BaseProcessFilter const * const filter ) const
 {
 	short count ( 0 );
-	const int maxcl ( m_max_index );
-	int x ( 0 );
-
-	switch( strict )
+	for( PlayerHandler::const_iterator it ( filter ); it != PlayerHandler::end (); it+=filter )
 	{
-		case STATUS_STRICT:
-			{
-				do
-				{
-					if( FullHandlersList[ x ].status == filter ) ++count;
-				}
-				while( ++x <= maxcl );
-			}
-			break;
-		case STATUS_BETTER:
-			{
-				do
-				{
-					if( FullHandlersList[ x ].status > filter ) ++count;
-				}
-				while( ++x <= maxcl );
-			}
-			break;
-		case STATUS_EQUAL_OR_BETTER:
-			{
-				do
-				{
-					if( FullHandlersList[ x ].status >= filter ) ++count;
-				}
-				while( ++x <= maxcl );
-			}
-			break;
-	};
-
+		++count;
+	}
 	return count;
 }

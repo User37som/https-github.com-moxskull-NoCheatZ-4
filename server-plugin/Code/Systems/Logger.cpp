@@ -48,7 +48,9 @@ void Logger::Push ( const char * msg )
 		m_msg.AddToTail ( Helpers::format ( "%s [Server Tick #%d] %s", Helpers::getStrDateTime ( "%x %X" ), server_tick, msg ) );
 	}
 
-	if( NczPlayerManager::GetInstance ()->GetPlayerCount ( SlotStatus::PLAYER_CONNECTED, STATUS_EQUAL_OR_BETTER ) == 0 )
+	ProcessFilter::HumanAtLeastConnected filter_class;
+
+	if( NczPlayerManager::GetInstance ()->GetPlayerCount ( &filter_class ) == 0 )
 	{
 		// We can flush right now.
 

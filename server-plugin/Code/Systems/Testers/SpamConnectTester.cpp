@@ -21,7 +21,7 @@
 #include "Systems/BanRequest.h"
 
 SpamConnectTester::SpamConnectTester () :
-	BaseSystem ( "SpamConnectTester", SlotStatus::PLAYER_CONNECTING, SlotStatus::INVALID, STATUS_EQUAL_OR_BETTER ),
+	BaseSystem ( "SpamConnectTester" ),
 	singleton_class ()
 {}
 
@@ -39,6 +39,11 @@ void SpamConnectTester::Load ()
 void SpamConnectTester::Unload ()
 {
 	m_connect_list.RemoveAll ();
+}
+
+bool SpamConnectTester::GotJob () const
+{
+	return true;
 }
 
 void SpamConnectTester::ClientConnect ( bool *bAllowConnect, SourceSdk::edict_t const * const pEntity, const char *pszName, const char *pszAddress, char *reject, int maxrejectlen )

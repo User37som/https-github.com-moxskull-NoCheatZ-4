@@ -20,7 +20,7 @@
 #include "Systems/Logger.h"
 
 ConCommandTester::ConCommandTester () :
-	BaseSystem ( "ConCommandTester", SlotStatus::PLAYER_CONNECTING, SlotStatus::PLAYER_CONNECTING, STATUS_EQUAL_OR_BETTER ),
+	BaseSystem ( "ConCommandTester" ),
 	ConCommandHookListener (),
 	playerdatahandler_class (),
 	singleton_class (),
@@ -120,6 +120,16 @@ void ConCommandTester::Unload ()
 	ConCommandHookListener::RemoveConCommandHookListener ( this );
 }
 
+bool ConCommandTester::GotJob () const
+{
+	// Create a filter
+	ProcessFilter::HumanAtLeastConnecting const filter_class;
+	// Initiate the iterator at the first match in the filter
+	PlayerHandler::const_iterator it ( &filter_class );
+	// Return if we have job to do or not ...
+	return it != PlayerHandler::end ();
+}
+
 void ConCommandTester::RT_AddPlayerCommand ( PlayerHandler::const_iterator ph, const basic_string& command )
 {
 	LastPlayerCommandsT* playerData ( this->GetPlayerDataStructByIndex ( ph.GetIndex () ) );
@@ -166,35 +176,38 @@ void ConCommandTester::RemoveCommandInfo ( const basic_string& name )
 
 bool ConCommandTester::RT_TestPlayerCommand ( PlayerHandler::const_iterator ph, const basic_string& command )
 {
-	// To lower
-	basic_string lower_cmd ( command );
-	lower_cmd.lower ();
-
-	size_t id ( 0 );
-	size_t const max ( m_commands_list.Size () );
-	for( CommandInfoT* cmd_test ( &m_commands_list[ id ] ); id != max; cmd_test = &m_commands_list[ ++id ] )
+	if( IsActive () )
 	{
-		for( size_t x ( 0 ); x < lower_cmd.size (); ++x )
+		// To lower
+		basic_string lower_cmd ( command );
+		lower_cmd.lower ();
+
+		size_t id ( 0 );
+		size_t const max ( m_commands_list.Size () );
+		for( CommandInfoT* cmd_test ( &m_commands_list[ id ] ); id != max; cmd_test = &m_commands_list[ ++id ] )
 		{
-			if( StriCmpOffset ( lower_cmd.c_str (), cmd_test->command_name.c_str (), x ) )
+			for( size_t x ( 0 ); x < lower_cmd.size (); ++x )
 			{
-				// Ignored cmds are always at the end of the set
-				if( cmd_test->ignore ) return false;
+				if( StriCmpOffset ( lower_cmd.c_str (), cmd_test->command_name.c_str (), x ) )
+				{
+					// Ignored cmds are always at the end of the set
+					if( cmd_test->ignore ) return false;
 
-				RT_AddPlayerCommand ( ph, command );
-				Detection_CmdViolation pDetection;
-				pDetection.PrepareDetectionData ( GetPlayerDataStructByIndex ( ph.GetIndex () ) );
-				pDetection.PrepareDetectionLog ( ph, this );
-				pDetection.Log ();
+					RT_AddPlayerCommand ( ph, command );
+					Detection_CmdViolation pDetection;
+					pDetection.PrepareDetectionData ( GetPlayerDataStructByIndex ( ph.GetIndex () ) );
+					pDetection.PrepareDetectionLog ( ph, this );
+					pDetection.Log ();
 
-				if( cmd_test->ban ) ph->Ban ( "ConCommand exploit" );
-				else ph->Kick ( "ConCommand exploit" );
-				return true;
+					if( cmd_test->ban ) ph->Ban ( "ConCommand exploit" );
+					else ph->Kick ( "ConCommand exploit" );
+					return true;
+				}
 			}
 		}
-	}
 
-	RT_AddPlayerCommand ( ph, command );
+		RT_AddPlayerCommand ( ph, command );
+	}
 	return false;
 }
 

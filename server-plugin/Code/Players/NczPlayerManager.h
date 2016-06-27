@@ -19,13 +19,15 @@
 #include <limits>
 #include <cstring> // memset, memcpy
 
-#include "Preprocessors.h"
-#include "NczPlayer.h"
-#include "Misc/temp_singleton.h"
-#include "Misc/Helpers.h"
-
 #include "SdkPreprocessors.h"
 #include "Interfaces/IGameEventManager/IGameEventManager.h"
+
+#include "Preprocessors.h"
+#include "NczPlayer.h"
+#include "Players/ProcessFilter.h"
+#include "Misc/temp_singleton.h"
+#include "Misc/Helpers.h"
+#include "Misc/ClassSpecifications.h"
 
 class NczPlayerManager;
 
@@ -42,6 +44,9 @@ public:
 
 	typedef iterator const const_iterator;
 
+	/*
+		Wrapper of the PlayerHandler (pointer) type.
+	*/
 	class ALIGN4 iterator
 	{
 		friend NczPlayerManager;
@@ -52,24 +57,37 @@ public:
 		inline PlayerHandler * GetHandler () const; // backdoor for NczPlayerManager
 
 	public:
-		iterator ()
+		iterator () : m_ptr ( invalid.m_ptr )
 		{}
 		iterator ( PlayerHandler const * const ptr ) : m_ptr ( ptr )
 		{}
+		iterator ( BaseProcessFilter const * const filter ) : m_ptr ( invalid.m_ptr )
+		{
+			this->operator+=( filter );
+		}
 		iterator ( int const slot_index ) : m_ptr ( invalid.m_ptr + slot_index )
 		{}
 		iterator ( const_iterator & other ) : m_ptr ( other.m_ptr )
 		{}
+		/*
+			Assign by copy
+		*/
 		const_iterator & operator=( PlayerHandler const * const ptr ) const
 		{
 			m_ptr = ptr;
 			return *this;
 		}
+		/*
+			Assign by copy
+		*/
 		const_iterator & operator=( const_iterator & other ) const
 		{
 			m_ptr = other.m_ptr;
 			return *this;
 		}
+		/*
+			Assign by index (no check)
+		*/
 		const_iterator & operator=( int const slot_index ) const
 		{
 			m_ptr = invalid.m_ptr + slot_index;
@@ -77,21 +95,73 @@ public:
 		}
 		~iterator ()
 		{}
+		/*
+			Advance the iterator to the next handler until the end.
+		*/
 		inline const_iterator & operator++() const;
+		/*
+			Advance the iterator to the next handler that matches the conditions in target
+		*/
+		inline const_iterator & operator+=( BaseProcessFilter const * const target ) const;
+		/*
+			Returns the index of the handler
+		*/
 		inline int GetIndex () const;
+		/*
+			Returns true if the iterator is at the same index than other
+		*/
 		inline bool operator==( const_iterator & other ) const;
+		/*
+			Returns false if the iterator is at the same index than other
+		*/
 		inline bool operator!=( const_iterator & other ) const;
+		/*
+			Returns true if the status of the handler matches other_status
+		*/
 		inline bool operator==( SlotStatus const other_status ) const;
+		/*
+			Returns true if the status of the handler doesn't matches other_status
+		*/
 		inline bool operator!=( SlotStatus const other_status ) const;
+		/*
+			Returns true if the status of the handler is greater or equal than other_status
+		*/
 		inline bool operator>=( SlotStatus const other_status ) const;
+		/*
+			Returns true if the status of the handler is lower or equal than other_status
+		*/
 		inline bool operator<=( SlotStatus const other_status ) const;
+		/*
+			Returns true if the status of the handler is greater than other_status
+		*/
 		inline bool operator>( SlotStatus const other_status ) const;
+		/*
+			Returns true if the status of the handler is lower than other_status
+		*/
 		inline bool operator<( SlotStatus const other_status ) const;
+		/*
+			Returns true if the handler got a valid status (= NczPlayer class is allocated)
+		*/
 		inline operator bool () const;
+		/*
+			Returns false if the handler got a valid status (= NczPlayer class is allocated)
+		*/
 		inline bool operator!() const;
+		/*
+			Convert the iterator to the NczPlayer pointer in the handler (might be null)
+		*/
 		inline operator NczPlayer_ptr() const;
+		/*
+			Convert the iterator to the handler's status
+		*/
 		inline operator SlotStatus() const;
+		/*
+			Convert the iterator to the dereferenced NczPlayer pointer in the handler (might be null)
+		*/
 		inline NczPlayer_ptr operator*() const;
+		/*
+			Convert the iterator to the dereferenced NczPlayer pointer in the handler (might be null)
+		*/
 		inline NczPlayer_ptr operator->() const;
 	} ALIGN4_POST;
 
@@ -137,6 +207,27 @@ inline PlayerHandler * PlayerHandler::iterator::GetHandler () const
 inline PlayerHandler::const_iterator & PlayerHandler::iterator::operator++() const // CONST CHEATTERR
 {
 	--m_ptr;
+	return *this;
+}
+
+inline PlayerHandler::const_iterator & PlayerHandler::iterator::operator+=( BaseProcessFilter const * const target ) const
+{
+	if( this->operator==( PlayerHandler::end () ) ) // We already are at the end ... but our tester wants to work :'(
+	{
+		this->operator=( begin () );
+	}
+	while( this->operator!=( PlayerHandler::end () ) ); // begin can still be invalid when server is empty
+	{
+		if( target->CanProcessThisSlot ( this->operator SlotStatus() ) )
+		{
+			return *this;
+		}
+		else
+		{
+			this->operator++();
+		}
+	}
+
 	return *this;
 }
 
@@ -253,7 +344,7 @@ public:
 	inline PlayerHandler::const_iterator GetPlayerHandlerByEdict ( SourceSdk::edict_t const * const pEdict ) const;
 	PlayerHandler::const_iterator GetPlayerHandlerByName ( const char * playerName ) const;
 
-	short GetPlayerCount ( SlotStatus filter = SlotStatus::INVALID, SlotFilterBehavior strict = STATUS_EQUAL_OR_BETTER ) const;
+	short GetPlayerCount ( BaseProcessFilter const * const filter ) const;
 
 	void ClientConnect ( SourceSdk::edict_t* pEntity ); // Bots don't call this ...
 	void ClientActive ( SourceSdk::edict_t* pEntity ); // ... they call this at first
@@ -261,7 +352,7 @@ public:
 	void FireGameEvent ( SourceSdk::IGameEvent* ev );
 	void DeclareKickedPlayer ( int const slot );
 
-	void RT_Think ();
+	void RT_Think ( float const curtime );
 
 	const int GetMaxIndex () const
 	{

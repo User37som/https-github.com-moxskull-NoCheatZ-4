@@ -57,6 +57,8 @@ private:
 
 	virtual void Unload () override final;
 
+	virtual bool GotJob () const override final;
+
 	virtual void FireGameEvent ( SourceSdk::IGameEvent* ev ) override final;
 
 	virtual bool RT_SetTransmitCallback ( PlayerHandler::const_iterator sender, PlayerHandler::const_iterator receiver ) override final;

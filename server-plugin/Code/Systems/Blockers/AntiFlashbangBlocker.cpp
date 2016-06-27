@@ -23,7 +23,7 @@
 #include "Players/NczPlayerManager.h"
 
 AntiFlashbangBlocker::AntiFlashbangBlocker () :
-	BaseSystem ( "AntiFlashbangBlocker", SlotStatus::PLAYER_CONNECTED, SlotStatus::PLAYER_CONNECTING, STATUS_EQUAL_OR_BETTER ),
+	BaseSystem ( "AntiFlashbangBlocker" ),
 	IGameEventListener002 (),
 	playerdatahandler_class (),
 	SetTransmitHookListener (),
@@ -58,6 +58,16 @@ void AntiFlashbangBlocker::Unload ()
 {
 	SetTransmitHookListener::RemoveSetTransmitHookListener ( this );
 	SourceSdk::InterfacesProxy::GetGameEventManager ()->RemoveListener ( this );
+}
+
+bool AntiFlashbangBlocker::GotJob () const
+{
+	// Create a filter
+	ProcessFilter::HumanAtLeastConnecting const filter_class;
+	// Initiate the iterator at the first match in the filter
+	PlayerHandler::const_iterator it ( &filter_class );
+	// Return if we have job to do or not ...
+	return it != PlayerHandler::end ();
 }
 
 bool AntiFlashbangBlocker::RT_SetTransmitCallback ( PlayerHandler::const_iterator sender, PlayerHandler::const_iterator receiver )

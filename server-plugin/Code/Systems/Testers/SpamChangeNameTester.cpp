@@ -24,7 +24,7 @@
 #include "Systems/BanRequest.h"
 
 SpamChangeNameTester::SpamChangeNameTester () :
-	BaseSystem ( "SpamChangeNameTester", SlotStatus::PLAYER_CONNECTING, SlotStatus::PLAYER_CONNECTING, STATUS_EQUAL_OR_BETTER ),
+	BaseSystem ( "SpamChangeNameTester" ),
 	SourceSdk::IGameEventListener002 (),
 	OnTickListener (),
 	playerdata_class (),
@@ -56,6 +56,16 @@ void SpamChangeNameTester::Unload ()
 {
 	OnTickListener::RemoveOnTickListener ( this );
 	SourceSdk::InterfacesProxy::GetGameEventManager ()->RemoveListener ( this );
+}
+
+bool SpamChangeNameTester::GotJob () const
+{
+	// Create a filter
+	ProcessFilter::HumanAtLeastConnecting const filter_class;
+	// Initiate the iterator at the first match in the filter
+	PlayerHandler::const_iterator it ( &filter_class );
+	// Return if we have job to do or not ...
+	return it != PlayerHandler::end ();
 }
 
 bool IsNameValid ( const char* const o_name )

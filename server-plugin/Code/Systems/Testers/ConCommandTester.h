@@ -155,6 +155,8 @@ private:
 
 	virtual void Unload () override final;
 
+	virtual bool GotJob () const override final;
+
 	virtual bool RT_ConCommandCallback ( PlayerHandler::const_iterator ph, void * const cmd, SourceSdk::CCommand const & args ) override final;
 
 public:

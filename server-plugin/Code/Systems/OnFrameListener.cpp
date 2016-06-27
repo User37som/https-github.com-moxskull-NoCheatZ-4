@@ -23,7 +23,6 @@ OnFrameListener::FrameListenersListT OnFrameListener::m_framedTestersList;
 
 OnFrameListener::OnFrameListener()
 {
-	m_filter = PLAYER_IN_TESTS;
 }
 
 void OnFrameListener::ProcessTestsOnFrame()

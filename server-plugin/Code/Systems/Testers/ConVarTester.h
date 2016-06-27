@@ -130,13 +130,12 @@ private:
 
 	virtual void Unload () override final;
 
+	virtual bool GotJob () const override final;
+
 	virtual bool sys_cmd_fn ( SourceSdk::CCommand const &args ) override final;
 
 	/* Nouvelle version de la fonction qui va faire en sorte de ne tester qu'un seul joueur par frame */
 	virtual void RT_ProcessOnTick ( float const curtime ) override final;
-
-	virtual void RT_ProcessPlayerTestOnTick ( PlayerHandler::const_iterator ph, float const curtime ) override final
-	{};
 
 public:
 	void RT_OnQueryCvarValueFinished ( PlayerHandler::const_iterator ph, SourceSdk::EQueryCvarValueStatus eStatus, const char *pCvarName, const char *pCvarValue );

@@ -25,9 +25,8 @@
 // BaseSystem
 /////////////////////////////////////////////////////////////////////////
 
-BaseSystem::BaseSystem ( char const * const name, SlotStatus filter, SlotStatus load_filter, SlotFilterBehavior filter_behavior, char const * const commands ) :
+BaseSystem::BaseSystem ( char const * const name, char const * const commands ) :
 	ListMeClass (),
-	SlotFilter ( filter, load_filter, filter_behavior ),
 	m_name ( name ),
 	m_cmd_list ( commands ),
 	m_isActive ( false ),
@@ -54,7 +53,7 @@ void BaseSystem::TryUnloadSystems ()
 	BaseSystem* it ( GetFirst () );
 	while( it != nullptr )
 	{
-		if( it->ShouldUnload () ) it->SetActive ( false );
+		if( ! it->GotJob () ) it->SetActive ( false );
 		GetNext ( it );
 	}
 }
@@ -91,13 +90,6 @@ BaseSystem * BaseSystem::FindSystemByName ( const char * name )
 	return nullptr;
 }
 
-bool BaseSystem::ShouldUnload ()
-{
-	//if(GetTargetSlotStatus() == INVALID) return false;
-
-	return ( NczPlayerManager::GetInstance ()->GetPlayerCount ( GetLoadFilter (), STATUS_EQUAL_OR_BETTER ) == 0 );
-}
-
 void BaseSystem::SetActive ( bool active )
 {
 	if( m_isActive == active ) return;
@@ -108,11 +100,15 @@ void BaseSystem::SetActive ( bool active )
 			if( m_configState )
 			{
 				// Should load
-				if( NczPlayerManager::GetInstance ()->GetPlayerCount ( GetLoadFilter (), STATUS_EQUAL_OR_BETTER ) > 0 )
+				if( this->GotJob() )
 				{
 					Logger::GetInstance ()->Msg<MSG_HINT> ( Helpers::format ( "Starting %s", GetName () ) );
 					Load ();
 					m_isActive = true;
+				}
+				else
+				{
+					DebugMessage ( Helpers::format ( "System %s has nothing to do and will not be loaded", GetName () ) );
 				}
 			}
 			else

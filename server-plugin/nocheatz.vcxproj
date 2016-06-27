@@ -449,10 +449,12 @@ copy "$(TargetPath)" ..\..\..\game\bin\"$(TargetName)".pdb
   <ItemGroup>
     <ClInclude Include="Code\Hooks\ThinkPostHookListener.h" />
     <ClInclude Include="Code\Hooks\UserMessageHookListener.h" />
+    <ClInclude Include="Code\Misc\ClassSpecifications.h" />
     <ClInclude Include="Code\Misc\MathCache.h" />
     <ClInclude Include="Code\Misc\temp_basiclist.h" />
     <ClInclude Include="Code\Misc\temp_basicstring.h" />
     <ClInclude Include="Code\Misc\temp_singleton.h" />
+    <ClInclude Include="Code\Players\ProcessFilter.h" />
     <ClInclude Include="Code\Systems\AutoTVRecord.h" />
     <ClInclude Include="Code\Systems\Blockers\RadarHackBlocker.h" />
     <ClInclude Include="Code\Systems\ConfigManager.h" />

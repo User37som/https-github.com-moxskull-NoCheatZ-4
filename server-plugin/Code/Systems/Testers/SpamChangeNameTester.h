@@ -61,12 +61,11 @@ public:
 
 	virtual void Unload () override final;
 
+	virtual bool GotJob () const override final;
+
 	virtual void FireGameEvent ( SourceSdk::IGameEvent* ev ) override final;
 
 	virtual void RT_ProcessOnTick ( float const curtime ) override final;
-
-	virtual void RT_ProcessPlayerTestOnTick ( PlayerHandler::const_iterator ph, float const curtime ) override final
-	{};
 
 	void ClientConnect ( bool *bAllowConnect, SourceSdk::edict_t const * const pEntity, const char *pszName, const char *pszAddress, char *reject, int maxrejectlen );
 };

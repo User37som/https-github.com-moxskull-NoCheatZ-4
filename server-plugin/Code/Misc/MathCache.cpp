@@ -41,7 +41,7 @@ MathInfo& MathCache::RT_GetCachedMaths ( int const player_index, bool const forc
 	{
 		PlayerHandler::const_iterator ph ( player_index );
 
-		Assert ( ph > INVALID );
+		Assert ( ph > SlotStatus::INVALID );
 
 		SourceSdk::IPlayerInfo * const playerinfo ( ph->GetPlayerInfo () );
 

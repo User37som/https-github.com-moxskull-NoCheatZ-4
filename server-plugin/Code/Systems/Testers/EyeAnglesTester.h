@@ -126,6 +126,8 @@ private:
 
 	virtual void Unload () override final;
 
+	virtual bool GotJob () const override final;
+
 	virtual void FireGameEvent ( SourceSdk::IGameEvent *ev ) override final;
 
 	virtual PlayerRunCommandRet RT_PlayerRunCommandCallback ( PlayerHandler::const_iterator ph, void * const cmd, void * const old_cmd ) override final;

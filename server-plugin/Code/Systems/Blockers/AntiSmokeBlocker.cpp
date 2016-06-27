@@ -25,7 +25,7 @@
 #include "Systems/ConfigManager.h"
 
 AntiSmokeBlocker::AntiSmokeBlocker () :
-	BaseSystem ( "AntiSmokeBlocker", SlotStatus::PLAYER_CONNECTED, SlotStatus::PLAYER_CONNECTING, STATUS_EQUAL_OR_BETTER ),
+	BaseSystem ( "AntiSmokeBlocker" ),
 	IGameEventListener002 (),
 	OnTickListener (),
 	playerdatahandler_class (),
@@ -69,6 +69,16 @@ void AntiSmokeBlocker::Unload ()
 	{
 		it = m_smokes.Remove ( it );
 	}
+}
+
+bool AntiSmokeBlocker::GotJob () const
+{
+	// Create a filter
+	ProcessFilter::HumanAtLeastConnecting const filter_class;
+	// Initiate the iterator at the first match in the filter
+	PlayerHandler::const_iterator it ( &filter_class );
+	// Return if we have job to do or not ...
+	return it != PlayerHandler::end ();
 }
 
 void AntiSmokeBlocker::RT_ProcessOnTick ( float const curtime )

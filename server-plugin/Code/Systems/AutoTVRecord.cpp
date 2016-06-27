@@ -6,7 +6,7 @@
 #include "Logger.h"
 
 AutoTVRecord::AutoTVRecord () :
-	BaseSystem ( "AutoTVRecord", SlotStatus::PLAYER_CONNECTED, SlotStatus::INVALID, STATUS_EQUAL_OR_BETTER, "Enable - Disable - Verbose - SetMinPlayers - SetPrefix" ),
+	BaseSystem ( "AutoTVRecord", "Enable - Disable - Verbose - SetMinPlayers - SetPrefix" ),
 	ConCommandHookListener (),
 	singleton_class (),
 	m_demofile ( "" ),
@@ -48,6 +48,11 @@ void AutoTVRecord::Unload ()
 	m_recording = false;
 
 	ConCommandHookListener::RemoveConCommandHookListener ( this );
+}
+
+bool AutoTVRecord::GotJob () const
+{
+	return true;
 }
 
 void AutoTVRecord::StartRecord ()

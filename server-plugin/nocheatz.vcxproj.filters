@@ -545,6 +545,12 @@
     <ClInclude Include="Code\version.h">
       <Filter>Code</Filter>
     </ClInclude>
+    <ClInclude Include="Code\Players\ProcessFilter.h">
+      <Filter>Code\Players</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Misc\ClassSpecifications.h">
+      <Filter>Code\Misc</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Library Include="SourceSdk\Interfaces\Protobuf\protobuf-2.5.0\vsprojects\Debug\libprotobuf.lib">

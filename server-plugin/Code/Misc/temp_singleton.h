@@ -20,33 +20,11 @@ limitations under the License.
 
 #include "SdkPreprocessors.h"
 
+#include "ClassSpecifications.h"
+
 #ifdef GNUC
 #	include <mm_malloc.h>
 #endif
-
-class NoCopy
-{
-protected:
-	NoCopy() {}
-	~NoCopy() {}
-
-private:
-	NoCopy(NoCopy const &) = delete;
-	NoCopy& operator=(NoCopy const &) = delete;
-};
-
-class NoMove
-{
-protected:
-	NoMove ()
-	{}
-	~NoMove ()
-	{}
-
-private:
-	NoMove ( NoMove && ) = delete;
-	NoMove& operator=( NoMove && ) = delete;
-};
 
 template <class C>
 class Singleton :

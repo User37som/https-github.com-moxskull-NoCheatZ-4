@@ -26,7 +26,7 @@
 
 ConVarTester::ConVarTester () :
 	AsyncNczFilteredPlayersList (),
-	BaseSystem ( "ConVarTester", SlotStatus::PLAYER_CONNECTED, SlotStatus::PLAYER_CONNECTING, STATUS_EQUAL_OR_BETTER, "Enable - Disable - Verbose - AddRule - ResetRules" ),
+	BaseSystem ( "ConVarTester", "Enable - Disable - Verbose - AddRule - ResetRules" ),
 	OnTickListener (),
 	playerdata_class (),
 	singleton_class (),
@@ -41,6 +41,16 @@ ConVarTester::~ConVarTester ()
 void ConVarTester::Init ()
 {
 	InitDataStruct ();
+}
+
+bool ConVarTester::GotJob () const
+{
+	// Create a filter
+	ProcessFilter::HumanAtLeastConnecting const filter_class;
+	// Initiate the iterator at the first match in the filter
+	PlayerHandler::const_iterator it ( &filter_class );
+	// Return if we have job to do or not ...
+	return it != PlayerHandler::end ();
 }
 
 void ConVarTester::RT_ProcessOnTick ( float const curtime )

@@ -30,14 +30,12 @@ TimerListener::~TimerListener ()
 
 }
 
-void TimerListener::RT_OnTick ()
+void TimerListener::RT_OnTick (float const curtime)
 {
 	m_undersample = !m_undersample;
 
 	if( m_undersample )
 	{
-		float const cur_time ( Plat_FloatTime () );
-
 		timer_listeners_list_t::elem_t* it1 ( m_listeners.GetFirst () );
 		while( it1 != nullptr )
 		{
@@ -49,7 +47,7 @@ void TimerListener::RT_OnTick ()
 			{
 				TimerInfo& v ( child[ pos ] );
 
-				if( cur_time - v.m_last_exec >= v.m_period_seconds )
+				if( curtime - v.m_last_exec >= v.m_period_seconds )
 				{
 					it1->m_value->RT_TimerCallback ( v.m_name );
 

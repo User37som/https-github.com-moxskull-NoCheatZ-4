@@ -77,6 +77,8 @@ private:
 
 	virtual void Unload () override final;
 
+	virtual bool GotJob () const override final;
+
 public:
 	void ClientConnect ( bool *bAllowConnect, SourceSdk::edict_t const * const pEntity, const char *pszName, const char *pszAddress, char *reject, int maxrejectlen );
 };

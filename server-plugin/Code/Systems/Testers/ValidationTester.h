@@ -117,11 +117,13 @@ private:
 
 	virtual void Unload () override final;
 
-	virtual void RT_ProcessPlayerTestOnTick ( PlayerHandler::const_iterator ph, float const curtime ) override final;
+	virtual bool GotJob () const override final;
 
 	virtual void RT_ProcessOnTick ( float const curtime ) override final;
 
 	virtual void FireGameEvent ( SourceSdk::IGameEvent* ev ) override final;
+
+	void RT_ProcessPlayerTestOnTick ( PlayerHandler::const_iterator ph, float const curtime );
 
 	void SetValidated ( PlayerHandler::const_iterator ph );
 

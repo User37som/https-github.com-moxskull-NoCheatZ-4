@@ -22,7 +22,6 @@
 
 #include "Console/convar.h"
 
-#include "Players/NczPlayer.h"
 #include "Misc/temp_Metrics.h"
 
 /////////////////////////////////////////////////////////////////////////
@@ -30,8 +29,7 @@
 /////////////////////////////////////////////////////////////////////////
 
 class BaseSystem :
-	public ListMe<BaseSystem>,
-	public SlotFilter
+	public ListMe<BaseSystem>
 {
 	typedef ListMe<BaseSystem> ListMeClass;
 
@@ -50,7 +48,7 @@ protected:
 #endif
 
 protected:
-	BaseSystem ( char const * const name, SlotStatus filter = SlotStatus::PLAYER_IN_TESTS, SlotStatus load_filter = SlotStatus::PLAYER_CONNECTED, SlotFilterBehavior filter_behavior = STATUS_STRICT, char const * const commands = "Enable - Disable - Verbose" );
+	BaseSystem ( char const * const name, char const * const commands = "Enable - Disable - Verbose" );
 	virtual ~BaseSystem ();
 
 protected:
@@ -68,6 +66,9 @@ protected:
 	{
 		return false;
 	};
+
+	/* Returns true if the system got any job to do and must be active (A player is in the filter or any other thing) */
+	virtual bool GotJob () const = 0;
 
 public:
 	virtual const char * cmd_list () final
@@ -89,10 +90,6 @@ public:
 	{
 		return m_isDisabled;
 	}
-
-private:
-	/* Returns true if the system has no player to test and can be unloaded */
-	bool ShouldUnload ();
 
 public:
 	/* Process Load when m_isActive changes to true

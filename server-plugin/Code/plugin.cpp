@@ -353,15 +353,16 @@ void CNoCheatZPlugin::RT_GameFrame ( bool simulating )
 
 	if( simulating )
 	{
+		float const curtime = Plat_FloatTime ();
 		/**************/
-		NczPlayerManager::GetInstance ()->RT_Think (); /// ALWAYS FIRST
+		NczPlayerManager::GetInstance ()->RT_Think ( curtime ); /// ALWAYS FIRST
 		/**************/
 
 		MathCache::GetInstance ()->RT_SetCacheExpired ();
 
-		OnTickListener::RT_OnTick ();
+		OnTickListener::RT_OnTick ( curtime );
 
-		TimerListener::RT_OnTick ();
+		TimerListener::RT_OnTick ( curtime );
 
 		AutoTVRecord::GetInstance ()->RT_OnTick ();
 	}
@@ -396,7 +397,8 @@ void CNoCheatZPlugin::ClientActive ( SourceSdk::edict_t *pEntity )
 		HookEntity ( ph->GetEdict () );
 	}
 
-	if( NczPlayerManager::GetInstance ()->GetPlayerCount ( SlotStatus::PLAYER_CONNECTED ) == 1 ) AutoTVRecord::GetInstance ()->SpawnTV ();
+	ProcessFilter::HumanAtLeastConnected filter_class;
+	if( NczPlayerManager::GetInstance ()->GetPlayerCount ( &filter_class ) == 1 ) AutoTVRecord::GetInstance ()->SpawnTV ();
 }
 
 //---------------------------------------------------------------------------------
@@ -421,7 +423,7 @@ void CNoCheatZPlugin::ClientPutInServer ( SourceSdk::edict_t *pEntity, char cons
 		ValidationTester::GetInstance ()->ResetPlayerDataStruct ( pEntity );
 	}
 
-	DebugMessage ( Helpers::format ( "CNoCheatZPlugin::ClientPutInServer (%s -> %s) (Was already connected: %s)", pEntity->GetClassName (), playername, Helpers::boolToString ( stat != INVALID ) ) );
+	DebugMessage ( Helpers::format ( "CNoCheatZPlugin::ClientPutInServer (%s -> %s) (Was already connected: %s)", pEntity->GetClassName (), playername, Helpers::boolToString ( stat != SlotStatus::INVALID ) ) );
 }
 
 //---------------------------------------------------------------------------------
@@ -519,7 +521,11 @@ SourceSdk::PLUGIN_RESULT CNoCheatZPlugin::NetworkIDValidated ( const char *pszUs
 void CNoCheatZPlugin::RT_OnQueryCvarValueFinished ( SourceSdk::QueryCvarCookie_t iCookie, SourceSdk::edict_t *pPlayerEntity, SourceSdk::EQueryCvarValueStatus eStatus, const char *pCvarName, const char *pCvarValue )
 {
 	PlayerHandler::const_iterator ph ( NczPlayerManager::GetInstance ()->GetPlayerHandlerByEdict ( pPlayerEntity ) );
-	if( !ConVarTester::GetInstance ()->CanProcessThisSlot ( ph ) ) return;
+	if( !( ph >= SlotStatus::PLAYER_CONNECTING ) )
+	{
+		DebugMessage ( "RT_OnQueryCvarValueFinished : ConVarTester cannot process callback" );
+		return;
+	}
 
 	ConVarTester::GetInstance ()->RT_OnQueryCvarValueFinished ( ph, eStatus, pCvarName, pCvarValue );
 }
