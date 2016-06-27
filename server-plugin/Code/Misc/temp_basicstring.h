@@ -370,37 +370,7 @@ public:
 		return *this;
 	}
 
-	String<pod>& replace_insensitive ( pod const replace_this, pod const replace_by )
-	{
-		constexpr auto const replace_this_insensitive = ( pod ) toupper ( replace_this );
-		if( m_size > 0 )
-		{
-			pod * me ( m_alloc );
-			do
-			{
-				if( touppder ( *me ) == replace_this_insensitive ) *me = replace_by;
-			}
-			while( *++me != 0 );
-		}
-
-		return *this;
-	}
-
 	String<pod>& replace ( pod const * replace_list, pod const replace_by )
-	{
-		if( m_size > 0 )
-		{
-			while( *replace_list != 0 )
-			{
-				replace ( *replace_list, replace_by );
-				++replace_list;
-			}
-		}
-
-		return *this;
-	}
-
-	String<pod>& replace_insensitive ( pod const * replace_list, pod const replace_by )
 	{
 		if( m_size > 0 )
 		{
@@ -472,36 +442,6 @@ public:
 		return *this;
 	}
 
-	String<pod>& replace_insensitive ( String<pod> const & replace_this, String<pod> const & replace_by )
-	{
-		int const diff ( replace_by.m_size - replace_this.m_size );
-		size_t pos ( find_insensitive ( replace_this ) );
-		while( pos != npos )
-		{
-			if( diff <= 0 )
-			{
-				memcpy ( m_alloc + pos, replace_by.m_alloc, sizeof ( pod ) * replace_by.m_size - 1 );
-				if( diff < 0 ) remove ( pos + replace_by.m_size, pos + replace_this.m_size - 1 );
-			}
-			else if( diff > 0 )
-			{
-				memcpy ( m_alloc + pos, replace_by.m_alloc, sizeof ( pod ) * replace_this.m_size - 1 );
-				Grow ( m_size + diff + 1 );
-				size_t move_from_here ( m_size + diff );
-				size_t const move_until_here ( pos + replace_this.m_size - 1 );
-				do
-				{
-					m_alloc[ move_from_here ] = m_alloc[ move_from_here - diff ];
-				}
-				while( --move_from_here != move_until_here );
-				memcpy ( m_alloc + pos + replace_this.m_size, replace_by.m_alloc + replace_this.m_size, sizeof ( pod ) * diff );
-				m_size += diff;
-			}
-			pos = find ( replace_this, pos );
-		}
-		return *this;
-	}
-
 	size_t find ( pod const c, size_t start = 0 ) const
 	{
 		size_t a ( m_size );
@@ -512,24 +452,6 @@ public:
 		do
 		{
 			if( *me == c ) return a;
-			++a;
-		}
-		while( *( ++me ) != 0 );
-
-		return npos;
-	}
-
-	size_t find_insensitive ( pod const c, size_t start = 0 ) const
-	{
-		constexpr auto const ic ( toupper ( *c ) );
-		size_t a ( m_size );
-		if( a == 0 ) return npos;
-		if( start >= a ) return npos;
-		a = start;
-		pod const * me ( m_alloc + start );
-		do
-		{
-			if( toupper ( *me ) == ic ) return a;
 			++a;
 		}
 		while( *( ++me ) != 0 );
@@ -553,21 +475,6 @@ private:
 		return true;
 	}
 
-	bool cmp_insensitive ( pod const * c, size_t const start = 0 ) const
-	{
-		// this function is confident with the caller -> no extra check
-
-		pod const * me ( m_alloc + start );
-		do
-		{
-			if( toupper ( *c ) != toupper ( *me ) ) return false;
-			else ++c;
-		}
-		while( ++me != 0 );
-
-		return true;
-	}
-
 public:
 	size_t find ( pod const * const c, size_t start = 0 ) const
 	{
@@ -582,25 +489,7 @@ public:
 		return start;
 	}
 
-	size_t find_insensitive ( pod const * const c, size_t start = 0 ) const
-	{
-		size_t csize ( autolen ( c ) + start );
-		if( csize > m_size ) return npos;
-
-		while( cmp_insensitive ( c, start++ ) == false )
-		{
-			if( ++csize > m_size ) return npos;
-		}
-
-		return start;
-	}
-
 	size_t find ( String<pod> const & c, size_t start = 0 ) const
-	{
-		return find ( c.c_str () );
-	}
-
-	size_t find_insensitive ( String<pod> const & c, size_t start = 0 ) const
 	{
 		return find ( c.c_str () );
 	}
@@ -629,30 +518,6 @@ public:
 		return npos;
 	}
 
-	size_t find_last_of_insensitive ( pod const * const c, size_t start = npos ) const
-	{
-		size_t a ( m_size );
-		if( a == 0 ) return npos;
-		if( start == 0 ) return npos;
-		if( *c == 0 ) return npos;
-
-		pod const * me ( m_alloc + a - 1 );
-		pod const * temp_c ( c );
-		do
-		{
-			do
-			{
-				if( toupper ( *me ) == toupper ( *temp_c++ ) ) return a;
-			}
-			while( *temp_c != 0 );
-			temp_c = c;
-			--a;
-		}
-		while( me-- != m_alloc );
-
-		return npos;
-	}
-
 	size_t find_last_of ( pod const c, size_t start = npos ) const
 	{
 		size_t a ( m_size );
@@ -663,24 +528,6 @@ public:
 		do
 		{
 			if( *me == c ) return a;
-			--a;
-		}
-		while( me-- != m_alloc );
-
-		return npos;
-	}
-
-	size_t find_last_of_insensitive ( pod const c, size_t start = npos ) const
-	{
-		size_t a ( m_size );
-		pod const test ( toupper ( c ) );
-		if( a == 0 ) return npos;
-		if( start == 0 ) return npos;
-
-		pod const * me ( m_alloc + a - 1 );
-		do
-		{
-			if( toupper ( *me ) == test ) return a;
 			--a;
 		}
 		while( me-- != m_alloc );
