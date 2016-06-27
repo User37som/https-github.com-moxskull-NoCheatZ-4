@@ -167,35 +167,38 @@ void ConCommandTester::RemoveCommandInfo(const basic_string& name)
 
 bool ConCommandTester::TestPlayerCommand(PlayerHandler::const_iterator ph, const basic_string& command)
 {
-	// To lower
-	basic_string lower_cmd(command);
-	lower_cmd.lower();
-
-	size_t id = 0;
-	size_t const max = m_commands_list.Size();
-	for(CommandInfoT* cmd_test = &m_commands_list[id]; id != max; cmd_test = &m_commands_list[++id])
+	if(IsActive())
 	{
-		for(size_t x = 0; x < lower_cmd.size(); ++x)
+		// To lower
+		basic_string lower_cmd(command);
+		lower_cmd.lower();
+	
+		size_t id = 0;
+		size_t const max = m_commands_list.Size();
+		for(CommandInfoT* cmd_test = &m_commands_list[id]; id != max; cmd_test = &m_commands_list[++id])
 		{
-			if(StriCmpOffset(lower_cmd.c_str(), cmd_test->command_name.c_str(), x))
+			for(size_t x = 0; x < lower_cmd.size(); ++x)
 			{
-				// Ignored cmds are always at the end of the set
-				if(cmd_test->ignore) return false;
-
-				AddPlayerCommand(ph, command);
-				Detection_CmdViolation pDetection;
-				pDetection.PrepareDetectionData(GetPlayerDataStructByIndex(ph.GetIndex()));
-				pDetection.PrepareDetectionLog(ph, this);
-				pDetection.Log();
-
-				if(cmd_test->ban) ph->Ban("ConCommand exploit");
-				else ph->Kick("ConCommand exploit");
-				return true;
+				if(StriCmpOffset(lower_cmd.c_str(), cmd_test->command_name.c_str(), x))
+				{
+					// Ignored cmds are always at the end of the set
+					if(cmd_test->ignore) return false;
+	
+					AddPlayerCommand(ph, command);
+					Detection_CmdViolation pDetection;
+					pDetection.PrepareDetectionData(GetPlayerDataStructByIndex(ph.GetIndex()));
+					pDetection.PrepareDetectionLog(ph, this);
+					pDetection.Log();
+	
+					if(cmd_test->ban) ph->Ban("ConCommand exploit");
+					else ph->Kick("ConCommand exploit");
+					return true;
+				}
 			}
 		}
+	
+		AddPlayerCommand(ph, command);
 	}
-
-	AddPlayerCommand(ph, command);
 	return false;
 }
 
