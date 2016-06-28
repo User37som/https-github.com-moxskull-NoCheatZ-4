@@ -4,6 +4,8 @@
 #include <new>
 #include <string.h>
 #include <limits>
+#include <cwctype>
+#include <clocale>
 
 #include "Containers/utlvector.h"
 #include "Misc/temp_singleton.h"
@@ -548,24 +550,20 @@ public:
 	{
 		if( !m_alloc )
 			return;
-		pod * me ( m_alloc );
-		while( *me != 0 )
-		{
-			*me = ( pod ) tolower ( *me );
-			++me;
-		}
+		String<wchar_t> t;
+		ConvertToWideChar ( *this, t );
+		t.lower ();
+		ConvertToChar ( t, *this );
 	}
 
 	void upper ()
 	{
 		if( !m_alloc )
 			return;
-		pod * me ( m_alloc );
-		while( *me != 0 )
-		{
-			*me = ( pod ) toupper ( *me );
-			++me;
-		}
+		String<wchar_t> t;
+		ConvertToWideChar ( *this, t );
+		t.upper ();
+		ConvertToChar ( t, *this );
 	}
 
 	pod& operator[] ( size_t const index ) const
@@ -575,12 +573,46 @@ public:
 
 	static void ConvertToWideChar ( String<char> const & in, String<wchar_t> & out )
 	{
+		std::setlocale ( LC_ALL, "en_US.utf8" );
 		out.Grow ( in.m_size, false );
-		size_t const cpsize ( mbstowcs ( out.m_alloc, in.m_alloc, out.m_capacity ) );
+		size_t const cpsize ( std::mbstowcs ( out.m_alloc, in.m_alloc, out.m_capacity ) );
+		Assert ( cpsize < std::numeric_limits<size_t>::max () );
+		out.m_size = cpsize;
+	}
+
+	static void ConvertToChar ( String<wchar_t> const & in, String<char> & out )
+	{
+		std::setlocale ( LC_ALL, "en_US.utf8" );
+		out.Grow ( in.m_size, false );
+		size_t const cpsize ( std::wcstombs( out.m_alloc, in.m_alloc, out.m_capacity ) );
 		Assert ( cpsize < std::numeric_limits<size_t>::max () );
 		out.m_size = cpsize;
 	}
 };
+
+template <>
+void String<wchar_t>::upper ()
+{
+	std::setlocale ( LC_ALL, "en_US.utf8" );
+	if( !m_alloc )
+		return;
+	for( size_t i ( 0 ); i != m_size; ++i )
+	{
+		m_alloc[ i ] = std::towupper ( m_alloc[ i ] );
+	}
+}
+
+template <>
+void String<wchar_t>::lower ()
+{
+	std::setlocale ( LC_ALL, "en_US.utf8" );
+	if( !m_alloc )
+		return;
+	for( size_t i ( 0 ); i != m_size; ++i )
+	{
+		m_alloc[ i ] = std::towlower ( m_alloc[ i ] );
+	}
+}
 
 template <>
 inline size_t String<wchar_t>::autolen ( wchar_t const * string ) const

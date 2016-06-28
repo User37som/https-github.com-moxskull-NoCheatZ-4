@@ -43,8 +43,8 @@
 #include "Systems/OnTickListener.h"
 #include "Systems/TimerListener.h"
 
-template <typename pod>
-string_memory_pool<pod> String<pod>::m_pool;
+string_memory_pool<char> String<char>::m_pool;
+string_memory_pool<wchar_t> String<wchar_t>::m_pool;
 
 static void* __CreatePlugin_interface ()
 {
