@@ -15,3 +15,5 @@ server-plugin/nocheatzX.map
 *.vsp
 Performance1.psess
 *.vsps
+server-plugin/version.h
+server-plugin/Code/version.h

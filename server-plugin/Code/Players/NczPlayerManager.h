@@ -40,7 +40,7 @@ public:
 
 	typedef iterator const const_iterator;
 
-	class ALIGNX(sizeof(PlayerHandler const *)) iterator
+	class ALIGN4 iterator
 	{
 		friend NczPlayerManager;
 
@@ -86,7 +86,7 @@ public:
 		inline operator SlotStatus() const;
 		inline NczPlayer_ptr operator*() const;
 		inline NczPlayer_ptr operator->() const;
-	} ALIGNX_POST(sizeof(PlayerHandler const *));
+	} ALIGN4_POST;
 
 private:
 

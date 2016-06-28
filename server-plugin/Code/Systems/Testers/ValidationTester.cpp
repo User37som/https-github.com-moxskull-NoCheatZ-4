@@ -46,7 +46,7 @@ void ValidationTester::Init()
 
 void ValidationTester::SetValidated(PlayerHandler::const_iterator ph)
 {
-	GetPlayerDataStruct(ph.GetIndex())->b = true;
+	GetPlayerDataStructByIndex(ph.GetIndex())->b = true;
 	DebugMessage(Helpers::format("%s SteamID validated\n", ph->GetName()));
 	SystemVerbose1(Helpers::format("%s SteamID validated", ph->GetName()));
 
@@ -60,7 +60,7 @@ void ValidationTester::SetValidated(PlayerHandler::const_iterator ph)
 void ValidationTester::ProcessPlayerTestOnTick(PlayerHandler::const_iterator ph, float const curtime)
 {
 	if(!SteamGameServer_BSecure()) return;
-	if(GetPlayerDataStruct(ph.GetIndex())->b)
+	if(GetPlayerDataStructByIndex(ph.GetIndex())->b)
 		return;
 
 	SystemVerbose1(Helpers::format("%s SteamID not validated, validation time left : %f", ph->GetName(), 20.0f - ph->GetTimeConnected()));
@@ -73,7 +73,7 @@ void ValidationTester::Load()
 {
 	for (PlayerHandler::const_iterator it = PlayerHandler::begin(); it != PlayerHandler::end(); ++it)
 	{
-		ResetPlayerDataStruct(it.GetIndex());
+		ResetPlayerDataStructByIndex(it.GetIndex());
 	}
 
 	OnTickListener::RegisterOnTickListener(this);

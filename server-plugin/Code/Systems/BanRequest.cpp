@@ -83,18 +83,18 @@ void BanRequest::BanInternal(int ban_time, char const * steam_id, int userid, ch
 	}
 	if (cmd_sm_ban)
 	{
-		SourceSdk::InterfacesProxy::Call_ServerCommand(Helpers::format("sm_ban %d %d \"%s\"\n", userid, ban_time, kick_message).c_str());
+		SourceSdk::InterfacesProxy::Call_ServerCommand(Helpers::format("sm_ban %d %d \"%s\"\n", userid, ban_time, kick_message));
 	}
 	else
 	{
 		if (SteamGameServer_BSecure() && steam_id != nullptr)
 		{
-			SourceSdk::InterfacesProxy::Call_ServerCommand(Helpers::format("banid %d %s\n", ban_time, steam_id).c_str());
+			SourceSdk::InterfacesProxy::Call_ServerCommand(Helpers::format("banid %d %s\n", ban_time, steam_id));
 		}
-		SourceSdk::InterfacesProxy::Call_ServerCommand(Helpers::format("kickid %d [NoCheatZ 4] %s\n", userid, kick_message).c_str());
+		SourceSdk::InterfacesProxy::Call_ServerCommand(Helpers::format("kickid %d [NoCheatZ 4] %s\n", userid, kick_message));
 		if (!Helpers::bStrEq("127.0.0.1", ip))
 		{
-			SourceSdk::InterfacesProxy::Call_ServerCommand(Helpers::format("addip 1440 \"%s\"\n", ip).c_str());
+			SourceSdk::InterfacesProxy::Call_ServerCommand(Helpers::format("addip 1440 \"%s\"\n", ip));
 		}
 
 		m_do_writeid = true;

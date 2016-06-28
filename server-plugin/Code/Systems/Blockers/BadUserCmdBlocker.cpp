@@ -42,7 +42,7 @@ void BadUserCmdBlocker::Load()
 {
 	for (PlayerHandler::const_iterator it = PlayerHandler::begin(); it != PlayerHandler::end(); ++it)
 	{
-		ResetPlayerDataStruct(it.GetIndex());
+		ResetPlayerDataStructByIndex(it.GetIndex());
 	}
 
 	RegisterPlayerRunCommandHookListener(this, 0, PLAYER_CONNECTED);

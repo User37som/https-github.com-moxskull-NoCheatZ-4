@@ -48,7 +48,7 @@ void ShotTester::Load()
 {
 	for (PlayerHandler::const_iterator it = PlayerHandler::begin(); it != PlayerHandler::end(); ++it)
 	{
-		ResetPlayerDataStruct(it.GetIndex());
+		ResetPlayerDataStructByIndex(it.GetIndex());
 	}
 
 	PlayerRunCommandHookListener::RegisterPlayerRunCommandHookListener(this, 4);
@@ -75,7 +75,7 @@ PlayerRunCommandRet ShotTester::PlayerRunCommandCallback(PlayerHandler::const_it
 {	
 	PlayerRunCommandRet drop_cmd = CONTINUE;
 
-	ShotStatsT * const playerData = GetPlayerDataStruct(ph.GetIndex());
+	ShotStatsT * const playerData = GetPlayerDataStructByIndex(ph.GetIndex());
 
 	bool cur_in_attack;
 	bool past_in_attack;
@@ -208,5 +208,5 @@ basic_string ShotDetection::GetDataDump()
 							GetDataStruct()->with_pistol.n, GetDataStruct()->with_pistol.ratio, GetDataStruct()->with_pistol.avg_time, 
 							GetDataStruct()->with_auto.n, GetDataStruct()->with_auto.ratio, GetDataStruct()->with_auto.avg_time, 
 							GetDataStruct()->on_target.n, GetDataStruct()->on_target.ratio, GetDataStruct()->on_target.avg_time, 
-							GetDataStruct()->row, GetDataStruct()->last_detection).c_str();
+							GetDataStruct()->row, GetDataStruct()->last_detection);
 }

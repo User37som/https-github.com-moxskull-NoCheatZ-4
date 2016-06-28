@@ -26,7 +26,7 @@
 #include "Players/NczPlayerManager.h"
 #include "Systems/AutoTVRecord.h"
 
-void Logger::Push(const basic_string& msg)
+void Logger::Push(const char * msg)
 {
 	int server_tick;
 	if (SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive)
@@ -40,12 +40,12 @@ void Logger::Push(const basic_string& msg)
 
 	if (AutoTVRecord::GetInstance()->IsRecording())
 	{
-		basic_string record_tick(Helpers::format("%s.dem:Tick #%d", AutoTVRecord::GetInstance()->GetRecordFilename().c_str(), AutoTVRecord::GetInstance()->GetRecordTick()));
-		m_msg.AddToTail(Helpers::format("%s [Server Tick #%d, SourceTV : %s] %s", Helpers::getStrDateTime("%x %X").c_str(), server_tick, record_tick.c_str(), msg.c_str()));
+		const char* record_tick(Helpers::format("%s.dem:Tick #%d", AutoTVRecord::GetInstance()->GetRecordFilename().c_str(), AutoTVRecord::GetInstance()->GetRecordTick()));
+		m_msg.AddToTail(Helpers::format("%s [Server Tick #%d, SourceTV : %s] %s", Helpers::getStrDateTime("%x %X"), server_tick, record_tick, msg));
 	}
 	else
 	{
-		m_msg.AddToTail(Helpers::format("%s [Server Tick #%d] %s", Helpers::getStrDateTime("%x %X").c_str(), server_tick, msg.c_str()));
+		m_msg.AddToTail(Helpers::format("%s [Server Tick #%d] %s", Helpers::getStrDateTime("%x %X"), server_tick, msg));
 	}
 	
 	if(NczPlayerManager::GetInstance()->GetPlayerCount(PLAYER_CONNECTED, STATUS_EQUAL_OR_BETTER) == 0)
@@ -57,18 +57,18 @@ void Logger::Push(const basic_string& msg)
 }
 
 template <>
-void Logger::Msg<MSG_CONSOLE>(const basic_string& msg, int verbose /*= 0*/)
+void Logger::Msg<MSG_CONSOLE>(const char * msg, int verbose /*= 0*/)
 { 
-	std::cout << prolog.c_str() << msg.c_str() << "\n";
+	std::cout << prolog.c_str() << msg << "\n";
 #ifdef WIN32
 	OutputDebugStringA(prolog.c_str());
-	OutputDebugStringA(msg.c_str());
+	OutputDebugStringA(msg);
 	OutputDebugStringA("\n");
 #endif
 }
 
 template <>
-void Logger::Msg<MSG_CHAT>(const basic_string& msg, int verbose /*= 0*/)
+void Logger::Msg<MSG_CHAT>(const char * msg, int verbose /*= 0*/)
 {
 	Msg<MSG_CONSOLE>(msg);
 	basic_string m(prolog);
@@ -76,14 +76,14 @@ void Logger::Msg<MSG_CHAT>(const basic_string& msg, int verbose /*= 0*/)
 }
 
 template <>
-void Logger::Msg<MSG_LOG>(const basic_string& msg, int verbose /*= 0*/)
+void Logger::Msg<MSG_LOG>(const char * msg, int verbose /*= 0*/)
 {
 	Msg<MSG_CONSOLE>(msg);
 	Push(msg);
 }
 
 template <>
-void Logger::Msg<MSG_LOG_CHAT>(const basic_string& msg, int verbose /*= 0*/)
+void Logger::Msg<MSG_LOG_CHAT>(const char * msg, int verbose /*= 0*/)
 {
 	Msg<MSG_LOG>(msg);
 	basic_string m(prolog);
@@ -91,7 +91,7 @@ void Logger::Msg<MSG_LOG_CHAT>(const basic_string& msg, int verbose /*= 0*/)
 }
 
 template <>
-void Logger::Msg<MSG_WARNING>(const basic_string& msg, int verbose /*= 0*/)
+void Logger::Msg<MSG_WARNING>(const char * msg, int verbose /*= 0*/)
 {
 	basic_string m(prolog);
 	m.append("WARNING : ").append(msg).append('\n');
@@ -99,11 +99,11 @@ void Logger::Msg<MSG_WARNING>(const basic_string& msg, int verbose /*= 0*/)
 #ifdef WIN32
 	OutputDebugStringA(m.c_str());
 #endif
-	Push(m);
+	Push(m.c_str());
 }
 
 template <>
-void Logger::Msg<MSG_ERROR>(const basic_string& msg, int verbose /*= 0*/)
+void Logger::Msg<MSG_ERROR>(const char * msg, int verbose /*= 0*/)
 {
 	basic_string m(prolog);
 	m.append("ERROR : ").append(msg).append('\n');
@@ -111,17 +111,17 @@ void Logger::Msg<MSG_ERROR>(const basic_string& msg, int verbose /*= 0*/)
 #ifdef WIN32
 	OutputDebugStringA(m.c_str());
 #endif
-	Push(m);
+	Push(m.c_str());
 }
 
 template <>
-void Logger::Msg<MSG_HINT>(const basic_string& msg, int verbose /*= 0*/)
+void Logger::Msg<MSG_HINT>(const char * msg, int verbose /*= 0*/)
 {
-	std::cerr << prolog.c_str() << Plat_FloatTime() << " : " << msg.c_str() << "\n";
+	std::cerr << prolog.c_str() << Plat_FloatTime() << " : " << msg << "\n";
 }
 
 template <>
-void Logger::Msg<MSG_VERBOSE1>(const basic_string& msg, int verbose /*= 0*/)
+void Logger::Msg<MSG_VERBOSE1>(const char * msg, int verbose /*= 0*/)
 {
 	if (verbose == 1)
 	{
@@ -130,7 +130,7 @@ void Logger::Msg<MSG_VERBOSE1>(const basic_string& msg, int verbose /*= 0*/)
 }
 
 template <>
-void Logger::Msg<MSG_VERBOSE2>(const basic_string& msg, int verbose /*= 0*/)
+void Logger::Msg<MSG_VERBOSE2>(const char * msg, int verbose /*= 0*/)
 {
 	if (verbose == 2)
 	{
@@ -139,7 +139,7 @@ void Logger::Msg<MSG_VERBOSE2>(const basic_string& msg, int verbose /*= 0*/)
 }
 
 template <>
-void Logger::Msg<MSG_DEBUG>(const basic_string& msg, int verbose /*= 0*/)
+void Logger::Msg<MSG_DEBUG>(const char * msg, int verbose /*= 0*/)
 {
 	if (verbose > 2)
 	{
@@ -188,6 +188,5 @@ void Logger::Flush()
 
 void Helpers::writeToLogfile(const basic_string &text)
 {
-	basic_string msg(Helpers::format("At %f (Server Tick #%d) : %s", Plat_FloatTime(), Helpers::GetTickCount(), text.c_str()));
-	Logger::GetInstance()->Push(msg);
+	Logger::GetInstance()->Push(Helpers::format("At %f (Server Tick #%d) : %s", Plat_FloatTime(), Helpers::GetTickCount(), text.c_str()));
 }

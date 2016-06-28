@@ -44,7 +44,7 @@ void EyeAnglesTester::Load()
 {
 	for (PlayerHandler::const_iterator it = PlayerHandler::begin(); it != PlayerHandler::end(); ++it)
 	{
-		ResetPlayerDataStruct(it.GetIndex());
+		ResetPlayerDataStructByIndex(it.GetIndex());
 	}
 
 	SourceSdk::InterfacesProxy::GetGameEventManager()->AddListener(this, "round_end", true);
@@ -69,7 +69,7 @@ PlayerRunCommandRet EyeAnglesTester::PlayerRunCommandCallback(PlayerHandler::con
 
 	PlayerRunCommandRet drop_cmd = CONTINUE;
 
-	EyeAngleInfoT* playerData = GetPlayerDataStruct(ph.GetIndex());
+	EyeAngleInfoT* playerData = GetPlayerDataStructByIndex(ph.GetIndex());
 	playerData->x.abs_value = fabs(    playerData->x.value = static_cast<SourceSdk::CUserCmd_csgo*>(pCmd)->viewangles.x    );
 	playerData->y.abs_value = fabs(    playerData->y.value = static_cast<SourceSdk::CUserCmd_csgo*>(pCmd)->viewangles.y    );
 	playerData->z.abs_value = fabs(    playerData->z.value = static_cast<SourceSdk::CUserCmd_csgo*>(pCmd)->viewangles.z    );
@@ -139,7 +139,7 @@ void EyeAnglesTester::FireGameEvent(SourceSdk::IGameEvent *ev) // round_end
 	{
 		if (ph >= PLAYER_CONNECTED)
 		{
-			++(GetPlayerDataStruct(ph.GetIndex())->ignore_last);
+			++(GetPlayerDataStructByIndex(ph.GetIndex())->ignore_last);
 		}
 	}
 }

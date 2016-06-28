@@ -28,17 +28,17 @@ class ALIGN16 PlayerDataStructHandler :
 	typedef BaseDataStructHandler<DataT, MAX_PLAYERS> BaseClass;
 
 public:
-	inline void ResetPlayerDataStruct(int const index)
+	inline void ResetPlayerDataStructByIndex(int const index)
 	{
 		this->m_dataStruct[index] = DataT();
 	};
 	inline void ResetPlayerDataStruct(SourceSdk::edict_t const * const player)
 	{
-		ResetPlayerDataStruct(Helpers::IndexOfEdict(player));
+		ResetPlayerDataStructByIndex(Helpers::IndexOfEdict(player));
 	};
 	inline void ResetPlayerDataStruct(NczPlayer const * const player)
 	{
-		ResetPlayerDataStruct(player->GetIndex());
+		ResetPlayerDataStructByIndex(player->GetIndex());
 	};
 
 protected:
@@ -47,17 +47,17 @@ protected:
 	};
 	virtual ~PlayerDataStructHandler() override {};
 
-	inline DataT* GetPlayerDataStruct(NczPlayer const * const player) const
-	{
-		return GetPlayerDataStruct(player->GetIndex());
-	};
-	inline DataT* GetPlayerDataStruct(int const index) const
+	inline DataT* GetPlayerDataStructByIndex(int const index) const
 	{
 		return (DataT*)(&(this->m_dataStruct[index]));
 	};
+	inline DataT* GetPlayerDataStruct(NczPlayer const * const player) const
+	{
+		return GetPlayerDataStructByIndex(player->GetIndex());
+	};
 	inline DataT* GetPlayerDataStruct(SourceSdk::edict_t const * const player) const
 	{
-		return GetPlayerDataStruct(Helpers::IndexOfEdict(player));
+		return GetPlayerDataStructByIndex(Helpers::IndexOfEdict(player));
 	};
 } ALIGN16_POST;
 

@@ -97,7 +97,7 @@ void RadarHackBlocker::ThinkPostCallback(SourceSdk::edict_t const * const pent)
 		if (CanProcessThisSlot(ph) || ph == BOT)
 		{
 			int const index = ph.GetIndex();
-			ClientRadarData * pData = GetPlayerDataStruct(index);
+			ClientRadarData * pData = GetPlayerDataStructByIndex(index);
 			if (pData->m_last_spotted_status != m_players_spotted[index])
 			{
 				pData->m_last_spotted_status = m_players_spotted[index];
@@ -200,7 +200,7 @@ void RadarHackBlocker::SendRandomRadarUpdate(MRecipientFilter & filter, ClientRa
 
 void RadarHackBlocker::ProcessEntity(SourceSdk::edict_t const * const pent)
 {
-	ClientRadarData * pData = GetPlayerDataStruct(Helpers::IndexOfEdict(pent));
+	ClientRadarData * pData = GetPlayerDataStructByIndex(Helpers::IndexOfEdict(pent));
 
 	static MRecipientFilter filter;
 	filter.RemoveAll();
@@ -269,7 +269,7 @@ void RadarHackBlocker::ProcessOnTick(float const curtime)
 		if (!CanProcessThisSlot(ph) && ph != BOT) continue;
 		int const index = ph.GetIndex();
 
-		ClientRadarData * pData = GetPlayerDataStruct(index);
+		ClientRadarData * pData = GetPlayerDataStructByIndex(index);
 
 		if (pData->m_last_spotted_status)
 		{

@@ -63,11 +63,17 @@ public:
 	Logger() : singleton_class(), m_msg(), prolog("[NoCheatZ " NCZ_VERSION_STR "] ") {};
 	virtual ~Logger() override final {};
 
-	void Push(const basic_string& msg);
+	void Push(const char * msg);
 	void Flush();
 
 	template <msg_type type = MSG_CONSOLE>
-	void Msg(const basic_string& msg, int verbose = 0);
+	void Msg(const char * msg, int verbose = 0);
+
+	template <msg_type type = MSG_CONSOLE>
+	inline void Msg(const basic_string& msg, int verbose = 0)
+	{
+		Msg<type>(msg.c_str(), verbose);
+	}
 };
 
 #define SystemVerbose1(x) Logger::GetInstance()->Msg<MSG_VERBOSE1>(x, this->m_verbose)

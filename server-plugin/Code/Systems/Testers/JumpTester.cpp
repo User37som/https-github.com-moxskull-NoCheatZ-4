@@ -50,7 +50,7 @@ void JumpTester::Load()
 {
 	for (PlayerHandler::const_iterator it = PlayerHandler::begin(); it != PlayerHandler::end(); ++it)
 	{
-		ResetPlayerDataStruct(it.GetIndex());
+		ResetPlayerDataStructByIndex(it.GetIndex());
 	}
 
 	OnGroundHookListener::RegisterOnGroundHookListener(this);
@@ -77,7 +77,7 @@ int GetGameTickCount()
 
 void JumpTester::m_hGroundEntityStateChangedCallback(PlayerHandler::const_iterator ph, bool new_isOnGround)
 {
-	JumpInfoT* playerData = GetPlayerDataStruct(ph.GetIndex());
+	JumpInfoT* playerData = GetPlayerDataStructByIndex(ph.GetIndex());
 
 	if(new_isOnGround)
 	{
@@ -116,7 +116,7 @@ PlayerRunCommandRet JumpTester::PlayerRunCommandCallback(PlayerHandler::const_it
 {
 	PlayerRunCommandRet drop_cmd = CONTINUE;
 
-	JumpInfoT* playerData = GetPlayerDataStruct(ph.GetIndex());
+	JumpInfoT* playerData = GetPlayerDataStructByIndex(ph.GetIndex());
 
 	bool cur_in_jump;
 

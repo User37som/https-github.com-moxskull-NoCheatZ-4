@@ -66,7 +66,7 @@ void ConVarTester::ProcessPlayerTest(PlayerHandler::const_iterator ph, float con
 	if (!IsActive()) return;
 	if (m_convars_rules.IsEmpty()) return;
 
-	CurrentConVarRequestT* const req = GetPlayerDataStruct(ph.GetIndex());
+	CurrentConVarRequestT* const req = GetPlayerDataStructByIndex(ph.GetIndex());
 
 	if(req->isSent && !req->isReplyed)
 	{
@@ -207,7 +207,7 @@ unexpected:
 		return;
 	}
 
-	CurrentConVarRequest* const req = GetPlayerDataStruct(ph.GetIndex());
+	CurrentConVarRequest* const req = GetPlayerDataStructByIndex(ph.GetIndex());
 
 	if(!req->isSent) goto unexpected;
 	if(!Helpers::bStriEq(m_convars_rules[req->ruleset].name, ruleset->name)) goto unexpected;
@@ -356,7 +356,7 @@ void ConVarTester::Load()
 {
 	for (PlayerHandler::const_iterator it = PlayerHandler::begin(); it != PlayerHandler::end(); ++it)
 	{
-		ResetPlayerDataStruct(it.GetIndex());
+		ResetPlayerDataStructByIndex(it.GetIndex());
 	}
 
 	AddConvarRuleset("developer", "0", SAME);

@@ -49,7 +49,7 @@ namespace Helpers
 	void writeToLogfile(const basic_string &p_text);
 
 	/* Retourne la date selon le format */
-	basic_string getStrDateTime(const char *p_format);
+	const char * getStrDateTime(const char *p_format);
 
 
 	SourceSdk::edict_t * getEdictFromSteamID(const char *p_SteamID);
@@ -70,7 +70,7 @@ namespace Helpers
 	int GetTickCount();
 
 	/* Permet d'avoir un format style C dans un conteneur C++ */
-	basic_string format(const char *fmt, ...);
+	const char * format(const char *fmt, ...);
 	
 	/* Retourne vrai si la valeur est impaire ... */
 	bool isOdd(const int value);

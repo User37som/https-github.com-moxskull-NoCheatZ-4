@@ -7,8 +7,8 @@
 
 #include "Containers/utlvector.h"
 
-#define STRING_POOL_SIZE 128
-#define AVERAGE_STRING_SIZE 32
+#define STRING_POOL_SIZE 64
+#define AVERAGE_STRING_SIZE 64 // must be a power of 2
 
 /*
 Use a pool of pointers to prevent re-allocations.
@@ -65,7 +65,7 @@ public:
 	void DeclareFreeMemory(pod * ptr, size_t capacity);
 
 	// Re-use a free pointer if we have capacity, otherwise return nullptr. The pool will delete element if there is a match.
-	pod * GetFreeMemory(size_t target_min_capacity);
+	pod * GetFreeMemory(size_t target_min_capacity, size_t & got_capacity);
 };
 
 template <typename pod = char>
@@ -88,10 +88,14 @@ private:
 
 private:
 
-	inline pod * Alloc(size_t capacity)
+	inline pod * Alloc(size_t wanted_capacity, size_t & got_capacity)
 	{
-		pod * t = m_pool.GetFreeMemory(capacity);
-		if(t == nullptr) return new pod[capacity];
+		pod * t = m_pool.GetFreeMemory(wanted_capacity, got_capacity);
+		if (t == nullptr)
+		{
+			got_capacity = wanted_capacity;
+			return new pod[wanted_capacity];
+		}
 		else return t;
 	}
 
@@ -120,7 +124,7 @@ private:
 		size_t new_capacity = AVERAGE_STRING_SIZE;
 		while (new_capacity < need) new_capacity <<= 1;
 
-		pod * n = Alloc(new_capacity);
+		pod * n = Alloc(new_capacity, new_capacity);
 		
 		if (m_alloc)
 		{
@@ -230,6 +234,12 @@ public:
 		assign(src.c_str());
 	}
 
+	String(String<pod> && src) : String()
+	{
+		memcpy(this, &src, sizeof(String<pod>));
+		memset(&src, 0, sizeof(String<pod>));
+	}
+
 	String(String<pod> const &src, size_t start, size_t count = std::numeric_limits<size_t>::max()) : String()
 	{
 		assign(src.c_str()+start, count);
@@ -238,6 +248,17 @@ public:
 	String & operator = (String<pod> const &src)
 	{
 		assign(src);
+		return *this;
+	}
+
+	String & operator = (String<pod> && src)
+	{
+		if (this != &src)
+		{
+			Dealloc();
+			memcpy(this, &src, sizeof(String<pod>));
+			memset(&src, 0, sizeof(String<pod>));
+		}
 		return *this;
 	}
 
@@ -557,7 +578,7 @@ void string_memory_pool<pod>::DeclareFreeMemory(pod * ptr, size_t capacity)
 }
 
 template <typename pod>
-pod * string_memory_pool<pod>::GetFreeMemory(size_t target_min_capacity)
+pod * string_memory_pool<pod>::GetFreeMemory(size_t target_min_capacity, size_t & got_capacity)
 {
 	if (m_pool_elements > 0)
 	{
@@ -568,6 +589,7 @@ pod * string_memory_pool<pod>::GetFreeMemory(size_t target_min_capacity)
 			{
 				m_alloc_pool[index].m_in_use = false;
 				--m_pool_elements;
+				got_capacity = m_alloc_pool[index].m_capacity;
 				return m_alloc_pool[index].m_ptr;
 			}
 		} while (++index < STRING_POOL_SIZE);
