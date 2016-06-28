@@ -171,7 +171,11 @@ bool CNoCheatZPlugin::Load ( SourceSdk::CreateInterfaceFn _interfaceFactory, Sou
 	Logger::CreateInstance ();
 	Logger::GetInstance ()->Msg<MSG_CONSOLE> ( "Loading ..." );
 
-	if( !SourceSdk::InterfacesProxy::Load ( gameServerFactory, _interfaceFactory ) ) return false;
+	if( !SourceSdk::InterfacesProxy::Load ( gameServerFactory, _interfaceFactory ) )
+	{
+		Logger::GetInstance ()->Msg<MSG_ERROR> ( "SourceSdk::InterfacesProxy::Load failed" );
+		return false;
+	}
 
 	UserMessageHookListener::HookUserMessage ();
 
@@ -188,7 +192,11 @@ bool CNoCheatZPlugin::Load ( SourceSdk::CreateInterfaceFn _interfaceFactory, Sou
 	}
 
 	ConfigManager::CreateInstance ();
-	if( !ConfigManager::GetInstance ()->LoadConfig () ) return false;
+	if( !ConfigManager::GetInstance ()->LoadConfig () )
+	{
+		Logger::GetInstance ()->Msg<MSG_ERROR> ( "ConfigManager::LoadConfig failed" );
+		return false;
+	}
 
 	if( SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive )
 	{

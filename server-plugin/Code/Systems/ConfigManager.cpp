@@ -70,11 +70,15 @@ bool GetIniAttributeValue ( std::ifstream & file, basic_string const & root, bas
 		}
 		else
 		{
-			Assert ( 0 && "root not found in config.ini file" );
+			Logger::GetInstance ()->Msg<MSG_ERROR> ( Helpers::format ( "ConfigManager::GetIniAttributeValue : Cannot find root %s", root.c_str ()) );
 		}
 	}
+	else
+	{
+		Logger::GetInstance ()->Msg<MSG_ERROR> (  "ConfigManager::GetIniAttributeValue : Cannot read ini file" );
+	}
 	value = "";
-	Assert ( 0 && "Attribute not found in config.ini file" );
+	Logger::GetInstance ()->Msg<MSG_ERROR> ( Helpers::format("ConfigManager::GetIniAttributeValue : Cannot find attribute %s -> %s", root.c_str(), attrib.c_str() ));
 	return false;
 }
 
@@ -185,8 +189,12 @@ bool ConfigManager::LoadConfig ()
 		}
 		else
 		{
-			Assert ( "config.ini content version doesn't match what we expect. Update it." && 0 );
+			Logger::GetInstance ()->Msg<MSG_ERROR> (  "ConfigManager::LoadConfig : content_version mismatch"  );
 		}
+	}
+	else
+	{
+		Logger::GetInstance ()->Msg<MSG_ERROR> ( "ConfigManager::LoadConfig : Cannot open config.ini"  );
 	}
 
 	return false;
