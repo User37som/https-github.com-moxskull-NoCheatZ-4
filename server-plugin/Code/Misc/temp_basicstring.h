@@ -271,7 +271,8 @@ public:
 	bool operator ==( const String<pod> &other ) const
 	{
 		if( m_size != other.m_size ) return false;
-
+		__assume( m_alloc > 0 );
+		__assume( other.m_alloc  > 0 );
 		pod const * me ( m_alloc );
 		pod const * other_c ( other.m_alloc );
 		do
@@ -297,7 +298,7 @@ public:
 	bool operator ==( pod const * other ) const
 	{
 		if( m_size != autolen ( other ) ) return false;
-
+		__assume( m_alloc > 0 );
 		pod const * me ( m_alloc );
 		do
 		{
@@ -357,6 +358,7 @@ public:
 
 	String<pod>& replace ( pod const replace_this, pod const replace_by )
 	{
+		__assume( m_alloc > 0 );
 		if( m_size > 0 )
 		{
 			pod * me ( m_alloc );
@@ -386,6 +388,7 @@ public:
 
 	String<pod>& remove ( size_t pos )
 	{
+		__assume( m_alloc > 0 );
 		if( pos < m_size )
 		{
 			do
@@ -414,6 +417,7 @@ public:
 
 	String<pod>& replace ( String<pod> const & replace_this, String<pod> const & replace_by )
 	{
+		__assume( m_alloc > 0 );
 		int const diff ( replace_by.m_size - replace_this.m_size );
 		size_t pos ( find ( replace_this ) );
 		while( pos != npos )
@@ -444,6 +448,7 @@ public:
 
 	size_t find ( pod const c, size_t start = 0 ) const
 	{
+		__assume( m_alloc > 0 );
 		size_t a ( m_size );
 		if( a == 0 ) return npos;
 		if( start >= a ) return npos;
@@ -465,12 +470,12 @@ private:
 		// this function is confident with the caller -> no extra check
 
 		pod const * me ( m_alloc + start );
+		__assume( me > 0 );
 		do
 		{
-			if( *c != *me ) return false;
-			else ++c;
+			if( *c != *me++ ) return false;
 		}
-		while( ++me != 0 );
+		while( *(++c) != 0 );
 
 		return true;
 	}
@@ -478,15 +483,17 @@ private:
 public:
 	size_t find ( pod const * const c, size_t start = 0 ) const
 	{
-		size_t csize ( autolen ( c ) + start );
+		size_t qstart ( start );
+		volatile size_t csize ( autolen ( c ) + qstart ); // add volatile because the VS optimiser is going crazy here ... https://github.com/L-EARN/NoCheatZ-4/issues/50
 		if( csize > m_size ) return npos;
 
-		while( cmp ( c, start++ ) == false )
+		while( cmp ( c, qstart ) == false )
 		{
 			if( ++csize > m_size ) return npos;
+			++qstart;
 		}
 
-		return start;
+		return qstart;
 	}
 
 	size_t find ( String<pod> const & c, size_t start = 0 ) const
@@ -496,6 +503,7 @@ public:
 
 	size_t find_last_of ( pod const * const c, size_t start = npos ) const
 	{
+		__assume( m_size > 0 );
 		size_t a ( m_size );
 		if( a == 0 ) return npos;
 		if( start == 0 ) return npos;
@@ -520,6 +528,7 @@ public:
 
 	size_t find_last_of ( pod const c, size_t start = npos ) const
 	{
+		__assume( m_size > 0 );
 		size_t a ( m_size );
 		if( a == 0 ) return npos;
 		if( start == 0 ) return npos;
