@@ -216,7 +216,7 @@ inline PlayerHandler::const_iterator & PlayerHandler::iterator::operator+=( Base
 	{
 		this->operator=( begin () );
 	}
-	while( this->operator!=( PlayerHandler::end () ) ); // begin can still be invalid when server is empty
+	while( this->operator!=( PlayerHandler::end () ) ) // begin can still be invalid when server is empty
 	{
 		if( target->CanProcessThisSlot ( this->operator SlotStatus() ) )
 		{
