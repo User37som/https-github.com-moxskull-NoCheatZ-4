@@ -26,8 +26,8 @@
 #include "Systems/AutoTVRecord.h"
 
 PlayerHandler::const_iterator PlayerHandler::invalid;
-PlayerHandler::const_iterator PlayerHandler::first;
-PlayerHandler::const_iterator PlayerHandler::last;
+PlayerHandler::const_iterator PlayerHandler::first( invalid );
+PlayerHandler::const_iterator PlayerHandler::last ( invalid );
 
 
 //---------------------------------------------------------------------------------
