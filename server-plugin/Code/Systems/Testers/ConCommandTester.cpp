@@ -205,7 +205,6 @@ bool ConCommandTester::RT_TestPlayerCommand ( PlayerHandler::const_iterator ph, 
 				}
 			}
 		}
-
 		RT_AddPlayerCommand ( ph, command );
 	}
 	return false;
