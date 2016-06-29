@@ -168,7 +168,6 @@ bool CNoCheatZPlugin::Load ( SourceSdk::CreateInterfaceFn _interfaceFactory, Sou
 {
 	GlobalTimer::GetInstance ()->EnterSection ();
 
-	Logger::CreateInstance ();
 	Logger::GetInstance ()->Msg<MSG_CONSOLE> ( "Loading ..." );
 
 	if( !SourceSdk::InterfacesProxy::Load ( gameServerFactory, _interfaceFactory ) )
@@ -191,7 +190,6 @@ bool CNoCheatZPlugin::Load ( SourceSdk::CreateInterfaceFn _interfaceFactory, Sou
 		Assert ( "Error when testing for multiple instances" && 0 );
 	}
 
-	ConfigManager::CreateInstance ();
 	if( !ConfigManager::GetInstance ()->LoadConfig () )
 	{
 		Logger::GetInstance ()->Msg<MSG_ERROR> ( "ConfigManager::LoadConfig failed" );
@@ -224,13 +222,9 @@ bool CNoCheatZPlugin::Load ( SourceSdk::CreateInterfaceFn _interfaceFactory, Sou
 		SourceSdk::ConVar_Register ( 0 );
 	}
 
-	EntityProps::CreateInstance ();
-
 	BaseSystem::InitSystems ();
-	BanRequest::CreateInstance ();
 	BanRequest::GetInstance ()->Init ();
 
-	NczPlayerManager::CreateInstance ();
 	NczPlayerManager::GetInstance ()->LoadPlayerManager (); // Mark any present player as PLAYER_CONNECTED
 
 	SourceSdk::InterfacesProxy::Call_ServerExecute ();
