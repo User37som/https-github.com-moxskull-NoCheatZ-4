@@ -50,9 +50,9 @@ class CBaseEntity;
 struct HookInfo
 {
 	DWORD oldFn; // Old function address that we replace in the vtable
-	DWORD* vf_entry; // Pointer to the entry in the virtual table
 	void* origEnt; // Address of the class used to determine virtual table base
 	DWORD* pInterface; // Virtual table base
+	DWORD* vf_entry; // Pointer to the entry in the virtual table
 	DWORD newFn; // New function address that will be at *vf_entry after hook
 
 	HookInfo ()
@@ -70,6 +70,7 @@ struct HookInfo
 	}
 	HookInfo ( void* class_ptr, int vfid, DWORD new_fn ) :
 		oldFn ( 0 ),
+		origEnt( class_ptr ),
 		pInterface ( ( DWORD* )*( DWORD* ) origEnt ),
 		vf_entry ( &( pInterface[ vfid ] ) ),
 		newFn ( new_fn )
