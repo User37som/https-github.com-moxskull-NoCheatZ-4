@@ -328,8 +328,10 @@ class NczPlayerManager :
 	public Singleton<NczPlayerManager>
 {
 	typedef  Singleton<NczPlayerManager> singleton_class;
+	friend PlayerHandler;
+
 private:
-	PlayerHandler FullHandlersList[ MAX_PLAYERS + 1 ];
+	static PlayerHandler FullHandlersList[ MAX_PLAYERS + 1 ];
 	int m_max_index;
 
 public:

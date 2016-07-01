@@ -25,7 +25,8 @@
 #include "Systems/BaseSystem.h"
 #include "Systems/AutoTVRecord.h"
 
-PlayerHandler::const_iterator PlayerHandler::invalid;
+PlayerHandler NczPlayerManager::FullHandlersList[];
+PlayerHandler::const_iterator PlayerHandler::invalid(&NczPlayerManager::FullHandlersList[0]);
 PlayerHandler::const_iterator PlayerHandler::first( invalid );
 PlayerHandler::const_iterator PlayerHandler::last ( invalid );
 
@@ -36,7 +37,6 @@ PlayerHandler::const_iterator PlayerHandler::last ( invalid );
 
 NczPlayerManager::NczPlayerManager () :
 	singleton_class (),
-	FullHandlersList (),
 	m_max_index ( 0 )
 {
 	PlayerHandler::invalid = FullHandlersList;
