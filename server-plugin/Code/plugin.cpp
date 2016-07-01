@@ -173,8 +173,6 @@ bool CNoCheatZPlugin::Load ( SourceSdk::CreateInterfaceFn _interfaceFactory, Sou
 		return false;
 	}
 
-	UserMessageHookListener::HookUserMessage ();
-
 	void* pinstance ( SourceSdk::InterfacesProxy::ICvar_FindVar ( "nocheatz_instance" ) );
 	if( pinstance )
 	{
@@ -218,6 +216,8 @@ bool CNoCheatZPlugin::Load ( SourceSdk::CreateInterfaceFn _interfaceFactory, Sou
 
 		SourceSdk::ConVar_Register ( 0 );
 	}
+
+	UserMessageHookListener::HookUserMessage ();
 
 	BaseSystem::InitSystems ();
 	BanRequest::GetInstance ()->Init ();
@@ -293,13 +293,50 @@ void CNoCheatZPlugin::Unload ( void )
 // Purpose: called when the plugin is paused (i.e should stop running but isn't unloaded)
 //---------------------------------------------------------------------------------
 void CNoCheatZPlugin::Pause ( void )
-{}
+{
+	BanRequest::GetInstance ()->WriteBansIfNeeded ();
+	Logger::GetInstance ()->Msg<MSG_CHAT> ( "Plugin pause" );
+	Logger::GetInstance ()->Flush ();
+	DestroySingletons ();
+}
 
 //---------------------------------------------------------------------------------
 // Purpose: called when the plugin is unpaused (i.e should start executing again)
 //---------------------------------------------------------------------------------
 void CNoCheatZPlugin::UnPause ( void )
-{}
+{
+	CreateSingletons ();
+
+	GlobalTimer::GetInstance ()->EnterSection ();
+
+	Logger::GetInstance ()->Msg<MSG_CONSOLE> ( "Unpausing ..." );
+	BaseSystem::InitSystems ();
+	BanRequest::GetInstance ()->Init ();
+
+	NczPlayerManager::GetInstance ()->LoadPlayerManager (); // Mark any present player as PLAYER_CONNECTED
+
+	SourceSdk::InterfacesProxy::Call_ServerExecute ();
+	SourceSdk::InterfacesProxy::Call_ServerCommand ( "exec nocheatz.cfg\n" );
+	SourceSdk::InterfacesProxy::Call_ServerExecute ();
+
+	for( int i ( 1 ); i < MAX_PLAYERS; ++i )
+	{
+		PlayerHandler::const_iterator ph ( NczPlayerManager::GetInstance ()->GetPlayerHandlerByIndex ( i ) );
+		if( ph >= SlotStatus::BOT )
+		{
+			HookEntity ( ph->GetEdict () );
+			WeaponHookListener::HookWeapon ( ph );
+
+			if( ph >= SlotStatus::PLAYER_CONNECTED )
+			{
+				HookBasePlayer ( ph );
+			}
+		}
+	}
+	BaseSystem::ManageSystems ();
+
+	Logger::GetInstance ()->Msg<MSG_CHAT> ( "Plugin unpaused" );
+}
 
 //---------------------------------------------------------------------------------
 // Purpose: the name of this plugin, returned in "plugin_print" command
