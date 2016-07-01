@@ -7,6 +7,7 @@
 #include <cwctype>
 #include <clocale>
 
+#include "Preprocessors.h"
 #include "Containers/utlvector.h"
 #include "Misc/temp_singleton.h"
 #include "HeapMemoryManager.h"
@@ -474,7 +475,7 @@ public:
 		return npos;
 	}
 
-	void lower ()
+	inline void lower ()
 	{
 		if( !m_alloc )
 			return;
@@ -484,7 +485,7 @@ public:
 		ConvertToChar ( t, *this );
 	}
 
-	void upper ()
+	inline void upper ()
 	{
 		if( !m_alloc )
 			return;
@@ -519,7 +520,7 @@ public:
 };
 
 template <>
-void String<wchar_t>::upper ()
+inline void String<wchar_t>::upper ()
 {
 	std::setlocale ( LC_ALL, "en_US.utf8" );
 	if( !m_alloc )
@@ -531,7 +532,7 @@ void String<wchar_t>::upper ()
 }
 
 template <>
-void String<wchar_t>::lower ()
+inline void String<wchar_t>::lower ()
 {
 	std::setlocale ( LC_ALL, "en_US.utf8" );
 	if( !m_alloc )

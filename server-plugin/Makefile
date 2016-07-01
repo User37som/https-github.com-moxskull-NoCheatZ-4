@@ -30,7 +30,7 @@ OTHER_PREPROCESSORS = -DNCZ_CSS $(SDK_DEF)
 CXX = g++ -m32 -std=c++11
 
 ARCH_CFLAGS =   -mtune=i486 -march=x86-64 -mmmx
-USER_CFLAGS =   -DTIXML_USE_TICPP -Dstricmp=strcasecmp -D_stricmp=strcasecmp
+USER_CFLAGS =   -DTIXML_USE_TICPP -Dstricmp=strcasecmp -D_stricmp=strcasecmp -Dstrnicmp=strncasecmp
 BASE_CFLAGS =   -msse -D_LINUX -DLINUX -D_alloca=alloca \
 		-fPIC -Wno-deprecated -fno-exceptions -fpermissive \
 		-fno-strict-aliasing \

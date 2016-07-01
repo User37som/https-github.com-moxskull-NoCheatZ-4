@@ -79,7 +79,9 @@ SourceSdk::datamap_t* GetDataDescMap ( SourceSdk::edict_t* const pEntity );
 
 #undef GetProp
 
-class EntityProps : public Singleton<EntityProps>
+class EntityProps :
+	public HeapMemoryManager::OverrideNew<16>,
+	public Singleton<EntityProps>
 {
 private:
 	/* I believe offsets are consistents so don't need to reset the cache during runtime */

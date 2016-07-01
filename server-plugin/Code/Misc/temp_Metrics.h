@@ -34,7 +34,8 @@
 #define METRICS_NAME_SIZE 44
 
 template <typename val_t>
-class BaseMetrics
+class BaseMetrics : 
+	public HeapMemoryManager::OverrideNew<16>
 {
 protected:
 	val_t m_min;
