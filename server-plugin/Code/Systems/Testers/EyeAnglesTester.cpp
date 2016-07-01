@@ -144,12 +144,10 @@ PlayerRunCommandRet EyeAnglesTester::RT_PlayerRunCommandCallback ( PlayerHandler
 
 void EyeAnglesTester::FireGameEvent ( SourceSdk::IGameEvent *ev ) // round_end
 {
-	for( PlayerHandler::const_iterator ph ( PlayerHandler::begin () ); ph != PlayerHandler::end (); ++ph )
+	ProcessFilter::HumanAtLeastConnected filter_class;
+	for( PlayerHandler::const_iterator ph ( &filter_class ); ph != PlayerHandler::end (); ph+=&filter_class )
 	{
-		if( ph >= SlotStatus::PLAYER_CONNECTED )
-		{
-			++( GetPlayerDataStructByIndex ( ph.GetIndex () )->ignore_last );
-		}
+		++( GetPlayerDataStructByIndex ( ph.GetIndex () )->ignore_last );
 	}
 }
 

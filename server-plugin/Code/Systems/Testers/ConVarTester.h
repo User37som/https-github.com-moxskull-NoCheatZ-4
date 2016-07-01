@@ -21,7 +21,6 @@
 #include "Misc/temp_basiclist.h"
 #include "Systems/BaseSystem.h"
 #include "Systems/Testers/Detections/temp_BaseDetection.h" // + helpers, ifaces, preprocessors, playermanager
-#include "Players/NczFilteredPlayersList.h" // + playermanager, singleton
 #include "Players/temp_PlayerDataStruct.h"
 #include "Systems/OnTickListener.h"
 #include "Misc/temp_singleton.h"
@@ -103,7 +102,6 @@ public:
 };
 
 class ConVarTester :
-	private AsyncNczFilteredPlayersList,
 	public BaseSystem,
 	public OnTickListener,
 	public PlayerDataStructHandler<CurrentConVarRequestT>,
@@ -146,6 +144,8 @@ private:
 	void AddConvarRuleset ( const char * name, const char * value, ConVarRuleT rule, bool safe = true );
 
 	ConVarInfoT* RT_FindConvarRuleset ( const char * name );
+
+	PlayerHandler::const_iterator m_current_player;
 };
 
 #endif // CONVARTESTER_H

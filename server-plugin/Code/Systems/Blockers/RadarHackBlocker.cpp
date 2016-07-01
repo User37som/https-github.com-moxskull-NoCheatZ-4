@@ -273,7 +273,7 @@ void RadarHackBlocker::RT_UpdatePlayerData ( NczPlayer* pPlayer )
 
 void RadarHackBlocker::RT_ProcessOnTick ( float const curtime )
 {
-	ProcessFilter::HumanAtLeastConnected const filter_class;
+	ProcessFilter::HumanAtLeastConnectedOrBot const filter_class;
 
 	for( PlayerHandler::const_iterator ph (&filter_class ); ph != PlayerHandler::end (); ph+= &filter_class )
 	{

@@ -111,10 +111,9 @@ void SpamChangeNameTester::FireGameEvent ( SourceSdk::IGameEvent* ev )
 
 void SpamChangeNameTester::RT_ProcessOnTick ( float const curtime )
 {
-	for( PlayerHandler::const_iterator ph ( PlayerHandler::begin () ); ph != PlayerHandler::end (); ++ph )
+	ProcessFilter::HumanAtLeastConnected filter_class;
+	for( PlayerHandler::const_iterator ph ( &filter_class ); ph != PlayerHandler::end (); ph+=&filter_class )
 	{
-		if( ph < SlotStatus::PLAYER_CONNECTED ) continue;
-
 		ChangeNameInfo* const pInfo ( GetPlayerDataStruct ( ph ) );
 
 		{

@@ -21,7 +21,6 @@
 #include "Players/temp_PlayerDataStruct.h"
 #include "Interfaces/IGameEventManager/IGameEventManager.h"
 #include "Systems/Testers/Detections/temp_BaseDetection.h"
-#include "Players/NczFilteredPlayersList.h"
 #include "Misc/temp_singleton.h"
 
 typedef struct EyeAngle

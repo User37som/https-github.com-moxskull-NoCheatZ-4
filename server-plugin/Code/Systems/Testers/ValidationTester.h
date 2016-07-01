@@ -18,7 +18,6 @@
 
 #include "Misc/temp_basiclist.h"
 #include "Systems/BaseSystem.h"
-#include "Players/NczFilteredPlayersList.h"
 #include "Systems/OnTickListener.h"
 #include "Players/temp_PlayerDataStruct.h"
 #include "Misc/temp_singleton.h"
@@ -92,7 +91,6 @@ typedef struct ValidatedInfo
 class ValidationTester :
 	private BaseSystem,
 	private SourceSdk::IGameEventListener002,
-	private NczFilteredPlayersList,
 	private OnTickListener,
 	public PlayerDataStructHandler<ValidationInfoT>,
 	public Singleton<ValidationTester>

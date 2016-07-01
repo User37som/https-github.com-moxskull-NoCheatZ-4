@@ -102,10 +102,10 @@ void AntiSmokeBlocker::RT_ProcessOnTick ( float const curtime )
 	if( it == nullptr ) return;
 
 	// Test if players are immersed in smoke
-	for( PlayerHandler::const_iterator ph ( PlayerHandler::begin () ); ph != PlayerHandler::end (); ++ph )
+	ProcessFilter::InTestsNoBot l1_filter;
+	ProcessFilter::InTestsOrBot l2_filter;
+	for( PlayerHandler::const_iterator ph ( &l1_filter ); ph != PlayerHandler::end (); ph+=&l1_filter )
 	{
-		if( ph != SlotStatus::PLAYER_IN_TESTS ) continue;
-
 		SourceSdk::Vector delta, other_delta;
 
 		MathInfo const & x_math ( MathCache::GetInstance ()->RT_GetCachedMaths ( ph.GetIndex () ) );
@@ -126,9 +126,8 @@ void AntiSmokeBlocker::RT_ProcessOnTick ( float const curtime )
 				const SourceSdk::vec_t ang_smoke ( tanf ( ConfigManager::GetInstance ()->m_smoke_radius / sqrtf ( dst ) ) );
 				SourceSdk::VectorNorm ( delta );
 
-				for( PlayerHandler::const_iterator other_ph ( PlayerHandler::begin () ); other_ph != PlayerHandler::end (); ++other_ph )
+				for( PlayerHandler::const_iterator other_ph ( &l2_filter ); other_ph != PlayerHandler::end (); other_ph+=&l2_filter )
 				{
-					if( other_ph != SlotStatus::PLAYER_IN_TESTS && other_ph != SlotStatus::BOT ) continue;
 					if( ph == other_ph ) continue;
 
 					MathInfo const & y_math ( MathCache::GetInstance ()->RT_GetCachedMaths ( other_ph.GetIndex () ) );

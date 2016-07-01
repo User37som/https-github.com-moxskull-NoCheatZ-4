@@ -27,7 +27,6 @@
 ValidationTester::ValidationTester () :
 	BaseSystem ( "ValidationTester" ),
 	SourceSdk::IGameEventListener002 (),
-	NczFilteredPlayersList (),
 	OnTickListener (),
 	playerdata_class (),
 	singleton_class ()

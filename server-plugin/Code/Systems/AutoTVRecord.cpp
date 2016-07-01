@@ -135,15 +135,8 @@ bool AutoTVRecord::IsRecording () const
 
 bool AutoTVRecord::IsTVPresent () const
 {
-	for( PlayerHandler::const_iterator it ( PlayerHandler::begin () ); it != PlayerHandler::end (); ++it )
-	{
-		if( it == SlotStatus::BOT )
-		{
-			if( it->GetPlayerInfo ()->IsHLTV () )
-				return true;
-		}
-	}
-	return false;
+	ProcessFilter::TVOnly filter_class;
+	return PlayerHandler::const_iterator ( &filter_class ) != PlayerHandler::end ();
 }
 
 void AutoTVRecord::SpawnTV ()
@@ -193,14 +186,10 @@ basic_string const & AutoTVRecord::GetRecordFilename () const
 
 void AutoTVRecord::SendTVChatMessage ( basic_string const & msg )
 {
-	for( PlayerHandler::const_iterator it ( PlayerHandler::begin () ); it != PlayerHandler::end (); ++it )
+	ProcessFilter::TVOnly filter_class;
+	for( PlayerHandler::const_iterator it ( &filter_class ); it != PlayerHandler::end (); it += &filter_class )
 	{
-		if( it == SlotStatus::BOT )
-		{
-			if( it->GetPlayerInfo ()->IsHLTV () )
-				Helpers::tell ( it->GetEdict (), msg );
-			// We don't break because it seems we can have multiple GOTV instances ... I don't know if it means multiple entities though ...
-		}
+		Helpers::tell ( it->GetEdict (), msg );
 	}
 }
 

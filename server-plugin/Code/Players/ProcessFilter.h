@@ -182,6 +182,33 @@ namespace ProcessFilter
 			TemplatedProcessFilter::CanProcessThisSlot<STATUS_BETTER, true, SlotStatus::INVALID> ( player_slot_status );
 		}
 	};
+
+	class TVOnly :
+		public BaseProcessFilter
+	{
+		virtual bool CanProcessThisSlot ( SlotStatus const player_slot_status ) const
+		{
+			return player_slot_status == SlotStatus::TV;
+		}
+	};
+
+	class BOTOnly :
+		public BaseProcessFilter
+	{
+		virtual bool CanProcessThisSlot ( SlotStatus const player_slot_status ) const
+		{
+			return player_slot_status == SlotStatus::BOT;
+		}
+	};
+
+	class FakeClientOnly :
+		public BaseProcessFilter
+	{
+		virtual bool CanProcessThisSlot ( SlotStatus const player_slot_status ) const
+		{
+			return player_slot_status == SlotStatus::BOT || player_slot_status == SlotStatus::TV;
+		}
+	};
 }
 
 #endif // PROCESSFILTER_H

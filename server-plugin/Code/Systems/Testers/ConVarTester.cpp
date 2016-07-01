@@ -25,7 +25,6 @@
 /////////////////////////////////////////////////////////////////////////
 
 ConVarTester::ConVarTester () :
-	AsyncNczFilteredPlayersList (),
 	BaseSystem ( "ConVarTester", "Enable - Disable - Verbose - AddRule - ResetRules" ),
 	OnTickListener (),
 	playerdata_class (),
@@ -62,10 +61,11 @@ void ConVarTester::RT_ProcessOnTick ( float const curtime )
 	{
 		return;
 	}
-	PlayerHandler::const_iterator ph ( GetNextPlayer () );
-	if( ph )
+	ProcessFilter::HumanAtLeastConnected filter_class;
+	m_current_player += &filter_class;
+	if( m_current_player )
 	{
-		RT_ProcessPlayerTest ( ph, curtime );
+		RT_ProcessPlayerTest ( m_current_player, curtime );
 	}
 }
 
@@ -404,6 +404,8 @@ void ConVarTester::Load ()
 	AddConvarRuleset ( "byp_fake_loss", "", ConVarRule::NO_VALUE );
 
 	var_sv_cheats = SourceSdk::InterfacesProxy::ICvar_FindVar ( "sv_cheats" );
+
+	m_current_player = PlayerHandler::end ();
 
 	OnTickListener::RegisterOnTickListener ( this );
 }

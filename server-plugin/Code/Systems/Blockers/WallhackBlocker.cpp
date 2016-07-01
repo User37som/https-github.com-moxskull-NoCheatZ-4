@@ -229,10 +229,9 @@ void WallhackBlocker::RT_ProcessOnTick ( float const curtime )
 	ST_R_STATIC SourceSdk::Vector hull_min ( -5.0f, -5.0f, -5.0f );
 	ST_R_STATIC SourceSdk::Vector hull_max ( 5.0f, 5.0f, 5.0f );
 
-	for( PlayerHandler::const_iterator ph ( PlayerHandler::begin () ); ph != PlayerHandler::end (); ++ph )
+	ProcessFilter::HumanAtLeastConnectedOrBot filter_class;
+	for( PlayerHandler::const_iterator ph ( &filter_class ); ph != PlayerHandler::end (); ph+=&filter_class )
 	{
-		if( ph != SlotStatus::BOT && ph != SlotStatus::PLAYER_IN_TESTS ) continue;
-
 		SourceSdk::IPlayerInfo * const playerinfo ( ph->GetPlayerInfo () );
 		if( playerinfo != nullptr )
 		{
