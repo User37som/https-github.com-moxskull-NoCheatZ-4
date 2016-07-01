@@ -24,6 +24,7 @@
 #include "Misc/temp_Metrics.h"
 
 class CNoCheatZPlugin :
+	public HeapMemoryManager::OverrideNew<16>,
 	public SourceSdk::IServerPluginCallbacks,
 	public Singleton<CNoCheatZPlugin>
 {

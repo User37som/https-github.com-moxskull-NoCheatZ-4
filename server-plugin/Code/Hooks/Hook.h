@@ -32,6 +32,7 @@
 #include "Interfaces/iserverunknown.h"
 
 #include "Players/NczPlayerManager.h"
+#include "Misc/HeapMemoryManager.h"
 
 /*
 	Used to replace a pointer in one virtual table.
@@ -135,7 +136,8 @@ class HookListenersList
 {
 	typedef SortedListener<C> inner_type;
 public:
-	struct elem_t
+	struct alignas(8) elem_t :
+		HeapMemoryManager::OverrideNew<8>
 	{
 		elem_t ()
 		{

@@ -237,6 +237,9 @@
     <ClCompile Include="Code\Misc\MathCache.cpp">
       <Filter>Code\Misc</Filter>
     </ClCompile>
+    <ClCompile Include="Code\Misc\HeapMemoryManager.cpp">
+      <Filter>Code\Misc</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Code\plugin.h">
@@ -531,6 +534,9 @@
       <Filter>Code\Players</Filter>
     </ClInclude>
     <ClInclude Include="Code\Misc\ClassSpecifications.h">
+      <Filter>Code\Misc</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Misc\HeapMemoryManager.h">
       <Filter>Code\Misc</Filter>
     </ClInclude>
   </ItemGroup>

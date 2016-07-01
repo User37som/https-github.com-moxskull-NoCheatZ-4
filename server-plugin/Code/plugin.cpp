@@ -43,9 +43,6 @@
 #include "Systems/OnTickListener.h"
 #include "Systems/TimerListener.h"
 
-string_memory_pool<char> String<char>::m_pool;
-string_memory_pool<wchar_t> String<wchar_t>::m_pool;
-
 static void* __CreatePlugin_interface ()
 {
 	CNoCheatZPlugin::CreateInstance ();
@@ -126,9 +123,9 @@ void CNoCheatZPlugin::DestroySingletons ()
 	Logger::DestroyInstance ();
 	GlobalTimer::DestroyInstance ();
 	MathCache::DestroyInstance ();
+
+	HeapMemoryManager::FreePool ();
 }
-
-
 
 //---------------------------------------------------------------------------------
 // Purpose: constructor/destructor

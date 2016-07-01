@@ -92,6 +92,7 @@ class ValidationTester :
 	private BaseSystem,
 	private SourceSdk::IGameEventListener002,
 	private OnTickListener,
+	public HeapMemoryManager::OverrideNew<16>,
 	public PlayerDataStructHandler<ValidationInfoT>,
 	public Singleton<ValidationTester>
 {

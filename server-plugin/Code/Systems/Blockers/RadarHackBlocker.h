@@ -70,6 +70,7 @@ struct ClientRadarData
 class RadarHackBlocker :
 	public BaseSystem,
 	public OnTickListener,
+	public HeapMemoryManager::OverrideNew<16>,
 	public PlayerDataStructHandler<ClientRadarData>,
 	public Singleton<RadarHackBlocker>,
 	public ThinkPostHookListener,

@@ -9,69 +9,13 @@
 
 #include "Containers/utlvector.h"
 #include "Misc/temp_singleton.h"
+#include "HeapMemoryManager.h"
 
-#define STRING_POOL_SIZE 64
 #define AVERAGE_STRING_SIZE 64 // must be a power of 2
 
-/*
-Use a pool of pointers to prevent re-allocations.
-*/
-
-template <typename pod>
-struct ALIGN4 memory_info :
-	protected NoCopy,
-	protected NoMove
-{
-	size_t m_capacity;
-	pod * m_ptr;
-	bool m_in_use;
-
-	memory_info () : m_capacity ( 0 ), m_ptr ( nullptr ), m_in_use ( false )
-	{}
-
-} ALIGN4_POST;
-
-template <typename pod>
-class string_memory_pool
-{
-
-private:
-	memory_info<pod> m_alloc_pool[ STRING_POOL_SIZE ]; // list of free memory actually not removed from heap
-	size_t m_pool_elements;
-
-public:
-
-	string_memory_pool () : m_alloc_pool (), m_pool_elements ( 0 )
-	{
-		memset ( m_alloc_pool, 0, sizeof ( memory_info<pod> ) * STRING_POOL_SIZE );
-	}
-
-	~string_memory_pool ()
-	{
-		size_t index ( 0 );
-		do
-		{
-			if( m_alloc_pool[ index ].m_in_use )
-			{
-				delete[] m_alloc_pool[ index ].m_ptr;
-			}
-		}
-		while( ++index < STRING_POOL_SIZE );
-	}
-
-public:
-	// True if the pool can store a free pointer, so the string must call DeclareFreeMemory instead of delete[]
-	inline bool StringShouldNotDealloc () const;
-
-	// Add a free pointer to the pool.
-	void DeclareFreeMemory ( pod * ptr, size_t capacity );
-
-	// Re-use a free pointer if we have capacity, otherwise return nullptr. The pool will delete element if there is a match.
-	pod * GetFreeMemory ( size_t target_min_capacity, size_t & got_capacity );
-};
-
 template <typename pod = char>
-class String
+class alignas(16) String :
+	public HeapMemoryManager::OverrideNew<16>
 {
 	friend String<char>;
 	friend String<wchar_t>;
@@ -86,33 +30,17 @@ private:
 	size_t m_capacity;
 
 private:
-	static string_memory_pool<pod> m_pool;
-
-private:
 
 	inline pod * Alloc ( size_t wanted_capacity, size_t & got_capacity )
 	{
-		pod * t ( m_pool.GetFreeMemory ( wanted_capacity, got_capacity ) );
-		if( t == nullptr )
-		{
-			got_capacity = wanted_capacity;
-			return new pod[ wanted_capacity ];
-		}
-		else return t;
+		return ( pod *)HeapMemoryManager::AllocateMemory ( wanted_capacity, got_capacity );
 	}
 
 	inline void Dealloc ()
 	{
 		if( m_alloc )
 		{
-			if( m_pool.StringShouldNotDealloc () )
-			{
-				m_pool.DeclareFreeMemory ( m_alloc, m_capacity );
-			}
-			else
-			{
-				delete[] m_alloc;
-			}
+			HeapMemoryManager::FreeMemory ( m_alloc, m_capacity );
 			m_alloc = nullptr;
 		}
 	}
@@ -634,52 +562,6 @@ inline wchar_t const * String<wchar_t>::autoempty () const
 
 typedef String<char> basic_string;
 typedef String<wchar_t> basic_wstring;
-
-template <typename pod>
-inline bool string_memory_pool<pod>::StringShouldNotDealloc () const
-{
-	return m_pool_elements != STRING_POOL_SIZE;
-}
-
-template <typename pod>
-void string_memory_pool<pod>::DeclareFreeMemory ( pod * ptr, size_t capacity )
-{
-	size_t index ( 0 );
-	do
-	{
-		if( !m_alloc_pool[ index ].m_in_use )
-		{
-			m_alloc_pool[ index ].m_capacity = capacity;
-			m_alloc_pool[ index ].m_ptr = ptr;
-			m_alloc_pool[ index ].m_in_use = true;
-			++m_pool_elements;
-			return;
-		}
-	}
-	while( ++index < STRING_POOL_SIZE );
-}
-
-template <typename pod>
-pod * string_memory_pool<pod>::GetFreeMemory ( size_t target_min_capacity, size_t & got_capacity )
-{
-	if( m_pool_elements > 0 )
-	{
-		size_t index ( 0 );
-		do
-		{
-			if( m_alloc_pool[ index ].m_in_use && m_alloc_pool[ index ].m_capacity >= target_min_capacity )
-			{
-				m_alloc_pool[ index ].m_in_use = false;
-				--m_pool_elements;
-				got_capacity = m_alloc_pool[ index ].m_capacity;
-				return m_alloc_pool[ index ].m_ptr;
-			}
-		}
-		while( ++index < STRING_POOL_SIZE );
-	}
-
-	return nullptr;
-}
 
 template <typename pod>
 void SplitString ( String<pod> const & string, pod const delim, CUtlVector < String<pod> > & out )

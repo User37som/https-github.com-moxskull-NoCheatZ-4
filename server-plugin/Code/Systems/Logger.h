@@ -51,7 +51,9 @@ enum msg_type
 	MSG_DEBUG
 };
 
-class Logger : public Singleton<Logger>
+class Logger :
+	public HeapMemoryManager::OverrideNew<16>,
+	public Singleton<Logger>
 {
 	typedef Singleton<Logger> singleton_class;
 

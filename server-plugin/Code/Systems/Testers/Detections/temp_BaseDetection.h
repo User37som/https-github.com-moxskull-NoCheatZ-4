@@ -24,7 +24,8 @@
 #include "Players/NczPlayerManager.h"
 #include "Systems/BaseSystem.h"
 
-class BaseDetection
+class BaseDetection :
+	public HeapMemoryManager::OverrideNew<16>
 {
 public:
 	BaseDetection ()

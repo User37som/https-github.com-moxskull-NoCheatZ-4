@@ -74,6 +74,7 @@ class AntiSmokeBlocker :
 	private BaseSystem,
 	private SourceSdk::IGameEventListener002,
 	private OnTickListener,
+	public HeapMemoryManager::OverrideNew<16>,
 	public PlayerDataStructHandler<SmokeInfoT>,
 	private SetTransmitHookListener,
 	public Singleton<AntiSmokeBlocker>

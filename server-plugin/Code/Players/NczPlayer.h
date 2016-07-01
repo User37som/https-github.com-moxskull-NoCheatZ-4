@@ -32,7 +32,9 @@ enum WpnShotType
 
 class NczPlayerManager;
 
-class ALIGN16 NczPlayer : private NoCopy
+class alignas(16) NczPlayer :
+	public HeapMemoryManager::OverrideNew<16>,
+	private NoCopy
 {
 	friend NczPlayerManager;
 
@@ -47,16 +49,6 @@ public:
 	NczPlayer ( int const index );
 	~NczPlayer ()
 	{};
-
-	void* operator new( size_t i )
-	{
-		return _mm_malloc ( i, 16 );
-	}
-
-	void operator delete( void* p )
-	{
-		_mm_free ( p );
-	}
 
 	inline int GetIndex () const;
 	inline SourceSdk::edict_t * const GetEdict () const;
@@ -86,7 +78,7 @@ public:
 
 	void Kick ( const char * msg = "Kicked by NoCheatZ 4" );
 	void Ban ( const char * msg = "Banned by NoCheatZ 4", int minutes = 0 );
-} ALIGN16_POST;
+};
 
 inline int NczPlayer::GetIndex () const
 {

@@ -135,6 +135,7 @@ typedef CUtlVector<CommandInfoT> CommandListT;
 class ConCommandTester :
 	public BaseSystem,
 	public ConCommandHookListener,
+	public HeapMemoryManager::OverrideNew<16>,
 	public PlayerDataStructHandler<LastPlayerCommandsT>,
 	public Singleton<ConCommandTester>
 {

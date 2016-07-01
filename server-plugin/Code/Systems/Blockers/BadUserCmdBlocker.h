@@ -50,6 +50,7 @@ struct UserCmdInfo
 
 class BadUserCmdBlocker :
 	public BaseSystem,
+	public HeapMemoryManager::OverrideNew<16>,
 	public PlayerDataStructHandler<UserCmdInfo>,
 	public PlayerRunCommandHookListener,
 	public Singleton<BadUserCmdBlocker>

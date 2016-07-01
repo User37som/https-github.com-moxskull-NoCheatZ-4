@@ -1,15 +1,17 @@
 #ifndef TEMP_BASICLIST
 #define TEMP_BASICLIST
 
-#include <new>
 #include <limits>
 #include <cstdlib>
+
+#include "HeapMemoryManager.h"
 
 template <typename inner_type>
 class basic_slist
 {
 public:
-	struct elem_t
+	struct alignas(8) elem_t :
+		HeapMemoryManager::OverrideNew<8>
 	{
 		elem_t ( inner_type const & newvalue ) : m_value ( newvalue )
 		{}

@@ -73,6 +73,7 @@ public:
 class SpeedTester :
 	private BaseSystem,
 	private OnTickListener,
+	public HeapMemoryManager::OverrideNew<16>,
 	public PlayerDataStructHandler<SpeedHolderT>,
 	private PlayerRunCommandHookListener,
 	public Singleton<SpeedTester>

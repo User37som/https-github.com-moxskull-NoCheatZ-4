@@ -6,7 +6,9 @@
 #include "Misc/temp_basicstring.h"
 #include "Misc/temp_singleton.h"
 
-class ConfigManager : public Singleton<ConfigManager>
+class ConfigManager :
+	public HeapMemoryManager::OverrideNew<16>,
+	public Singleton<ConfigManager>
 {
 	typedef Singleton<ConfigManager> singleton_class;
 
