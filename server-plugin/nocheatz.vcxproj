@@ -411,17 +411,11 @@ copy "$(TargetPath)" ..\..\..\game\bin\"$(TargetName)".pdb
     <ClCompile Include="Code\Hooks\Hook.cpp" />
     <ClCompile Include="Code\Hooks\OnGroundHookListener.cpp" />
     <ClCompile Include="Code\Hooks\PlayerRunCommandHookListener.cpp" />
-    <ClCompile Include="Code\Hooks\RayTraceCache.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Profiler|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
     <ClCompile Include="Code\Hooks\SetTransmitHookListener.cpp" />
     <ClCompile Include="Code\Hooks\WeaponHookListener.cpp" />
     <ClCompile Include="Code\Misc\EntityProps.cpp" />
     <ClCompile Include="Code\Misc\Helpers.cpp" />
     <ClCompile Include="Code\Misc\MRecipientFilter.cpp" />
-    <ClCompile Include="Code\Players\NczFilteredPlayersList.cpp" />
     <ClCompile Include="Code\Players\NczPlayer.cpp" />
     <ClCompile Include="Code\Players\NczPlayerManager.cpp" />
     <ClCompile Include="Code\plugin.cpp" />
@@ -432,9 +426,6 @@ copy "$(TargetPath)" ..\..\..\game\bin\"$(TargetName)".pdb
     <ClCompile Include="Code\Systems\Blockers\BadUserCmdBlocker.cpp" />
     <ClCompile Include="Code\Systems\Blockers\WallhackBlocker.cpp" />
     <ClCompile Include="Code\Systems\Logger.cpp" />
-    <ClCompile Include="Code\Systems\OnFrameListener.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
     <ClCompile Include="Code\Systems\OnTickListener.cpp" />
     <ClCompile Include="Code\Systems\Testers\ConCommandTester.cpp" />
     <ClCompile Include="Code\Systems\Testers\ShotTester.cpp" />
@@ -512,7 +503,6 @@ copy "$(TargetPath)" ..\..\..\game\bin\"$(TargetName)".pdb
     <ClInclude Include="Code\Hooks\Hook.h" />
     <ClInclude Include="Code\Hooks\OnGroundHookListener.h" />
     <ClInclude Include="Code\Hooks\PlayerRunCommandHookListener.h" />
-    <ClInclude Include="Code\Hooks\RayTraceCache.h" />
     <ClInclude Include="Code\Hooks\SetTransmitHookListener.h" />
     <ClInclude Include="Code\Hooks\WeaponHookListener.h" />
     <ClInclude Include="Code\MagicValues.h" />
@@ -523,7 +513,6 @@ copy "$(TargetPath)" ..\..\..\game\bin\"$(TargetName)".pdb
     <ClInclude Include="Code\Misc\MRecipientFilter.h" />
     <ClInclude Include="Code\Misc\temp_BaseDataStruct.h" />
     <ClInclude Include="Code\Misc\UserMsg.h" />
-    <ClInclude Include="Code\Players\NczFilteredPlayersList.h" />
     <ClInclude Include="Code\Players\NczPlayer.h" />
     <ClInclude Include="Code\Players\NczPlayerManager.h" />
     <ClInclude Include="Code\Players\temp_PlayerDataStruct.h" />
@@ -536,7 +525,6 @@ copy "$(TargetPath)" ..\..\..\game\bin\"$(TargetName)".pdb
     <ClInclude Include="Code\Systems\Blockers\BadUserCmdBlocker.h" />
     <ClInclude Include="Code\Systems\Blockers\WallhackBlocker.h" />
     <ClInclude Include="Code\Systems\Logger.h" />
-    <ClInclude Include="Code\Systems\OnFrameListener.h" />
     <ClInclude Include="Code\Systems\OnTickListener.h" />
     <ClInclude Include="Code\Systems\Testers\ConCommandTester.h" />
     <ClInclude Include="Code\Systems\Testers\ShotTester.h" />
