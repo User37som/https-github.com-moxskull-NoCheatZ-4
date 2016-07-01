@@ -108,7 +108,7 @@ void BaseSystem::SetActive ( bool active )
 				}
 				else
 				{
-					DebugMessage ( Helpers::format ( "System %s has nothing to do and will not be loaded", GetName () ) );
+					//DebugMessage ( Helpers::format ( "System %s has nothing to do and will not be loaded", GetName () ) ); // That spam ...
 				}
 			}
 			else
