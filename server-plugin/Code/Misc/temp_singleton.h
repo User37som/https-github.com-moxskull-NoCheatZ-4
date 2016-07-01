@@ -21,10 +21,7 @@ limitations under the License.
 #include "SdkPreprocessors.h"
 
 #include "ClassSpecifications.h"
-
-#ifdef GNUC
-#	include <mm_malloc.h>
-#endif
+#include "HeapMemoryManager.h"
 
 template <class C>
 class Singleton :
@@ -49,8 +46,8 @@ public:
 	static void CreateInstance()
 	{
 		Assert(hClass::instance == nullptr);
-		void* ptr = _mm_malloc(sizeof(C), 16);
-		hClass::instance = new(ptr) C();
+		void* ptr = HeapMemoryManager::AllocateMemory ( sizeof ( C ), static_cast< HeapMemoryManager::OverrideNew* >( hClass:instance )->m_hmm_capacity, 16 );
+		hClass::instance = new(ptr) X();
 	}
 
 	static void Required()
@@ -63,10 +60,12 @@ public:
 
 	static void DestroyInstance()
 	{
-		Assert ( hClass::instance );
-		hClass::instance->~C ();
-		_mm_free ( hClass::instance );
-		hClass::instance = nullptr;
+		if( hClass::instance )
+		{
+			hClass::instance->~X ();
+			HeapMemoryManager::FreeMemory ( hClass::instance, static_cast< HeapMemoryManager::OverrideNew* >( hClass:instance )->m_hmm_capacity );
+			hClass::instance = nullptr;
+		}
 	}
 };
 

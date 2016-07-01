@@ -15,6 +15,9 @@ limitations under the License.
 
 #include "HeapMemoryManager.h"
 
+#ifdef GNUC
+#	include <mm_malloc.h>
+#endif
 #include <algorithm>
 
 #include "SdkPreprocessors.h"
