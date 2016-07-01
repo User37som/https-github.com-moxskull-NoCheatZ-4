@@ -1,22 +1,16 @@
 language: cpp
 
-os:
-  - linux
+os: linux
+sudo: required
+dist: trusty
 
 branches:
   only:
     - master
 
-addons:
- apt:
-   sources:
-   - ubuntu-toolchain-r-test
-   packages:
-   - gcc-4.8
-   - g++-4.8
-
-sudo:
-  - false
+before_install:
+  - sudo apt-get -qq update
+  - sudo apt-get install -y build-essential gcc-multilib g++-multilib ia32-libs lib32gcc1 libc6-i386 libc6-dev-i386 autotools-dev autoconf libtool
 
 before_script:
   - cd server-plugin
