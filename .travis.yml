@@ -1,0 +1,19 @@
+language: cpp
+
+os:
+  - linux
+
+branches:
+  only:
+    - master
+
+sudo:
+  - false
+
+before_script:
+  - cd server-plugin
+
+script:
+  - make clean
+  - make debug
+  - make release
