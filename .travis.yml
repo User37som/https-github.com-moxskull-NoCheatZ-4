@@ -9,6 +9,7 @@ branches:
     - master
 
 before_install:
+  - sudo dpkg --add-architecture i386
   - sudo apt-get -qq update
   - sudo apt-get install -y build-essential gcc-multilib g++-multilib ia32-libs lib32gcc1 libc6-i386 libc6-dev-i386 autotools-dev autoconf libtool
 
