@@ -34,6 +34,7 @@ struct MathInfo
 };
 
 class MathCache :
+	public HeapMemoryManager::OverrideNew<16>,
 	public Singleton<MathCache>
 {
 private:

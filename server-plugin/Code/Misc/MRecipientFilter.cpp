@@ -23,8 +23,8 @@
 
 MRecipientFilter::MRecipientFilter ( void ) :
 	SourceSdk::IRecipientFilter (),
-	m_bInitMessage ( false ),
-	m_bReliable ( true )
+	m_bReliable ( true ),
+	m_bInitMessage ( false )
 {
 	m_Recipients.EnsureCapacity ( 64 );
 }

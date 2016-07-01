@@ -179,7 +179,7 @@ namespace ProcessFilter
 	{
 		virtual bool CanProcessThisSlot ( SlotStatus const player_slot_status ) const
 		{
-			TemplatedProcessFilter::CanProcessThisSlot<STATUS_BETTER, true, SlotStatus::INVALID> ( player_slot_status );
+			return TemplatedProcessFilter::CanProcessThisSlot<STATUS_BETTER, true, SlotStatus::INVALID> ( player_slot_status );
 		}
 	};
 

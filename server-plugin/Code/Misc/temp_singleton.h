@@ -46,8 +46,8 @@ public:
 	static void CreateInstance()
 	{
 		Assert(hClass::instance == nullptr);
-		void* ptr = HeapMemoryManager::AllocateMemory ( sizeof ( C ), static_cast< HeapMemoryManager::OverrideNew* >( hClass:instance )->m_hmm_capacity, 16 );
-		hClass::instance = new(ptr) X();
+		void* ptr = HeapMemoryManager::AllocateMemory ( sizeof ( C ), static_cast< HeapMemoryManager::OverrideNew<16>* >( hClass::instance )->m_hmm_capacity, 16 );
+		hClass::instance = new(ptr) C();
 	}
 
 	static void Required()
@@ -62,8 +62,8 @@ public:
 	{
 		if( hClass::instance )
 		{
-			hClass::instance->~X ();
-			HeapMemoryManager::FreeMemory ( hClass::instance, static_cast< HeapMemoryManager::OverrideNew* >( hClass:instance )->m_hmm_capacity );
+			hClass::instance->~C ();
+			HeapMemoryManager::FreeMemory ( hClass::instance, static_cast< HeapMemoryManager::OverrideNew<16>* >( hClass::instance )->m_hmm_capacity );
 			hClass::instance = nullptr;
 		}
 	}
