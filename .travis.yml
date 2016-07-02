@@ -15,7 +15,7 @@ before_install:
   - sudo rm /etc/apt/sources.list.d/google-chrome.list
   - sudo dpkg --add-architecture i386
   - sudo apt-get -qq update
-  - sudo apt-get install -y build-essential libgd2-xpm lib32z1 lib32ncurses5 lib32bz2-1.0 gcc-multilib g++-multilib lib32gcc1 libc6-i386 libc6-dev-i386 autotools-dev autoconf libtool
+  - sudo apt-get install -y build-essential lib32z1 lib32ncurses5 lib32bz2-1.0 gcc-multilib g++-multilib lib32gcc1 libc6-i386 libc6-dev-i386 autotools-dev autoconf libtool
 
 before_script:
   - cd server-plugin
