@@ -22,5 +22,5 @@ else
 	./autogen.sh
 	./configure --build=i686-pc-linux-gnu --prefix=/usr CFLAGS="-m32 -DNDEBUG" CXXFLAGS="-m32 -DNDEBUG" LDFLAGS=-m32
 	echo "Building protobuf 2.5.0"
-	make
+	make -j6
 fi
