@@ -130,7 +130,7 @@ error:
 compile_object = \
 	@mkdir -p $(2); \
 	echo "$(1) => $(3)"; \
-	$(d_CXX) $(INCLUDE) $(CFLAGS) -o $(3) -c $(1) 2> >(tee "error_compile.txt" >&2);
+	$(d_CXX) $(INCLUDE) $(CFLAGS) -o $(3) -c $(1) 2>&1 | tee "error_compile.txt"
 
 $(BIN_DIR)/%.o: %.cpp %.h
 	$(call compile_object, $<, $(@D), $@)
@@ -139,7 +139,7 @@ $(BIN_DIR)/%.o: %.cpp
 	$(call compile_object, $<, $(@D), $@)
 
 all: $(OBJECTS)
-	@$(d_CXX) $(INCLUDE) $(CFLAGS) $(OBJECTS) $(LINK) -m32 -o $(BINARY_DIR)/$(BINARY_NAME)  2> >(tee "error_link.txt" >&2)
+	@$(d_CXX) $(INCLUDE) $(CFLAGS) $(OBJECTS) $(LINK) -m32 -o $(BINARY_DIR)/$(BINARY_NAME)  2>&1 | tee "error_link.txt"
 
 release:
 	@$(MAKE) prepare-build DEBUG=false
