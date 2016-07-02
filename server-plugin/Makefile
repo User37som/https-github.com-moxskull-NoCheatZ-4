@@ -27,7 +27,11 @@ OTHER_PREPROCESSORS = -DNCZ_CSS $(SDK_DEF)
 # Compiler.                                               #
 # You can specify an absolute path to a specific version. #
 ###########################################################
-CXX = g++ -m32 -std=c++11
+ifdef CXX
+d_CXX = $(CXX) -m32 -std=c++11
+else
+d_CXX = g++ -m32 -std=c++11
+endif
 
 ARCH_CFLAGS =   -mtune=i486 -march=x86-64 -mmmx
 USER_CFLAGS =   -DTIXML_USE_TICPP -Dstricmp=strcasecmp -D_stricmp=strcasecmp -Dstrnicmp=strncasecmp
@@ -104,8 +108,8 @@ endif
 
 CFLAGS += $(USER_CFLAGS) $(BASE_CFLAGS) $(ARCH_CFLAGS) -DNCZ_VERSION_GIT=$(VERSION_GIT) -DNCZ_VERSION_GIT_SHORT=$(VERSION_GIT_SHORT)
 
-CPP_MAJOR := $(shell $(CXX) -dumpversion >&1 | cut -b1)
-CPP_MINOR := $(shell $(CXX) -dumpversion >&1 | cut -b3)
+CPP_MAJOR := $(shell $(d_CXX) -dumpversion >&1 | cut -b1)
+CPP_MINOR := $(shell $(d_CXX) -dumpversion >&1 | cut -b3)
 ifeq "$(shell expr $(CPP_MAJOR) \>= 4)" "1"
 	CFLAGS += -fvisibility=hidden -fvisibility-inlines-hidden
 endif
@@ -126,7 +130,7 @@ error:
 compile_object = \
 	@mkdir -p $(2); \
 	echo "$(1) => $(3)"; \
-	$(CXX) $(INCLUDE) $(CFLAGS) -o $(3) -c $(1) 2> "error_compile.txt";
+	$(d_CXX) $(INCLUDE) $(CFLAGS) -o $(3) -c $(1) 2> "error_compile.txt";
 
 $(BIN_DIR)/%.o: %.cpp %.h
 	$(call compile_object, $<, $(@D), $@)
@@ -135,7 +139,7 @@ $(BIN_DIR)/%.o: %.cpp
 	$(call compile_object, $<, $(@D), $@)
 
 all: $(OBJECTS)
-	@$(CXX) $(INCLUDE) $(CFLAGS) $(OBJECTS) $(LINK) -m32 -o $(BINARY_DIR)/$(BINARY_NAME)  2> "error_link.txt";
+	@$(d_CXX) $(INCLUDE) $(CFLAGS) $(OBJECTS) $(LINK) -m32 -o $(BINARY_DIR)/$(BINARY_NAME)  2> "error_link.txt";
 
 release:
 	@$(MAKE) prepare-build DEBUG=false

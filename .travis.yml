@@ -1,5 +1,8 @@
 language: cpp
 
+compiler: 
+  - g++
+
 os: linux
 sudo: required
 dist: trusty
@@ -9,14 +12,15 @@ branches:
     - master
 
 before_install:
+  - sudo rm /etc/apt/sources.list.d/google-chrome.list
   - sudo dpkg --add-architecture i386
   - sudo apt-get -qq update
-  - sudo apt-get install -y build-essential gcc-multilib g++-multilib ia32-libs lib32gcc1 libc6-i386 libc6-dev-i386 autotools-dev autoconf libtool
+  - sudo apt-get install -y build-essential libgd2-xpm ia32-libs ia32-libs-multiarch gcc-multilib g++-multilib lib32gcc1 libc6-i386 libc6-dev-i386 autotools-dev autoconf libtool
 
 before_script:
   - cd server-plugin
 
 script:
-  - make clean
   - make debug
   - make release
+  - make superclean
