@@ -91,8 +91,6 @@ namespace HeapMemoryManager
 			it->m_capacity = capacity;
 
 			std::qsort ( m_free_memory, HMM_MAX_FREE_OBJECTS, sizeof ( FreeMemoryHolder ), SortMemPool_wrap );
-
-			Assert ( it->m_ptr == nullptr );
 		}
 	}
 
