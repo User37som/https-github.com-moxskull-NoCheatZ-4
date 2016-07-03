@@ -59,7 +59,7 @@ private:
 
 		if( m_alloc )
 		{
-			if( copy ) memcpy ( n, m_alloc, m_size * sizeof ( pod ) );
+			if( copy ) memcpy ( n, m_alloc, (m_size + 1) * sizeof ( pod ) );
 			Dealloc ();
 		}
 		else
@@ -145,7 +145,7 @@ public:
 			size_t const len ( autonlen ( d, count ) + 1 );
 			Grow ( len, false );
 			memcpy ( m_alloc, d, len * sizeof ( pod ) );
-			m_alloc[ len ] = 0;
+			m_alloc[ len - 2 ] = 0;
 			m_size = autolen ( m_alloc );
 		}
 	}
