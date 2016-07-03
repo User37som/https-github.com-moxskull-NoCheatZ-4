@@ -49,6 +49,7 @@ private:
 	/*  -need- always contains the zero char. */
 	void Grow ( size_t need, bool copy = true )
 	{
+        need *= sizeof(pod);
 		if( need <= m_capacity )
 			return;
 
@@ -251,7 +252,7 @@ public:
 		size_t const len ( autolen ( t ) + 1 );
 		Grow ( m_size + len );
 		memcpy ( m_alloc + m_size, t, sizeof ( pod ) * len );
-		m_size = strlen ( m_alloc );
+		m_size = autolen ( m_alloc );
 		return *this;
 	}
 
@@ -499,27 +500,41 @@ public:
 
 	pod& operator[] ( size_t const index ) const
 	{
+        Assert(index <= m_capacity / sizeof(pod));
+        Assert(index <= m_size);
 		return m_alloc[ index ];
 	}
 
 	static void ConvertToWideChar ( String<char> const & in, String<wchar_t> & out )
 	{
+		if( in.m_size == 0 ) return;
 		std::setlocale ( LC_ALL, "en_US.utf8" );
-		out.Grow ( in.m_size, false );
-		size_t const cpsize ( std::mbstowcs ( out.m_alloc, in.m_alloc, out.m_capacity - 1) );
+		size_t const cpsize ( std::mbstowcs ( nullptr, in.m_alloc, 0) );
 		Assert ( cpsize < std::numeric_limits<size_t>::max () );
+		Assert ( cpsize > 0);
+
+		out.Grow ( cpsize + 1, false );
+
+		std::mbstowcs ( out.m_alloc, in.m_alloc, cpsize + 1);
+
 		out.m_size = cpsize;
-		out.m_alloc[ out.m_size ] = 0;
+		out[ out.m_size ] = 0;
 	}
 
 	static void ConvertToChar ( String<wchar_t> const & in, String<char> & out )
 	{
+		if( in.m_size == 0 ) return;
 		std::setlocale ( LC_ALL, "en_US.utf8" );
-		out.Grow ( in.m_size, false );
-		size_t const cpsize ( std::wcstombs( out.m_alloc, in.m_alloc, out.m_capacity - 1 ) );
+		size_t const cpsize ( std::wcstombs ( nullptr, in.m_alloc, 0) );
 		Assert ( cpsize < std::numeric_limits<size_t>::max () );
+		Assert ( cpsize > 0);
+
+		out.Grow ( cpsize + 1, false );
+
+		std::wcstombs ( out.m_alloc, in.m_alloc, cpsize + 1);
+
 		out.m_size = cpsize;
-		out.m_alloc[ out.m_size ] = 0;
+		out[ out.m_size ] = 0;
 	}
 };
 

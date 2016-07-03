@@ -4,3 +4,5 @@ Profiler/
 *.so
 error_compile.txt
 error_link.txt
+nocheatz.cbp
+nocheatz.layout

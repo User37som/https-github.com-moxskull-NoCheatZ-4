@@ -48,7 +48,7 @@ namespace HeapMemoryManager
 		{
 			if( it->m_ptr == nullptr ) // If this pointer is not valid, then we quit and call standard alloc, because array is sorted.
 			{
-				break;				
+				break;
 			}
 			else
 			{
@@ -63,6 +63,8 @@ namespace HeapMemoryManager
 
 						std::qsort ( m_free_memory, HMM_MAX_FREE_OBJECTS, sizeof( FreeMemoryHolder ), SortMemPool_wrap );
 
+                        //printf("reuse %p (%u, %u)\n", ret, new_capacity, align_of);
+
 						return ret;
 					}
 				}
@@ -73,7 +75,9 @@ namespace HeapMemoryManager
 		new_capacity = align_of;
 		while( new_capacity < bytes /*|| ( new_capacity % align_of != 0) */) new_capacity <<= 1;
 
-		return _mm_malloc ( new_capacity, align_of );
+        void * nptr(_mm_malloc ( new_capacity, align_of ));
+        //printf("alloc %p (%u, %u)\n", nptr, new_capacity, align_of);
+		return nptr;
 	}
 
 	void FreeMemory ( void * ptr, size_t capacity )
@@ -83,12 +87,15 @@ namespace HeapMemoryManager
 		FreeMemoryHolder* it ( m_free_memory + HMM_MAX_FREE_OBJECTS - 1 );
 		if( it->m_ptr != nullptr || capacity > HMM_MAX_SINGLE_OBJECT_SIZE ) // Pool is full or memory too big
 		{
+            //printf("free %p (%u)\n", ptr, capacity);
 			_mm_free ( ptr );
 		}
 		else
 		{
 			it->m_ptr = ptr;
 			it->m_capacity = capacity;
+
+			//printf("stored %p (%u)\n", ptr, capacity);
 
 			std::qsort ( m_free_memory, HMM_MAX_FREE_OBJECTS, sizeof ( FreeMemoryHolder ), SortMemPool_wrap );
 
@@ -118,6 +125,7 @@ namespace HeapMemoryManager
 		{
 			if( it->m_ptr != nullptr )
 			{
+                //printf("free %p (%u)\n", it->m_ptr, it->m_capacity);
 				_mm_free ( it->m_ptr );
 				it->m_ptr = nullptr;
 				it->m_capacity = std::numeric_limits<size_t>::max ();
