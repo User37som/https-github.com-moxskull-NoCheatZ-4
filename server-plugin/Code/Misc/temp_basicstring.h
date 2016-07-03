@@ -506,18 +506,20 @@ public:
 	{
 		std::setlocale ( LC_ALL, "en_US.utf8" );
 		out.Grow ( in.m_size, false );
-		size_t const cpsize ( std::mbstowcs ( out.m_alloc, in.m_alloc, out.m_capacity ) );
+		size_t const cpsize ( std::mbstowcs ( out.m_alloc, in.m_alloc, out.m_capacity - 1) );
 		Assert ( cpsize < std::numeric_limits<size_t>::max () );
 		out.m_size = cpsize;
+		out.m_alloc[ out.m_size ] = 0;
 	}
 
 	static void ConvertToChar ( String<wchar_t> const & in, String<char> & out )
 	{
 		std::setlocale ( LC_ALL, "en_US.utf8" );
 		out.Grow ( in.m_size, false );
-		size_t const cpsize ( std::wcstombs( out.m_alloc, in.m_alloc, out.m_capacity ) );
+		size_t const cpsize ( std::wcstombs( out.m_alloc, in.m_alloc, out.m_capacity - 1 ) );
 		Assert ( cpsize < std::numeric_limits<size_t>::max () );
 		out.m_size = cpsize;
+		out.m_alloc[ out.m_size ] = 0;
 	}
 };
 
