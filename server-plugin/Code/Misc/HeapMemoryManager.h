@@ -21,6 +21,7 @@ limitations under the License.
 #include <new>
 
 #include "ClassSpecifications.h"
+#include "Containers/utlvector.h"
 
 /*
 	The purpose of this file is to simply reduce the amount of re-allocations of any type
@@ -43,11 +44,10 @@ namespace HeapMemoryManager
 		}
 	};
 
-	typedef std::array<FreeMemoryHolder, HMM_MAX_FREE_OBJECTS> FreeMemoryList_t;
-
 	void* AllocateMemory ( size_t bytes, size_t & new_capacity, size_t align_of = 4U );
 	void FreeMemory ( void * ptr, size_t capacity);
 
+	void InitPool ();
 	void FreePool ();
 
 	template <size_t align>

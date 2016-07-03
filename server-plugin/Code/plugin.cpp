@@ -45,6 +45,7 @@
 
 static void* __CreatePlugin_interface ()
 {
+	HeapMemoryManager::InitPool ();
 	CNoCheatZPlugin::CreateInstance ();
 	printf ( "CNoCheatZPlugin interface created with CSGO callbacks ...\n" );
 	return CNoCheatZPlugin::GetInstance ();

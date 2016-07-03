@@ -24,28 +24,27 @@ limitations under the License.
 
 namespace HeapMemoryManager
 {
-	FreeMemoryList_t m_free_memory;
+	FreeMemoryHolder m_free_memory[ HMM_MAX_FREE_OBJECTS ];
+	bool m_memory_init ( false );
 
-	bool SortMemPool ( FreeMemoryHolder const & a, FreeMemoryHolder const & b )
+	inline int SortMemPool ( FreeMemoryHolder const * a, FreeMemoryHolder const * b )
 	{
-		if( a.m_capacity == 0 )
-		{
-			return false;
-		}
-		else if( b.m_capacity == 0 )
-		{
-			return true;
-		}
-		else
-		{
-			return a.m_capacity < b.m_capacity;
-		}
+		if( a->m_capacity > b->m_capacity ) return 1;
+		else if( a->m_capacity < b->m_capacity ) return -1;
+		else return 0;
+	}
+
+	int SortMemPool_wrap ( void const * a, void const * b )
+	{
+		return SortMemPool ( static_cast< FreeMemoryHolder const * >( a ), static_cast< FreeMemoryHolder const * >( b ) );
 	}
 
 	void* AllocateMemory ( size_t bytes, size_t & new_capacity, size_t align_of /* = 4U */ )
 	{
-		FreeMemoryList_t::const_iterator aend ( m_free_memory.cend () );
-		for( FreeMemoryList_t::iterator it ( m_free_memory.begin ()); it != aend; ++it )
+		if( !m_memory_init ) InitPool ();
+		FreeMemoryHolder* it ( m_free_memory );
+		FreeMemoryHolder * const it_end ( &( m_free_memory[ HMM_MAX_FREE_OBJECTS ] ) );
+		do
 		{
 			if( it->m_ptr == nullptr ) // If this pointer is not valid, then we quit and call standard alloc, because array is sorted.
 			{
@@ -59,16 +58,17 @@ namespace HeapMemoryManager
 					{
 						new_capacity = it->m_capacity;
 						void * ret ( it->m_ptr );
-						it->m_capacity = 0;
+						it->m_capacity = std::numeric_limits<size_t>::max();
 						it->m_ptr = nullptr;
 
-						std::sort ( m_free_memory.begin (), m_free_memory.end (), SortMemPool );
+						std::qsort ( m_free_memory, HMM_MAX_FREE_OBJECTS, sizeof( FreeMemoryHolder ), SortMemPool_wrap );
 
 						return ret;
 					}
 				}
 			}
 		}
+		while( ++it != it_end );
 
 		new_capacity = align_of;
 		while( new_capacity < bytes /*|| ( new_capacity % align_of != 0) */) new_capacity <<= 1;
@@ -78,8 +78,9 @@ namespace HeapMemoryManager
 
 	void FreeMemory ( void * ptr, size_t capacity )
 	{
-		Assert ( capacity && "Stop using memset everywhere ..." );
-		FreeMemoryList_t::reverse_iterator it ( m_free_memory.rbegin () );
+		if( !m_memory_init ) InitPool ();
+		Assert ( capacity && (capacity & 0xFF) != 0xCC && "Stop using memset everywhere ..." );
+		FreeMemoryHolder* it ( m_free_memory + HMM_MAX_FREE_OBJECTS - 1 );
 		if( it->m_ptr != nullptr || capacity > HMM_MAX_SINGLE_OBJECT_SIZE ) // Pool is full or memory too big
 		{
 			_mm_free ( ptr );
@@ -89,24 +90,43 @@ namespace HeapMemoryManager
 			it->m_ptr = ptr;
 			it->m_capacity = capacity;
 
-			std::sort ( m_free_memory.begin (), m_free_memory.end (), SortMemPool );
+			std::qsort ( m_free_memory, HMM_MAX_FREE_OBJECTS, sizeof ( FreeMemoryHolder ), SortMemPool_wrap );
+
+			Assert ( it->m_ptr == nullptr );
 		}
+	}
+
+	void InitPool ()
+	{
+		FreeMemoryHolder * it ( m_free_memory );
+		FreeMemoryHolder const * const it_end ( &( m_free_memory[ HMM_MAX_FREE_OBJECTS ] ) );
+		do
+		{
+			it->m_ptr = nullptr;
+			it->m_capacity = std::numeric_limits<size_t>::max ();
+		}
+		while( ++it != it_end );
+		m_memory_init = true;
 	}
 
 	void FreePool ()
 	{
-		for( FreeMemoryList_t::iterator it ( m_free_memory.begin () ); it != m_free_memory.cend (); ++it )
+		if( !m_memory_init ) return;
+		FreeMemoryHolder * it ( m_free_memory );
+		FreeMemoryHolder const * const it_end ( &( m_free_memory[ HMM_MAX_FREE_OBJECTS ] ) );
+		do
 		{
 			if( it->m_ptr != nullptr )
 			{
 				_mm_free ( it->m_ptr );
 				it->m_ptr = nullptr;
-				it->m_capacity = 0;
+				it->m_capacity = std::numeric_limits<size_t>::max ();
 			}
 			else
 			{
 				return;
 			}
 		}
+		while( ++it != it_end );
 	}
 }
