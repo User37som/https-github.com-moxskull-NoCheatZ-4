@@ -440,7 +440,8 @@ public:
 		if( start == 0 ) return npos;
 		if( *c == 0 ) return npos;
 
-		pod const * me ( m_alloc + a - 1 );
+		--a;
+		pod const * me ( m_alloc + a );
 		pod const * temp_c ( c );
 		do
 		{
@@ -464,7 +465,8 @@ public:
 		if( a == 0 ) return npos;
 		if( start == 0 ) return npos;
 
-		pod const * me ( m_alloc + a - 1 );
+		--a;
+		pod const * me ( m_alloc + a );
 		do
 		{
 			if( *me == c ) return a;
