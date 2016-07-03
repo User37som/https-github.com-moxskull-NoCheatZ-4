@@ -107,7 +107,6 @@ public:
 class EyeAnglesTester :
 	public BaseSystem,
 	public SourceSdk::IGameEventListener002,
-	public HeapMemoryManager::OverrideNew<16>,
 	public PlayerDataStructHandler<EyeAngleInfoT>,
 	public PlayerRunCommandHookListener,
 	public Singleton<EyeAnglesTester>

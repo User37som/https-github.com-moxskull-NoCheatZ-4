@@ -68,7 +68,6 @@ typedef struct ShotStats
 
 class ShotTester :
 	public BaseSystem,
-	public HeapMemoryManager::OverrideNew<16>,
 	public PlayerDataStructHandler<ShotStatsT>,
 	public PlayerRunCommandHookListener,
 	public Singleton<ShotTester>

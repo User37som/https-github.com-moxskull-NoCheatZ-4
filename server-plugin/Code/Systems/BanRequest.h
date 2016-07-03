@@ -87,7 +87,6 @@ typedef struct PlayerBanRequest
 typedef basic_slist<PlayerBanRequestT> BanRequestListT;
 
 class BanRequest :
-	public HeapMemoryManager::OverrideNew<16>,
 	public Singleton<BanRequest>,
 	public TimerListener
 {

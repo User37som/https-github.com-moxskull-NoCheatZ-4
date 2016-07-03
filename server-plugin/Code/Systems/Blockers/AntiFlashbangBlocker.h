@@ -38,7 +38,6 @@ typedef struct FlashInfoS
 class AntiFlashbangBlocker :
 	private BaseSystem,
 	private SourceSdk::IGameEventListener002,
-	public HeapMemoryManager::OverrideNew<16>,
 	public PlayerDataStructHandler<FlashInfoT>,
 	private SetTransmitHookListener,
 	public Singleton<AntiFlashbangBlocker>

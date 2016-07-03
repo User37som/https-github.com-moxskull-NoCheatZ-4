@@ -58,7 +58,6 @@ struct ConnectInfo
 
 class SpamConnectTester :
 	private BaseSystem,
-	public HeapMemoryManager::OverrideNew<16>,
 	public Singleton<SpamConnectTester>
 {
 	typedef Singleton<SpamConnectTester> singleton_class;

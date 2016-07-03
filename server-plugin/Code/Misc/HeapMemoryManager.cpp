@@ -25,7 +25,6 @@ limitations under the License.
 namespace HeapMemoryManager
 {
 	FreeMemoryList_t m_free_memory;
-	size_t m_memlist_elem_count(0);
 
 	bool SortMemPool ( FreeMemoryHolder const & a, FreeMemoryHolder const & b )
 	{
@@ -63,13 +62,8 @@ namespace HeapMemoryManager
 						it->m_capacity = 0;
 						it->m_ptr = nullptr;
 
-						--m_memlist_elem_count;
+						std::sort ( m_free_memory.begin (), m_free_memory.end (), SortMemPool );
 
-						FreeMemoryList_t::iterator t ( it + 1 );
-						if( t != aend )
-						{
-							std::rotate ( it, t, m_free_memory.begin () + m_memlist_elem_count );
-						}
 						return ret;
 					}
 				}
@@ -96,8 +90,6 @@ namespace HeapMemoryManager
 			it->m_capacity = capacity;
 
 			std::sort ( m_free_memory.begin (), m_free_memory.end (), SortMemPool );
-
-			++m_memlist_elem_count;
 		}
 	}
 
@@ -110,7 +102,6 @@ namespace HeapMemoryManager
 				_mm_free ( it->m_ptr );
 				it->m_ptr = nullptr;
 				it->m_capacity = 0;
-				--m_memlist_elem_count;
 			}
 			else
 			{

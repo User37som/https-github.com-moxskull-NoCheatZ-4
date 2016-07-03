@@ -80,7 +80,6 @@ SourceSdk::datamap_t* GetDataDescMap ( SourceSdk::edict_t* const pEntity );
 #undef GetProp
 
 class EntityProps :
-	public HeapMemoryManager::OverrideNew<16>,
 	public Singleton<EntityProps>
 {
 private:

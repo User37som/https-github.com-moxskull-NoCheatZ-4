@@ -325,7 +325,6 @@ class CCSPlayer;
 /* Distribue et met à jour l'état des slots du serveur */
 class NczPlayerManager :
 	public SourceSdk::IGameEventListener002,
-	public HeapMemoryManager::OverrideNew<16>,
 	public Singleton<NczPlayerManager>
 {
 	typedef  Singleton<NczPlayerManager> singleton_class;

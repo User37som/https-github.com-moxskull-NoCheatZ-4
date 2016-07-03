@@ -31,7 +31,6 @@ limitations under the License.
 class AutoTVRecord :
 	private BaseSystem,
 	private ConCommandHookListener,
-	public HeapMemoryManager::OverrideNew<16>,
 	public Singleton<AutoTVRecord>
 {
 	typedef Singleton<AutoTVRecord> singleton_class;

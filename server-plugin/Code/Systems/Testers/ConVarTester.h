@@ -104,7 +104,6 @@ public:
 class ConVarTester :
 	public BaseSystem,
 	public OnTickListener,
-	public HeapMemoryManager::OverrideNew<16>,
 	public PlayerDataStructHandler<CurrentConVarRequestT>,
 	public Singleton<ConVarTester>
 {

@@ -122,7 +122,6 @@ public:
 class WallhackBlocker :
 	private BaseSystem,
 	private OnTickListener,
-	public HeapMemoryManager::OverrideNew<16>,
 	public PlayerDataStructHandler<ClientDataS>,
 	private SetTransmitHookListener,
 	public Singleton<WallhackBlocker>,

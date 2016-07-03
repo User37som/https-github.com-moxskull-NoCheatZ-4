@@ -32,9 +32,10 @@ class Singleton :
 
 private:
 	static C* instance;
+	static size_t memory_used;
 
 protected:
-	Singleton() : NoCopy()
+	Singleton()
 	{
 	}
 
@@ -46,7 +47,7 @@ public:
 	static void CreateInstance()
 	{
 		Assert(hClass::instance == nullptr);
-		void* ptr = HeapMemoryManager::AllocateMemory ( sizeof ( C ), static_cast< HeapMemoryManager::OverrideNew<16>* >( hClass::instance )->m_hmm_capacity, 16 );
+		void* ptr = HeapMemoryManager::AllocateMemory ( sizeof ( C ), hClass::memory_used, 16 );
 		hClass::instance = new(ptr) C();
 	}
 
@@ -63,14 +64,17 @@ public:
 		if( hClass::instance )
 		{
 			hClass::instance->~C ();
-			HeapMemoryManager::FreeMemory ( hClass::instance, static_cast< HeapMemoryManager::OverrideNew<16>* >( hClass::instance )->m_hmm_capacity );
+			HeapMemoryManager::FreeMemory ( hClass::instance, hClass::memory_used );
 			hClass::instance = nullptr;
 		}
 	}
 };
 
 template <class C>
-C* Singleton<C>::instance = nullptr;
+C* Singleton<C>::instance(nullptr);
+
+template <class C>
+size_t Singleton<C>::memory_used(0);
 
 template <class C>
 inline C * const Singleton<C>::GetInstance()

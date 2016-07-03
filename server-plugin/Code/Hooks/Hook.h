@@ -91,7 +91,6 @@ struct HookInfo
 typedef CUtlVector<HookInfo> hooked_list_t;
 
 class HookGuard :
-	public HeapMemoryManager::OverrideNew<16>,
 	public Singleton<HookGuard>
 {
 private:

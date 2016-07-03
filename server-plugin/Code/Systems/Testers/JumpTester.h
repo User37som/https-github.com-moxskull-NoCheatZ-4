@@ -118,7 +118,6 @@ public:
 class JumpTester :
 	public BaseSystem,
 	public OnGroundHookListener,
-	public HeapMemoryManager::OverrideNew<16>,
 	public PlayerDataStructHandler<JumpInfoT>,
 	public PlayerRunCommandHookListener,
 	public Singleton<JumpTester>

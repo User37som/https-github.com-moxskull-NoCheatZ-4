@@ -44,7 +44,6 @@ class SpamChangeNameTester :
 	public BaseSystem,
 	public SourceSdk::IGameEventListener002,
 	public OnTickListener,
-	public HeapMemoryManager::OverrideNew<16>,
 	public PlayerDataStructHandler<ChangeNameInfo>,
 	public Singleton<SpamChangeNameTester>
 {

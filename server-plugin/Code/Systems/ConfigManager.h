@@ -7,7 +7,6 @@
 #include "Misc/temp_singleton.h"
 
 class ConfigManager :
-	public HeapMemoryManager::OverrideNew<16>,
 	public Singleton<ConfigManager>
 {
 	typedef Singleton<ConfigManager> singleton_class;
