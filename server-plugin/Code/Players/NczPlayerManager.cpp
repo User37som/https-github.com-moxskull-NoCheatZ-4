@@ -157,7 +157,8 @@ void NczPlayerManager::ClientActive ( SourceSdk::edict_t* pEntity )
 		ph.playerClass = new NczPlayer ( index );
 		ph.playerClass->m_playerinfo = ( SourceSdk::IPlayerInfo * )SourceSdk::InterfacesProxy::Call_GetPlayerInfo ( ph.playerClass->m_edict );
 		Assert ( ph.playerClass->m_playerinfo );
-		if(ph.playerClass->m_playerinfo->IsHLTV() )
+#undef GetClassName
+		if( strcmp(pEntity->GetClassName(), "player") == 0 )
 			ph.status = SlotStatus::TV;
 		else
 			ph.status = SlotStatus::BOT;
