@@ -27,10 +27,15 @@
 SetTransmitHookListener::TransmitListenersListT SetTransmitHookListener::m_listeners;
 
 SetTransmitHookListener::SetTransmitHookListener ()
-{}
+{
+	HookGuard<SetTransmitHookListener>::Required ();
+}
 
 SetTransmitHookListener::~SetTransmitHookListener ()
-{}
+{
+	HookGuard<SetTransmitHookListener>::GetInstance ()->UnhookAll ();
+	HookGuard<SetTransmitHookListener>::DestroyInstance ();
+}
 
 void SetTransmitHookListener::HookSetTransmit ( SourceSdk::edict_t const * const ent )
 {
@@ -38,7 +43,7 @@ void SetTransmitHookListener::HookSetTransmit ( SourceSdk::edict_t const * const
 	void* unk ( ent->m_pUnk );
 
 	HookInfo info ( unk, ConfigManager::GetInstance ()->vfid_settransmit, ( DWORD ) RT_nSetTransmit );
-	HookGuard::GetInstance ()->VirtualTableHook ( info );
+	HookGuard<SetTransmitHookListener>::GetInstance ()->VirtualTableHook ( info );
 }
 
 #ifdef GNUC
@@ -92,7 +97,7 @@ void HOOKFN_INT SetTransmitHookListener::RT_nSetTransmit ( void * const This, vo
 	}
 
 	SetTransmit_t gpOldFn;
-	*( uint32_t* )&( gpOldFn ) = HookGuard::GetInstance ()->RT_GetOldFunction ( This, ConfigManager::GetInstance ()->vfid_settransmit );
+	*( uint32_t* )&( gpOldFn ) = HookGuard<SetTransmitHookListener>::GetInstance ()->RT_GetOldFunction ( This, ConfigManager::GetInstance ()->vfid_settransmit );
 	gpOldFn ( This, pInfo, bAlways );
 }
 

@@ -23,12 +23,13 @@ SourceSdk::bf_write* UserMessageHookListener::m_buffer ( nullptr );
 
 UserMessageHookListener::UserMessageHookListener ()
 {
-
+	HookGuard<UserMessageHookListener>::Required ();
 }
 
 UserMessageHookListener::~UserMessageHookListener ()
 {
-
+	HookGuard<UserMessageHookListener>::GetInstance ()->UnhookAll ();
+	HookGuard<UserMessageHookListener>::DestroyInstance ();
 }
 
 void UserMessageHookListener::HookUserMessage ()
@@ -41,9 +42,9 @@ void UserMessageHookListener::HookUserMessage ()
 	else
 	{
 		HookInfo usermessagebegin_info ( SourceSdk::InterfacesProxy::m_engineserver, 43, ( DWORD ) RT_nUserMessageBegin );
-		HookGuard::GetInstance ()->VirtualTableHook ( usermessagebegin_info );
+		HookGuard<UserMessageHookListener>::GetInstance ()->VirtualTableHook ( usermessagebegin_info );
 		HookInfo messageend_info ( SourceSdk::InterfacesProxy::m_engineserver, 44, ( DWORD ) RT_nMessageEnd );
-		HookGuard::GetInstance ()->VirtualTableHook ( messageend_info );
+		HookGuard<UserMessageHookListener>::GetInstance ()->VirtualTableHook ( messageend_info );
 	}
 
 

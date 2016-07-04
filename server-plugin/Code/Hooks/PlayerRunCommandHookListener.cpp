@@ -37,10 +37,14 @@ PlayerRunCommandHookListener::PlayerRunCommandHookListener ()
 {
 	//for(int x = 1; x < MAX_PLAYERS; ++x) m_lastCUserCmd[x] = SourceSdk::CUserCmd();
 	std::srand ( ( unsigned int ) ( std::time ( 0 ) ) );
+	HookGuard<PlayerRunCommandHookListener>::Required ();
 }
 
 PlayerRunCommandHookListener::~PlayerRunCommandHookListener ()
-{}
+{
+	HookGuard<PlayerRunCommandHookListener>::GetInstance ()->UnhookAll ();
+	HookGuard<PlayerRunCommandHookListener>::DestroyInstance ();
+}
 
 void* PlayerRunCommandHookListener::RT_GetLastUserCmd ( PlayerHandler::const_iterator ph )
 {
@@ -58,7 +62,7 @@ void PlayerRunCommandHookListener::HookPlayerRunCommand ( PlayerHandler::const_i
 	SourceSdk::IServerUnknown* unk ( ph->GetEdict ()->m_pUnk );
 
 	HookInfo info ( unk, ConfigManager::GetInstance ()->vfid_playerruncommand, ( DWORD ) RT_nPlayerRunCommand );
-	HookGuard::GetInstance ()->VirtualTableHook ( info );
+	HookGuard<PlayerRunCommandHookListener>::GetInstance ()->VirtualTableHook ( info );
 }
 
 /*void PlayerRunCommandHookListener::UnhookPlayerRunCommand()
@@ -117,7 +121,7 @@ void HOOKFN_INT PlayerRunCommandHookListener::RT_nPlayerRunCommand ( void* This,
 		}
 
 		ST_W_STATIC PlayerRunCommand_t gpOldFn;
-		*( DWORD* )&( gpOldFn ) = HookGuard::GetInstance ()->RT_GetOldFunction ( This, ConfigManager::GetInstance ()->vfid_playerruncommand );
+		*( DWORD* )&( gpOldFn ) = HookGuard<PlayerRunCommandHookListener>::GetInstance ()->RT_GetOldFunction ( This, ConfigManager::GetInstance ()->vfid_playerruncommand );
 		gpOldFn ( This, pCmd, pMoveHelper );
 	}
 	else

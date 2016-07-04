@@ -26,10 +26,15 @@
 WeaponHookListener::WeaponHookListenersListT WeaponHookListener::m_listeners;
 
 WeaponHookListener::WeaponHookListener ()
-{}
+{
+	HookGuard<WeaponHookListener>::Required ();
+}
 
 WeaponHookListener::~WeaponHookListener ()
-{}
+{
+	HookGuard<WeaponHookListener>::GetInstance ()->UnhookAll ();
+	HookGuard<WeaponHookListener>::DestroyInstance ();
+}
 
 void WeaponHookListener::HookWeapon ( PlayerHandler::const_iterator ph )
 {
@@ -38,8 +43,8 @@ void WeaponHookListener::HookWeapon ( PlayerHandler::const_iterator ph )
 
 	HookInfo info_equip ( unk, ConfigManager::GetInstance ()->vfid_weaponequip, ( DWORD ) RT_nWeapon_Equip );
 	HookInfo info_drop ( unk, ConfigManager::GetInstance ()->vfid_weapondrop, ( DWORD ) RT_nWeapon_Drop );
-	HookGuard::GetInstance ()->VirtualTableHook ( info_equip );
-	HookGuard::GetInstance ()->VirtualTableHook ( info_drop );
+	HookGuard<WeaponHookListener>::GetInstance ()->VirtualTableHook ( info_equip );
+	HookGuard<WeaponHookListener>::GetInstance ()->VirtualTableHook ( info_drop );
 }
 
 #ifdef GNUC
@@ -66,7 +71,7 @@ void HOOKFN_INT WeaponHookListener::RT_nWeapon_Equip ( void * const basePlayer, 
 	}
 
 	WeaponEquip_t gpOldFn;
-	*( DWORD* )&( gpOldFn ) = HookGuard::GetInstance ()->RT_GetOldFunction ( basePlayer, ConfigManager::GetInstance ()->vfid_weaponequip );
+	*( DWORD* )&( gpOldFn ) = HookGuard<WeaponHookListener>::GetInstance ()->RT_GetOldFunction ( basePlayer, ConfigManager::GetInstance ()->vfid_weaponequip );
 	gpOldFn ( basePlayer, weapon );
 }
 
@@ -94,7 +99,7 @@ void HOOKFN_INT WeaponHookListener::RT_nWeapon_Drop ( void * const basePlayer, v
 	}
 
 	WeaponDrop_t gpOldFn;
-	*( DWORD* )&( gpOldFn ) = HookGuard::GetInstance ()->RT_GetOldFunction ( basePlayer, ConfigManager::GetInstance ()->vfid_weapondrop );
+	*( DWORD* )&( gpOldFn ) = HookGuard<WeaponHookListener>::GetInstance ()->RT_GetOldFunction ( basePlayer, ConfigManager::GetInstance ()->vfid_weapondrop );
 	gpOldFn ( basePlayer, weapon, targetVec, velocity );
 }
 

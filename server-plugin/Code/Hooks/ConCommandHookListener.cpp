@@ -24,15 +24,20 @@
 ConCommandHookListener::ConCommandListenersListT ConCommandHookListener::m_listeners;
 
 ConCommandHookListener::ConCommandHookListener ()
-{}
+{
+	HookGuard<ConCommandHookListener>::Required ();
+}
 
 ConCommandHookListener::~ConCommandHookListener ()
-{}
+{
+	HookGuard<ConCommandHookListener>::GetInstance()->UnhookAll ();
+	HookGuard<ConCommandHookListener>::DestroyInstance ();
+}
 
 void ConCommandHookListener::HookDispatch ( void* cmd )
 {
 	HookInfo info ( cmd, ConfigManager::GetInstance ()->vfid_dispatch, ( DWORD ) RT_nDispatch );
-	HookGuard::GetInstance ()->VirtualTableHook ( info );
+	HookGuard<ConCommandHookListener>::GetInstance ()->VirtualTableHook ( info );
 }
 
 #ifdef GNUC
@@ -91,7 +96,7 @@ void HOOKFN_INT ConCommandHookListener::RT_nDispatch ( void* cmd, void*, SourceS
 		//Assert(it != nullptr);
 
 		ST_W_STATIC Dispatch_t gpOldFn;
-		*( DWORD* )&( gpOldFn ) = HookGuard::GetInstance ()->RT_GetOldFunction ( cmd, ConfigManager::GetInstance ()->vfid_dispatch );
+		*( DWORD* )&( gpOldFn ) = HookGuard<ConCommandHookListener>::GetInstance ()->RT_GetOldFunction ( cmd, ConfigManager::GetInstance ()->vfid_dispatch );
 		gpOldFn ( cmd, args );
 	}
 	else

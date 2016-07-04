@@ -23,16 +23,19 @@ ThinkPostHookListener::ListenersList_t ThinkPostHookListener::m_listeners;
 
 ThinkPostHookListener::ThinkPostHookListener ()
 {
-
+	HookGuard<ThinkPostHookListener>::Required ();
 }
 
 ThinkPostHookListener::~ThinkPostHookListener ()
-{}
+{
+	HookGuard<ThinkPostHookListener>::GetInstance ()->UnhookAll ();
+	HookGuard<ThinkPostHookListener>::DestroyInstance ();
+}
 
 void ThinkPostHookListener::HookThinkPost ( SourceSdk::edict_t const * const entity )
 {
 	HookInfo info ( entity->m_pUnk, ConfigManager::GetInstance ()->vfid_thinkpost, ( DWORD ) RT_nThinkPost );
-	HookGuard::GetInstance ()->VirtualTableHook ( info, true );
+	HookGuard<ThinkPostHookListener>::GetInstance ()->VirtualTableHook ( info, true );
 }
 
 void ThinkPostHookListener::RegisterThinkPostHookListener ( ThinkPostHookListener const * const listener )
@@ -52,7 +55,7 @@ void HOOKFN_INT ThinkPostHookListener::RT_nThinkPost ( void * const baseentity, 
 #endif
 {
 	PostThink_t gpOldFn;
-	*( DWORD* ) &gpOldFn = HookGuard::GetInstance ()->RT_GetOldFunction ( baseentity, ConfigManager::GetInstance ()->vfid_thinkpost );
+	*( DWORD* ) &gpOldFn = HookGuard<ThinkPostHookListener>::GetInstance ()->RT_GetOldFunction ( baseentity, ConfigManager::GetInstance ()->vfid_thinkpost );
 	gpOldFn ( baseentity );
 
 	ListenersList_t::elem_t const * it ( m_listeners.GetFirst () );

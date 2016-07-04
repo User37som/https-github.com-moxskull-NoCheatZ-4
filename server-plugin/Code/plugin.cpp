@@ -77,7 +77,6 @@ void CNoCheatZPlugin::CreateSingletons ()
 	NczPlayerManager::CreateInstance ();
 	BanRequest::CreateInstance ();
 	EntityProps::CreateInstance ();
-	HookGuard::CreateInstance ();
 
 	AntiFlashbangBlocker::CreateInstance ();
 	AntiSmokeBlocker::CreateInstance ();
@@ -98,9 +97,6 @@ void CNoCheatZPlugin::CreateSingletons ()
 
 void CNoCheatZPlugin::DestroySingletons ()
 {
-	HookGuard::GetInstance ()->UnhookAll ();
-	HookGuard::DestroyInstance ();
-
 	RadarHackBlocker::DestroyInstance ();
 	AutoTVRecord::DestroyInstance ();
 	ValidationTester::DestroyInstance ();
@@ -295,10 +291,10 @@ void CNoCheatZPlugin::Unload ( void )
 //---------------------------------------------------------------------------------
 void CNoCheatZPlugin::Pause ( void )
 {
+	BaseSystem::UnloadAllSystems ();
 	BanRequest::GetInstance ()->WriteBansIfNeeded ();
 	Logger::GetInstance ()->Msg<MSG_CHAT> ( "Plugin pause" );
 	Logger::GetInstance ()->Flush ();
-	DestroySingletons ();
 }
 
 //---------------------------------------------------------------------------------
@@ -306,8 +302,6 @@ void CNoCheatZPlugin::Pause ( void )
 //---------------------------------------------------------------------------------
 void CNoCheatZPlugin::UnPause ( void )
 {
-	CreateSingletons ();
-
 	GlobalTimer::GetInstance ()->EnterSection ();
 
 	Logger::GetInstance ()->Msg<MSG_CONSOLE> ( "Unpausing ..." );
@@ -385,8 +379,6 @@ void CNoCheatZPlugin::ServerActivate ( SourceSdk::edict_t *pEdictList, int edict
 void CNoCheatZPlugin::RT_GameFrame ( bool simulating )
 {
 	//OnFrameListener::OnFrame();
-
-	//HookGuard::GetInstance()->GuardHooks();
 
 	if( simulating )
 	{

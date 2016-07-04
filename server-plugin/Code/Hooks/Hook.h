@@ -17,6 +17,8 @@
 #define HOOK_H
 
 #include <limits>
+#include <iostream>
+#include <algorithm>
 
 #ifdef WIN32
 #	include "Misc/include_windows_headers.h"
@@ -29,10 +31,13 @@
 #	define HOOKFN_INT __attribute__((cdecl))
 #endif
 
+#include "SdkPreprocessors.h"
 #include "Interfaces/iserverunknown.h"
 
 #include "Players/NczPlayerManager.h"
 #include "Misc/HeapMemoryManager.h"
+#include "Systems/Logger.h"
+#include "Misc/Helpers.h"
 
 /*
 	Used to replace a pointer in one virtual table.
@@ -90,11 +95,14 @@ struct HookInfo
 
 typedef CUtlVector<HookInfo> hooked_list_t;
 
+extern int HookCompare ( HookInfo const * a, HookInfo const * b );
+
+template <class CallerTicket>
 class HookGuard :
-	public Singleton<HookGuard>
+	public Singleton< HookGuard < CallerTicket > >
 {
 private:
-	typedef Singleton<HookGuard> singleton_class;
+	typedef Singleton< HookGuard < CallerTicket > > singleton_class;
 
 	hooked_list_t m_list;
 
@@ -104,20 +112,107 @@ public:
 	virtual ~HookGuard () final
 	{};
 
-	void VirtualTableHook ( HookInfo& info, bool force = false );
+	void VirtualTableHook ( HookInfo& info, bool force = false )
+	{
+		if( m_list.HasElement ( info ) && !force ) return;
+
+		//info.oldFn = 0;
+#ifdef WIN32
+		DWORD dwOld;
+		if( !VirtualProtect ( info.vf_entry, 2 * sizeof ( DWORD* ), PAGE_EXECUTE_READWRITE, &dwOld ) )
+		{
+			return;
+		}
+#else // LINUX
+		uint32_t psize ( sysconf ( _SC_PAGESIZE ) );
+		void *p ( ( void * ) ( ( DWORD ) ( info.vf_entry ) & ~( psize - 1 ) ) );
+		if( mprotect ( p, ( ( 2 * sizeof ( void * ) ) + ( ( DWORD ) ( info.vf_entry ) & ( psize - 1 ) ) ), PROT_READ | PROT_WRITE | PROT_EXEC ) < 0 )
+		{
+			return;
+		}
+#endif // WIN32
+
+		if( info.oldFn && info.oldFn != *info.vf_entry )
+			Logger::GetInstance ()->Msg<MSG_WARNING> ( "VirtualTableHook : Unexpected virtual table value in VirtualTableHook. Another plugin might be in conflict." );
+		if( info.newFn == *info.vf_entry )
+		{
+
+			if( !m_list.HasElement ( info ) )
+			{
+				Logger::GetInstance ()->Msg<MSG_WARNING> ( "VirtualTableHook : Virtual function pointer was the same but not registered as hooked ..." );
+				m_list.AddToTail ( info );
+				m_list.Sort ( HookCompare );
+			}
+			return;
+		}
+
+		info.oldFn = *info.vf_entry;
+		*info.vf_entry = info.newFn;
+
+#ifdef WIN32
+		VirtualProtect ( info.vf_entry, 2 * sizeof ( DWORD* ), dwOld, &dwOld );
+#else // LINUX
+		mprotect ( p, ( ( 2 * sizeof ( void * ) ) + ( ( DWORD ) ( info.vf_entry ) & ( psize - 1 ) ) ), PROT_READ | PROT_EXEC );
+#endif // WIN32
+		DebugMessage ( Helpers::format ( "VirtualTableHook : function 0x%X at 0x%X replaced by 0x%X.", info.oldFn, info.vf_entry, info.newFn ) );
+
+		if( !m_list.HasElement ( info ) )
+		{
+			m_list.AddToTail ( info );
+			m_list.Sort ( HookCompare );
+		}
+	}
 
 	// Find by virtual table entry address
-	DWORD RT_GetOldFunction ( void* class_ptr, int vfid ) const;
+	DWORD RT_GetOldFunction ( void* class_ptr, int vfid ) const
+	{
+		int it ( m_list.Find ( HookInfo ( class_ptr, vfid ) ) );
+		if( it != -1 )
+		{
+			return m_list[ it ].oldFn;
+		}
+		else
+		{
+			return 0;
+		}
+	}
 
 	// Only find by virtual table base (Remove need to call ConfigManager), class_ptr is converted to virtual table base
-	DWORD RT_GetOldFunctionByVirtualTable ( void* class_ptr ) const;
+	DWORD RT_GetOldFunctionByVirtualTable ( void* class_ptr ) const
+	{
+		DWORD* vt ( ( ( DWORD* )*( DWORD* ) class_ptr ) );
+		for( hooked_list_t::const_iterator it ( m_list.begin () ); it != m_list.end (); ++it )
+		{
+			if( it->pInterface == vt )
+			{
+				return it->oldFn;
+			}
+		}
+		return 0;
+	}
 
 	// Only find by virtual table base (Remove need to call ConfigManager), class_ptr is the original instance
-	DWORD RT_GetOldFunctionByInstance ( void* class_ptr ) const;
+	DWORD RT_GetOldFunctionByInstance ( void* class_ptr ) const
+	{
+		for( hooked_list_t::const_iterator it ( m_list.begin () ); it != m_list.end (); ++it )
+		{
+			if( it->origEnt == class_ptr )
+			{
+				return it->oldFn;
+			}
+		}
+		return 0;
+	}
 
-	void RT_GuardHooks ();
-
-	void UnhookAll ();
+	void UnhookAll ()
+	{
+		for( hooked_list_t::iterator it ( m_list.begin () ); it != m_list.end (); ++it )
+		{
+			std::swap ( it->newFn, it->oldFn );
+			VirtualTableHook ( *it, true ); // unhook
+		}
+		m_list.RemoveAll ();
+	}
 };
 
 /*
