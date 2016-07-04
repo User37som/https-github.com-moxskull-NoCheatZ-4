@@ -95,7 +95,7 @@ public:
 
 	virtual void Reset()
 	{
-		memset(&m_min, 0, &m_name - &m_min );
+		memset(&m_min, 0, size_t(&m_name) - size_t(&m_min) );
 	}
 };
 
@@ -177,12 +177,15 @@ public:
 		hClass()
 	{
 #ifdef GNUC
-		ElapsedMilliseconds = 0.0f
+		ElapsedMilliseconds = 0.0f;
 #endif
 	};
 
 	MetricsTimer(char const * const name, float const overload_threshold = 0) : hClass(name, overload_threshold)
 	{
+#ifdef GNUC
+		ElapsedMilliseconds = 0.0f;
+#endif
 	}
 
 	~MetricsTimer()

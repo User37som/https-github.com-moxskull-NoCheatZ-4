@@ -37,6 +37,8 @@ struct ConnectInfo
 	};
 	ConnectInfo ( const char* addr )
 	{
+		count = 0;
+		next_connect_time = 0;
 		ip_addr = addr;
 	};
 	ConnectInfo ( const ConnectInfo& other )
