@@ -240,69 +240,36 @@ void WallhackBlocker::RT_ProcessOnTick ( float const curtime )
 		SourceSdk::IPlayerInfo * const playerinfo ( ph->GetPlayerInfo () );
 		if( playerinfo != nullptr )
 		{
-			SourceSdk::INetChannelInfo* const netchan ( ph->GetChannelInfo () );
-			if( netchan == nullptr && ph == SlotStatus::PLAYER_IN_TESTS ) continue;
-			else
+			switch( ph.operator SlotStatus() )
 			{
-				__assume( netchan != nullptr ); // compiler is not aware that bots don't have net ...
-
-				MathInfo const & player_maths ( MathCache::GetInstance ()->RT_GetCachedMaths ( ph.GetIndex () ) );
-
-				ClientDataS* const pData ( GetPlayerDataStructByIndex ( ph.GetIndex () ) );
-
-				SourceSdk::VectorCopy ( player_maths.m_mins, pData->bbox_min );
-				SourceSdk::VectorCopy ( player_maths.m_maxs, pData->bbox_max );
-				SourceSdk::VectorCopy ( player_maths.m_abs_origin, pData->abs_origin );
-				SourceSdk::VectorCopy ( player_maths.m_eyepos, pData->ear_pos );
-
-				{
-					SourceSdk::vec_t& bmax2 ( pData->bbox_max.z );
-					bmax2 *= 0.5f;
-					pData->bbox_min.z -= bmax2;
-					pData->abs_origin.z += bmax2;
-				}
-
-				if( !SourceSdk::VectorIsZero ( player_maths.m_velocity, 0.0001f ) )
-				{
-					ST_W_STATIC float diff_time;
-					ST_W_STATIC int target_tick;
-
-					if( ph == SlotStatus::BOT )
+				case SlotStatus::BOT: // predict without tracing hull
 					{
-						target_tick = game_tick - 1;
-						diff_time = tick_interval;
-					}
-					else
-					{
-						const int lerp_ticks ( ( int ) ( 0.5f + *EntityProps::GetInstance ()->GetPropValue<float, PROP_LERP_TIME> ( ph->GetEdict (), true ) / tick_interval ) );
-						const float fCorrect ( netchan->GetLatency ( FLOW_OUTGOING ) + fmodf ( lerp_ticks * tick_interval, 1.0f ) );
+						MathInfo const & player_maths ( MathCache::GetInstance ()->RT_GetCachedMaths ( ph.GetIndex () ) );
 
-						target_tick = static_cast< SourceSdk::CUserCmd_csgo* >( PlayerRunCommandHookListener::RT_GetLastUserCmd ( ph ) )->tick_count - lerp_ticks;
+						ClientDataS* const pData ( GetPlayerDataStructByIndex ( ph.GetIndex () ) );
 
-						diff_time = ( game_tick - target_tick ) * tick_interval;
+						SourceSdk::VectorCopy ( player_maths.m_mins, pData->bbox_min );
+						SourceSdk::VectorCopy ( player_maths.m_maxs, pData->bbox_max );
+						SourceSdk::VectorCopy ( player_maths.m_abs_origin, pData->abs_origin );
+						SourceSdk::VectorCopy ( player_maths.m_eyepos, pData->ear_pos );
 
-						if( fabs ( fCorrect - diff_time ) > 0.2f )
-						{
-							target_tick = ( int ) ceil ( ( float ) game_tick - fCorrect / tick_interval );
-							diff_time = ( float ) ( game_tick - target_tick ) * tick_interval;
-						}
-					}
+						SourceSdk::vec_t& bmax2 ( pData->bbox_max.z );
+						bmax2 *= 0.5f;
+						pData->bbox_min.z -= bmax2;
+						pData->abs_origin.z += bmax2;
 
-					ST_W_STATIC SourceSdk::Vector predicted_pos;
+						int target_tick ( game_tick - 1 );
+						float diff_time = ( tick_interval );
 
-					{
+						ST_W_STATIC SourceSdk::Vector predicted_pos;
+
 						SourceSdk::VectorCopy ( player_maths.m_velocity, predicted_pos );
 						SourceSdk::VectorMultiply ( predicted_pos, diff_time );
 						SourceSdk::VectorAdd ( pData->abs_origin, predicted_pos );
-					}
 
-					if( SourceSdk::trace_hull_fn ( predicted_pos, hull_min, hull_max, MASK_PLAYERSOLID_BRUSHONLY, &itracefilter ) )
-					{
 						SourceSdk::VectorCopy ( predicted_pos, pData->abs_origin );
 						SourceSdk::VectorAdd ( player_maths.m_velocity, pData->ear_pos );
-					}
 
-					{
 						SourceSdk::vec_t const vx ( player_maths.m_abs_velocity.x );
 						SourceSdk::vec_t const vy ( player_maths.m_abs_velocity.y );
 						SourceSdk::vec_t const vz ( player_maths.m_abs_velocity.z );
@@ -321,8 +288,82 @@ void WallhackBlocker::RT_ProcessOnTick ( float const curtime )
 							pData->bbox_min.z *= vz;
 							pData->bbox_max.z *= vz;
 						}
+
+						break;
 					}
-				}
+				default:
+					{
+						SourceSdk::INetChannelInfo* const netchan ( ph->GetChannelInfo () );
+						if( netchan != nullptr )
+						{
+							MathInfo const & player_maths ( MathCache::GetInstance ()->RT_GetCachedMaths ( ph.GetIndex () ) );
+
+							ClientDataS* const pData ( GetPlayerDataStructByIndex ( ph.GetIndex () ) );
+
+							SourceSdk::VectorCopy ( player_maths.m_mins, pData->bbox_min );
+							SourceSdk::VectorCopy ( player_maths.m_maxs, pData->bbox_max );
+							SourceSdk::VectorCopy ( player_maths.m_abs_origin, pData->abs_origin );
+							SourceSdk::VectorCopy ( player_maths.m_eyepos, pData->ear_pos );
+
+							{
+								SourceSdk::vec_t& bmax2 ( pData->bbox_max.z );
+								bmax2 *= 0.5f;
+								pData->bbox_min.z -= bmax2;
+								pData->abs_origin.z += bmax2;
+							}
+
+
+							const int lerp_ticks ( ( int ) ( 0.5f + *EntityProps::GetInstance ()->GetPropValue<float, PROP_LERP_TIME> ( ph->GetEdict (), true ) / tick_interval ) );
+							const float fCorrect ( netchan->GetLatency ( FLOW_OUTGOING ) + fmodf ( lerp_ticks * tick_interval, 1.0f ) );
+
+							int target_tick ( static_cast< SourceSdk::CUserCmd_csgo* >( PlayerRunCommandHookListener::RT_GetLastUserCmd ( ph ) )->tick_count - lerp_ticks );
+
+							float diff_time ( ( game_tick - target_tick ) * tick_interval );
+
+							if( fabs ( fCorrect - diff_time ) > 0.2f )
+							{
+								target_tick = ( int ) ceil ( ( float ) game_tick - fCorrect / tick_interval );
+								diff_time = ( float ) ( game_tick - target_tick ) * tick_interval;
+							}
+
+							ST_W_STATIC SourceSdk::Vector predicted_pos;
+
+							{
+								SourceSdk::VectorCopy ( player_maths.m_velocity, predicted_pos );
+								SourceSdk::VectorMultiply ( predicted_pos, diff_time );
+								SourceSdk::VectorAdd ( pData->abs_origin, predicted_pos );
+							}
+
+							if( SourceSdk::trace_hull_fn ( predicted_pos, hull_min, hull_max, MASK_PLAYERSOLID_BRUSHONLY, &itracefilter ) )
+							{
+								SourceSdk::VectorCopy ( predicted_pos, pData->abs_origin );
+								SourceSdk::VectorAdd ( player_maths.m_velocity, pData->ear_pos );
+							}
+
+							{
+								SourceSdk::vec_t const vx ( player_maths.m_abs_velocity.x );
+								SourceSdk::vec_t const vy ( player_maths.m_abs_velocity.y );
+								SourceSdk::vec_t const vz ( player_maths.m_abs_velocity.z );
+								if( vx > 1.0f )
+								{
+									pData->bbox_min.x *= vx;
+									pData->bbox_max.x *= vx;
+								}
+								if( vy > 1.0f )
+								{
+									pData->bbox_min.y *= vy;
+									pData->bbox_max.y *= vy;
+								}
+								if( vz > 1.0f )
+								{
+									pData->bbox_min.z *= vz;
+									pData->bbox_max.z *= vz;
+								}
+							}
+						}
+
+						break;
+					}
 			}
 		}
 	}
