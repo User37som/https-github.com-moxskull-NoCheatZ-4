@@ -258,7 +258,6 @@ void WallhackBlocker::RT_ProcessOnTick ( float const curtime )
 						pData->bbox_min.z -= bmax2;
 						pData->abs_origin.z += bmax2;
 
-						int target_tick ( game_tick - 1 );
 						float diff_time = ( tick_interval );
 
 						ST_W_STATIC SourceSdk::Vector predicted_pos;
