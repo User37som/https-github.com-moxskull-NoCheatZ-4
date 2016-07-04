@@ -109,7 +109,7 @@ void ConCommandHookListener::RegisterConCommandHookListener ( ConCommandHookList
 	ConCommandListenersListT::elem_t* it ( m_listeners.FindByListener ( listener ) );
 	if( it == nullptr )
 	{
-		it = m_listeners.Add ( listener );
+		m_listeners.Add ( listener );
 	}
 
 	size_t cmd_pos ( 0 );

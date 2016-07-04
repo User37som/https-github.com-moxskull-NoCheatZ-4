@@ -50,7 +50,7 @@ typedef struct PlayerBanRequest
 		}
 		while( ++x < 64 );
 	};
-	PlayerBanRequest ( int id )
+	PlayerBanRequest ( int id ) : PlayerBanRequest ()
 	{
 		userid = id;
 	};

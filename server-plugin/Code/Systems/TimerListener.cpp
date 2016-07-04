@@ -78,7 +78,7 @@ void TimerListener::RemoveTimerListener ( TimerListener* listener )
 
 void TimerListener::AddTimer ( float period_seconds, char const * const name, bool single_time )
 {
-	Assert ( period_seconds >= 2.0 * SourceSdk::InterfacesProxy::Call_GetTickInterval () && "You can't use a timer that is under the resolution of 2 game-ticks." );
+	Assert ( period_seconds >= 2.0 );
 
 	TimerInfo t ( name, period_seconds, single_time );
 

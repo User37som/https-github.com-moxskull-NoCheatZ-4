@@ -15,7 +15,7 @@
 #define AVERAGE_STRING_SIZE 64 // must be a power of 2
 
 template <typename pod = char>
-class alignas(16) String :
+class alignas( 16 ) String :
 	public HeapMemoryManager::OverrideNew<16>
 {
 	friend String<char>;
@@ -34,7 +34,7 @@ private:
 
 	inline pod * Alloc ( size_t wanted_capacity, size_t & got_capacity )
 	{
-		return ( pod *)HeapMemoryManager::AllocateMemory ( wanted_capacity, got_capacity );
+		return ( pod * ) HeapMemoryManager::AllocateMemory ( wanted_capacity, got_capacity );
 	}
 
 	inline void Dealloc ()
@@ -49,7 +49,7 @@ private:
 	/*  -need- always contains the zero char. */
 	void Grow ( size_t need, bool copy = true )
 	{
-        need *= sizeof(pod);
+		need *= sizeof ( pod );
 		if( need <= m_capacity )
 			return;
 
@@ -60,7 +60,7 @@ private:
 
 		if( m_alloc )
 		{
-			if( copy ) memcpy ( n, m_alloc, (m_size + 1) * sizeof ( pod ) );
+			if( copy ) memcpy ( n, m_alloc, ( m_size + 1 ) * sizeof ( pod ) );
 			Dealloc ();
 		}
 		else
@@ -204,7 +204,7 @@ public:
 	{
 		if( m_size != other.m_size ) return false;
 		__assume( m_alloc > 0 );
-		__assume( other.m_alloc  > 0 );
+		__assume( other.m_alloc > 0 );
 		pod const * me ( m_alloc );
 		pod const * other_c ( other.m_alloc );
 		do
@@ -407,7 +407,7 @@ private:
 		{
 			if( *c != *me++ ) return false;
 		}
-		while( *(++c) != 0 );
+		while( *( ++c ) != 0 );
 
 		return true;
 	}
@@ -500,8 +500,8 @@ public:
 
 	pod& operator[] ( size_t const index ) const
 	{
-        Assert(index <= m_capacity / sizeof(pod));
-        Assert(index <= m_size);
+		Assert ( index <= m_capacity / sizeof ( pod ) );
+		Assert ( index <= m_size );
 		return m_alloc[ index ];
 	}
 
@@ -509,13 +509,13 @@ public:
 	{
 		if( in.m_size == 0 ) return;
 		std::setlocale ( LC_ALL, "en_US.utf8" );
-		size_t const cpsize ( std::mbstowcs ( nullptr, in.m_alloc, 0) );
+		size_t const cpsize ( std::mbstowcs ( nullptr, in.m_alloc, 0 ) );
 		Assert ( cpsize < std::numeric_limits<size_t>::max () );
-		Assert ( cpsize > 0);
+		Assert ( cpsize > 0 );
 
 		out.Grow ( cpsize + 1, false );
 
-		std::mbstowcs ( out.m_alloc, in.m_alloc, cpsize + 1);
+		std::mbstowcs ( out.m_alloc, in.m_alloc, cpsize + 1 );
 
 		out.m_size = cpsize;
 		out[ out.m_size ] = 0;
@@ -525,13 +525,13 @@ public:
 	{
 		if( in.m_size == 0 ) return;
 		std::setlocale ( LC_ALL, "en_US.utf8" );
-		size_t const cpsize ( std::wcstombs ( nullptr, in.m_alloc, 0) );
+		size_t const cpsize ( std::wcstombs ( nullptr, in.m_alloc, 0 ) );
 		Assert ( cpsize < std::numeric_limits<size_t>::max () );
-		Assert ( cpsize > 0);
+		Assert ( cpsize > 0 );
 
 		out.Grow ( cpsize + 1, false );
 
-		std::wcstombs ( out.m_alloc, in.m_alloc, cpsize + 1);
+		std::wcstombs ( out.m_alloc, in.m_alloc, cpsize + 1 );
 
 		out.m_size = cpsize;
 		out[ out.m_size ] = 0;
@@ -590,10 +590,9 @@ void SplitString ( String<pod> const & string, pod const delim, CUtlVector < Str
 	out.EnsureCapacity ( 8 );
 
 	size_t start ( 0 );
-	size_t end;
 	for( ;;)
 	{
-		end = string.find ( delim, start );
+		size_t const end = string.find ( delim, start );
 		if( end == String<pod>::npos )
 		{
 			out.AddToTail ( String<pod> ( string, start ) );

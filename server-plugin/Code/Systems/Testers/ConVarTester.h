@@ -77,7 +77,7 @@ typedef struct CurrentConVarRequest
 
 	CurrentConVarRequest ()
 	{
-		isSent = false; isReplyed = false; timeStart = 0.0;
+		isSent = false; isReplyed = false; timeStart = 0.0; ruleset = 0;
 	};
 	CurrentConVarRequest ( const CurrentConVarRequest& other )
 	{

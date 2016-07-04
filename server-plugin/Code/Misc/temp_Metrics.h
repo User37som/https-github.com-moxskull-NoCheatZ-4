@@ -95,7 +95,7 @@ public:
 
 	virtual void Reset()
 	{
-		memset(this, 0, sizeof(BaseMetrics<val_t>) - METRICS_NAME_SIZE);
+		memset(&m_min, 0, &m_name - &m_min );
 	}
 };
 
@@ -173,8 +173,12 @@ private:
 #endif
 
 public:
-	MetricsTimer() : hClass()
+	MetricsTimer() :
+		hClass()
 	{
+#ifdef GNUC
+		ElapsedMilliseconds = 0.0f
+#endif
 	};
 
 	MetricsTimer(char const * const name, float const overload_threshold = 0) : hClass(name, overload_threshold)

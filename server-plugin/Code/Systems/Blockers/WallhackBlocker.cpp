@@ -31,7 +31,12 @@ WallhackBlocker::WallhackBlocker () :
 	playerdatahandler_class (),
 	SetTransmitHookListener (),
 	singleton_class (),
-	WeaponHookListener ()
+	WeaponHookListener (),
+	m_weapon_owner (),
+	m_viscache (),
+	m_disable_shadows ( nullptr ),
+	m_shadow_direction ( nullptr ),
+	m_shadow_maxdist ( nullptr )
 {
 	METRICS_ADD_TIMER ( "WallhackBlocker::SetTransmitCallback", 1.0 );
 	METRICS_ADD_TIMER ( "WallhackBlocker::OnFrame", 10.0 );
@@ -230,7 +235,7 @@ void WallhackBlocker::RT_ProcessOnTick ( float const curtime )
 	ST_R_STATIC SourceSdk::Vector hull_max ( 5.0f, 5.0f, 5.0f );
 
 	ProcessFilter::HumanAtLeastConnectedOrBot filter_class;
-	for( PlayerHandler::const_iterator ph ( &filter_class ); ph != PlayerHandler::end (); ph+=&filter_class )
+	for( PlayerHandler::const_iterator ph ( &filter_class ); ph != PlayerHandler::end (); ph += &filter_class )
 	{
 		SourceSdk::IPlayerInfo * const playerinfo ( ph->GetPlayerInfo () );
 		if( playerinfo != nullptr )

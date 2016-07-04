@@ -40,7 +40,7 @@ enum class PlayerRunCommandRet : short
 	BLOCK
 };
 
-class ALIGN8 PlayerRunCommandHookListener
+class alignas(8) PlayerRunCommandHookListener
 {
 	typedef HookListenersList<PlayerRunCommandHookListener> ListenersListT;
 
@@ -71,6 +71,6 @@ private:
 #else
 	static void HOOKFN_INT RT_nPlayerRunCommand ( void * const This, void * const, void * const pCmd, IMoveHelper const * const pMoveHelper );
 #endif
-} ALIGN8_POST;
+};
 
 #endif

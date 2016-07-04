@@ -29,7 +29,11 @@ RadarHackBlocker::RadarHackBlocker () :
 	playerdatahandler_class (),
 	singleton_class (),
 	ThinkPostHookListener (),
-	UserMessageHookListener ()
+	UserMessageHookListener (),
+	m_players_spotted ( nullptr ),
+	m_bomb_spotted ( nullptr ),
+	m_cvar_forcecamera ( nullptr ),
+	m_next_process ( 0.0f )
 {
 
 }
@@ -104,7 +108,7 @@ void RadarHackBlocker::RT_ThinkPostCallback ( SourceSdk::edict_t const * const p
 {
 	ProcessFilter::HumanAtLeastConnectedOrBot const filter_class;
 
-	for( PlayerHandler::const_iterator ph ( &filter_class ); ph != PlayerHandler::end (); ph+= &filter_class )
+	for( PlayerHandler::const_iterator ph ( &filter_class ); ph != PlayerHandler::end (); ph += &filter_class )
 	{
 		int const index ( ph.GetIndex () );
 		ClientRadarData * pData ( GetPlayerDataStructByIndex ( index ) );
@@ -275,7 +279,7 @@ void RadarHackBlocker::RT_ProcessOnTick ( float const curtime )
 {
 	ProcessFilter::HumanAtLeastConnectedOrBot const filter_class;
 
-	for( PlayerHandler::const_iterator ph (&filter_class ); ph != PlayerHandler::end (); ph+= &filter_class )
+	for( PlayerHandler::const_iterator ph ( &filter_class ); ph != PlayerHandler::end (); ph += &filter_class )
 	{
 		int const index ( ph.GetIndex () );
 

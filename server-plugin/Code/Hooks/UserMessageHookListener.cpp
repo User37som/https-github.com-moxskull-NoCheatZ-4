@@ -122,8 +122,11 @@ void HOOKFN_INT UserMessageHookListener::RT_nMessageEnd ( void * const thisptr, 
 {
 	if( bypass )
 	{
-		if( m_buffer->m_pData ) delete m_buffer->m_pData;
-		if( m_buffer ) delete m_buffer;
+		if( m_buffer )
+		{
+			if( m_buffer->m_pData ) delete m_buffer->m_pData;
+			delete m_buffer;
+		}
 		m_buffer = nullptr;
 		bypass = false;
 	}

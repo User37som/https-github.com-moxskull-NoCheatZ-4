@@ -54,16 +54,16 @@ namespace HeapMemoryManager
 			{
 				if( it->m_capacity >= bytes ) // Is there enough capacity here ?
 				{
-					if( size_t( it->m_ptr ) % align_of == 0 && it->m_capacity % align_of == 0 ) // Try to see if the pointer fits in the alignement requirements
+					if( size_t ( it->m_ptr ) % align_of == 0 && it->m_capacity % align_of == 0 ) // Try to see if the pointer fits in the alignement requirements
 					{
 						new_capacity = it->m_capacity;
 						void * ret ( it->m_ptr );
-						it->m_capacity = std::numeric_limits<size_t>::max();
+						it->m_capacity = std::numeric_limits<size_t>::max ();
 						it->m_ptr = nullptr;
 
-						std::qsort ( m_free_memory, HMM_MAX_FREE_OBJECTS, sizeof( FreeMemoryHolder ), SortMemPool_wrap );
+						std::qsort ( m_free_memory, HMM_MAX_FREE_OBJECTS, sizeof ( FreeMemoryHolder ), SortMemPool_wrap );
 
-                        //printf("reuse %p (%u, %u)\n", ret, new_capacity, align_of);
+						//printf("reuse %p (%u, %u)\n", ret, new_capacity, align_of);
 
 						return ret;
 					}
@@ -73,21 +73,21 @@ namespace HeapMemoryManager
 		while( ++it != it_end );
 
 		new_capacity = align_of;
-		while( new_capacity < bytes /*|| ( new_capacity % align_of != 0) */) new_capacity <<= 1;
+		while( new_capacity < bytes /*|| ( new_capacity % align_of != 0) */ ) new_capacity <<= 1;
 
-        void * nptr(_mm_malloc ( new_capacity, align_of ));
-        //printf("alloc %p (%u, %u)\n", nptr, new_capacity, align_of);
+		void * nptr ( _mm_malloc ( new_capacity, align_of ) );
+		//printf("alloc %p (%u, %u)\n", nptr, new_capacity, align_of);
 		return nptr;
 	}
 
 	void FreeMemory ( void * ptr, size_t capacity )
 	{
 		if( !m_memory_init ) InitPool ();
-		Assert ( capacity && (capacity & 0xFF) != 0xCC && "Stop using memset everywhere ..." );
+		Assert ( capacity && ( capacity & 0xFF ) != 0xCC );
 		FreeMemoryHolder* it ( m_free_memory + HMM_MAX_FREE_OBJECTS - 1 );
 		if( it->m_ptr != nullptr || capacity > HMM_MAX_SINGLE_OBJECT_SIZE ) // Pool is full or memory too big
 		{
-            //printf("free %p (%u)\n", ptr, capacity);
+			//printf("free %p (%u)\n", ptr, capacity);
 			_mm_free ( ptr );
 		}
 		else
@@ -123,7 +123,7 @@ namespace HeapMemoryManager
 		{
 			if( it->m_ptr != nullptr )
 			{
-                //printf("free %p (%u)\n", it->m_ptr, it->m_capacity);
+				//printf("free %p (%u)\n", it->m_ptr, it->m_capacity);
 				_mm_free ( it->m_ptr );
 				it->m_ptr = nullptr;
 				it->m_capacity = std::numeric_limits<size_t>::max ();

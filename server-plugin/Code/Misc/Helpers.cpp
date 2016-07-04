@@ -141,15 +141,11 @@ namespace Helpers
 				++str;
 				if( *str == 0xBB )
 				{
-					if( *++str == 0xBF ) return false;
+					if( *++str >= 0xB9 ) return false;
 				}
 				else if( *str == 0xBE )
 				{
 					if( *++str == 0xA0 ) return false;
-				}
-				else if( *str == 0xBB )
-				{
-					if( *++str >= 0xB9 ) return false;
 				}
 			}
 		}
@@ -266,7 +262,7 @@ namespace Helpers
 	template<typename T>
 	basic_string tostring ( const T & toConvert )
 	{
-		std::locale loc;
+		//std::locale loc;
 		std::stringstream convertion;
 		convertion << toConvert;
 		return basic_string ( convertion.str ().c_str () );

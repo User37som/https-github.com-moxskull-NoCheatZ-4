@@ -49,7 +49,7 @@ typedef struct ValidatedInfo
 		m_ipaddress  { 0 } 
 	{}
 
-	ValidatedInfo ( char const * steamid )
+	ValidatedInfo ( char const * steamid ) : ValidatedInfo ()
 	{
 		strncpy ( m_steamid, steamid, 64 );
 	}
