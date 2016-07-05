@@ -213,10 +213,6 @@ public:
 
 inline bool PlayerHandler::iterator::IsIteratorValid () const
 {
-#ifdef DEBUG
-	if( m_ptr > PlayerHandler::last.m_ptr )
-		DebugMessage ( "Encountered PlayerHandler::iterator that is not already set by NczPlayerManager" ); // runtime memory range
-#endif
 	return m_ptr >= PlayerHandler::invalid.m_ptr && m_ptr < PlayerHandler::invalid.m_ptr + MAX_PLAYERS; // static memory range (fatal)
 }
 
