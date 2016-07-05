@@ -61,7 +61,7 @@ void HOOKFN_INT SetTransmitHookListener::RT_nSetTransmit ( void * const This, vo
 
 		if( sender_assumed_client )
 		{
-			if( sender_assumed_client != receiver_assumed_player )
+			if( sender_assumed_client != receiver_assumed_player && sender_assumed_client != SlotStatus::PLAYER_CONNECTING && sender_assumed_client >= SlotStatus::BOT )
 			{
 				TransmitListenersListT::elem_t* it ( m_listeners.GetFirst () );
 
@@ -82,16 +82,13 @@ void HOOKFN_INT SetTransmitHookListener::RT_nSetTransmit ( void * const This, vo
 
 			Assert ( Helpers::IndexOfEdict ( pEdict_sender ) > inst->GetMaxIndex () );
 
-			if( receiver_assumed_player > SlotStatus::PLAYER_CONNECTING )
+			while( it != nullptr )
 			{
-				while( it != nullptr )
+				if( it->m_value.listener->RT_SetTransmitWeaponCallback ( pEdict_sender, receiver_assumed_player ) )
 				{
-					if( it->m_value.listener->RT_SetTransmitWeaponCallback ( pEdict_sender, receiver_assumed_player ) )
-					{
-						return;
-					}
-					it = it->m_next;
+					return;
 				}
+				it = it->m_next;
 			}
 		}
 	}
