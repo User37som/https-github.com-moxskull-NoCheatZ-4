@@ -15,7 +15,7 @@ before_install:
   - sudo rm /etc/apt/sources.list.d/google-chrome.list
   - sudo dpkg --add-architecture i386
   - sudo apt-get -qq update
-  - sudo apt-get -qq install -y curl build-essential lib32z1 lib32ncurses5 lib32bz2-1.0 gcc-multilib g++-multilib lib32gcc1 libc6-i386 libc6-dev-i386 autotools-dev autoconf libtool cppcheck
+  - sudo apt-get -qq install -y curl build-essential lib32z1 lib32ncurses5 lib32bz2-1.0 gcc-multilib g++-multilib lib32gcc1 libc6-i386 libc6-dev-i386 autotools-dev autoconf libtool cppcheck cmake
 
 before_script:
   - cd server-plugin
@@ -26,6 +26,10 @@ script:
   - make debug
   - make release
   - make superclean
-
+  - mkdir testbuild
+  - cd testbuild
+  - cmake ..
+  - make
+  - make clean
 after_success:
   - bash <(curl -s https://codecov.io/bash)

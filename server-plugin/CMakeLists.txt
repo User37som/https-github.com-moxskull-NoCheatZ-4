@@ -13,7 +13,6 @@ execute_process(
   OUTPUT_VARIABLE VERSION_GIT
   OUTPUT_STRIP_TRAILING_WHITESPACE
 )
-message("error ${error}")
 execute_process(
   COMMAND git describe --tags --abbrev=0
   OUTPUT_VARIABLE VERSION_GIT_SHORT
@@ -39,6 +38,7 @@ ADD_DEFINITIONS(
   -I${PROJECT_SOURCE_DIR}/SourceSdk/Interfaces/Protobuf/protobuf-2.5.0/src
 )
 
+execute_process(COMMAND git submodule update --init)
 
 file(GLOB server-plugin_SRC
   "Code/*.cpp" "Code/*.h"
@@ -58,7 +58,6 @@ set_target_properties(nocheatzX PROPERTIES
 target_link_libraries(nocheatzX "${PROJECT_SOURCE_DIR}/SourceSdk/Interfaces/Protobuf/protobuf-2.5.0/src/.libs/libprotobuf.a")
 set(CMAKE_SHARED_LINKER_FLAGS "-Wl,--as-needed,--no-undefined -static-libgcc -ldl -lm -m32")
 message ("compiling protobuf")
-execute_process(COMMAND git submodule update --init)
 execute_process(
   COMMAND "/bin/sh" "${PROJECT_SOURCE_DIR}/../scripts/make-protobuf.sh" 
   WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}" 
