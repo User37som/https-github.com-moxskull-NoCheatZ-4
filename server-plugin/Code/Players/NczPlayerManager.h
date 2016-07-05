@@ -56,6 +56,11 @@ public:
 
 		inline PlayerHandler * GetHandler () const; // backdoor for NczPlayerManager
 
+		/*
+			Just returns true if m_ptr is in range. Will be only called in debug mode using Assert.
+		*/
+		inline bool IsIteratorValid () const;
+
 	public:
 		iterator () : m_ptr ( invalid.m_ptr )
 		{}
@@ -64,6 +69,7 @@ public:
 		iterator ( BaseProcessFilter const * const filter ) : m_ptr ( invalid.m_ptr )
 		{
 			this->operator+=( filter );
+			Assert ( IsIteratorValid () );
 		}
 		iterator ( int const slot_index ) : m_ptr ( invalid.m_ptr + slot_index )
 		{}
@@ -75,6 +81,7 @@ public:
 		const_iterator & operator=( PlayerHandler const * const ptr ) const
 		{
 			m_ptr = ptr;
+			Assert ( IsIteratorValid () );
 			return *this;
 		}
 		/*
@@ -82,6 +89,7 @@ public:
 		*/
 		const_iterator & operator=( const_iterator & other ) const
 		{
+			Assert ( other.IsIteratorValid () );
 			m_ptr = other.m_ptr;
 			return *this;
 		}
@@ -91,6 +99,7 @@ public:
 		const_iterator & operator=( int const slot_index ) const
 		{
 			m_ptr = invalid.m_ptr + slot_index;
+			Assert ( IsIteratorValid () );
 			return *this;
 		}
 		~iterator ()
@@ -183,6 +192,8 @@ private:
 
 	PlayerHandler ( const PlayerHandler& other ) = delete;
 	PlayerHandler& operator=( const PlayerHandler& other ) = delete;
+	PlayerHandler (  PlayerHandler&& other ) = delete;
+	PlayerHandler& operator=(  PlayerHandler&& other ) = delete;
 
 	void Reset ()
 	{
@@ -199,19 +210,27 @@ public:
 
 } ALIGN16_POST;
 
+inline bool PlayerHandler::iterator::IsIteratorValid () const
+{
+	return m_ptr >= PlayerHandler::invalid.m_ptr && m_ptr <= PlayerHandler::last.m_ptr;
+}
+
 inline PlayerHandler * PlayerHandler::iterator::GetHandler () const
 {
+	Assert ( IsIteratorValid () );
 	return const_cast< PlayerHandler * >( m_ptr );
 }
 
 inline PlayerHandler::const_iterator & PlayerHandler::iterator::operator++() const // CONST CHEATTERR
 {
+	Assert ( IsIteratorValid () );
 	--m_ptr;
 	return *this;
 }
 
 inline PlayerHandler::const_iterator & PlayerHandler::iterator::operator+=( BaseProcessFilter const * const target ) const
 {
+	Assert ( IsIteratorValid () );
 	if( this->operator==( PlayerHandler::end () ) ) // We already are at the end ... but our tester wants to work :'(
 	{
 		this->operator=( begin () );
@@ -247,76 +266,93 @@ inline PlayerHandler::const_iterator & PlayerHandler::end ()
 
 inline PlayerHandler::iterator::operator bool () const
 {
+	Assert ( IsIteratorValid () );
 	return m_ptr->status != SlotStatus::INVALID;
 }
 
 inline bool PlayerHandler::iterator::operator!() const
 {
+	Assert ( IsIteratorValid () );
 	return m_ptr->status == SlotStatus::INVALID;
 }
 
 inline PlayerHandler::iterator::operator NczPlayer_ptr() const
 {
+	Assert ( IsIteratorValid () );
 	return m_ptr->playerClass;
 }
 
 inline int PlayerHandler::iterator::GetIndex () const
 {
+	Assert ( IsIteratorValid () );
 	return m_ptr - invalid.m_ptr;
 }
 
 inline bool PlayerHandler::iterator::operator==( const_iterator & other ) const
 {
+	Assert ( IsIteratorValid () );
+	Assert ( other.IsIteratorValid () );
 	return m_ptr == other.m_ptr;
 }
 
 inline bool PlayerHandler::iterator::operator!=( const_iterator & other ) const
 {
+	Assert ( IsIteratorValid () );
+	Assert ( other.IsIteratorValid () );
 	return m_ptr != other.m_ptr;
 }
 
 inline bool PlayerHandler::iterator::operator==( SlotStatus const other_status ) const
 {
+	Assert ( IsIteratorValid () );
 	return m_ptr->status == other_status;
 }
 
 inline bool PlayerHandler::iterator::operator!=( SlotStatus const other_status ) const
 {
+	Assert ( IsIteratorValid () );
 	return m_ptr->status != other_status;
 }
 
 inline bool PlayerHandler::iterator::operator>=( SlotStatus const other_status ) const
 {
+	Assert ( IsIteratorValid () );
 	return m_ptr->status >= other_status;
 }
 
 inline bool PlayerHandler::iterator::operator<=( SlotStatus const other_status ) const
 {
+	Assert ( IsIteratorValid () );
 	return m_ptr->status <= other_status;
 }
 
 inline bool PlayerHandler::iterator::operator>( SlotStatus const other_status ) const
 {
+	Assert ( IsIteratorValid () );
 	return m_ptr->status > other_status;
 }
 
 inline bool PlayerHandler::iterator::operator<( SlotStatus const other_status ) const
 {
+	Assert ( IsIteratorValid () );
 	return m_ptr->status < other_status;
 }
 
 inline PlayerHandler::iterator::operator SlotStatus() const
 {
+	Assert ( IsIteratorValid () );
 	return m_ptr->status;
 }
 
 inline PlayerHandler::NczPlayer_ptr PlayerHandler::iterator::operator*() const
 {
+	Assert ( IsIteratorValid () );
 	return m_ptr->playerClass;
 }
 
 inline PlayerHandler::NczPlayer_ptr PlayerHandler::iterator::operator->() const
 {
+	Assert ( IsIteratorValid () );
 	return m_ptr->playerClass;
 }
 
