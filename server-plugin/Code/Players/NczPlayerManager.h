@@ -28,6 +28,7 @@
 #include "Misc/temp_singleton.h"
 #include "Misc/Helpers.h"
 #include "Misc/ClassSpecifications.h"
+#include "Systems/Logger.h"
 
 class NczPlayerManager;
 
@@ -212,7 +213,11 @@ public:
 
 inline bool PlayerHandler::iterator::IsIteratorValid () const
 {
-	return m_ptr >= PlayerHandler::invalid.m_ptr && m_ptr <= PlayerHandler::last.m_ptr;
+#ifdef DEBUG
+	if( m_ptr > PlayerHandler::last.m_ptr )
+		DebugMessage ( "Encountered PlayerHandler::iterator that is not already set by NczPlayerManager" ); // runtime memory range
+#endif
+	return m_ptr >= PlayerHandler::invalid.m_ptr && m_ptr < PlayerHandler::invalid.m_ptr + MAX_PLAYERS; // static memory range (fatal)
 }
 
 inline PlayerHandler * PlayerHandler::iterator::GetHandler () const

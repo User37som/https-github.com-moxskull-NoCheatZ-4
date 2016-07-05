@@ -52,6 +52,7 @@ public:
 		{
 			elem_t* const old_first ( m_first );
 			m_first = new elem_t ( value );
+			__assume ( m_first != nullptr );
 			m_first->m_next = old_first;
 		}
 		else

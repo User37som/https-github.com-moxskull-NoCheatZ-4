@@ -276,6 +276,7 @@ public:
 		if( m_first == nullptr )
 		{
 			m_first = new elem_t ();
+			__assume ( m_first != nullptr );
 			m_first->m_value.listener = const_cast< C * const >( listener );
 			m_first->m_value.priority = priority;
 			m_first->m_value.filter = filter;
