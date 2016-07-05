@@ -56,6 +56,7 @@ public:
 		else
 		{
 			m_first = new elem_t ( value );
+			__assume ( m_first != nullptr );
 			m_first->m_next = nullptr;
 		}
 		return m_first;

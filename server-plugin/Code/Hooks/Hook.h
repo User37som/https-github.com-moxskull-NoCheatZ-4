@@ -294,6 +294,7 @@ public:
 					{
 						elem_t* const old_first = m_first;
 						m_first = new elem_t ();
+						__assume ( m_first != nullptr );
 						m_first->m_next = old_first;
 						m_first->m_value.listener = const_cast< C * const >( listener );
 						m_first->m_value.priority = priority;
@@ -317,6 +318,7 @@ public:
 			while( iterator != nullptr );
 
 			prev->m_next = new elem_t ();
+			__assume ( prev->m_next != nullptr );
 			prev->m_next->m_value.listener = const_cast< C * const >( listener );
 			prev->m_next->m_value.priority = priority;
 			prev->m_next->m_value.filter = filter;

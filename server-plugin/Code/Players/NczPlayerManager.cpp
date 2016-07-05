@@ -25,8 +25,8 @@
 #include "Systems/BaseSystem.h"
 #include "Systems/AutoTVRecord.h"
 
-PlayerHandler NczPlayerManager::FullHandlersList[];
-PlayerHandler::const_iterator PlayerHandler::invalid(&NczPlayerManager::FullHandlersList[0]);
+PlayerHandler NczPlayerManager::FullHandlersList[ MAX_PLAYERS + 1 ];
+PlayerHandler::const_iterator PlayerHandler::invalid(NczPlayerManager::FullHandlersList);
 PlayerHandler::const_iterator PlayerHandler::first( invalid );
 PlayerHandler::const_iterator PlayerHandler::last ( invalid );
 
@@ -155,6 +155,7 @@ void NczPlayerManager::ClientActive ( SourceSdk::edict_t* pEntity )
 	if( ph.status == SlotStatus::INVALID ) // Bots don't call ClientConnect
 	{
 		ph.playerClass = new NczPlayer ( index );
+		__assume ( ph.playerClass != nullptr );
 		ph.playerClass->m_playerinfo = ( SourceSdk::IPlayerInfo * )SourceSdk::InterfacesProxy::Call_GetPlayerInfo ( ph.playerClass->m_edict );
 		Assert ( ph.playerClass->m_playerinfo );
 #undef GetClassName
