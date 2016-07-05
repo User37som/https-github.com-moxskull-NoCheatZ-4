@@ -4,6 +4,7 @@
 #include <limits>
 #include <cstdlib>
 
+#include "Preprocessors.h"
 #include "HeapMemoryManager.h"
 
 template <typename inner_type>

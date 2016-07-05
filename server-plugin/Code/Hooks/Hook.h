@@ -34,6 +34,7 @@
 #include "SdkPreprocessors.h"
 #include "Interfaces/iserverunknown.h"
 
+#include "Preprocessors.h"
 #include "Players/NczPlayerManager.h"
 #include "Misc/HeapMemoryManager.h"
 #include "Systems/Logger.h"
