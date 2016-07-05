@@ -33,8 +33,11 @@ SetTransmitHookListener::SetTransmitHookListener ()
 
 SetTransmitHookListener::~SetTransmitHookListener ()
 {
-	HookGuard<SetTransmitHookListener>::GetInstance ()->UnhookAll ();
-	HookGuard<SetTransmitHookListener>::DestroyInstance ();
+	if( HookGuard<SetTransmitHookListener>::IsCreated () )
+	{
+		HookGuard<SetTransmitHookListener>::GetInstance ()->UnhookAll ();
+		HookGuard<SetTransmitHookListener>::DestroyInstance ();
+	}
 }
 
 void SetTransmitHookListener::HookSetTransmit ( SourceSdk::edict_t const * const ent )

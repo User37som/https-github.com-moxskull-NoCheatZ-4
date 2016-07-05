@@ -28,8 +28,11 @@ ThinkPostHookListener::ThinkPostHookListener ()
 
 ThinkPostHookListener::~ThinkPostHookListener ()
 {
-	HookGuard<ThinkPostHookListener>::GetInstance ()->UnhookAll ();
-	HookGuard<ThinkPostHookListener>::DestroyInstance ();
+	if( HookGuard<ThinkPostHookListener>::IsCreated () )
+	{
+		HookGuard<ThinkPostHookListener>::GetInstance ()->UnhookAll ();
+		HookGuard<ThinkPostHookListener>::DestroyInstance ();
+	}
 }
 
 void ThinkPostHookListener::HookThinkPost ( SourceSdk::edict_t const * const entity )

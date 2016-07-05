@@ -31,8 +31,11 @@ OnGroundHookListener::OnGroundHookListener ()
 
 OnGroundHookListener::~OnGroundHookListener ()
 {
-	HookGuard<OnGroundHookListener>::GetInstance ()->UnhookAll ();
-	HookGuard<OnGroundHookListener>::DestroyInstance ();
+	if( HookGuard<OnGroundHookListener>::IsCreated () )
+	{
+		HookGuard<OnGroundHookListener>::GetInstance ()->UnhookAll ();
+		HookGuard<OnGroundHookListener>::DestroyInstance ();
+	}
 }
 
 void OnGroundHookListener::HookOnGround ( PlayerHandler::const_iterator ph )

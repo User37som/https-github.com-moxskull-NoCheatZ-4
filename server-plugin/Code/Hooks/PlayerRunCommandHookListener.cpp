@@ -42,8 +42,11 @@ PlayerRunCommandHookListener::PlayerRunCommandHookListener ()
 
 PlayerRunCommandHookListener::~PlayerRunCommandHookListener ()
 {
-	HookGuard<PlayerRunCommandHookListener>::GetInstance ()->UnhookAll ();
-	HookGuard<PlayerRunCommandHookListener>::DestroyInstance ();
+	if( HookGuard<PlayerRunCommandHookListener>::IsCreated () )
+	{
+		HookGuard<PlayerRunCommandHookListener>::GetInstance ()->UnhookAll ();
+		HookGuard<PlayerRunCommandHookListener>::DestroyInstance ();
+	}
 }
 
 void* PlayerRunCommandHookListener::RT_GetLastUserCmd ( PlayerHandler::const_iterator ph )

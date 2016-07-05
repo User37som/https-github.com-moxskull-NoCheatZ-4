@@ -32,8 +32,11 @@ WeaponHookListener::WeaponHookListener ()
 
 WeaponHookListener::~WeaponHookListener ()
 {
-	HookGuard<WeaponHookListener>::GetInstance ()->UnhookAll ();
-	HookGuard<WeaponHookListener>::DestroyInstance ();
+	if( HookGuard<WeaponHookListener>::IsCreated () )
+	{
+		HookGuard<WeaponHookListener>::GetInstance ()->UnhookAll ();
+		HookGuard<WeaponHookListener>::DestroyInstance ();
+	}
 }
 
 void WeaponHookListener::HookWeapon ( PlayerHandler::const_iterator ph )

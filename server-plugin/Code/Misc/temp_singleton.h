@@ -44,16 +44,21 @@ protected:
 	}
 
 public:
+	static bool IsCreated () const
+	{
+		return hClass::instance != nullptr;
+	}
+
 	static void CreateInstance()
 	{
-		Assert(hClass::instance == nullptr);
+		Assert( IsCreated () );
 		void* ptr = HeapMemoryManager::AllocateMemory ( sizeof ( C ), hClass::memory_used, 16 );
 		hClass::instance = new(ptr) C();
 	}
 
 	static void Required()
 	{
-		if (hClass::instance == nullptr)
+		if ( !IsCreated () )
 			CreateInstance();
 	}
 
@@ -61,7 +66,7 @@ public:
 
 	static void DestroyInstance()
 	{
-		if( hClass::instance )
+		if( IsCreated () )
 		{
 			hClass::instance->~C ();
 			HeapMemoryManager::FreeMemory ( hClass::instance, hClass::memory_used );
@@ -79,7 +84,7 @@ size_t Singleton<C>::memory_used(0);
 template <class C>
 inline C * const Singleton<C>::GetInstance()
 {
-	Assert(hClass::instance);
+	Assert( IsCreated () );
 	return hClass::instance;
 }
 

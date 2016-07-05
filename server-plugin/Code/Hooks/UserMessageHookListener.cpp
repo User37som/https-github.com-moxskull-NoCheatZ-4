@@ -28,8 +28,11 @@ UserMessageHookListener::UserMessageHookListener ()
 
 UserMessageHookListener::~UserMessageHookListener ()
 {
-	HookGuard<UserMessageHookListener>::GetInstance ()->UnhookAll ();
-	HookGuard<UserMessageHookListener>::DestroyInstance ();
+	if( HookGuard<UserMessageHookListener>::IsCreated () )
+	{
+		HookGuard<UserMessageHookListener>::GetInstance ()->UnhookAll ();
+		HookGuard<UserMessageHookListener>::DestroyInstance ();
+	}
 }
 
 void UserMessageHookListener::HookUserMessage ()

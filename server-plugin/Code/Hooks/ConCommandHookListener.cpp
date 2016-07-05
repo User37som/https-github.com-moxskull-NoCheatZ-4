@@ -30,8 +30,11 @@ ConCommandHookListener::ConCommandHookListener ()
 
 ConCommandHookListener::~ConCommandHookListener ()
 {
-	HookGuard<ConCommandHookListener>::GetInstance()->UnhookAll ();
-	HookGuard<ConCommandHookListener>::DestroyInstance ();
+	if( HookGuard<ConCommandHookListener>::IsCreated() )
+	{
+		HookGuard<ConCommandHookListener>::GetInstance ()->UnhookAll ();
+		HookGuard<ConCommandHookListener>::DestroyInstance ();
+	}
 }
 
 void ConCommandHookListener::HookDispatch ( void* cmd )
