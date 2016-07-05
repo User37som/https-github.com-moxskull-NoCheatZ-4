@@ -143,12 +143,16 @@ all: $(OBJECTS)
 	@$(d_CXX) $(INCLUDE) $(CFLAGS) $(OBJECTS) $(LINK) -m32 -o $(BINARY_DIR)/$(BINARY_NAME)  2>&1 | tee "error_link.txt"
 
 release:
-	@$(MAKE) prepare-build DEBUG=false
-	@$(MAKE) -j6 all DEBUG=false
+	@$(MAKE) prepare-build DEBUG=false COVERAGE=false
+	@$(MAKE) -j6 all DEBUG=false COVERAGE=false
 
 debug:
-	@$(MAKE) prepare-build DEBUG=true
-	@$(MAKE) -j6 all DEBUG=true
+	@$(MAKE) prepare-build DEBUG=true COVERAGE=false
+	@$(MAKE) -j6 all DEBUG=true COVERAGE=false
+
+coverage:
+	@$(MAKE) prepare-build COVERAGE=true
+	@$(MAKE) -j6 all COVERAGE=true
 
 clean:
 	@rm -rf $(RELEASE_DIR)

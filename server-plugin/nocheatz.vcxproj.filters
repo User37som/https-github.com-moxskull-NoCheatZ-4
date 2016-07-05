@@ -536,6 +536,9 @@
     <ClInclude Include="Code\Misc\HeapMemoryManager.h">
       <Filter>Code\Misc</Filter>
     </ClInclude>
+    <ClInclude Include="Code\Systems\i18nManager.h">
+      <Filter>Code\Systems</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Library Include="SourceSdk\Interfaces\Protobuf\protobuf-2.5.0\vsprojects\Debug\libprotobuf.lib">

@@ -51,7 +51,7 @@ public:
 
 	static void CreateInstance()
 	{
-		Assert( IsCreated () );
+		Assert( !IsCreated () );
 		void* ptr = HeapMemoryManager::AllocateMemory ( sizeof ( C ), hClass::memory_used, 16 );
 		hClass::instance = new(ptr) C();
 	}

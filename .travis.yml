@@ -12,6 +12,7 @@ branches:
     - master
 
 before_install:
+  - sudo pip install codecov
   - sudo rm /etc/apt/sources.list.d/google-chrome.list
   - sudo dpkg --add-architecture i386
   - sudo apt-get -qq update
@@ -32,4 +33,4 @@ script:
   - make
   - make clean
 after_success:
-  - bash <(curl -s https://codecov.io/bash)
+  - codecov
