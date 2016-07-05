@@ -44,7 +44,7 @@ protected:
 	}
 
 public:
-	static bool IsCreated () const
+	static bool IsCreated ()
 	{
 		return hClass::instance != nullptr;
 	}
