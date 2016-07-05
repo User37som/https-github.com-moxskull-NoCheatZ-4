@@ -225,18 +225,15 @@ bool CNoCheatZPlugin::Load ( SourceSdk::CreateInterfaceFn _interfaceFactory, Sou
 	SourceSdk::InterfacesProxy::Call_ServerCommand ( "exec nocheatz.cfg\n" );
 	SourceSdk::InterfacesProxy::Call_ServerExecute ();
 
-	for( int i ( 1 ); i < MAX_PLAYERS; ++i )
+	ProcessFilter::HumanAtLeastConnectedOrBot filter_class;
+	for( PlayerHandler::const_iterator ph ( &filter_class ); ph != PlayerHandler::end(); ph += &filter_class )
 	{
-		PlayerHandler::const_iterator ph ( NczPlayerManager::GetInstance ()->GetPlayerHandlerByIndex ( i ) );
-		if( ph >= SlotStatus::BOT )
-		{
-			HookEntity ( ph->GetEdict () );
-			WeaponHookListener::HookWeapon ( ph );
+		HookEntity ( ph->GetEdict () );
+		WeaponHookListener::HookWeapon ( ph );
 
-			if( ph >= SlotStatus::PLAYER_CONNECTED )
-			{
-				HookBasePlayer ( ph );
-			}
+		if( ph >= SlotStatus::PLAYER_CONNECTED )
+		{
+			HookBasePlayer ( ph );
 		}
 	}
 	BaseSystem::ManageSystems ();

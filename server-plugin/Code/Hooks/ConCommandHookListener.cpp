@@ -53,29 +53,32 @@ void HOOKFN_INT ConCommandHookListener::RT_nDispatch ( void* cmd, void*, SourceS
 	bool bypass ( false );
 	if( index >= PLUGIN_MIN_COMMAND_INDEX && index <= PLUGIN_MAX_COMMAND_INDEX )
 	{
-		PlayerHandler::const_iterator ph = NczPlayerManager::GetInstance ()->GetPlayerHandlerByIndex ( index );
-
-		if( ph > SlotStatus::INVALID )
+		if( index <= NczPlayerManager::GetInstance ()->GetMaxIndex () ) // https://github.com/L-EARN/NoCheatZ-4/issues/59#issuecomment-230506264
 		{
+			PlayerHandler::const_iterator ph = NczPlayerManager::GetInstance ()->GetPlayerHandlerByIndex ( index );
 
-#ifdef DEBUG
-			printf ( "Testing ConCommand %s of %s\n", SourceSdk::InterfacesProxy::ConCommand_GetName ( cmd ), ph->GetName () );
-#endif
-
-			ConCommandListenersListT::elem_t* it ( m_listeners.GetFirst () );
-			while( it != nullptr )
+			if( ph > SlotStatus::INVALID )
 			{
-				int const c ( it->m_value.listener->m_mycommands.Find ( cmd ) );
-				if( c != -1 )
-				{
-					bypass |= it->m_value.listener->RT_ConCommandCallback ( ph, cmd, args );
-				}
-				it = it->m_next;
-			}
 
 #ifdef DEBUG
-			printf ( "Bypassed ConCommand %s of %s\n", SourceSdk::InterfacesProxy::ConCommand_GetName ( cmd ), ph->GetName () );
+				printf ( "Testing ConCommand %s of %s\n", SourceSdk::InterfacesProxy::ConCommand_GetName ( cmd ), ph->GetName () );
 #endif
+
+				ConCommandListenersListT::elem_t* it ( m_listeners.GetFirst () );
+				while( it != nullptr )
+				{
+					int const c ( it->m_value.listener->m_mycommands.Find ( cmd ) );
+					if( c != -1 )
+					{
+						bypass |= it->m_value.listener->RT_ConCommandCallback ( ph, cmd, args );
+					}
+					it = it->m_next;
+				}
+
+#ifdef DEBUG
+				printf ( "Bypassed ConCommand %s of %s\n", SourceSdk::InterfacesProxy::ConCommand_GetName ( cmd ), ph->GetName () );
+#endif
+			}
 		}
 	}
 	else if( index == 0 )
