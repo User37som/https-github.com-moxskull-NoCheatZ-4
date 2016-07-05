@@ -13,7 +13,7 @@
 #   limitations under the License.                                           #
 ##############################################################################
 
-SHELL := /bin/bash
+SHELL := /bin/bash -o pipefail
 
 BASE = ..
 PROJECT = server-plugin
@@ -131,7 +131,7 @@ error:
 compile_object = \
 	@mkdir -p $(2); \
 	echo "$(1) => $(3)"; \
-	$(d_CXX) $(INCLUDE) $(CFLAGS) -o $(3) -c $(1) 2>&1 | tee "error_compile.txt"; test ${PIPESTATUS[0]} -eq 0
+	$(d_CXX) $(INCLUDE) $(CFLAGS) -o $(3) -c $(1) 2>&1 | tee "error_compile.txt"
 
 $(BIN_DIR)/%.o: %.cpp %.h
 	$(call compile_object, $<, $(@D), $@)
@@ -140,7 +140,7 @@ $(BIN_DIR)/%.o: %.cpp
 	$(call compile_object, $<, $(@D), $@)
 
 all: $(OBJECTS)
-	@$(d_CXX) $(INCLUDE) $(CFLAGS) $(OBJECTS) $(LINK) -m32 -o $(BINARY_DIR)/$(BINARY_NAME)  2>&1 | tee "error_link.txt"; test ${PIPESTATUS[0]} -eq 0
+	@$(d_CXX) $(INCLUDE) $(CFLAGS) $(OBJECTS) $(LINK) -m32 -o $(BINARY_DIR)/$(BINARY_NAME)  2>&1 | tee "error_link.txt"
 
 release:
 	@$(MAKE) prepare-build DEBUG=false
