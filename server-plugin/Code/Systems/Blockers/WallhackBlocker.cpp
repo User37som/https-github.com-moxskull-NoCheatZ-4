@@ -138,7 +138,7 @@ bool WallhackBlocker::RT_SetTransmitCallback ( PlayerHandler::const_iterator sen
 
 	if( sender_player->GetPlayerInfo ()->GetTeamIndex () == receiver_player->GetPlayerInfo ()->GetTeamIndex () )
 	{
-		cache.SetVisibility ( sender_player, receiver_player, true );
+		cache.SetVisibility ( sender_player.GetIndex(), receiver_player.GetIndex (), true );
 		METRICS_LEAVE_SECTION ( "WallhackBlocker::SetTransmitCallback" );
 		return false;
 	}
