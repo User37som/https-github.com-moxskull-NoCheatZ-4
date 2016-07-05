@@ -97,25 +97,25 @@ public:
 		memset ( this, 0, sizeof ( VisCache ) );
 	};
 
-	inline bool IsValid ( NczPlayer const * const pa, NczPlayer const * const pb ) const
+	inline bool IsValid ( int pa, int pb ) const
 	{
 		Assert ( pa && pb );
 		Assert ( pa != pb );
-		return m_cache[ pa->GetIndex () ][ pb->GetIndex () ].m_valid;
+		return m_cache[ pa ][ pb ].m_valid;
 	};
 
-	inline bool IsVisible ( NczPlayer const * const pa, NczPlayer const * const pb ) const
+	inline bool IsVisible ( int pa, int pb ) const
 	{
 		Assert ( pa && pb );
 		Assert ( pa != pb );
-		return m_cache[ pa->GetIndex () ][ pb->GetIndex () ].m_visible;
+		return m_cache[ pa][ pb ].m_visible;
 	};
 
-	inline void SetVisibility ( NczPlayer const * const pa, NczPlayer const * const pb, bool const visibility )
+	inline void SetVisibility ( int pa, int pb, bool const visibility )
 	{
 		Assert ( pa && pb );
 		Assert ( pa != pb );
-		m_cache[ pa->GetIndex () ][ pb->GetIndex () ] = VisInfo ( visibility );
+		m_cache[ pa][ pb ] = VisInfo ( visibility );
 	};
 };
 
