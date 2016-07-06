@@ -296,9 +296,9 @@ namespace Helpers
 
 			if( time > 0 )
 			{
-				pBuffer->set_duration ( 0 );
-				pBuffer->set_hold_time ( 0 );
-				pBuffer->set_flags ( 0x0008 ); // FFADE_STAYOUT
+				pBuffer->set_duration ( time / 2 );
+				pBuffer->set_hold_time ( time / 4 );
+				pBuffer->set_flags ( 0x0011 );// FFADE_PURGE | FFADE_IN
 			}
 			else
 			{

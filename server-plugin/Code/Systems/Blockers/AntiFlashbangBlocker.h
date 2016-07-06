@@ -21,6 +21,7 @@
 #include "Hooks/SetTransmitHookListener.h"
 #include "Systems/BaseSystem.h"
 #include "Misc/temp_singleton.h"
+#include "Systems/OnTickListener.h"
 
 typedef struct FlashInfoS
 {
@@ -38,6 +39,7 @@ typedef struct FlashInfoS
 class AntiFlashbangBlocker :
 	private BaseSystem,
 	private SourceSdk::IGameEventListener002,
+	private OnTickListener,
 	public PlayerDataStructHandler<FlashInfoT>,
 	private SetTransmitHookListener,
 	public Singleton<AntiFlashbangBlocker>
@@ -60,6 +62,8 @@ private:
 	virtual bool GotJob () const override final;
 
 	virtual void FireGameEvent ( SourceSdk::IGameEvent* ev ) override final;
+
+	virtual void RT_ProcessOnTick ( float const curtime ) override final;
 
 	virtual bool RT_SetTransmitCallback ( PlayerHandler::const_iterator sender, PlayerHandler::const_iterator receiver ) override final;
 

@@ -21,6 +21,8 @@
 
 #include "Misc/EntityProps.h"
 #include "Players/NczPlayerManager.h"
+#include "Systems/Logger.h"
+#include "Misc/Helpers.h"
 
 AntiFlashbangBlocker::AntiFlashbangBlocker () :
 	BaseSystem ( "AntiFlashbangBlocker" ),
@@ -52,12 +54,14 @@ void AntiFlashbangBlocker::Load ()
 
 	SourceSdk::InterfacesProxy::GetGameEventManager ()->AddListener ( this, "player_blind", true );
 	SetTransmitHookListener::RegisterSetTransmitHookListener ( this, 0 );
+	OnTickListener::RegisterOnTickListener ( this );
 }
 
 void AntiFlashbangBlocker::Unload ()
 {
 	SetTransmitHookListener::RemoveSetTransmitHookListener ( this );
 	SourceSdk::InterfacesProxy::GetGameEventManager ()->RemoveListener ( this );
+	OnTickListener::RemoveOnTickListener ( this );
 }
 
 bool AntiFlashbangBlocker::GotJob () const
@@ -124,8 +128,11 @@ void AntiFlashbangBlocker::FireGameEvent ( SourceSdk::IGameEvent* ev ) // player
 		const float flash_alpha ( *EntityProps::GetInstance ()->GetPropValue<float, PROP_FLASH_MAX_ALPHA> ( ph->GetEdict () ) );
 		const float flash_duration ( *EntityProps::GetInstance ()->GetPropValue<float, PROP_FLASH_DURATION> ( ph->GetEdict () ) );
 
+		DebugMessage ( Helpers::format ( "Player %s flash alpha %f, duration %f", ph->GetName(), flash_alpha, flash_duration ) );
+
 		if( flash_alpha < 255.0f )
 		{
+			Helpers::FadeUser ( ph->GetEdict (), 0 );
 			ResetPlayerDataStruct ( ph );
 			METRICS_LEAVE_SECTION ( "AntiFlashbangBlocker::FireGameEvent" );
 			return;
@@ -143,4 +150,21 @@ void AntiFlashbangBlocker::FireGameEvent ( SourceSdk::IGameEvent* ev ) // player
 		Helpers::FadeUser ( ph->GetEdict (), ( short ) floorf ( flash_duration * 1000.0f ) );
 	}
 	METRICS_LEAVE_SECTION ( "AntiFlashbangBlocker::FireGameEvent" );
+}
+
+void AntiFlashbangBlocker::RT_ProcessOnTick ( float const curtime )
+{
+	ProcessFilter::HumanAtLeastConnected filter_class;
+	for( PlayerHandler::const_iterator ph ( &filter_class ); ph != PlayerHandler::end (); ph += &filter_class )
+	{
+		FlashInfoT* const pInfo ( GetPlayerDataStruct ( ph ) );
+
+		if( pInfo->flash_end_time != 0.0 )
+		{
+			if( pInfo->flash_end_time > Plat_FloatTime () )
+			{
+				Helpers::FadeUser ( ph->GetEdict (), 0 );
+			}
+		}
+	}
 }
