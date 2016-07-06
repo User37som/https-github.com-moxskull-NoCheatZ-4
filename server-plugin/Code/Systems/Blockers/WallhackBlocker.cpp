@@ -118,66 +118,73 @@ void WallhackBlocker::OnMapStart ()
 
 bool WallhackBlocker::RT_SetTransmitCallback ( PlayerHandler::const_iterator sender_player, PlayerHandler::const_iterator receiver_player )
 {
-	METRICS_ENTER_SECTION ( "WallhackBlocker::SetTransmitCallback" );
+	/*
+		@sender : could be BOT, PLAYER_CONNECTED or PLAYER_IN_TESTS.
+		@receiver : could be PLAYER_CONNECTED or PLAYER_IN_TESTS.
+	*/
 
 	VisCache& cache ( WallhackBlocker::GetInstance ()->m_viscache );
 
-	bool can_not_process ( sender_player < SlotStatus::BOT );
-	can_not_process |= sender_player == SlotStatus::PLAYER_CONNECTING;
-	if( !can_not_process )
+	if( cache.IsValid ( sender_player.GetIndex (), receiver_player.GetIndex () ) )
 	{
-		can_not_process |= sender_player->GetPlayerInfo () == nullptr;
-		can_not_process |= receiver_player->GetPlayerInfo () == nullptr;
+		return !cache.IsVisible ( sender_player.GetIndex (), receiver_player.GetIndex () );
 	}
 
-	if( can_not_process )
-	{
-		METRICS_LEAVE_SECTION ( "WallhackBlocker::SetTransmitCallback" );
-		return false;
-	}
+	SourceSdk::IPlayerInfo * const pinfo_receiver = receiver_player->GetPlayerInfo ();
+	Assert ( pinfo_receiver );
+	SourceSdk::IPlayerInfo * const pinfo_sender = sender_player->GetPlayerInfo ();
+	Assert ( pinfo_sender );
 
-	if( sender_player->GetPlayerInfo ()->GetTeamIndex () == receiver_player->GetPlayerInfo ()->GetTeamIndex () )
+	if ( !pinfo_receiver->IsDead () )
 	{
-		cache.SetVisibility ( sender_player.GetIndex(), receiver_player.GetIndex (), true );
-		METRICS_LEAVE_SECTION ( "WallhackBlocker::SetTransmitCallback" );
-		return false;
+		if( !pinfo_sender->IsDead () && pinfo_receiver->GetTeamIndex() != pinfo_sender->GetTeamIndex() )
+		{
+			cache.SetVisibility(sender_player.GetIndex (), receiver_player.GetIndex (), RT_IsAbleToSee ( sender_player, receiver_player ) );
+		}
+		else
+		{
+			cache.SetVisibility ( sender_player.GetIndex (), receiver_player.GetIndex (), true );
+		}
 	}
-
-	if( receiver_player->GetPlayerInfo ()->IsObserver () )
+	else if( !pinfo_sender->IsDead () )
 	{
-		SpectatorMode receiver_spec ( *EntityProps::GetInstance ()->GetPropValue<SpectatorMode, PROP_OBSERVER_MODE> ( receiver_player->GetEdict (), false ) );
+		SpectatorMode const receiver_spec ( *EntityProps::GetInstance ()->GetPropValue<SpectatorMode, PROP_OBSERVER_MODE> ( receiver_player->GetEdict (), false ) );
 		if( receiver_spec == OBS_MODE_IN_EYE )
 		{
 			SourceSdk::CBaseHandle &bh ( *EntityProps::GetInstance ()->GetPropValue<SourceSdk::CBaseHandle, PROP_OBSERVER_TARGET> ( receiver_player->GetEdict (), false ) );
-			PlayerHandler::const_iterator spec_player ( bh.GetEntryIndex () );
-
-			if( spec_player && sender_player != spec_player )
+			if( bh.IsValid () )
 			{
+				PlayerHandler::const_iterator spec_player ( bh.GetEntryIndex () );
 
-				if( !cache.IsValid ( sender_player.GetIndex (), spec_player.GetIndex () ) )
+				if( spec_player && sender_player != spec_player )
 				{
-					cache.SetVisibility ( sender_player.GetIndex (), spec_player.GetIndex (), RT_IsAbleToSee ( sender_player, spec_player ) );
+					if( !cache.IsValid ( sender_player.GetIndex (), spec_player.GetIndex () ) )
+					{
+						cache.SetVisibility ( sender_player.GetIndex (), spec_player.GetIndex (), RT_IsAbleToSee ( sender_player, spec_player ) );
+					}
+					cache.SetVisibility ( sender_player.GetIndex (), receiver_player.GetIndex (), cache.IsVisible ( sender_player.GetIndex (), spec_player.GetIndex () ) );
 				}
-
-				bool rt ( !cache.IsVisible ( sender_player.GetIndex (), spec_player.GetIndex () ) );
-				METRICS_LEAVE_SECTION ( "WallhackBlocker::SetTransmitCallback" );
-				//SystemVerbose2(Helpers::format("%s can see %s ? : %s", spec_player->playerClass->GetName(), sender_player->playerClass->GetName(), Helpers::boolToString(!rt)));
-				return rt;
+				else
+				{
+					cache.SetVisibility ( sender_player.GetIndex (), receiver_player.GetIndex (), true );
+				}
 			}
 			else
 			{
-				return false;
+				cache.SetVisibility ( sender_player.GetIndex (), receiver_player.GetIndex (), true );
 			}
 		}
+		else
+		{
+			cache.SetVisibility ( sender_player.GetIndex (), receiver_player.GetIndex (), true );
+		}
+	}
+	else
+	{
+		cache.SetVisibility ( sender_player.GetIndex (), receiver_player.GetIndex (), true );
 	}
 
-	if( !cache.IsValid ( sender_player.GetIndex (), receiver_player.GetIndex () ) )
-	{
-		cache.SetVisibility ( sender_player.GetIndex (), receiver_player.GetIndex (), RT_IsAbleToSee ( sender_player, receiver_player ) );
-	}
-	bool rt ( !cache.IsVisible ( sender_player.GetIndex (), receiver_player.GetIndex () ) );
-	METRICS_LEAVE_SECTION ( "WallhackBlocker::SetTransmitCallback" );
-	return rt;
+	return !cache.IsVisible ( sender_player.GetIndex (), receiver_player.GetIndex () );
 }
 
 bool WallhackBlocker::RT_SetTransmitWeaponCallback ( SourceSdk::edict_t const * const sender, PlayerHandler::const_iterator receiver )
@@ -188,7 +195,9 @@ bool WallhackBlocker::RT_SetTransmitWeaponCallback ( SourceSdk::edict_t const * 
 
 	if( owner_player == *receiver ) return false;
 
-	if( receiver > SlotStatus::PLAYER_CONNECTING )
+	PlayerHandler::const_iterator owner_ph ( owner_player->GetIndex () );
+
+	if( receiver > SlotStatus::PLAYER_CONNECTING && owner_ph >= SlotStatus::BOT && owner_ph != SlotStatus::PLAYER_CONNECTING )
 	{
 		return RT_SetTransmitCallback ( owner_player->GetIndex (), receiver );
 	}
