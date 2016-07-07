@@ -16,8 +16,9 @@
 #ifndef LOGGER_H
 #define LOGGER_H
 
-#include "Preprocessors.h"
+#include "Interfaces/InterfacesProxy.h"
 
+#include "Preprocessors.h"
 #include "Misc/temp_basicstring.h"
 #include "Misc/temp_singleton.h"
 #include "Containers/utlvector.h"
@@ -52,6 +53,7 @@ enum msg_type
 };
 
 class Logger :
+	public SourceSdk::IGameEventListener002,
 	public Singleton<Logger>
 {
 	typedef Singleton<Logger> singleton_class;
@@ -63,8 +65,12 @@ private:
 public:
 	Logger () : singleton_class (), m_msg (), prolog ( "[NoCheatZ " NCZ_VERSION_STR "] " )
 	{};
-	virtual ~Logger () override final
-	{};
+	virtual ~Logger () final
+	{
+		SourceSdk::InterfacesProxy::GetGameEventManager ()->RemoveListener ( this );
+	};
+
+	virtual void FireGameEvent ( SourceSdk::IGameEvent* ev ) override final;
 
 	void Push ( const char * msg );
 	void Flush ();

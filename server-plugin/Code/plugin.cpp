@@ -354,12 +354,15 @@ void CNoCheatZPlugin::LevelInit ( char const *pMapName )
 //---------------------------------------------------------------------------------
 void CNoCheatZPlugin::ServerActivate ( SourceSdk::edict_t *pEdictList, int edictCount, int clientMax )
 {
-	DebugMessage ( "CNoCheatZPlugin::ServerActivate" );
+	DebugMessage ( Helpers::format("CNoCheatZPlugin::ServerActivate (pEdictList:%p, edictCount:%d, clientMax:%d)", edictCount, clientMax) );
 
 	Helpers::m_EdictList = pEdictList;
 	//Helpers::m_EdictList_csgo = pEdictList;
 	//Helpers::m_edictCount = edictCount;
 	//Helpers::m_clientMax = clientMax;
+
+	SourceSdk::InterfacesProxy::GetGameEventManager ()->AddListener ( Logger::GetInstance (), "player_connect", true );
+	SourceSdk::InterfacesProxy::GetGameEventManager ()->AddListener ( Logger::GetInstance (), "player_disconnect", true );
 
 	NczPlayerManager::GetInstance ()->LoadPlayerManager ();
 
@@ -408,11 +411,12 @@ void CNoCheatZPlugin::LevelShutdown ( void ) // !!!!this can get called multiple
 //---------------------------------------------------------------------------------
 void CNoCheatZPlugin::ClientActive ( SourceSdk::edict_t *pEntity )
 {
-	DebugMessage ( Helpers::format ( "CNoCheatZPlugin::ClientActive (%X -> %s)", pEntity, pEntity->GetClassName () ) );
-
 	NczPlayerManager::GetInstance ()->ClientActive ( pEntity );
 
 	PlayerHandler::const_iterator ph ( NczPlayerManager::GetInstance ()->GetPlayerHandlerByEdict ( pEntity ) );
+
+	DebugMessage ( Helpers::format ( "CNoCheatZPlugin::ClientActive (pEntity:%p -> pEntity->classname:%s -> clientname:%s)", pEntity, pEntity->GetClassName (), ph->GetName() ) );
+
 	if( ph >= SlotStatus::PLAYER_CONNECTED ) HookBasePlayer ( ph );
 	if( ph >= SlotStatus::BOT )
 	{
@@ -429,7 +433,7 @@ void CNoCheatZPlugin::ClientActive ( SourceSdk::edict_t *pEntity )
 //---------------------------------------------------------------------------------
 void CNoCheatZPlugin::ClientDisconnect ( SourceSdk::edict_t *pEntity )
 {
-	DebugMessage ( "CNoCheatZPlugin::ClientDisconnect" );
+	DebugMessage ( Helpers::format("CNoCheatZPlugin::ClientDisconnect (pEntity:%p -> pEntity->classname:%s -> clientname:%s)", pEntity, pEntity->GetClassName (), PlayerHandler::const_iterator ( NczPlayerManager::GetInstance ()->GetPlayerHandlerByEdict ( pEntity ) )->GetName() ));
 
 	WallhackBlocker::GetInstance ()->ClientDisconnect ( Helpers::IndexOfEdict ( pEntity ) );
 	NczPlayerManager::GetInstance ()->ClientDisconnect ( pEntity );
@@ -446,7 +450,7 @@ void CNoCheatZPlugin::ClientPutInServer ( SourceSdk::edict_t *pEntity, char cons
 		ValidationTester::GetInstance ()->ResetPlayerDataStruct ( pEntity );
 	}
 
-	DebugMessage ( Helpers::format ( "CNoCheatZPlugin::ClientPutInServer (%s -> %s) (Was already connected: %s)", pEntity->GetClassName (), playername, Helpers::boolToString ( stat != SlotStatus::INVALID ) ) );
+	DebugMessage ( Helpers::format ( "CNoCheatZPlugin::ClientPutInServer (pEntity:%p -> pEntity->classname:%s, playername:%s) (Was already connected: %s)", pEntity, pEntity->GetClassName (), playername, Helpers::boolToString ( stat != SlotStatus::INVALID ) ) );
 }
 
 //---------------------------------------------------------------------------------
@@ -476,7 +480,7 @@ SourceSdk::PLUGIN_RESULT CNoCheatZPlugin::ClientConnect ( bool *bAllowConnect, S
 	SpamConnectTester::GetInstance ()->ClientConnect ( bAllowConnect, pEntity, pszName, pszAddress, reject, maxrejectlen );
 	SpamChangeNameTester::GetInstance ()->ClientConnect ( bAllowConnect, pEntity, pszName, pszAddress, reject, maxrejectlen );
 
-	DebugMessage ( Helpers::format ( "CNoCheatZPlugin::ClientConnect (AllowConnect: %s, %X -> %s, %s, %s, %s", Helpers::boolToString ( *bAllowConnect ), pEntity, pEntity->GetClassName (), pszName, pszAddress, reject ) );
+	DebugMessage ( Helpers::format ( "CNoCheatZPlugin::ClientConnect (bAllowConnect:%s, pEntity:%p -> pEntity->classname:%s, pszName:%s, pszAddress:%s, reject:%s, maxrejectlen:%d", Helpers::boolToString ( *bAllowConnect ), pEntity, pEntity->GetClassName (), pszName, pszAddress, reject, maxrejectlen ) );
 
 	if( !*bAllowConnect )
 	{
@@ -505,14 +509,13 @@ SourceSdk::PLUGIN_RESULT CNoCheatZPlugin::ClientConnect ( bool *bAllowConnect, S
 //---------------------------------------------------------------------------------
 SourceSdk::PLUGIN_RESULT CNoCheatZPlugin::RT_ClientCommand ( SourceSdk::edict_t *pEntity, const SourceSdk::CCommand &args )
 {
-	DebugMessage ( Helpers::format ( "CNoCheatZPlugin::ClientCommand(%X -> %s, %s)", pEntity, pEntity->GetClassName (), args.GetCommandString () ) );
-
 	if( !pEntity || pEntity->IsFree () )
 	{
 		return SourceSdk::PLUGIN_CONTINUE;
 	}
 
 	PlayerHandler::const_iterator ph ( NczPlayerManager::GetInstance ()->GetPlayerHandlerByEdict ( pEntity ) );
+	DebugMessage ( Helpers::format ( "CNoCheatZPlugin::ClientCommand (pEntity:%p -> pEntity->classname:%s -> clientname:%s, args:%s)", pEntity, pEntity->GetClassName (), ph->GetName(), args.GetCommandString () ) );
 	if( ph >= SlotStatus::PLAYER_CONNECTED )
 	{
 		if( ConCommandTester::GetInstance ()->RT_TestPlayerCommand ( ph, args.GetCommandString () ) )
@@ -531,6 +534,7 @@ SourceSdk::PLUGIN_RESULT CNoCheatZPlugin::RT_ClientCommand ( SourceSdk::edict_t 
 //---------------------------------------------------------------------------------
 SourceSdk::PLUGIN_RESULT CNoCheatZPlugin::NetworkIDValidated ( const char *pszUserName, const char *pszNetworkID )
 {
+	DebugMessage ( Helpers::format ( "CNoCheatZPlugin::NetworkIDValidated (pszUserName:%s, pszNetworkID:%s)", pszUserName, pszNetworkID ) );
 	if( !SteamGameServer_BSecure () ) return SourceSdk::PLUGIN_CONTINUE;
 
 	ValidationTester::GetInstance ()->AddPendingValidation ( pszUserName, pszNetworkID );

@@ -18,8 +18,6 @@
 #include <fstream>
 #include <iostream>
 
-#include "Interfaces/InterfacesProxy.h"
-
 #include "Misc/include_windows_headers.h"
 #include "Misc/Helpers.h"
 #include "Misc/temp_Metrics.h"
@@ -28,6 +26,12 @@
 
 void Logger::Push ( const char * msg )
 {
+	/*
+		We need to make a copy of msg because most of functions calling Push are using Helpers::format while Push is also using Helpers::format.
+		But because Helpers::format is using a static buffer, msg also points to this static buffer. Hence, calling Helpers::format here will just overwrite the message ...
+	*/
+	basic_string copy_msg ( msg );
+
 	int server_tick;
 	if( SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive )
 	{
@@ -40,12 +44,21 @@ void Logger::Push ( const char * msg )
 
 	if( AutoTVRecord::GetInstance ()->IsRecording () )
 	{
-		const char* record_tick ( Helpers::format ( "%s.dem:Tick #%d", AutoTVRecord::GetInstance ()->GetRecordFilename ().c_str (), AutoTVRecord::GetInstance ()->GetRecordTick () ) );
-		m_msg.AddToTail ( Helpers::format ( "%s [Server Tick #%d, SourceTV : %s] %s", Helpers::getStrDateTime ( "%x %X" ), server_tick, record_tick, msg ) );
+		basic_string move_msg;
+		move_msg.reserve ( 255 );
+		move_msg.append ( Helpers::getStrDateTime ( "%x %X " ) );
+		move_msg.append ( Helpers::format ( "[ Server Tick #%d, SourceTV:%s.dem : Tick #%d ] ", server_tick, AutoTVRecord::GetInstance ()->GetRecordFilename ().c_str (), AutoTVRecord::GetInstance ()->GetRecordTick () ) );
+		move_msg.append ( copy_msg );
+		m_msg.AddToTail ( std::move( move_msg ) );
 	}
 	else
 	{
-		m_msg.AddToTail ( Helpers::format ( "%s [Server Tick #%d] %s", Helpers::getStrDateTime ( "%x %X" ), server_tick, msg ) );
+		basic_string move_msg;
+		move_msg.reserve ( 255 );
+		move_msg.append ( Helpers::getStrDateTime ( "%x %X " ) );
+		move_msg.append ( Helpers::format ( "[ Server Tick #%d] ", server_tick ) );
+		move_msg.append ( copy_msg );
+		m_msg.AddToTail ( std::move ( move_msg ) );
 	}
 
 	ProcessFilter::HumanAtLeastConnected filter_class;
@@ -61,7 +74,7 @@ void Logger::Push ( const char * msg )
 template <>
 void Logger::Msg<MSG_CONSOLE> ( const char * msg, int verbose /*= 0*/ )
 {
-	std::cout << prolog.c_str () << msg << "\n";
+	std::cout << prolog.c_str () << ' ' << Plat_FloatTime() << ' ' << msg << '\n';
 #ifdef WIN32
 	OutputDebugStringA ( prolog.c_str () );
 	OutputDebugStringA ( msg );
@@ -95,31 +108,37 @@ void Logger::Msg<MSG_LOG_CHAT> ( const char * msg, int verbose /*= 0*/ )
 template <>
 void Logger::Msg<MSG_WARNING> ( const char * msg, int verbose /*= 0*/ )
 {
-	basic_string m ( prolog );
-	m.append ( "WARNING : " ).append ( msg ).append ( '\n' );
-	std::cout << m.c_str ();
+	basic_string m1 ( "WARNING : " );
+	m1.append ( msg );
+	Push ( m1.c_str () );
+
+	basic_string m2 ( prolog );
+	m2.append ( m1 ).append ( '\n' );
+	std::cout << m2.c_str ();
 #ifdef WIN32
-	OutputDebugStringA ( m.c_str () );
+	OutputDebugStringA ( m2.c_str () );
 #endif
-	Push ( m.c_str () );
 }
 
 template <>
 void Logger::Msg<MSG_ERROR> ( const char * msg, int verbose /*= 0*/ )
 {
-	basic_string m ( prolog );
-	m.append ( "ERROR : " ).append ( msg ).append ( '\n' );
-	std::cout << m.c_str ();
+	basic_string m1 ( "ERROR : " );
+	m1.append ( msg );
+	Push ( m1.c_str () );
+
+	basic_string m2 ( prolog );
+	m2.append ( m1 ).append ( '\n' );
+	std::cout << m2.c_str ();
 #ifdef WIN32
-	OutputDebugStringA ( m.c_str () );
+	OutputDebugStringA ( m2.c_str () );
 #endif
-	Push ( m.c_str () );
 }
 
 template <>
 void Logger::Msg<MSG_HINT> ( const char * msg, int verbose /*= 0*/ )
 {
-	std::cerr << prolog.c_str () << Plat_FloatTime () << " : " << msg << "\n";
+	std::cerr << prolog.c_str () << Plat_FloatTime () << " : " << msg << '\n';
 }
 
 template <>
@@ -146,6 +165,23 @@ void Logger::Msg<MSG_DEBUG> ( const char * msg, int verbose /*= 0*/ )
 	if( verbose > 2 )
 	{
 		Msg<MSG_CONSOLE> ( basic_string ( "DEBUG : " ).append ( msg ) );
+	}
+}
+
+void Logger::FireGameEvent ( SourceSdk::IGameEvent * ev )
+{
+	// player_connect
+	// player_disconnect
+
+	char const * const event_name = ev->GetName () + 7;
+
+	if( *event_name == 'c' )
+	{
+		Msg<MSG_LOG> ( Helpers::format ( "Client connect : %s [%s - %s]", ev->GetString ( "name" ), ev->GetString ( "networkid" ), ev->GetString ( "address" ) ) );
+	}
+	else
+	{
+		Msg<MSG_LOG> ( Helpers::format ( "Client disconnect : %s [%s] %s", ev->GetString ( "name" ), ev->GetString ( "networkid" ), ev->GetString ( "reason" ) ) );
 	}
 }
 
@@ -191,5 +227,5 @@ void Logger::Flush ()
 
 void Helpers::writeToLogfile ( const basic_string &text )
 {
-	Logger::GetInstance ()->Push ( Helpers::format ( "At %f (Server Tick #%d) : %s", Plat_FloatTime (), Helpers::GetTickCount (), text.c_str () ) );
+	Logger::GetInstance ()->Push ( text.c_str () );
 }
