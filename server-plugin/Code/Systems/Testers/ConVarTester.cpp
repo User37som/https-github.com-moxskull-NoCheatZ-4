@@ -73,7 +73,7 @@ void ConVarTester::RT_ProcessOnTick ( float const curtime )
 	else
 	{
 #ifdef DEBUG
-		SystemVerbose2 ( Helpers::format ( "ConVarTester : Not processing any player this tick", m_current_player->GetName () ) );
+		SystemVerbose2 (  "ConVarTester : Not processing any player this tick" );
 #endif
 	}
 }
