@@ -433,7 +433,7 @@ void CNoCheatZPlugin::ClientActive ( SourceSdk::edict_t *pEntity )
 //---------------------------------------------------------------------------------
 void CNoCheatZPlugin::ClientDisconnect ( SourceSdk::edict_t *pEntity )
 {
-	DebugMessage ( Helpers::format("CNoCheatZPlugin::ClientDisconnect (pEntity:%p -> pEntity->classname:%s -> clientname:%s)", pEntity, pEntity->GetClassName (), PlayerHandler::const_iterator ( NczPlayerManager::GetInstance ()->GetPlayerHandlerByEdict ( pEntity ) )->GetName() ));
+	DebugMessage ( Helpers::format("CNoCheatZPlugin::ClientDisconnect (pEntity:%p -> pEntity->classname:%s)", pEntity, pEntity->GetClassName () ));
 
 	WallhackBlocker::GetInstance ()->ClientDisconnect ( Helpers::IndexOfEdict ( pEntity ) );
 	NczPlayerManager::GetInstance ()->ClientDisconnect ( pEntity );
