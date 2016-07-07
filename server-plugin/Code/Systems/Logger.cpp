@@ -177,11 +177,11 @@ void Logger::FireGameEvent ( SourceSdk::IGameEvent * ev )
 
 	if( *event_name == 'c' )
 	{
-		Msg<MSG_LOG> ( Helpers::format ( "Client connect : %s [%s - %s]", ev->GetString ( "name" ), ev->GetString ( "networkid" ), ev->GetString ( "address" ) ) );
+		Logger::GetInstance()->Msg<MSG_LOG> ( Helpers::format ( "Client connect : %s [%s - %s]", ev->GetString ( "name" ), ev->GetString ( "networkid" ), ev->GetString ( "address" ) ) );
 	}
 	else
 	{
-		Msg<MSG_LOG> ( Helpers::format ( "Client disconnect : %s [%s] %s", ev->GetString ( "name" ), ev->GetString ( "networkid" ), ev->GetString ( "reason" ) ) );
+		Logger::GetInstance ()->Msg<MSG_LOG> ( Helpers::format ( "Client disconnect : %s [%s] %s", ev->GetString ( "name" ), ev->GetString ( "networkid" ), ev->GetString ( "reason" ) ) );
 	}
 }
 
