@@ -65,7 +65,16 @@ void ConVarTester::RT_ProcessOnTick ( float const curtime )
 	m_current_player += &filter_class;
 	if( m_current_player )
 	{
+#ifdef DEBUG
+		SystemVerbose2 ( Helpers::format ( "ConVarTester : Processing player %s", m_current_player->GetName () ) );
+#endif
 		RT_ProcessPlayerTest ( m_current_player, curtime );
+	}
+	else
+	{
+#ifdef DEBUG
+		SystemVerbose2 ( Helpers::format ( "ConVarTester : Not processing any player this tick", m_current_player->GetName () ) );
+#endif
 	}
 }
 
@@ -75,7 +84,7 @@ void ConVarTester::RT_ProcessPlayerTest ( PlayerHandler::const_iterator ph, floa
 
 	if( req->isSent && !req->isReplyed )
 	{
-		if( curtime - 30.0 > req->timeStart )
+		if( curtime - 30.0f > req->timeStart) 
 		{
 			ph->Kick ( "ConVar request timed out" );
 		}
@@ -96,6 +105,9 @@ void ConVarTester::RT_ProcessPlayerTest ( PlayerHandler::const_iterator ph, floa
 	}
 
 	SourceSdk::InterfacesProxy::GetServerPluginHelpers ()->StartQueryCvarValue ( ph->GetEdict (), m_convars_rules[ req->ruleset ].name );
+#ifdef DEBUG
+	SystemVerbose2 ( Helpers::format ( "ConVarTester : Requesting ConVar %s", m_convars_rules[ req->ruleset ].name ) );
+#endif
 	req->isSent = true;
 	req->isReplyed = false;
 	req->timeStart = curtime;
@@ -183,7 +195,7 @@ void ConVarTester::AddConvarRuleset ( const char * name, const char * value, Con
 		}
 		else
 		{
-			Logger::GetInstance ()->Msg<MSG_ERROR> ( Helpers::format ( "ConVarTester : Failed to link the server convar %s", name ) );
+			Logger::GetInstance ()->Msg<MSG_ERROR> ( Helpers::format ( "ConVarTester : Failed to link the server convar %s (Not found server-side)", name ) );
 		}
 	}
 	else
@@ -196,22 +208,34 @@ void ConVarTester::RT_OnQueryCvarValueFinished ( PlayerHandler::const_iterator p
 {
 	if( !IsActive () ) return;
 
+	CurrentConVarRequest* const req ( GetPlayerDataStructByIndex ( ph.GetIndex () ) );
+
 	if( SourceSdk::InterfacesProxy::ConVar_GetBool ( var_sv_cheats ) )
 	{
+		/* Some servers silently set sv_cheats to 1 in a short timespan to make some mods.
+		 This is where some players can get kicked without reason.
+		 We will send the same request another time. */
+
+		req->isSent = false;
+
+		Logger::GetInstance ()->Msg<MSG_WARNING> ( Helpers::format ( "ConVarTester : Cannot process RT_OnQueryCvarValueFinished because server-side sv_cheats is not 0", ph->GetName ()) );
 		return;
 	}
 
 	ConVarInfoT* ruleset ( RT_FindConvarRuleset ( pCvarName ) );
 	if( !ruleset )
 	{
+		Logger::GetInstance()->Msg<MSG_ERROR> ( Helpers::format("ConVarTester : RT_FindConvarRuleset failed for %s (%s) -> Another plugin sent this request or program is illformed", ph->GetName(), pCvarName ));
 unexpected:
 		return;
 	}
 
-	CurrentConVarRequest* const req ( GetPlayerDataStructByIndex ( ph.GetIndex () ) );
-
 	if( !req->isSent ) goto unexpected;
-	if( strcmp ( m_convars_rules[ req->ruleset ].name, ruleset->name ) ) goto unexpected;
+	if( strcmp ( m_convars_rules[ req->ruleset ].name, ruleset->name ) )
+	{
+		Logger::GetInstance ()->Msg<MSG_ERROR> ( Helpers::format ( "ConVarTester : RT_FindConvarRuleset failed for %s (%s) -> ConVarName %s doesn't match %s", ph->GetName (), pCvarName, m_convars_rules[ req->ruleset ].name, ruleset->name ) );
+		goto unexpected;
+	}
 	req->isReplyed = true;
 	req->answer = pCvarValue;
 
