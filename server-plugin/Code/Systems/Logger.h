@@ -53,7 +53,6 @@ enum msg_type
 };
 
 class Logger :
-	public SourceSdk::IGameEventListener002,
 	public Singleton<Logger>
 {
 	typedef Singleton<Logger> singleton_class;
@@ -65,12 +64,8 @@ private:
 public:
 	Logger () : singleton_class (), m_msg (), prolog ( "[NoCheatZ " NCZ_VERSION_STR "] " )
 	{};
-	virtual ~Logger () final
-	{
-		SourceSdk::InterfacesProxy::GetGameEventManager ()->RemoveListener ( this );
-	};
-
-	virtual void FireGameEvent ( SourceSdk::IGameEvent* ev ) override final;
+	virtual ~Logger () override final
+	{};
 
 	void Push ( const char * msg );
 	void Flush ();

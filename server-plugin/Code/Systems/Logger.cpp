@@ -168,23 +168,6 @@ void Logger::Msg<MSG_DEBUG> ( const char * msg, int verbose /*= 0*/ )
 	}
 }
 
-void Logger::FireGameEvent ( SourceSdk::IGameEvent * ev )
-{
-	// player_connect
-	// player_disconnect
-
-	char const * const event_name = ev->GetName () + 7;
-
-	if( *event_name == 'c' )
-	{
-		Logger::GetInstance()->Msg<MSG_LOG> ( Helpers::format ( "Client connect : %s [%s - %s]", ev->GetString ( "name" ), ev->GetString ( "networkid" ), ev->GetString ( "address" ) ) );
-	}
-	else
-	{
-		Logger::GetInstance ()->Msg<MSG_LOG> ( Helpers::format ( "Client disconnect : %s [%s] %s", ev->GetString ( "name" ), ev->GetString ( "networkid" ), ev->GetString ( "reason" ) ) );
-	}
-}
-
 void Logger::Flush ()
 {
 	if( m_msg.IsEmpty () ) return;

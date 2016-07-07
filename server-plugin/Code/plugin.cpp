@@ -361,9 +361,6 @@ void CNoCheatZPlugin::ServerActivate ( SourceSdk::edict_t *pEdictList, int edict
 	//Helpers::m_edictCount = edictCount;
 	//Helpers::m_clientMax = clientMax;
 
-	SourceSdk::InterfacesProxy::GetGameEventManager ()->AddListener ( Logger::GetInstance (), "player_connect", true );
-	SourceSdk::InterfacesProxy::GetGameEventManager ()->AddListener ( Logger::GetInstance (), "player_disconnect", true );
-
 	NczPlayerManager::GetInstance ()->LoadPlayerManager ();
 
 	RadarHackBlocker::GetInstance ()->OnMapStart ();
