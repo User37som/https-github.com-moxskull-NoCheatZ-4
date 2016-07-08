@@ -119,7 +119,7 @@ ConVarInfoT* ConVarTester::RT_FindConvarRuleset ( const char * name )
 	size_t const max ( m_convars_rules.Size () );
 	while( pos < max )
 	{
-		if( strcmp ( m_convars_rules[ pos ].name, name ) == 0 )
+		if( stricmp ( m_convars_rules[ pos ].name, name ) == 0 )
 		{
 			return &m_convars_rules[ pos ];
 		}
@@ -218,24 +218,17 @@ void ConVarTester::RT_OnQueryCvarValueFinished ( PlayerHandler::const_iterator p
 
 		req->isSent = false;
 
-		Logger::GetInstance ()->Msg<MSG_WARNING> ( Helpers::format ( "ConVarTester : Cannot process RT_OnQueryCvarValueFinished because server-side sv_cheats is not 0", ph->GetName ()) );
+		//Logger::GetInstance ()->Msg<MSG_WARNING> ( Helpers::format ( "ConVarTester : Cannot process RT_OnQueryCvarValueFinished because server-side sv_cheats is not 0", ph->GetName ()) );
 		return;
 	}
 
 	ConVarInfoT* ruleset ( RT_FindConvarRuleset ( pCvarName ) );
-	if( !ruleset )
+	if( !ruleset || !req->isSent || stricmp ( m_convars_rules[ req->ruleset ].name, pCvarName ) != 0)
 	{
-		Logger::GetInstance()->Msg<MSG_ERROR> ( Helpers::format("ConVarTester : RT_FindConvarRuleset failed for %s (%s) -> Another plugin sent this request or program is illformed", ph->GetName(), pCvarName ));
-unexpected:
+		//Logger::GetInstance()->Msg<MSG_ERROR> ( Helpers::format("ConVarTester : Unexpected reply for %s (%s) -> Another plugin sent this request or program is illformed", ph->GetName(), pCvarName ));
 		return;
 	}
 
-	if( !req->isSent ) goto unexpected;
-	if( strcmp ( m_convars_rules[ req->ruleset ].name, ruleset->name ) )
-	{
-		Logger::GetInstance ()->Msg<MSG_ERROR> ( Helpers::format ( "ConVarTester : RT_FindConvarRuleset failed for %s (%s) -> ConVarName %s doesn't match %s", ph->GetName (), pCvarName, m_convars_rules[ req->ruleset ].name, ruleset->name ) );
-		goto unexpected;
-	}
 	req->isReplyed = true;
 	req->answer = pCvarValue;
 
