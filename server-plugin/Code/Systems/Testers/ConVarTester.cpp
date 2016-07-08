@@ -104,13 +104,22 @@ void ConVarTester::RT_ProcessPlayerTest ( PlayerHandler::const_iterator ph, floa
 		req->answer_status = "NO STATUS";
 	}
 
-	SourceSdk::InterfacesProxy::GetServerPluginHelpers ()->StartQueryCvarValue ( ph->GetEdict (), m_convars_rules[ req->ruleset ].name );
+	req->cookie = SourceSdk::InterfacesProxy::GetServerPluginHelpers ()->StartQueryCvarValue ( ph->GetEdict (), m_convars_rules[ req->ruleset ].name );
+	if( req->cookie != InvalidQueryCvarCookie )
+	{
 #ifdef DEBUG
-	SystemVerbose2 ( Helpers::format ( "ConVarTester : Requesting ConVar %s", m_convars_rules[ req->ruleset ].name ) );
+		SystemVerbose2 ( Helpers::format ( "ConVarTester : Requesting ConVar %s", m_convars_rules[ req->ruleset ].name ) );
 #endif
-	req->isSent = true;
-	req->isReplyed = false;
-	req->timeStart = curtime;
+		req->isSent = true;
+		req->isReplyed = false;
+		req->timeStart = curtime;
+	}
+	else
+	{
+		req->isSent = false;
+		req->isReplyed = false;
+		Logger::GetInstance ()->Msg<MSG_ERROR> ( "ConVarTester : StartQueryCvarValue returned InvalidQueryCvarCookie" );
+	}
 }
 
 ConVarInfoT* ConVarTester::RT_FindConvarRuleset ( const char * name )
@@ -204,142 +213,142 @@ void ConVarTester::AddConvarRuleset ( const char * name, const char * value, Con
 	}
 }
 
-void ConVarTester::RT_OnQueryCvarValueFinished ( PlayerHandler::const_iterator ph, SourceSdk::EQueryCvarValueStatus eStatus, const char *pCvarName, const char *pCvarValue )
+void ConVarTester::RT_OnQueryCvarValueFinished ( PlayerHandler::const_iterator ph, SourceSdk::QueryCvarCookie_t cookie, SourceSdk::EQueryCvarValueStatus eStatus, const char *pCvarName, const char *pCvarValue )
 {
-	if( !IsActive () ) return;
-
 	CurrentConVarRequest* const req ( GetPlayerDataStructByIndex ( ph.GetIndex () ) );
 
-	if( SourceSdk::InterfacesProxy::ConVar_GetBool ( var_sv_cheats ) )
+	if( req->cookie == cookie )
 	{
-		/* Some servers silently set sv_cheats to 1 in a short timespan to make some mods.
-		 This is where some players can get kicked without reason.
-		 We will send the same request another time. */
+		if( SourceSdk::InterfacesProxy::ConVar_GetBool ( var_sv_cheats ) )
+		{
+			/* Some servers silently set sv_cheats to 1 in a short timespan to make some mods.
+			 This is where some players can get kicked without reason.
+			 We will send the same request another time. */
+			Assert ( req->isSent );
+			req->isSent = false;
+
+			//Logger::GetInstance ()->Msg<MSG_WARNING> ( Helpers::format ( "ConVarTester : Cannot process RT_OnQueryCvarValueFinished because server-side sv_cheats is not 0", ph->GetName ()) );
+			return;
+		}
+
+		ConVarInfoT* ruleset ( RT_FindConvarRuleset ( pCvarName ) );
+		Assert ( ruleset );
+		Assert ( req->isSent );
+		Assert ( req->isReplyed == false );
+
+		req->isReplyed = true;
+		req->answer = pCvarValue;
+
+		switch( eStatus )
+		{
+			case SourceSdk::eQueryCvarValueStatus_ValueIntact:
+				{
+					req->answer_status = "ValueIntact";
+					if( ruleset->rule == ConVarRule::NO_VALUE )
+					{
+						Detection_ConVar pDetection;
+						pDetection.PrepareDetectionData ( req );
+						pDetection.PrepareDetectionLog ( ph, this );
+						pDetection.Log ();
+						BanRequest::GetInstance ()->AddAsyncBan ( ph, 0, "Banned by NoCheatZ 4" );
+					}
+					else if( ruleset->rule == ConVarRule::SAME )
+					{
+						if( strcmp ( ruleset->value, pCvarValue ) )
+						{
+							Detection_ConVar pDetection;
+							pDetection.PrepareDetectionData ( req );
+							pDetection.PrepareDetectionLog ( ph, this );
+							pDetection.Log ();
+							BanRequest::GetInstance ()->AddAsyncBan ( ph, 0, "Banned by NoCheatZ 4" );
+						}
+					}
+					else if( ruleset->rule == ConVarRule::SAME_AS_SERVER )
+					{
+						if( strcmp ( SourceSdk::InterfacesProxy::ConVar_GetString ( ruleset->sv_var ), pCvarValue ) )
+						{
+							Detection_ConVar pDetection;
+							pDetection.PrepareDetectionData ( req );
+							pDetection.PrepareDetectionLog ( ph, this );
+							pDetection.Log ();
+							BanRequest::GetInstance ()->AddAsyncBan ( ph, 0, "Banned by NoCheatZ 4" );
+						}
+					}
+					else if( ruleset->rule == ConVarRule::SAME_FLOAT )
+					{
+						float fcval = ( float ) atof ( pCvarValue );
+						float fsval = ( float ) atof ( ruleset->value );
+						if( fcval != fsval )
+						{
+							Detection_ConVar pDetection;
+							pDetection.PrepareDetectionData ( req );
+							pDetection.PrepareDetectionLog ( ph, this );
+							pDetection.Log ();
+							BanRequest::GetInstance ()->AddAsyncBan ( ph, 0, "Banned by NoCheatZ 4" );
+						}
+					}
+					else if( ruleset->rule == ConVarRule::SAME_FLOAT_AS_SERVER )
+					{
+						float fcval = ( float ) atof ( pCvarValue );
+						float fsval = ( float ) atof ( SourceSdk::InterfacesProxy::ConVar_GetString ( ruleset->sv_var ) );
+						if( fcval != fsval )
+						{
+							Detection_ConVar pDetection;
+							pDetection.PrepareDetectionData ( req );
+							pDetection.PrepareDetectionLog ( ph, this );
+							pDetection.Log ();
+							BanRequest::GetInstance ()->AddAsyncBan ( ph, 0, "Banned by NoCheatZ 4" );
+						}
+					}
+					break;
+				}
+
+			case SourceSdk::eQueryCvarValueStatus_CvarNotFound:
+				{
+					req->answer_status = "CvarNotFound";
+					req->answer = "NO VALUE";
+					if( ruleset->rule != ConVarRule::NO_VALUE )
+					{
+						Detection_ConVar pDetection;
+						pDetection.PrepareDetectionData ( req );
+						pDetection.PrepareDetectionLog ( ph, this );
+						pDetection.Log ();
+						BanRequest::GetInstance ()->AddAsyncBan ( ph, 0, "Banned by NoCheatZ 4" );
+					}
+					break;
+				}
+
+			case SourceSdk::eQueryCvarValueStatus_NotACvar:
+				{
+					req->answer_status = "NotACvar";
+					req->answer = "CONCOMMAND";
+					goto unexpected2;
+				}
+
+			case SourceSdk::eQueryCvarValueStatus_CvarProtected:
+				{
+					req->answer_status = "CvarProtected";
+					req->answer = "NO VALUE";
+					goto unexpected2;
+				}
+
+			default:
+				{
+					req->answer_status = "NO STATUS";
+					req->answer = "NO VALUE";
+					goto unexpected2;
+				}
+		}
 
 		req->isSent = false;
-
-		//Logger::GetInstance ()->Msg<MSG_WARNING> ( Helpers::format ( "ConVarTester : Cannot process RT_OnQueryCvarValueFinished because server-side sv_cheats is not 0", ph->GetName ()) );
 		return;
-	}
-
-	ConVarInfoT* ruleset ( RT_FindConvarRuleset ( pCvarName ) );
-	if( !ruleset || !req->isSent || stricmp ( m_convars_rules[ req->ruleset ].name, pCvarName ) != 0)
-	{
-		//Logger::GetInstance()->Msg<MSG_ERROR> ( Helpers::format("ConVarTester : Unexpected reply for %s (%s) -> Another plugin sent this request or program is illformed", ph->GetName(), pCvarName ));
-		return;
-	}
-
-	req->isReplyed = true;
-	req->answer = pCvarValue;
-
-	switch( eStatus )
-	{
-		case SourceSdk::eQueryCvarValueStatus_ValueIntact:
-			{
-				req->answer_status = "ValueIntact";
-				if( ruleset->rule == ConVarRule::NO_VALUE )
-				{
-					Detection_ConVar pDetection;
-					pDetection.PrepareDetectionData ( req );
-					pDetection.PrepareDetectionLog ( ph, this );
-					pDetection.Log ();
-					BanRequest::GetInstance ()->AddAsyncBan ( ph, 0, "Banned by NoCheatZ 4" );
-				}
-				else if( ruleset->rule == ConVarRule::SAME )
-				{
-					if( strcmp ( ruleset->value, pCvarValue ) )
-					{
-						Detection_ConVar pDetection;
-						pDetection.PrepareDetectionData ( req );
-						pDetection.PrepareDetectionLog ( ph, this );
-						pDetection.Log ();
-						BanRequest::GetInstance ()->AddAsyncBan ( ph, 0, "Banned by NoCheatZ 4" );
-					}
-				}
-				else if( ruleset->rule == ConVarRule::SAME_AS_SERVER )
-				{
-					if( strcmp ( SourceSdk::InterfacesProxy::ConVar_GetString ( ruleset->sv_var ), pCvarValue ) )
-					{
-						Detection_ConVar pDetection;
-						pDetection.PrepareDetectionData ( req );
-						pDetection.PrepareDetectionLog ( ph, this );
-						pDetection.Log ();
-						BanRequest::GetInstance ()->AddAsyncBan ( ph, 0, "Banned by NoCheatZ 4" );
-					}
-				}
-				else if( ruleset->rule == ConVarRule::SAME_FLOAT )
-				{
-					float fcval = ( float ) atof ( pCvarValue );
-					float fsval = ( float ) atof ( ruleset->value );
-					if( fcval != fsval )
-					{
-						Detection_ConVar pDetection;
-						pDetection.PrepareDetectionData ( req );
-						pDetection.PrepareDetectionLog ( ph, this );
-						pDetection.Log ();
-						BanRequest::GetInstance ()->AddAsyncBan ( ph, 0, "Banned by NoCheatZ 4" );
-					}
-				}
-				else if( ruleset->rule == ConVarRule::SAME_FLOAT_AS_SERVER )
-				{
-					float fcval = ( float ) atof ( pCvarValue );
-					float fsval = ( float ) atof ( SourceSdk::InterfacesProxy::ConVar_GetString ( ruleset->sv_var ) );
-					if( fcval != fsval )
-					{
-						Detection_ConVar pDetection;
-						pDetection.PrepareDetectionData ( req );
-						pDetection.PrepareDetectionLog ( ph, this );
-						pDetection.Log ();
-						BanRequest::GetInstance ()->AddAsyncBan ( ph, 0, "Banned by NoCheatZ 4" );
-					}
-				}
-				break;
-			}
-
-		case SourceSdk::eQueryCvarValueStatus_CvarNotFound:
-			{
-				req->answer_status = "CvarNotFound";
-				req->answer = "NO VALUE";
-				if( ruleset->rule != ConVarRule::NO_VALUE )
-				{
-					Detection_ConVar pDetection;
-					pDetection.PrepareDetectionData ( req );
-					pDetection.PrepareDetectionLog ( ph, this );
-					pDetection.Log ();
-					BanRequest::GetInstance ()->AddAsyncBan ( ph, 0, "Banned by NoCheatZ 4" );
-				}
-				break;
-			}
-
-		case SourceSdk::eQueryCvarValueStatus_NotACvar:
-			{
-				req->answer_status = "NotACvar";
-				req->answer = "CONCOMMAND";
-				goto unexpected2;
-			}
-
-		case SourceSdk::eQueryCvarValueStatus_CvarProtected:
-			{
-				req->answer_status = "CvarProtected";
-				req->answer = "NO VALUE";
-				goto unexpected2;
-			}
-
-		default:
-			{
-				req->answer_status = "NO STATUS";
-				goto unexpected2;
-			}
-	}
-
-	req->isSent = false;
-	return;
 unexpected2:
-	Detection_ConVar pDetection;
-	pDetection.PrepareDetectionData ( req );
-	pDetection.PrepareDetectionLog ( ph, this );
-	pDetection.Log ();
-	BanRequest::GetInstance ()->AddAsyncBan ( ph, 0, "Banned by NoCheatZ 4" );
+		Detection_ConVar pDetection;
+		pDetection.PrepareDetectionData ( req );
+		pDetection.PrepareDetectionLog ( ph, this );
+		pDetection.Log ();
+		BanRequest::GetInstance ()->AddAsyncBan ( ph, 0, "Banned by NoCheatZ 4" );
+	}
 }
 
 void ConVarTester::Load ()

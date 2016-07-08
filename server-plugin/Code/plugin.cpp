@@ -551,7 +551,7 @@ void CNoCheatZPlugin::RT_OnQueryCvarValueFinished ( SourceSdk::QueryCvarCookie_t
 		return;
 	}
 
-	ConVarTester::GetInstance ()->RT_OnQueryCvarValueFinished ( ph, eStatus, pCvarName, pCvarValue );
+	ConVarTester::GetInstance ()->RT_OnQueryCvarValueFinished ( ph, iCookie, eStatus, pCvarName, pCvarValue );
 }
 
 void CNoCheatZPlugin::OnEdictAllocated ( SourceSdk::edict_t *edict )

@@ -72,6 +72,7 @@ typedef struct CurrentConVarRequest
 	bool isReplyed;
 	float timeStart;
 	int ruleset;
+	SourceSdk::QueryCvarCookie_t cookie;
 	basic_string answer;
 	basic_string answer_status;
 
@@ -136,7 +137,7 @@ private:
 	virtual void RT_ProcessOnTick ( float const curtime ) override final;
 
 public:
-	void RT_OnQueryCvarValueFinished ( PlayerHandler::const_iterator ph, SourceSdk::EQueryCvarValueStatus eStatus, const char *pCvarName, const char *pCvarValue );
+	void RT_OnQueryCvarValueFinished ( PlayerHandler::const_iterator ph, SourceSdk::QueryCvarCookie_t cookie, SourceSdk::EQueryCvarValueStatus eStatus, const char *pCvarName, const char *pCvarValue );
 
 private:
 	void RT_ProcessPlayerTest ( PlayerHandler::const_iterator ph, float const curtime );
