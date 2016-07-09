@@ -66,24 +66,58 @@ typedef struct ConVarInfo
 
 typedef CUtlVector<ConVarInfoT> ConVarRulesListT;
 
+enum class ConVarRequestStatus : unsigned int
+{
+	NOT_PROCESSING = 0,
+	SENT,
+	REPLYED
+};
+
 typedef struct CurrentConVarRequest
 {
-	bool isSent;
-	bool isReplyed;
+	ConVarRequestStatus status;
 	float timeStart;
 	int ruleset;
 	SourceSdk::QueryCvarCookie_t cookie;
+	int attempts;
 	basic_string answer;
 	basic_string answer_status;
 
 	CurrentConVarRequest ()
 	{
-		isSent = false; isReplyed = false; timeStart = 0.0; ruleset = 0;
+		status = ConVarRequestStatus::NOT_PROCESSING; timeStart = 0.0; ruleset = 0;
 	};
 	CurrentConVarRequest ( const CurrentConVarRequest& other )
 	{
-		isSent = other.isSent; isReplyed = other.isReplyed; timeStart = other.timeStart; ruleset = other.ruleset; answer = other.answer; answer_status = other.answer_status;
+		status = other.status; timeStart = other.timeStart; ruleset = other.ruleset; answer = other.answer; answer_status = other.answer_status;
 	};
+
+	void PrepareNextRequest (ConVarRulesListT const & rules)
+	{
+		if( ++ ruleset >= rules.Size () )
+		{
+			ruleset = 0;
+		}
+		answer = "NO ANSWER";
+		answer_status = "NO STATUS";
+		status = ConVarRequestStatus::NOT_PROCESSING;
+		attempts = 0;
+	}
+
+	void SendCurrentRequest ( PlayerHandler::const_iterator ph, float const curtime, ConVarRulesListT const & rules )
+	{
+		cookie = SourceSdk::InterfacesProxy::GetServerPluginHelpers ()->StartQueryCvarValue ( ph->GetEdict (), rules[ ruleset ].name );
+		if( cookie != InvalidQueryCvarCookie )
+		{
+			status = ConVarRequestStatus::SENT;
+			timeStart = curtime;
+		}
+		else
+		{
+			status = ConVarRequestStatus::NOT_PROCESSING;
+			Logger::GetInstance ()->Msg<MSG_ERROR> ( "ConVarTester : StartQueryCvarValue returned InvalidQueryCvarCookie" );
+		}
+	}
 } CurrentConVarRequestT;
 
 class ConVarTester;

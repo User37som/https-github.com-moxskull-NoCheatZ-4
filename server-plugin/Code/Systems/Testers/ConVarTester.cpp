@@ -82,43 +82,37 @@ void ConVarTester::RT_ProcessPlayerTest ( PlayerHandler::const_iterator ph, floa
 {
 	CurrentConVarRequestT* const req ( GetPlayerDataStructByIndex ( ph.GetIndex () ) );
 
-	if( req->isSent && !req->isReplyed )
+	switch( req->status )
 	{
-		if( curtime - 30.0f > req->timeStart) 
-		{
-			ph->Kick ( "ConVar request timed out" );
-		}
-		return;
-	}
+		case ConVarRequestStatus::SENT: // Not yet replyed, check for timeout
+			{
+				if( curtime - 30.0f > req->timeStart )
+				{
+					if( req->attempts >= 2 )
+					{
+						Detection_ConVar pDetection;
+						pDetection.PrepareDetectionData ( req );
+						pDetection.PrepareDetectionLog ( ph, this );
+						pDetection.Log ();
+						ph->Kick ( "ConVar request timed out" );
+					}
+					else
+					{
+						Logger::GetInstance ()->Msg<MSG_WARNING> ( Helpers::format ( "ConVarTester : First chance - ConVar request timed out for %s (%s).", ph->GetName (), m_convars_rules[ req->ruleset ].name ) );
+						++req->attempts;
+						req->SendCurrentRequest ( ph, curtime, m_convars_rules ); // Send the request again
+					}
+				}
+				// else wait ...
+				break;
+			}
 
-	if( !req->isSent && !req->isReplyed )
-	{
-		req->ruleset = 0;
-		req->answer = "NO ANSWER";
-		req->answer_status = "NO STATUS";
-	}
-	else if( ++( req->ruleset ) >= m_convars_rules.Size () )
-	{
-		req->ruleset = 0;
-		req->answer = "NO ANSWER";
-		req->answer_status = "NO STATUS";
-	}
-
-	req->cookie = SourceSdk::InterfacesProxy::GetServerPluginHelpers ()->StartQueryCvarValue ( ph->GetEdict (), m_convars_rules[ req->ruleset ].name );
-	if( req->cookie != InvalidQueryCvarCookie )
-	{
-#ifdef DEBUG
-		SystemVerbose2 ( Helpers::format ( "ConVarTester : Requesting ConVar %s", m_convars_rules[ req->ruleset ].name ) );
-#endif
-		req->isSent = true;
-		req->isReplyed = false;
-		req->timeStart = curtime;
-	}
-	else
-	{
-		req->isSent = false;
-		req->isReplyed = false;
-		Logger::GetInstance ()->Msg<MSG_ERROR> ( "ConVarTester : StartQueryCvarValue returned InvalidQueryCvarCookie" );
+		default: // Continue to work ...
+			{
+				req->PrepareNextRequest ( m_convars_rules );
+				req->SendCurrentRequest ( ph, curtime, m_convars_rules );
+				break;
+			}
 	}
 }
 
@@ -219,13 +213,14 @@ void ConVarTester::RT_OnQueryCvarValueFinished ( PlayerHandler::const_iterator p
 
 	if( req->cookie == cookie )
 	{
+		Assert ( req->status == ConVarRequestStatus::SENT );
+
 		if( SourceSdk::InterfacesProxy::ConVar_GetBool ( var_sv_cheats ) )
 		{
 			/* Some servers silently set sv_cheats to 1 in a short timespan to make some mods.
 			 This is where some players can get kicked without reason.
 			 We will send the same request another time. */
-			Assert ( req->isSent );
-			req->isSent = false;
+			req->status = ConVarRequestStatus::NOT_PROCESSING;
 
 			//Logger::GetInstance ()->Msg<MSG_WARNING> ( Helpers::format ( "ConVarTester : Cannot process RT_OnQueryCvarValueFinished because server-side sv_cheats is not 0", ph->GetName ()) );
 			return;
@@ -233,10 +228,7 @@ void ConVarTester::RT_OnQueryCvarValueFinished ( PlayerHandler::const_iterator p
 
 		ConVarInfoT* ruleset ( RT_FindConvarRuleset ( pCvarName ) );
 		Assert ( ruleset );
-		Assert ( req->isSent );
-		Assert ( req->isReplyed == false );
-
-		req->isReplyed = true;
+		req->status = ConVarRequestStatus::REPLYED;
 		req->answer = pCvarValue;
 
 		switch( eStatus )
@@ -340,7 +332,6 @@ void ConVarTester::RT_OnQueryCvarValueFinished ( PlayerHandler::const_iterator p
 				}
 		}
 
-		req->isSent = false;
 		return;
 unexpected2:
 		Detection_ConVar pDetection;
@@ -461,11 +452,25 @@ const char* ConvertRule ( ConVarRule rule )
 	};
 }
 
+const char* ConvertRequestStatus ( ConVarRequestStatus status )
+{
+	switch( status )
+	{
+		case  ConVarRequestStatus::NOT_PROCESSING:
+			return "NOT_PROCESSING";
+		case  ConVarRequestStatus::SENT:
+			return "SENT";
+		case  ConVarRequestStatus::REPLYED:
+			return "REPLYED";
+		default:
+			return "UNKNOWN";
+	};
+}
+
 basic_string Detection_ConVar::GetDataDump ()
 {
-	return Helpers::format ( ":::: CurrentConVarRequest {\n:::::::: Is Request Sent : %s,\n:::::::: Is Request Answered : %s,\n:::::::: Request Sent At : %f,\n:::::::: ConVarInfo {\n:::::::::::: ConVar Name : %s,\n:::::::::::: Expected Value : %s,\n:::::::::::: Got Value : %s,\n:::::::::::: Answer Status : %s,\n:::::::::::: Comparison Rule : %s\n::::::::}\n::::}",
-							 Helpers::boolToString ( GetDataStruct ()->isSent ),
-							 Helpers::boolToString ( GetDataStruct ()->isReplyed ),
+	return Helpers::format ( ":::: CurrentConVarRequest {\n:::::::: Request Status : %s,\n:::::::: Request Sent At : %f,\n:::::::: ConVarInfo {\n:::::::::::: ConVar Name : %s,\n:::::::::::: Expected Value : %s,\n:::::::::::: Got Value : %s,\n:::::::::::: Answer Status : %s,\n:::::::::::: Comparison Rule : %s\n::::::::}\n::::}",
+							 ConvertRequestStatus ( GetDataStruct ()->status ),
 							 GetDataStruct ()->timeStart,
 							 ConVarTester::GetInstance ()->m_convars_rules[ GetDataStruct ()->ruleset ].name,
 							 ConVarTester::GetInstance ()->m_convars_rules[ GetDataStruct ()->ruleset ].value,
