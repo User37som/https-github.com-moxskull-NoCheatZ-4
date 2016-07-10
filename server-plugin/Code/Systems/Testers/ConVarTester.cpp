@@ -62,7 +62,7 @@ void ConVarTester::RT_ProcessOnTick ( float const curtime )
 		return;
 	}
 	ProcessFilter::HumanAtLeastConnected filter_class;
-	m_current_player += &filter_class;
+	/*m_current_player += &filter_class;
 	if( m_current_player )
 	{
 #ifdef DEBUG
@@ -75,6 +75,12 @@ void ConVarTester::RT_ProcessOnTick ( float const curtime )
 #ifdef DEBUG
 		SystemVerbose2 (  "ConVarTester : Not processing any player this tick" );
 #endif
+	}*/
+	m_current_player = PlayerHandler::end ();
+	m_current_player += &filter_class;
+	for( ; m_current_player != PlayerHandler::end (); m_current_player += &filter_class )
+	{
+		RT_ProcessPlayerTest ( m_current_player, curtime );
 	}
 }
 
