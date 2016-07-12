@@ -180,32 +180,41 @@ bool ConCommandTester::RT_TestPlayerCommand ( PlayerHandler::const_iterator ph, 
 	{
 		// To lower
 		basic_string lower_cmd ( command );
-		lower_cmd.lower ();
-
-		size_t id ( 0 );
-		size_t const max ( m_commands_list.Size () );
-		for( CommandInfoT* cmd_test ( &m_commands_list[ id ] ); id != max; cmd_test = &m_commands_list[ ++id ] )
+		if( basic_string::IsValidMultibyteString ( lower_cmd ) )
 		{
-			for( size_t x ( 0 ); x < lower_cmd.size (); ++x )
+			lower_cmd.lower ();
+
+			size_t id ( 0 );
+			size_t const max ( m_commands_list.Size () );
+			for( CommandInfoT* cmd_test ( &m_commands_list[ id ] ); id != max; cmd_test = &m_commands_list[ ++id ] )
 			{
-				if( StriCmpOffset ( lower_cmd.c_str (), cmd_test->command_name.c_str (), x ) )
+				for( size_t x ( 0 ); x < lower_cmd.size (); ++x )
 				{
-					// Ignored cmds are always at the end of the set
-					if( cmd_test->ignore ) return false;
+					if( StriCmpOffset ( lower_cmd.c_str (), cmd_test->command_name.c_str (), x ) )
+					{
+						// Ignored cmds are always at the end of the set
+						if( cmd_test->ignore ) return false;
 
-					RT_AddPlayerCommand ( ph, command );
-					Detection_CmdViolation pDetection;
-					pDetection.PrepareDetectionData ( GetPlayerDataStructByIndex ( ph.GetIndex () ) );
-					pDetection.PrepareDetectionLog ( ph, this );
-					pDetection.Log ();
+						RT_AddPlayerCommand ( ph, command );
+						Detection_CmdViolation pDetection;
+						pDetection.PrepareDetectionData ( GetPlayerDataStructByIndex ( ph.GetIndex () ) );
+						pDetection.PrepareDetectionLog ( ph, this );
+						pDetection.Log ();
 
-					if( cmd_test->ban ) ph->Ban ( "ConCommand exploit" );
-					else ph->Kick ( "ConCommand exploit" );
-					return true;
+						if( cmd_test->ban ) ph->Ban ( "ConCommand exploit" );
+						else ph->Kick ( "ConCommand exploit" );
+						return true;
+					}
 				}
 			}
+			RT_AddPlayerCommand ( ph, command );
 		}
-		RT_AddPlayerCommand ( ph, command );
+		else
+		{
+			Logger::GetInstance ()->Msg<MSG_LOG> ( Helpers::format("Dropped invalid command from %s", ph->GetName () ));
+			ph->Kick ( "Invalid ConCommand" );
+			return true;
+		}
 	}
 	return false;
 }

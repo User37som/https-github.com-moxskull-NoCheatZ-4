@@ -505,36 +505,76 @@ public:
 		return m_alloc[ index ];
 	}
 
+	static bool IsValidMultibyteString ( String<char> const & in )
+	{
+		std::setlocale ( LC_ALL, "en_US.utf8" );
+		return std::mbstowcs ( nullptr, in.m_alloc, 0 ) != std::numeric_limits<size_t>::max ();
+	}
+
+	static bool IsValidWideString ( String<wchar_t> const & in )
+	{
+		std::setlocale ( LC_ALL, "en_US.utf8" );
+		return std::wcstombs ( nullptr, in.m_alloc, 0 ) != std::numeric_limits<size_t>::max ();
+	}
+
 	static void ConvertToWideChar ( String<char> const & in, String<wchar_t> & out )
 	{
-		if( in.m_size == 0 ) return;
-		std::setlocale ( LC_ALL, "en_US.utf8" );
-		size_t const cpsize ( std::mbstowcs ( nullptr, in.m_alloc, 0 ) );
-		Assert ( cpsize < std::numeric_limits<size_t>::max () );
-		Assert ( cpsize > 0 );
+		if( in.m_size )
+		{
+			if( IsValidMultibyteString ( in ) )
+			{
+				std::setlocale ( LC_ALL, "en_US.utf8" );
+				size_t const cpsize ( std::mbstowcs ( nullptr, in.m_alloc, 0 ) );
 
-		out.Grow ( cpsize + 1, false );
+				Assert ( cpsize > 0 );
 
-		std::mbstowcs ( out.m_alloc, in.m_alloc, cpsize + 1 );
+				out.Grow ( cpsize + 1, false );
 
-		out.m_size = cpsize;
-		out[ out.m_size ] = 0;
+				std::mbstowcs ( out.m_alloc, in.m_alloc, cpsize + 1 );
+
+				out.m_size = cpsize;
+				out[ out.m_size ] = 0;
+			}
+			else
+			{
+				out.clear ();
+				in.clear ();
+			}
+		}
+		else
+		{
+			out.clear ();
+		}
 	}
 
 	static void ConvertToChar ( String<wchar_t> const & in, String<char> & out )
 	{
-		if( in.m_size == 0 ) return;
-		std::setlocale ( LC_ALL, "en_US.utf8" );
-		size_t const cpsize ( std::wcstombs ( nullptr, in.m_alloc, 0 ) );
-		Assert ( cpsize < std::numeric_limits<size_t>::max () );
-		Assert ( cpsize > 0 );
+		if( in.m_size )
+		{
+			if( IsValidWideString ( in ) )
+			{
+				std::setlocale ( LC_ALL, "en_US.utf8" );
+				size_t const cpsize ( std::wcstombs ( nullptr, in.m_alloc, 0 ) );
+				Assert ( cpsize < std::numeric_limits<size_t>::max () );
+				Assert ( cpsize > 0 );
 
-		out.Grow ( cpsize + 1, false );
+				out.Grow ( cpsize + 1, false );
 
-		std::wcstombs ( out.m_alloc, in.m_alloc, cpsize + 1 );
+				std::wcstombs ( out.m_alloc, in.m_alloc, cpsize + 1 );
 
-		out.m_size = cpsize;
-		out[ out.m_size ] = 0;
+				out.m_size = cpsize;
+				out[ out.m_size ] = 0;
+			}
+			else
+			{
+				out.clear ();
+				in.clear ();
+			}
+		}
+		else
+		{
+			out.clear ();
+		}
 	}
 };
 
