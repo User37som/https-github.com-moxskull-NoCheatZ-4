@@ -517,7 +517,7 @@ public:
 		return std::wcstombs ( nullptr, in.m_alloc, 0 ) != std::numeric_limits<size_t>::max ();
 	}
 
-	static void ConvertToWideChar ( String<char> const & in, String<wchar_t> & out )
+	static void ConvertToWideChar ( String<char> & in, String<wchar_t> & out )
 	{
 		if( in.m_size )
 		{
@@ -547,7 +547,7 @@ public:
 		}
 	}
 
-	static void ConvertToChar ( String<wchar_t> const & in, String<char> & out )
+	static void ConvertToChar ( String<wchar_t> & in, String<char> & out )
 	{
 		if( in.m_size )
 		{
