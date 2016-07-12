@@ -89,12 +89,11 @@ bool WallhackBlocker::GotJob () const
 
 void WallhackBlocker::OnMapStart ()
 {
+	m_disable_shadows = nullptr;
+	m_shadow_direction = nullptr;
+	m_shadow_maxdist = nullptr;
 	if( !GetDisabledByConfigIni () )
 	{
-		m_disable_shadows = nullptr;
-		m_shadow_direction = nullptr;
-		m_shadow_maxdist = nullptr;
-
 		for( int x ( 0 ); x < MAX_EDICTS; ++x )
 		{
 			SourceSdk::edict_t * const ent ( Helpers::PEntityOfEntIndex ( x ) );
@@ -539,7 +538,8 @@ bool WallhackBlocker::RT_IsAbleToSee ( PlayerHandler::const_iterator sender, Pla
 		}
 
 		// Test shadow, if any
-		if( !*m_disable_shadows )
+		if( m_disable_shadows != nullptr /* https://github.com/L-EARN/NoCheatZ-4/issues/65 */
+			&& !*m_disable_shadows )
 		{
 			ST_W_STATIC SourceSdk::Vector shadow_trace_end;
 			SourceSdk::VectorCopy ( m_shadow_direction, &shadow_trace_end );
