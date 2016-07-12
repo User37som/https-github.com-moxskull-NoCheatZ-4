@@ -5,7 +5,7 @@
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
-       http://www.apache.org/licenses/LICENSE-2.0
+	   http://www.apache.org/licenses/LICENSE-2.0
 
    Unless required by applicable law or agreed to in writing, software
    distributed under the License is distributed on an "AS IS" BASIS,
@@ -30,29 +30,31 @@ struct ConnectInfo
 	float next_connect_time;
 	int count;
 
-	ConnectInfo()
+	ConnectInfo ()
 	{
 		count = 0;
-		next_connect_time = Plat_FloatTime();
+		next_connect_time = Plat_FloatTime ();
 	};
-	ConnectInfo(const char* addr)
+	ConnectInfo ( const char* addr )
 	{
+		count = 0;
+		next_connect_time = 0;
 		ip_addr = addr;
 	};
-	ConnectInfo(const ConnectInfo& other)
+	ConnectInfo ( const ConnectInfo& other )
 	{
 		ip_addr = other.ip_addr;
 		count = other.count;
 		next_connect_time = other.next_connect_time;
 	};
-	void OnConnect()
+	void OnConnect ()
 	{
-		next_connect_time = Plat_FloatTime() + 10.0f;
+		next_connect_time = Plat_FloatTime () + 10.0f;
 	};
 
-	bool operator== (const ConnectInfo& other) const
+	bool operator== ( const ConnectInfo& other ) const
 	{
-		return (strcmp(ip_addr.c_str(), other.ip_addr.c_str()) == 0);
+		return ( strcmp ( ip_addr.c_str (), other.ip_addr.c_str () ) == 0 );
 	};
 };
 
@@ -67,18 +69,20 @@ private:
 	ConnectListT m_connect_list;
 
 public:
-	SpamConnectTester();
-	virtual ~SpamConnectTester() final;
+	SpamConnectTester ();
+	virtual ~SpamConnectTester () final;
 
 private:
-	virtual void Init() override final;
+	virtual void Init () override final;
 
-	virtual void Load() override final;
+	virtual void Load () override final;
 
-	virtual void Unload() override final;
+	virtual void Unload () override final;
+
+	virtual bool GotJob () const override final;
 
 public:
-	void ClientConnect( bool *bAllowConnect, SourceSdk::edict_t const * const pEntity, const char *pszName, const char *pszAddress, char *reject, int maxrejectlen );
+	void ClientConnect ( bool *bAllowConnect, SourceSdk::edict_t const * const pEntity, const char *pszName, const char *pszAddress, char *reject, int maxrejectlen );
 };
 
 #endif

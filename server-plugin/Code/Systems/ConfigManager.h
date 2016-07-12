@@ -6,12 +6,13 @@
 #include "Misc/temp_basicstring.h"
 #include "Misc/temp_singleton.h"
 
-class ConfigManager : public Singleton<ConfigManager>
+class ConfigManager :
+	public Singleton<ConfigManager>
 {
 	typedef Singleton<ConfigManager> singleton_class;
 
 private:
-	
+
 	int const content_version; // Backward compatible if we ever change the layout of the config file
 
 public:
@@ -34,13 +35,13 @@ public:
 	int vfid_thinkpost;
 
 public:
-	ConfigManager();
-	virtual ~ConfigManager() override final;
+	ConfigManager ();
+	virtual ~ConfigManager () override final;
 
 	/*
 		Load the config file containing configuration. Returns false if error parsing the config file.
 	*/
-	bool LoadConfig();
+	bool LoadConfig ();
 };
 
 #endif // CONFIGMANAGER_H

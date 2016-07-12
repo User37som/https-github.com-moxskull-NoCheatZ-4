@@ -39,19 +39,10 @@ public:
 
 	/* Appelé par le plugin à chaque frame
 	   Permet d'appeler les classes filles qui sont à l'écoute */
-	static void OnTick();
-
-	/* Filtre du testeur, peut/doit être redéfinit dans la classe fille */
-	virtual SlotStatus GetFilter() const {return m_filter;};
+	static void RT_OnTick(float const curtime);
 
 protected:
-	/* Appelé par OnTick, sert à iétrer entre les différents joueurs en fonction du filtre */
-	virtual void ProcessTestsOnTick(float const curtime);
-
-	/* Appelé par ProcessTestsOnTick() lorsque le joueur correspond au filtre */
-	virtual void ProcessPlayerTestOnTick(PlayerHandler::const_iterator ph, float const curtime) = 0;
-
-	virtual void ProcessOnTick(float const curtime) = 0;
+	virtual void RT_ProcessOnTick(float const curtime) = 0;
 
 	/* Permet de se mettre à l'écoute de l'événement, appelé par Load/Unload des testeurs */
 	static void RegisterOnTickListener(OnTickListener const * const listener);

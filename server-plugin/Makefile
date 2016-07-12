@@ -13,24 +13,29 @@
 #   limitations under the License.                                           #
 ##############################################################################
 
+SHELL := /bin/bash -o pipefail
+
 BASE = ..
 PROJECT = server-plugin
-SDK_DEF = -DGNUC -DPOSIX -DCOMPILER_GCC
 
 PROJECT_DIR = $(BASE)/$(PROJECT)
 SRC_DIR = $(PROJECT_DIR)/Code
 SDK_DIR = $(PROJECT_DIR)/SourceSdk
 
-OTHER_PREPROCESSORS = -DNCZ_CSS $(SDK_DEF)
+OTHER_PREPROCESSORS = -DGNUC -DPOSIX -DCOMPILER_GCC
 
 ###########################################################
 # Compiler.                                               #
 # You can specify an absolute path to a specific version. #
 ###########################################################
-CXX = g++ -m32 -std=c++11
+ifdef CXX
+d_CXX = $(CXX) -m32 -std=c++11
+else
+d_CXX = g++ -m32 -std=c++11
+endif
 
 ARCH_CFLAGS =   -mtune=i486 -march=x86-64 -mmmx
-USER_CFLAGS =   -DTIXML_USE_TICPP -Dstricmp=strcasecmp -D_stricmp=strcasecmp
+USER_CFLAGS =   -DTIXML_USE_TICPP -Dstricmp=strcasecmp -D_stricmp=strcasecmp -Dstrnicmp=strncasecmp
 BASE_CFLAGS =   -msse -D_LINUX -DLINUX -D_alloca=alloca \
 		-fPIC -Wno-deprecated -fno-exceptions -fpermissive \
 		-fno-strict-aliasing \
@@ -104,8 +109,8 @@ endif
 
 CFLAGS += $(USER_CFLAGS) $(BASE_CFLAGS) $(ARCH_CFLAGS) -DNCZ_VERSION_GIT=$(VERSION_GIT) -DNCZ_VERSION_GIT_SHORT=$(VERSION_GIT_SHORT)
 
-CPP_MAJOR := $(shell $(CXX) -dumpversion >&1 | cut -b1)
-CPP_MINOR := $(shell $(CXX) -dumpversion >&1 | cut -b3)
+CPP_MAJOR := $(shell $(d_CXX) -dumpversion >&1 | cut -b1)
+CPP_MINOR := $(shell $(d_CXX) -dumpversion >&1 | cut -b3)
 ifeq "$(shell expr $(CPP_MAJOR) \>= 4)" "1"
 	CFLAGS += -fvisibility=hidden -fvisibility-inlines-hidden
 endif
@@ -126,7 +131,7 @@ error:
 compile_object = \
 	@mkdir -p $(2); \
 	echo "$(1) => $(3)"; \
-	$(CXX) $(INCLUDE) $(CFLAGS) -o $(3) -c $(1) 2> "error_compile.txt";
+	$(d_CXX) $(INCLUDE) $(CFLAGS) -o $(3) -c $(1) 2>&1 | tee "error_compile.txt"
 
 $(BIN_DIR)/%.o: %.cpp %.h
 	$(call compile_object, $<, $(@D), $@)
@@ -135,15 +140,19 @@ $(BIN_DIR)/%.o: %.cpp
 	$(call compile_object, $<, $(@D), $@)
 
 all: $(OBJECTS)
-	@$(CXX) $(INCLUDE) $(CFLAGS) $(OBJECTS) $(LINK) -m32 -o $(BINARY_DIR)/$(BINARY_NAME)  2> "error_link.txt";
+	@$(d_CXX) $(INCLUDE) $(CFLAGS) $(OBJECTS) $(LINK) -m32 -o $(BINARY_DIR)/$(BINARY_NAME)  2>&1 | tee "error_link.txt"
 
 release:
-	@$(MAKE) prepare-build DEBUG=false
-	@$(MAKE) all DEBUG=false
+	@$(MAKE) prepare-build DEBUG=false COVERAGE=false
+	@$(MAKE) -j6 all DEBUG=false COVERAGE=false
 
 debug:
-	@$(MAKE) prepare-build DEBUG=true
-	@$(MAKE) all DEBUG=true
+	@$(MAKE) prepare-build DEBUG=true COVERAGE=false
+	@$(MAKE) -j6 all DEBUG=true COVERAGE=false
+
+coverage:
+	@$(MAKE) prepare-build COVERAGE=true
+	@$(MAKE) -j6 all COVERAGE=true
 
 clean:
 	@rm -rf $(RELEASE_DIR)

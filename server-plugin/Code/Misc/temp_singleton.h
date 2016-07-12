@@ -20,49 +20,45 @@ limitations under the License.
 
 #include "SdkPreprocessors.h"
 
-#ifdef GNUC
-#	include <mm_malloc.h>
-#endif
-
-class NoCopy
-{
-protected:
-	NoCopy() {}
-	virtual ~NoCopy() {}
-
-private:
-	NoCopy(NoCopy const &) = delete;
-	NoCopy& operator=(NoCopy const &) = delete;
-};
+#include "ClassSpecifications.h"
+#include "HeapMemoryManager.h"
 
 template <class C>
-class Singleton : protected NoCopy
+class Singleton :
+	protected NoCopy,
+	protected NoMove
 {
 	typedef Singleton<C> hClass;
 
 private:
 	static C* instance;
+	static size_t memory_used;
 
 protected:
-	Singleton() : NoCopy()
+	Singleton()
 	{
 	}
 
-	virtual ~Singleton() override
+	virtual ~Singleton()
 	{
 	}
 
 public:
+	static bool IsCreated ()
+	{
+		return hClass::instance != nullptr;
+	}
+
 	static void CreateInstance()
 	{
-		//Assert(hClass::instance == nullptr);
-		void* ptr = _mm_malloc(sizeof(C), 16);
+		Assert( !IsCreated () );
+		void* ptr = HeapMemoryManager::AllocateMemory ( sizeof ( C ), hClass::memory_used, 16 );
 		hClass::instance = new(ptr) C();
 	}
 
 	static void Required()
 	{
-		if (hClass::instance == nullptr)
+		if ( !IsCreated () )
 			CreateInstance();
 	}
 
@@ -70,22 +66,25 @@ public:
 
 	static void DestroyInstance()
 	{
-		if (hClass::instance)
+		if( IsCreated () )
 		{
-			hClass::instance->~C();
-			_mm_free(hClass::instance);
+			hClass::instance->~C ();
+			HeapMemoryManager::FreeMemory ( hClass::instance, hClass::memory_used );
+			hClass::instance = nullptr;
 		}
-		hClass::instance = nullptr;
 	}
 };
 
 template <class C>
-C* Singleton<C>::instance = nullptr;
+C* Singleton<C>::instance(nullptr);
+
+template <class C>
+size_t Singleton<C>::memory_used(0);
 
 template <class C>
 inline C * const Singleton<C>::GetInstance()
 {
-	Assert(hClass::instance);
+	Assert( IsCreated () );
 	return hClass::instance;
 }
 

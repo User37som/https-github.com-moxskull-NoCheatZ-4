@@ -4,7 +4,7 @@
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
-       http://www.apache.org/licenses/LICENSE-2.0
+	   http://www.apache.org/licenses/LICENSE-2.0
 
    Unless required by applicable law or agreed to in writing, software
    distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,8 +16,9 @@
 #ifndef LOGGER_H
 #define LOGGER_H
 
-#include "Preprocessors.h"
+#include "Interfaces/InterfacesProxy.h"
 
+#include "Preprocessors.h"
 #include "Misc/temp_basicstring.h"
 #include "Misc/temp_singleton.h"
 #include "Containers/utlvector.h"
@@ -48,10 +49,11 @@ enum msg_type
 	// Prints to stderr if verbose is 2
 	MSG_VERBOSE2,
 	// Prints to stderr only if the project build is in debug mode and verbose is at least 3
-	MSG_DEBUG     
+	MSG_DEBUG
 };
 
-class Logger : public Singleton<Logger>
+class Logger :
+	public Singleton<Logger>
 {
 	typedef Singleton<Logger> singleton_class;
 
@@ -60,19 +62,21 @@ private:
 	basic_string const prolog;
 
 public:
-	Logger() : singleton_class(), m_msg(), prolog("[NoCheatZ " NCZ_VERSION_STR "] ") {};
-	virtual ~Logger() override final {};
+	Logger () : singleton_class (), m_msg (), prolog ( "[NoCheatZ " NCZ_VERSION_STR "] " )
+	{};
+	virtual ~Logger () override final
+	{};
 
-	void Push(const char * msg);
-	void Flush();
+	void Push ( const char * msg );
+	void Flush ();
 
 	template <msg_type type = MSG_CONSOLE>
-	void Msg(const char * msg, int verbose = 0);
+	void Msg ( const char * msg, int verbose = 0 );
 
 	template <msg_type type = MSG_CONSOLE>
-	inline void Msg(const basic_string& msg, int verbose = 0)
+	inline void Msg ( const basic_string& msg, int verbose = 0 )
 	{
-		Msg<type>(msg.c_str(), verbose);
+		Msg<type> ( msg.c_str (), verbose );
 	}
 };
 

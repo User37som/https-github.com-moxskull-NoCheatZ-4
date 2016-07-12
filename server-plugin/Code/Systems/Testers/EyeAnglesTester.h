@@ -4,7 +4,7 @@
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
-       http://www.apache.org/licenses/LICENSE-2.0
+	   http://www.apache.org/licenses/LICENSE-2.0
 
    Unless required by applicable law or agreed to in writing, software
    distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,7 +21,6 @@
 #include "Players/temp_PlayerDataStruct.h"
 #include "Interfaces/IGameEventManager/IGameEventManager.h"
 #include "Systems/Testers/Detections/temp_BaseDetection.h"
-#include "Players/NczFilteredPlayersList.h"
 #include "Misc/temp_singleton.h"
 
 typedef struct EyeAngle
@@ -32,18 +31,13 @@ typedef struct EyeAngle
 	float lastDetectionPrintTime;
 	unsigned int detectionsCount;
 
-	EyeAngle()
+	EyeAngle ()
 	{
-		value = abs_value = 0.0;
-		lastDetectionPrintTime = 0.0;
-		detectionsCount = 0;
+		memset ( this, 0, sizeof ( EyeAngle ) );
 	};
-	EyeAngle(const EyeAngle& other)
+	EyeAngle ( const EyeAngle& other )
 	{
-		value = other.value;
-		abs_value = other.abs_value;
-		lastDetectionPrintTime = other.lastDetectionPrintTime;
-		detectionsCount = other.detectionsCount;
+		memcpy ( this, &other, sizeof ( EyeAngle ) );
 	};
 } EyeAngleT;
 
@@ -55,17 +49,13 @@ typedef struct EyeAngleInfo
 	EyeAngleT y;
 	EyeAngleT z;
 
-	EyeAngleInfo()
+	EyeAngleInfo ()
 	{
-		ignore_last = 0;
-		x = y = z = EyeAngle();
+		memset ( this, 0, sizeof ( EyeAngleInfo ) );
 	};
-	EyeAngleInfo(const EyeAngleInfo& other)
+	EyeAngleInfo ( const EyeAngleInfo& other )
 	{
-		ignore_last = other.ignore_last;
-		x = other.x;
-		y = other.y;
-		z = other.z;
+		memcpy ( this, &other, sizeof ( EyeAngleInfo ) );
 	};
 } EyeAngleInfoT;
 
@@ -73,37 +63,45 @@ class Detection_EyeAngle : public LogDetection<EyeAngleInfoT>
 {
 	typedef LogDetection<EyeAngleInfoT> hClass;
 public:
-	Detection_EyeAngle() : hClass() {};
-	virtual ~Detection_EyeAngle() {};
+	Detection_EyeAngle () : hClass ()
+	{};
+	virtual ~Detection_EyeAngle ()
+	{};
 
-	virtual basic_string GetDataDump() final;
+	virtual basic_string GetDataDump () final;
 };
 
 class Detection_EyeAngleX : public Detection_EyeAngle
 {
 public:
-	Detection_EyeAngleX(){};
-	virtual ~Detection_EyeAngleX() final {};
+	Detection_EyeAngleX ()
+	{};
+	virtual ~Detection_EyeAngleX () final
+	{};
 
-	virtual basic_string GetDetectionLogMessage() final;
+	virtual basic_string GetDetectionLogMessage () final;
 };
 
 class Detection_EyeAngleY : public Detection_EyeAngle
 {
 public:
-	Detection_EyeAngleY(){};
-	virtual ~Detection_EyeAngleY() final {};
+	Detection_EyeAngleY ()
+	{};
+	virtual ~Detection_EyeAngleY () final
+	{};
 
-	virtual basic_string GetDetectionLogMessage() final;
+	virtual basic_string GetDetectionLogMessage () final;
 };
 
 class Detection_EyeAngleZ : public Detection_EyeAngle
 {
 public:
-	Detection_EyeAngleZ(){};
-	virtual ~Detection_EyeAngleZ() final {};
+	Detection_EyeAngleZ ()
+	{};
+	virtual ~Detection_EyeAngleZ () final
+	{};
 
-	virtual basic_string GetDetectionLogMessage() final;
+	virtual basic_string GetDetectionLogMessage () final;
 };
 
 class EyeAnglesTester :
@@ -117,19 +115,21 @@ class EyeAnglesTester :
 	typedef PlayerDataStructHandler<EyeAngleInfoT> playerdata_class;
 
 public:
-	EyeAnglesTester();
-	virtual ~EyeAnglesTester() final;
+	EyeAnglesTester ();
+	virtual ~EyeAnglesTester () final;
 
 private:
-	virtual void Init() override final;
+	virtual void Init () override final;
 
-	virtual void Load() override final;
+	virtual void Load () override final;
 
-	virtual void Unload() override final;
+	virtual void Unload () override final;
 
-	virtual void FireGameEvent(SourceSdk::IGameEvent *ev) override final;
+	virtual bool GotJob () const override final;
 
-	virtual PlayerRunCommandRet PlayerRunCommandCallback(PlayerHandler::const_iterator ph, void * const cmd, void * const old_cmd) override final;
+	virtual void FireGameEvent ( SourceSdk::IGameEvent *ev ) override final;
+
+	virtual PlayerRunCommandRet RT_PlayerRunCommandCallback ( PlayerHandler::const_iterator ph, void * const cmd, void * const old_cmd ) override final;
 };
 
 #endif

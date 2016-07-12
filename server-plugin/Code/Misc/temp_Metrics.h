@@ -34,7 +34,8 @@
 #define METRICS_NAME_SIZE 44
 
 template <typename val_t>
-class BaseMetrics
+class BaseMetrics : 
+	public HeapMemoryManager::OverrideNew<16>
 {
 protected:
 	val_t m_min;
@@ -94,7 +95,7 @@ public:
 
 	virtual void Reset()
 	{
-		memset(this, 0, sizeof(BaseMetrics<val_t>) - METRICS_NAME_SIZE);
+		memset(&m_min, 0, size_t(&m_name) - size_t(&m_min) );
 	}
 };
 
@@ -172,12 +173,19 @@ private:
 #endif
 
 public:
-	MetricsTimer() : hClass()
+	MetricsTimer() :
+		hClass()
 	{
+#ifdef GNUC
+		ElapsedMilliseconds = 0.0f;
+#endif
 	};
 
 	MetricsTimer(char const * const name, float const overload_threshold = 0) : hClass(name, overload_threshold)
 	{
+#ifdef GNUC
+		ElapsedMilliseconds = 0.0f;
+#endif
 	}
 
 	~MetricsTimer()

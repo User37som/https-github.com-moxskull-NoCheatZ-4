@@ -4,7 +4,7 @@
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
-       http://www.apache.org/licenses/LICENSE-2.0
+	   http://www.apache.org/licenses/LICENSE-2.0
 
    Unless required by applicable law or agreed to in writing, software
    distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,175 +24,183 @@
 #include "Players/NczPlayerManager.h"
 #include "Systems/ConfigManager.h"
 
-AntiSmokeBlocker::AntiSmokeBlocker() :
-	BaseSystem("AntiSmokeBlocker", PLAYER_CONNECTED, PLAYER_CONNECTING, STATUS_EQUAL_OR_BETTER),
-	IGameEventListener002(),
-	OnTickListener(),
-	playerdatahandler_class(),
-	SetTransmitHookListener(),
-	singleton_class()
+AntiSmokeBlocker::AntiSmokeBlocker () :
+	BaseSystem ( "AntiSmokeBlocker" ),
+	IGameEventListener002 (),
+	OnTickListener (),
+	playerdatahandler_class (),
+	SetTransmitHookListener (),
+	singleton_class ()
 {
-	METRICS_ADD_TIMER("AntiSmokeBlocker::OnFrame", 10.0);
+	METRICS_ADD_TIMER ( "AntiSmokeBlocker::OnFrame", 10.0 );
 }
 
-AntiSmokeBlocker::~AntiSmokeBlocker()
+AntiSmokeBlocker::~AntiSmokeBlocker ()
 {
-	Unload();
+	Unload ();
 }
 
-void AntiSmokeBlocker::Init()
+void AntiSmokeBlocker::Init ()
 {
-	InitDataStruct();
+	InitDataStruct ();
 }
-	
-void AntiSmokeBlocker::Load()
+
+void AntiSmokeBlocker::Load ()
 {
-	for (PlayerHandler::const_iterator it = PlayerHandler::begin(); it != PlayerHandler::end(); ++it)
+	for( PlayerHandler::const_iterator it ( PlayerHandler::begin () ); it != PlayerHandler::end (); ++it )
 	{
-		ResetPlayerDataStructByIndex(it.GetIndex());
+		ResetPlayerDataStructByIndex ( it.GetIndex () );
 	}
 
-	SourceSdk::InterfacesProxy::GetGameEventManager()->AddListener(this, "smokegrenade_detonate", true);
-	SourceSdk::InterfacesProxy::GetGameEventManager()->AddListener(this, "round_start", true);
-	OnTickListener::RegisterOnTickListener(this);
-	SetTransmitHookListener::RegisterSetTransmitHookListener(this, 1);
+	SourceSdk::InterfacesProxy::GetGameEventManager ()->AddListener ( this, "smokegrenade_detonate", true );
+	SourceSdk::InterfacesProxy::GetGameEventManager ()->AddListener ( this, "round_start", true );
+	OnTickListener::RegisterOnTickListener ( this );
+	SetTransmitHookListener::RegisterSetTransmitHookListener ( this, 1 );
 }
 
-void AntiSmokeBlocker::Unload()
+void AntiSmokeBlocker::Unload ()
 {
-	SetTransmitHookListener::RemoveSetTransmitHookListener(this);
-	OnTickListener::RemoveOnTickListener(this);
-	SourceSdk::InterfacesProxy::GetGameEventManager()->RemoveListener(this);
+	SetTransmitHookListener::RemoveSetTransmitHookListener ( this );
+	OnTickListener::RemoveOnTickListener ( this );
+	SourceSdk::InterfacesProxy::GetGameEventManager ()->RemoveListener ( this );
 
-	SmokeListT::elem_t* it = m_smokes.GetFirst();
-	while (it != nullptr)
+	SmokeListT::elem_t* it ( m_smokes.GetFirst () );
+	while( it != nullptr )
 	{
-		it = m_smokes.Remove(it);
+		it = m_smokes.Remove ( it );
 	}
 }
 
-void AntiSmokeBlocker::ProcessOnTick(float const curtime)
+bool AntiSmokeBlocker::GotJob () const
 {
-	METRICS_ENTER_SECTION("AntiSmokeBlocker::OnFrame");
+	// Create a filter
+	ProcessFilter::HumanAtLeastConnecting const filter_class;
+	// Initiate the iterator at the first match in the filter
+	PlayerHandler::const_iterator it ( &filter_class );
+	// Return if we have job to do or not ...
+	return it != PlayerHandler::end ();
+}
 
-	SmokeListT::elem_t* it = m_smokes.GetFirst();
+void AntiSmokeBlocker::RT_ProcessOnTick ( float const curtime )
+{
+	METRICS_ENTER_SECTION ( "AntiSmokeBlocker::OnFrame" );
+
+	SmokeListT::elem_t* it ( m_smokes.GetFirst () );
 
 	// remove old smokes
-	while(it != nullptr)
+	while( it != nullptr )
 	{
-		if(curtime - (it->m_value.bang_time + ConfigManager::GetInstance()->m_smoke_time) > 0.0f)
-			it = m_smokes.Remove(it);
+		if( curtime - ( it->m_value.bang_time + ConfigManager::GetInstance ()->m_smoke_time ) > 0.0f )
+			it = m_smokes.Remove ( it );
 		else it = it->m_next;
 	}
 
 	ST_R_STATIC SmokeInfoT empty;
-	ResetAll(&empty);
+	ResetAll ( &empty );
 
-	it = m_smokes.GetFirst();
-	if (it == nullptr) return;
+	it = m_smokes.GetFirst ();
+	if( it == nullptr ) return;
 
 	// Test if players are immersed in smoke
-	for (PlayerHandler::const_iterator ph = PlayerHandler::begin(); ph != PlayerHandler::end(); ++ph)
+	ProcessFilter::InTestsNoBot l1_filter;
+	ProcessFilter::InTestsOrBot l2_filter;
+	for( PlayerHandler::const_iterator ph ( &l1_filter ); ph != PlayerHandler::end (); ph+=&l1_filter )
 	{
-		if(ph != PLAYER_IN_TESTS) continue;
+		SourceSdk::Vector delta, other_delta;
 
-		SourceSdk::Vector delta,other_delta;
+		MathInfo const & x_math ( MathCache::GetInstance ()->RT_GetCachedMaths ( ph.GetIndex () ) );
 
-		MathInfo const & x_math = MathCache::GetInstance()->GetCachedMaths(ph.GetIndex());
-		
 		do // At this stage, m_smokes ! empty
 		{
-			if(curtime - it->m_value.bang_time > ConfigManager::GetInstance()->m_smoke_timetobang)
+			if( curtime - it->m_value.bang_time > ConfigManager::GetInstance ()->m_smoke_timetobang )
 			{
 				SourceSdk::vec_t dst;
-				SourceSdk::VectorDistanceSqr(x_math.m_eyepos, it->m_value.pos, delta, dst);
-				if(dst < ConfigManager::GetInstance()->m_innersmoke_radius_sqr)
+				SourceSdk::VectorDistanceSqr ( x_math.m_eyepos, it->m_value.pos, delta, dst );
+				if( dst < ConfigManager::GetInstance ()->m_innersmoke_radius_sqr )
 				{
-					GetPlayerDataStructByIndex(ph.GetIndex())->is_in_smoke = true;
+					GetPlayerDataStructByIndex ( ph.GetIndex () )->is_in_smoke = true;
 				}
 
 				/* Players can't see eachother if they are behind a smoke */
 
-				const SourceSdk::vec_t ang_smoke = tanf(ConfigManager::GetInstance()->m_smoke_radius / sqrtf(dst));
-				SourceSdk::VectorNorm(delta);
+				const SourceSdk::vec_t ang_smoke ( tanf ( ConfigManager::GetInstance ()->m_smoke_radius / sqrtf ( dst ) ) );
+				SourceSdk::VectorNorm ( delta );
 
-				for (PlayerHandler::const_iterator other_ph = PlayerHandler::begin(); other_ph != PlayerHandler::end(); ++other_ph)
+				for( PlayerHandler::const_iterator other_ph ( &l2_filter ); other_ph != PlayerHandler::end (); other_ph+=&l2_filter )
 				{
-					if (other_ph != PLAYER_IN_TESTS && other_ph != BOT) continue;
-					if (ph == other_ph) continue;
+					if( ph == other_ph ) continue;
 
-					MathInfo const & y_math = MathCache::GetInstance()->GetCachedMaths(other_ph.GetIndex());
+					MathInfo const & y_math ( MathCache::GetInstance ()->RT_GetCachedMaths ( other_ph.GetIndex () ) );
 
 					// Is he behind the smoke against us ?
 
 					SourceSdk::vec_t other_dst;
-					SourceSdk::VectorDistanceSqr(x_math.m_eyepos, y_math.m_abs_origin, other_delta, other_dst);
-					if (dst + ConfigManager::GetInstance()->m_smoke_radius < other_dst)
+					SourceSdk::VectorDistanceSqr ( x_math.m_eyepos, y_math.m_abs_origin, other_delta, other_dst );
+					if( dst + ConfigManager::GetInstance ()->m_smoke_radius < other_dst )
 					{
 						// Hidden by the hull of the smoke ?
 
-						SourceSdk::VectorNorm(other_delta);
+						SourceSdk::VectorNorm ( other_delta );
 
 						SourceSdk::vec_t dp;
-						SourceSdk::VectorDotProduct(other_delta, delta, dp);
-						const SourceSdk::vec_t angle_player = fabs(acos(dp));
+						SourceSdk::VectorDotProduct ( other_delta, delta, dp );
+						const SourceSdk::vec_t angle_player ( fabs ( acos ( dp ) ) );
 
-						if (angle_player < ang_smoke)
+						if( angle_player < ang_smoke )
 						{
-							GetPlayerDataStructByIndex(ph.GetIndex())->can_not_see_this_player[other_ph.GetIndex()] = true;
+							GetPlayerDataStructByIndex ( ph.GetIndex () )->can_not_see_this_player[ other_ph.GetIndex () ] = true;
 						}
 					}
 				}
 			}
 			it = it->m_next;
-		} while(it != nullptr);
-		it = m_smokes.GetFirst();
+		}
+		while( it != nullptr );
+		it = m_smokes.GetFirst ();
 	}
 
-	METRICS_LEAVE_SECTION("AntiSmokeBlocker::OnFrame");
+	METRICS_LEAVE_SECTION ( "AntiSmokeBlocker::OnFrame" );
 }
 
-bool AntiSmokeBlocker::SetTransmitCallback(PlayerHandler::const_iterator sender, PlayerHandler::const_iterator receiver)
+bool AntiSmokeBlocker::RT_SetTransmitCallback ( PlayerHandler::const_iterator sender, PlayerHandler::const_iterator receiver )
 {
 	//if(!receiver) return false;
 
-	if(GetPlayerDataStructByIndex(receiver.GetIndex())->is_in_smoke)
+	if( GetPlayerDataStructByIndex ( receiver.GetIndex () )->is_in_smoke )
 		return true;
 
-	if(GetPlayerDataStructByIndex(receiver.GetIndex())->can_not_see_this_player[sender.GetIndex()] == true)
+	if( GetPlayerDataStructByIndex ( receiver.GetIndex () )->can_not_see_this_player[ sender.GetIndex () ] == true )
 		return true;
 
 	return false;
 }
 
-void AntiSmokeBlocker::FireGameEvent(SourceSdk::IGameEvent * ev)
+void AntiSmokeBlocker::FireGameEvent ( SourceSdk::IGameEvent * ev )
 {
 
-	if(ev->GetName()[0] == 's') // smokegrenade_detonate
+	if( ev->GetName ()[ 0 ] == 's' ) // smokegrenade_detonate
 	{
-		if (SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive)
+		if( SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive )
 		{
-			SourceSdk::Vector t1(reinterpret_cast<SourceSdk::IGameEvent_csgo*>(ev)->GetFloat("x"), 
-								reinterpret_cast<SourceSdk::IGameEvent_csgo*>(ev)->GetFloat("y"), 
-								reinterpret_cast<SourceSdk::IGameEvent_csgo*>(ev)->GetFloat("z"));
-			SmokeEntityS t2(t1);
-			m_smokes.Add(t2);
+			SourceSdk::Vector t1 ( reinterpret_cast< SourceSdk::IGameEvent_csgo* >( ev )->GetFloat ( "x" ),
+								   reinterpret_cast< SourceSdk::IGameEvent_csgo* >( ev )->GetFloat ( "y" ),
+								   reinterpret_cast< SourceSdk::IGameEvent_csgo* >( ev )->GetFloat ( "z" ) );
+			m_smokes.Add ( t1 );
 		}
 		else
 		{
-			SourceSdk::Vector t1(ev->GetFloat("x"), ev->GetFloat("y"), ev->GetFloat("z"));
-			SmokeEntityS t2(t1);
-			m_smokes.Add(t2);
+			SourceSdk::Vector t1 ( ev->GetFloat ( "x" ), ev->GetFloat ( "y" ), ev->GetFloat ( "z" ) );
+			m_smokes.Add ( t1 );
 		}
-		
+
 		return;
 	}
 
 	// round_start
 
-	SmokeListT::elem_t* it = m_smokes.GetFirst();
-	while (it != nullptr)
+	SmokeListT::elem_t* it ( m_smokes.GetFirst () );
+	while( it != nullptr )
 	{
-		it = m_smokes.Remove(it);
+		it = m_smokes.Remove ( it );
 	}
 }

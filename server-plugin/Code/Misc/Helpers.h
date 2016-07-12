@@ -4,7 +4,7 @@
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
-       http://www.apache.org/licenses/LICENSE-2.0
+	   http://www.apache.org/licenses/LICENSE-2.0
 
    Unless required by applicable law or agreed to in writing, software
    distributed under the License is distributed on an "AS IS" BASIS,
@@ -27,78 +27,50 @@ namespace SourceSdk
 
 namespace Helpers
 {
-	/* Convertis une chaine de caractères en caractères minuscules */
-	void toLowerCase(basic_string &p_str);
-
-	/* Envoie un message */
-	void xprintf(const char *p_fmt, ...);
-
-	/* Vérifie que 2 chaines de caractères sont strictement identiques
-	   Possibilité de se servir de sz1 comme un buffer à l'aide de start_offset et length */
-	bool bStrEq(const char *sz1, const char *sz2, size_t start_offset = 0, size_t length = std::numeric_limits<size_t>::max());
-
-	bool bstrneq(char const * s1, char const * s2, size_t len);
-
-	/* Même utilité que bStrEq, sz1 est un buffer obligatoirement */
-	bool bBytesEq(const char *sz1, const char *sz2, size_t start_offset, size_t length);
-
-	/* Même utilité que bStrEq, n'est pas sensible à la casse */
-	bool bStriEq(const char *sz1, const char *sz2, size_t start_offset = 0, size_t length = std::numeric_limits<size_t>::max());
-
 	/* Ecrit dans le fichier de log. Doit être remplacé par une classe du même style que BanRequest */
-	void writeToLogfile(const basic_string &p_text);
+	void writeToLogfile ( const basic_string &p_text );
 
 	/* Retourne la date selon le format */
-	const char * getStrDateTime(const char *p_format);
+	const char * getStrDateTime ( const char *p_format );
 
+	SourceSdk::edict_t * PEntityOfEntIndex ( const int p_iEntIndex );
 
-	SourceSdk::edict_t * getEdictFromSteamID(const char *p_SteamID);
-	int getIndexFromSteamID(const char *SteamID);
-	SourceSdk::edict_t * PEntityOfEntIndex(const int p_iEntIndex);
+	bool isValidEdict ( const SourceSdk::edict_t * const p_entity );
 
-	bool isValidEdict(const SourceSdk::edict_t * const p_entity);
+	int IndexOfEdict ( const SourceSdk::edict_t * const p_pEdict );
 
-	int IndexOfEdict(const SourceSdk::edict_t * const p_pEdict);
+	SourceSdk::edict_t * edictOfUnknown ( void * unk );
 
-	SourceSdk::edict_t * edictOfUnknown(void * unk);
-	
+	int GetMaxClients ();
 
-	int GetPlayerCount();
-
-	int GetMaxClients();
-
-	int GetTickCount();
+	int GetTickCount ();
 
 	/* Permet d'avoir un format style C dans un conteneur C++ */
-	const char * format(const char *fmt, ...);
-	
-	/* Retourne vrai si la valeur est impaire ... */
-	bool isOdd(const int value);
+	const char * format ( const char *fmt, ... );
 
-	/* Conversion des chars vers basic_string */
-	template<typename T>
-	basic_string tostring(const T & p_toConvert);
+	/* Retourne vrai si la valeur est impaire ... */
+	bool isOdd ( const int value );
 
 	/* Retourne vrai si value est un entier ... (140.000, 1587.000 etc) */
-	bool IsInt(float const value);
+	bool IsInt ( float const value );
 
 	/* Envoie un message chat à tous les clients sauf pEntity */
-	void noTell(const SourceSdk::edict_t * const pEntity, const basic_string& msg);
+	void noTell ( const SourceSdk::edict_t * const pEntity, const basic_string& msg );
 
-	void chatprintf(const basic_string& msg);
+	void chatprintf ( const basic_string& msg );
 
 	/* Envoie un message chat à pEntity */
-	void tell(SourceSdk::edict_t const * const pEntity, const basic_string& message);
+	void tell ( SourceSdk::edict_t const * const pEntity, const basic_string& message );
 
-	size_t GetUTF8Bytes(const char* const c);
+	size_t GetUTF8Bytes ( const char* const c );
 
-	bool IsValidUTF8Char(const char* const c, const size_t bytes);
+	bool IsValidUTF8Char ( const char* const c, const size_t bytes );
 
-	bool IsCharSpace(const char* const c);
+	bool IsCharSpace ( const char* const c );
 
-	void FadeUser(SourceSdk::edict_t const * const pEntity, const short time);
+	void FadeUser ( SourceSdk::edict_t const * const pEntity, const short time );
 
-	const char* boolToString(bool const v);
+	const char* boolToString ( bool const v );
 
 	/* C'est la base ... */
 	extern SourceSdk::edict_t* m_EdictList;

@@ -4,7 +4,7 @@
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
-       http://www.apache.org/licenses/LICENSE-2.0
+	   http://www.apache.org/licenses/LICENSE-2.0
 
    Unless required by applicable law or agreed to in writing, software
    distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,108 +17,122 @@
 
 #include "Systems/Logger.h"
 
-SpeedTester::SpeedTester() :
-	BaseSystem("SpeedTester"),
-	OnTickListener(),
-	playerdata_class(),
-	PlayerRunCommandHookListener(),
-	singleton_class()
+SpeedTester::SpeedTester () :
+	BaseSystem ( "SpeedTester" ),
+	OnTickListener (),
+	playerdata_class (),
+	PlayerRunCommandHookListener (),
+	singleton_class ()
+{}
+
+SpeedTester::~SpeedTester ()
 {
+	Unload ();
 }
 
-SpeedTester::~SpeedTester()
+void SpeedTester::Init ()
 {
-	Unload();
+	InitDataStruct ();
 }
 
-void SpeedTester::Init()
+void SpeedTester::Load ()
 {
-	InitDataStruct();
-}
-
-void SpeedTester::Load()
-{
-	for (PlayerHandler::const_iterator it = PlayerHandler::begin(); it != PlayerHandler::end(); ++it)
+	for( PlayerHandler::const_iterator it ( PlayerHandler::begin () ); it != PlayerHandler::end (); ++it )
 	{
-		ResetPlayerDataStructByIndex(it.GetIndex());
+		ResetPlayerDataStructByIndex ( it.GetIndex () );
 	}
 
-	OnTickListener::RegisterOnTickListener(this);
-	PlayerRunCommandHookListener::RegisterPlayerRunCommandHookListener(this, 1);
+	OnTickListener::RegisterOnTickListener ( this );
+	PlayerRunCommandHookListener::RegisterPlayerRunCommandHookListener ( this, 1 );
 }
 
-void SpeedTester::Unload()
+void SpeedTester::Unload ()
 {
-	OnTickListener::RemoveOnTickListener(this);
-	PlayerRunCommandHookListener::RemovePlayerRunCommandHookListener(this);
+	OnTickListener::RemoveOnTickListener ( this );
+	PlayerRunCommandHookListener::RemovePlayerRunCommandHookListener ( this );
 }
 
-void SpeedTester::ProcessPlayerTestOnTick(PlayerHandler::const_iterator ph, float const curtime)
+bool SpeedTester::GotJob () const
 {
-	SpeedHolderT* const pInfo = this->GetPlayerDataStructByIndex(ph.GetIndex());
-	float const tick_interval = SourceSdk::InterfacesProxy::Call_GetTickInterval();
-	const float newTicks = ceil((curtime - pInfo->lastTest) / tick_interval);
-	SourceSdk::INetChannelInfo* const netchan = ph->GetChannelInfo();
-	if(netchan == nullptr) return;
+	// Create a filter
+	ProcessFilter::HumanAtLeastConnected const filter_class;
+	// Initiate the iterator at the first match in the filter
+	PlayerHandler::const_iterator it ( &filter_class );
+	// Return if we have job to do or not ...
+	return it != PlayerHandler::end ();
+}
 
-	const float latency = netchan->GetLatency(FLOW_OUTGOING);
+void SpeedTester::RT_ProcessOnTick ( float const curtime )
+{
+	ProcessFilter::InTestsNoBot filter_class;
 
-	if (!pInfo->ticksLeft && fabs(pInfo->previousLatency - latency) <= 0.005f)
+	for( PlayerHandler::const_iterator ph ( &filter_class ); ph != PlayerHandler::end (); ph += &filter_class )
 	{
-		++(pInfo->detections);
+		SpeedHolderT* const pInfo ( this->GetPlayerDataStructByIndex ( ph.GetIndex () ) );
+		float const tick_interval ( SourceSdk::InterfacesProxy::Call_GetTickInterval () );
+		const float newTicks ( ceil ( ( curtime - pInfo->lastTest ) / tick_interval ) );
+		SourceSdk::INetChannelInfo* const netchan ( ph->GetChannelInfo () );
+		//if( netchan == nullptr ) return;
 
-		DebugMessage(Helpers::format("Player %s :  Speedhack pre-detection #%ud", ph->GetName(), pInfo->detections));
+		const float latency ( netchan->GetLatency ( FLOW_OUTGOING ) );
 
-		if (pInfo->detections >= 30 && curtime > pInfo->lastDetectionTime + 30.0f)
+		if( !pInfo->ticksLeft && fabs ( pInfo->previousLatency - latency ) <= 0.005f )
 		{
-			Detection_SpeedHack pDetection = Detection_SpeedHack();
-			pDetection.PrepareDetectionData(pInfo);
-			pDetection.PrepareDetectionLog(ph, this);
-			pDetection.Log();
+			++( pInfo->detections );
 
-			pInfo->lastDetectionTime = curtime;
+			DebugMessage ( Helpers::format ( "Player %s :  Speedhack pre-detection #%ud", ph->GetName (), pInfo->detections ) );
 
-			ph->Ban();
+			if( pInfo->detections >= 30 && curtime > pInfo->lastDetectionTime + 30.0f )
+			{
+				Detection_SpeedHack pDetection;
+				pDetection.PrepareDetectionData ( pInfo );
+				pDetection.PrepareDetectionLog ( ph, this );
+				pDetection.Log ();
+
+				pInfo->lastDetectionTime = curtime;
+
+				ph->Ban ();
+			}
 		}
-	}
-	else if(pInfo->detections)
-	{
-		--(pInfo->detections);
-	}
+		else if( pInfo->detections )
+		{
+			--( pInfo->detections );
+		}
 
-	float const vtest = ceil((1.0f / tick_interval * 2.0f));
-	if ((pInfo->ticksLeft += newTicks) > vtest)
-	{
-		pInfo->ticksLeft = vtest;
+		float const vtest = ceil ( ( 1.0f / tick_interval * 2.0f ) );
+		if( ( pInfo->ticksLeft += newTicks ) > vtest )
+		{
+			pInfo->ticksLeft = vtest;
+		}
+
+		pInfo->previousLatency = latency;
+		pInfo->lastTest = curtime;
 	}
-			
-	pInfo->previousLatency = latency;
-	pInfo->lastTest = curtime;
 }
 
-PlayerRunCommandRet SpeedTester::PlayerRunCommandCallback(PlayerHandler::const_iterator ph, void* pCmd, void* old_cmd)
+PlayerRunCommandRet SpeedTester::RT_PlayerRunCommandCallback ( PlayerHandler::const_iterator ph, void* pCmd, void* old_cmd )
 {
-	float& tl = this->GetPlayerDataStructByIndex(ph.GetIndex())->ticksLeft;
+	float& tl ( this->GetPlayerDataStructByIndex ( ph.GetIndex () )->ticksLeft );
 
-	if(!tl) return BLOCK;
+	if( !tl ) return PlayerRunCommandRet::BLOCK;
 
 	tl -= 1.0f;
-	
-	return CONTINUE;
+
+	return PlayerRunCommandRet::CONTINUE;
 }
 
-basic_string Detection_SpeedHack::GetDataDump()
+basic_string Detection_SpeedHack::GetDataDump ()
 {
-	return Helpers::format( ":::: SpeedHolderT {\n"
-							":::::::: Ticks Left : %lu,\n"
-							":::::::: Detections Count : %lu,\n"
-							":::::::: Last Detection Time %f,\n"
-							":::::::: Last Latency : %f,\n"
-							":::::::: Last Test Time : %f\n"
-							":::: }",
-						GetDataStruct()->ticksLeft,
-						GetDataStruct()->detections,
-						GetDataStruct()->lastDetectionTime,
-						GetDataStruct()->previousLatency,
-						GetDataStruct()->lastTest);					
+	return Helpers::format ( ":::: SpeedHolderT {\n"
+							 ":::::::: Ticks Left : %lu,\n"
+							 ":::::::: Detections Count : %lu,\n"
+							 ":::::::: Last Detection Time %f,\n"
+							 ":::::::: Last Latency : %f,\n"
+							 ":::::::: Last Test Time : %f\n"
+							 ":::: }",
+							 GetDataStruct ()->ticksLeft,
+							 GetDataStruct ()->detections,
+							 GetDataStruct ()->lastDetectionTime,
+							 GetDataStruct ()->previousLatency,
+							 GetDataStruct ()->lastTest );
 }

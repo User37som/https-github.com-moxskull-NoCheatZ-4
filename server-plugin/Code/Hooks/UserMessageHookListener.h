@@ -36,9 +36,9 @@ namespace google
 }
 
 // The function declarations we will call
-typedef void (HOOKFN_EXT *SendUserMessage_t)(SourceSdk::IVEngineServer023csgo const * const, SourceSdk::IRecipientFilter &, int, google::protobuf::Message const &);
-typedef void (HOOKFN_EXT *UserMessageBegin_t)(SourceSdk::IVEngineServer023 const * const thisptr, SourceSdk::bf_write const * const, SourceSdk::IRecipientFilter const * const, int const);
-typedef void (HOOKFN_EXT *MessageEnd_t)(void*);
+typedef void ( HOOKFN_EXT *SendUserMessage_t )( SourceSdk::IVEngineServer023csgo const * const, SourceSdk::IRecipientFilter &, int, google::protobuf::Message const & );
+typedef void ( HOOKFN_EXT *UserMessageBegin_t )( SourceSdk::IVEngineServer023 const * const thisptr, SourceSdk::bf_write const * const, SourceSdk::IRecipientFilter const * const, int const );
+typedef void ( HOOKFN_EXT *MessageEnd_t )( void* );
 
 class UserMessageHookListener
 {
@@ -51,8 +51,8 @@ private:
 	static SourceSdk::bf_write* m_buffer;
 
 public:
-	UserMessageHookListener();
-	virtual ~UserMessageHookListener();
+	UserMessageHookListener ();
+	virtual ~UserMessageHookListener ();
 
 	/*
 	Hook and unhook functions.
@@ -62,25 +62,25 @@ public:
 	/*
 		This must be called after InterfacesProxy::Load so we can have a passthru.
 	*/
-	static void HookUserMessage();
+	static void HookUserMessage ();
 
 protected:
-	static void RegisterUserMessageHookListener(UserMessageHookListener const * const listener);
-	static void RemoveUserMessageHookListener(UserMessageHookListener const * const listener);
+	static void RegisterUserMessageHookListener ( UserMessageHookListener const * const listener );
+	static void RemoveUserMessageHookListener ( UserMessageHookListener const * const listener );
 
-	virtual bool SendUserMessageCallback(SourceSdk::IRecipientFilter const &, int const, google::protobuf::Message const &) = 0;
-	virtual bool UserMessageBeginCallback(SourceSdk::IRecipientFilter const * const, int const) = 0;
+	virtual bool RT_SendUserMessageCallback ( SourceSdk::IRecipientFilter const &, int const, google::protobuf::Message const & ) = 0;
+	virtual bool RT_UserMessageBeginCallback ( SourceSdk::IRecipientFilter const * const, int const ) = 0;
 
 private:
 
 #ifdef GNUC
-	static void HOOKFN_INT nSendUserMessage(SourceSdk::IVEngineServer023csgo const * const thisptr, SourceSdk::IRecipientFilter const &, int const, google::protobuf::Message const &);
-	static SourceSdk::bf_write* HOOKFN_INT nUserMessageBegin(SourceSdk::IVEngineServer023 const * const thisptr, SourceSdk::IRecipientFilter const * const, int const);
-	static void HOOKFN_INT nMessageEnd(void * const thisptr);
+	static void HOOKFN_INT RT_nSendUserMessage ( SourceSdk::IVEngineServer023csgo const * const thisptr, SourceSdk::IRecipientFilter const &, int const, google::protobuf::Message const & );
+	static SourceSdk::bf_write* HOOKFN_INT RT_nUserMessageBegin ( SourceSdk::IVEngineServer023 const * const thisptr, SourceSdk::IRecipientFilter const * const, int const );
+	static void HOOKFN_INT RT_nMessageEnd ( void * const thisptr );
 #else
-	static void HOOKFN_INT nSendUserMessage(SourceSdk::IVEngineServer023csgo const * const thisptr, void * const, SourceSdk::IRecipientFilter const &, int const, google::protobuf::Message const &);
-	static SourceSdk::bf_write* HOOKFN_INT nUserMessageBegin(SourceSdk::IVEngineServer023 const * const thisptr, void * const, SourceSdk::IRecipientFilter const * const, int const);
-	static void HOOKFN_INT nMessageEnd(void * const thisptr, void * const);
+	static void HOOKFN_INT RT_nSendUserMessage ( SourceSdk::IVEngineServer023csgo const * const thisptr, void * const, SourceSdk::IRecipientFilter const &, int const, google::protobuf::Message const & );
+	static SourceSdk::bf_write* HOOKFN_INT RT_nUserMessageBegin ( SourceSdk::IVEngineServer023 const * const thisptr, void * const, SourceSdk::IRecipientFilter const * const, int const );
+	static void HOOKFN_INT RT_nMessageEnd ( void * const thisptr, void * const );
 #endif
 };
 

@@ -4,7 +4,7 @@
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
-       http://www.apache.org/licenses/LICENSE-2.0
+	   http://www.apache.org/licenses/LICENSE-2.0
 
    Unless required by applicable law or agreed to in writing, software
    distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,7 +21,6 @@
 #include "Misc/temp_basiclist.h"
 #include "Systems/BaseSystem.h"
 #include "Systems/Testers/Detections/temp_BaseDetection.h" // + helpers, ifaces, preprocessors, playermanager
-#include "Players/NczFilteredPlayersList.h" // + playermanager, singleton
 #include "Players/temp_PlayerDataStruct.h"
 #include "Systems/OnTickListener.h"
 #include "Misc/temp_singleton.h"
@@ -30,7 +29,7 @@
 // ConVarTester
 /////////////////////////////////////////////////////////////////////////
 
-typedef enum ConVarRule
+typedef enum class ConVarRule : unsigned int
 {
 	SAME = 0,
 	SAME_FLOAT,
@@ -41,43 +40,84 @@ typedef enum ConVarRule
 
 typedef struct ConVarInfo
 {
-	char name[64];
-	char value[64];
+	char name[ 64 ];
+	char value[ 64 ];
 	ConVarRuleT rule;
 	bool safe;
 	void* sv_var;
 
-	ConVarInfo()
+	ConVarInfo ()
 	{
-		memset(this, 0, sizeof(ConVarInfo));
+		memset ( this, 0, sizeof ( ConVarInfo ) );
 	};
-	ConVarInfo(const char* pname, const char* pvalue, ConVarRuleT prule, bool psafe, void* sv = nullptr)
+	ConVarInfo ( const char* pname, const char* pvalue, ConVarRuleT prule, bool psafe, void* sv = nullptr )
 	{
-		strncpy(name, pname, 64);
-		strncpy(value, pvalue, 64);
-		rule=prule;
-		safe=psafe;
+		strncpy ( name, pname, 64 );
+		strncpy ( value, pvalue, 64 );
+		rule = prule;
+		safe = psafe;
 		sv_var = sv;
 	};
-	ConVarInfo(const ConVarInfo& other)
+	ConVarInfo ( const ConVarInfo& other )
 	{
-		memcpy(this, &other, sizeof(ConVarInfo));
+		memcpy ( this, &other, sizeof ( ConVarInfo ) );
 	};
 } ConVarInfoT;
 
 typedef CUtlVector<ConVarInfoT> ConVarRulesListT;
 
+enum class ConVarRequestStatus : unsigned int
+{
+	NOT_PROCESSING = 0,
+	SENT,
+	REPLYED
+};
+
 typedef struct CurrentConVarRequest
 {
-	bool isSent;
-	bool isReplyed;
+	ConVarRequestStatus status;
 	float timeStart;
 	int ruleset;
+	SourceSdk::QueryCvarCookie_t cookie;
+	int attempts;
 	basic_string answer;
 	basic_string answer_status;
 
-	CurrentConVarRequest(){isSent=false;isReplyed=false;timeStart=0.0;};
-	CurrentConVarRequest(const CurrentConVarRequest& other){isSent=other.isSent;isReplyed=other.isReplyed;timeStart=other.timeStart;ruleset=other.ruleset;answer=other.answer;answer_status=other.answer_status;};
+	CurrentConVarRequest ()
+	{
+		status = ConVarRequestStatus::NOT_PROCESSING; timeStart = 0.0; ruleset = 0;
+	};
+	CurrentConVarRequest ( const CurrentConVarRequest& other )
+	{
+		status = other.status; timeStart = other.timeStart; ruleset = other.ruleset; answer = other.answer; answer_status = other.answer_status;
+	};
+
+	void PrepareNextRequest (ConVarRulesListT const & rules)
+	{
+		if( ++ ruleset >= rules.Size () )
+		{
+			ruleset = 0;
+		}
+		answer = "NO ANSWER";
+		answer_status = "NO STATUS";
+		status = ConVarRequestStatus::NOT_PROCESSING;
+		attempts = 0;
+	}
+
+	void SendCurrentRequest ( PlayerHandler::const_iterator ph, float const curtime, ConVarRulesListT const & rules )
+	{
+		cookie = SourceSdk::InterfacesProxy::GetServerPluginHelpers ()->StartQueryCvarValue ( ph->GetEdict (), rules[ ruleset ].name );
+		if( cookie != InvalidQueryCvarCookie )
+		{
+			status = ConVarRequestStatus::SENT;
+			timeStart = curtime;
+		}
+		else
+		{
+			status = ConVarRequestStatus::NOT_PROCESSING;
+			Logger::GetInstance ()->Msg<MSG_ERROR> ( "ConVarTester : StartQueryCvarValue returned InvalidQueryCvarCookie" );
+		}
+	}
 } CurrentConVarRequestT;
 
 class ConVarTester;
@@ -87,15 +127,16 @@ class Detection_ConVar : public LogDetection<CurrentConVarRequestT>
 	friend ConVarTester;
 	typedef LogDetection<CurrentConVarRequestT> hClass;
 public:
-	Detection_ConVar() : hClass() {};
-	~Detection_ConVar(){};
+	Detection_ConVar () : hClass ()
+	{};
+	~Detection_ConVar ()
+	{};
 
-	virtual basic_string GetDataDump();
-	virtual basic_string GetDetectionLogMessage();
+	virtual basic_string GetDataDump ();
+	virtual basic_string GetDetectionLogMessage ();
 };
 
 class ConVarTester :
-	private AsyncNczFilteredPlayersList,
 	public BaseSystem,
 	public OnTickListener,
 	public PlayerDataStructHandler<CurrentConVarRequestT>,
@@ -112,32 +153,34 @@ private:
 	void* var_sv_cheats;
 
 public:
-	ConVarTester();
-	virtual ~ConVarTester() final;
+	ConVarTester ();
+	virtual ~ConVarTester () final;
 
 private:
-	virtual void Init() override final;
+	virtual void Init () override final;
 
-	virtual void Load() override final;
+	virtual void Load () override final;
 
-	virtual void Unload() override final;
+	virtual void Unload () override final;
 
-	virtual bool sys_cmd_fn(SourceSdk::CCommand const &args) override final;
+	virtual bool GotJob () const override final;
+
+	virtual bool sys_cmd_fn ( SourceSdk::CCommand const &args ) override final;
 
 	/* Nouvelle version de la fonction qui va faire en sorte de ne tester qu'un seul joueur par frame */
-	virtual void ProcessOnTick(float const curtime) override final;
-
-	virtual void ProcessPlayerTestOnTick(PlayerHandler::const_iterator ph, float const curtime) override final {};
+	virtual void RT_ProcessOnTick ( float const curtime ) override final;
 
 public:
-	void OnQueryCvarValueFinished(PlayerHandler::const_iterator ph, SourceSdk::EQueryCvarValueStatus eStatus, const char *pCvarName, const char *pCvarValue);
+	void RT_OnQueryCvarValueFinished ( PlayerHandler::const_iterator ph, SourceSdk::QueryCvarCookie_t cookie, SourceSdk::EQueryCvarValueStatus eStatus, const char *pCvarName, const char *pCvarValue );
 
 private:
-	void ProcessPlayerTest(PlayerHandler::const_iterator ph, float const curtime);
+	void RT_ProcessPlayerTest ( PlayerHandler::const_iterator ph, float const curtime );
 
-	void AddConvarRuleset(const char * name, const char * value, ConVarRuleT rule, bool safe = true);
+	void AddConvarRuleset ( const char * name, const char * value, ConVarRuleT rule, bool safe = true );
 
-	ConVarInfoT* FindConvarRuleset(const char * name);
+	ConVarInfoT* RT_FindConvarRuleset ( const char * name );
+
+	PlayerHandler::const_iterator m_current_player;
 };
 
 #endif // CONVARTESTER_H

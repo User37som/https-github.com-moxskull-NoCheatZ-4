@@ -132,9 +132,6 @@
     <ClCompile Include="Code\Misc\Helpers.cpp">
       <Filter>Code\Misc</Filter>
     </ClCompile>
-    <ClCompile Include="Code\Players\NczFilteredPlayersList.cpp">
-      <Filter>Code\Players</Filter>
-    </ClCompile>
     <ClCompile Include="Code\Players\NczPlayer.cpp">
       <Filter>Code\Players</Filter>
     </ClCompile>
@@ -204,13 +201,7 @@
     <ClCompile Include="Code\Systems\Testers\SpamChangeNameTester.cpp">
       <Filter>Code\Systems\Testers</Filter>
     </ClCompile>
-    <ClCompile Include="Code\Hooks\RayTraceCache.cpp">
-      <Filter>Code\Hooks</Filter>
-    </ClCompile>
     <ClCompile Include="Code\Systems\TimerListener.cpp">
-      <Filter>Code\Systems</Filter>
-    </ClCompile>
-    <ClCompile Include="Code\Systems\OnFrameListener.cpp">
       <Filter>Code\Systems</Filter>
     </ClCompile>
     <ClCompile Include="Code\Systems\OnTickListener.cpp">
@@ -246,6 +237,9 @@
     <ClCompile Include="Code\Misc\MathCache.cpp">
       <Filter>Code\Misc</Filter>
     </ClCompile>
+    <ClCompile Include="Code\Misc\HeapMemoryManager.cpp">
+      <Filter>Code\Misc</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Code\plugin.h">
@@ -262,9 +256,6 @@
     </ClInclude>
     <ClInclude Include="Code\Misc\Helpers.h">
       <Filter>Code\Misc</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\Players\NczFilteredPlayersList.h">
-      <Filter>Code\Players</Filter>
     </ClInclude>
     <ClInclude Include="Code\Players\NczPlayer.h">
       <Filter>Code\Players</Filter>
@@ -353,16 +344,10 @@
     <ClInclude Include="Code\Systems\Testers\SpamChangeNameTester.h">
       <Filter>Code\Systems\Testers</Filter>
     </ClInclude>
-    <ClInclude Include="Code\Hooks\RayTraceCache.h">
-      <Filter>Code\Hooks</Filter>
-    </ClInclude>
     <ClInclude Include="Code\Misc\temp_Metrics.h">
       <Filter>Code\Misc</Filter>
     </ClInclude>
     <ClInclude Include="Code\Systems\TimerListener.h">
-      <Filter>Code\Systems</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\Systems\OnFrameListener.h">
       <Filter>Code\Systems</Filter>
     </ClInclude>
     <ClInclude Include="Code\Systems\OnTickListener.h">
@@ -542,8 +527,17 @@
     <ClInclude Include="Code\Misc\MathCache.h">
       <Filter>Code\Misc</Filter>
     </ClInclude>
-    <ClInclude Include="Code\version.h">
-      <Filter>Code</Filter>
+    <ClInclude Include="Code\Players\ProcessFilter.h">
+      <Filter>Code\Players</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Misc\ClassSpecifications.h">
+      <Filter>Code\Misc</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Misc\HeapMemoryManager.h">
+      <Filter>Code\Misc</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Systems\i18nManager.h">
+      <Filter>Code\Systems</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

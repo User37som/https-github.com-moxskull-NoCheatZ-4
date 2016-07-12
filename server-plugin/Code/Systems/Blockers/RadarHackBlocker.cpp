@@ -23,42 +23,46 @@ limitations under the License.
 #include "Misc/MathCache.h"
 #include "Systems/AutoTVRecord.h"
 
-RadarHackBlocker::RadarHackBlocker() :
-	BaseSystem("RadarHackBlocker", PLAYER_CONNECTED, PLAYER_CONNECTING, STATUS_EQUAL_OR_BETTER),
-	OnTickListener(),
-	playerdatahandler_class(),
-	singleton_class(),
-	ThinkPostHookListener(),
-	UserMessageHookListener()
+RadarHackBlocker::RadarHackBlocker () :
+	BaseSystem ( "RadarHackBlocker" ),
+	OnTickListener (),
+	playerdatahandler_class (),
+	singleton_class (),
+	ThinkPostHookListener (),
+	UserMessageHookListener (),
+	m_players_spotted ( nullptr ),
+	m_bomb_spotted ( nullptr ),
+	m_cvar_forcecamera ( nullptr ),
+	m_next_process ( 0.0f )
 {
 
 }
 
-RadarHackBlocker::~RadarHackBlocker()
+RadarHackBlocker::~RadarHackBlocker ()
 {
 
 }
 
-void RadarHackBlocker::OnMapStart()
+void RadarHackBlocker::OnMapStart ()
 {
-	if (!GetDisabledByConfigIni())
+	if( !GetDisabledByConfigIni () )
 	{
 		m_players_spotted = nullptr;
 		m_bomb_spotted = nullptr;
 
-		for (int x = 0; x < MAX_EDICTS; ++x)
+		for( int x ( 0 ); x < MAX_EDICTS; ++x )
 		{
-			SourceSdk::edict_t * const ent = Helpers::PEntityOfEntIndex(x);
-			if (Helpers::isValidEdict(ent))
+			SourceSdk::edict_t * const ent ( Helpers::PEntityOfEntIndex ( x ) );
+			if( Helpers::isValidEdict ( ent ) )
 			{
-				if (ent->GetClassName() != nullptr)
+				if( ent->GetClassName () != nullptr )
 				{
 #undef GetClassName
-					if (basic_string("cs_player_manager").operator==(ent->GetClassName()))
+					if( basic_string ( "cs_player_manager" ).operator==( ent->GetClassName () ) )
 					{
-						m_players_spotted = EntityProps::GetInstance()->GetPropValue<bool, PROP_PLAYER_SPOTTED>(ent);
-						m_bomb_spotted = EntityProps::GetInstance()->GetPropValue<bool, PROP_BOMB_SPOTTED>(ent);
-						ThinkPostHookListener::HookThinkPost(ent);
+						m_players_spotted = EntityProps::GetInstance ()->GetPropValue<bool, PROP_PLAYER_SPOTTED> ( ent );
+						m_bomb_spotted = EntityProps::GetInstance ()->GetPropValue<bool, PROP_BOMB_SPOTTED> ( ent );
+						ThinkPostHookListener::HookThinkPost ( ent );
 						break;
 					}
 				}
@@ -67,155 +71,164 @@ void RadarHackBlocker::OnMapStart()
 	}
 }
 
-void RadarHackBlocker::Init()
+void RadarHackBlocker::Init ()
 {
 	m_next_process = 0.0;
-	for (int x = 0; x < MAX_PLAYERS; ++x)
-		m_dataStruct[x] = ClientRadarData(x);
+	for( int x ( 0 ); x < MAX_PLAYERS; ++x )
+		m_dataStruct[ x ] = ClientRadarData ( x );
 }
 
-void RadarHackBlocker::Load()
+void RadarHackBlocker::Load ()
 {
-	m_cvar_forcecamera = SourceSdk::InterfacesProxy::ICvar_FindVar("mp_forcecamera");
+	m_cvar_forcecamera = SourceSdk::InterfacesProxy::ICvar_FindVar ( "mp_forcecamera" );
 
-	ThinkPostHookListener::RegisterThinkPostHookListener(this);
-	UserMessageHookListener::RegisterUserMessageHookListener(this);
-	OnTickListener::RegisterOnTickListener(this);
+	ThinkPostHookListener::RegisterThinkPostHookListener ( this );
+	UserMessageHookListener::RegisterUserMessageHookListener ( this );
+	OnTickListener::RegisterOnTickListener ( this );
 }
 
-void RadarHackBlocker::Unload()
+void RadarHackBlocker::Unload ()
 {
-	OnTickListener::RemoveOnTickListener(this);
-	UserMessageHookListener::RemoveUserMessageHookListener(this);
-	ThinkPostHookListener::RemoveThinkPostHookListener(this);
+	OnTickListener::RemoveOnTickListener ( this );
+	UserMessageHookListener::RemoveUserMessageHookListener ( this );
+	ThinkPostHookListener::RemoveThinkPostHookListener ( this );
 }
 
-void RadarHackBlocker::ThinkPostCallback(SourceSdk::edict_t const * const pent)
+bool RadarHackBlocker::GotJob () const
 {
-	for (PlayerHandler::const_iterator ph = PlayerHandler::begin(); ph != PlayerHandler::end(); ++ph)
+	// Create a filter
+	ProcessFilter::HumanAtLeastConnecting const filter_class;
+	// Initiate the iterator at the first match in the filter
+	PlayerHandler::const_iterator it ( &filter_class );
+	// Return if we have job to do or not ...
+	return it != PlayerHandler::end ();
+}
+
+void RadarHackBlocker::RT_ThinkPostCallback ( SourceSdk::edict_t const * const pent )
+{
+	ProcessFilter::HumanAtLeastConnectedOrBot const filter_class;
+
+	for( PlayerHandler::const_iterator ph ( &filter_class ); ph != PlayerHandler::end (); ph += &filter_class )
 	{
-		if (CanProcessThisSlot(ph) || ph == BOT)
+		int const index ( ph.GetIndex () );
+		ClientRadarData * pData ( GetPlayerDataStructByIndex ( index ) );
+		if( pData->m_last_spotted_status != m_players_spotted[ index ] )
 		{
-			int const index = ph.GetIndex();
-			ClientRadarData * pData = GetPlayerDataStructByIndex(index);
-			if (pData->m_last_spotted_status != m_players_spotted[index])
-			{
-				pData->m_last_spotted_status = m_players_spotted[index];
+			pData->m_last_spotted_status = m_players_spotted[ index ];
 
-				if (pData->m_last_spotted_status)
-				{
-					UpdatePlayerData(ph);
-					ProcessEntity(ph->GetEdict());
-				}
-				else
-				{
-					//pData->m_next_update = curtime + 1.0f;
-					//UpdatePlayerData(ph->playerClass);
-					//ProcessEntity(Helpers::PEntityOfEntIndex(x));
-				}
+			if( pData->m_last_spotted_status )
+			{
+				RT_UpdatePlayerData ( ph );
+				RT_ProcessEntity ( ph->GetEdict () );
+			}
+			else
+			{
+				//pData->m_next_update = curtime + 1.0f;
+				//UpdatePlayerData(ph->playerClass);
+				//ProcessEntity(Helpers::PEntityOfEntIndex(x));
 			}
 		}
 	}
 }
 
-bool RadarHackBlocker::SendUserMessageCallback(SourceSdk::IRecipientFilter const &, int const message_id, google::protobuf::Message const &)
+bool RadarHackBlocker::RT_SendUserMessageCallback ( SourceSdk::IRecipientFilter const &, int const message_id, google::protobuf::Message const & )
 {
-	return (message_id == CS_UM_ProcessSpottedEntityUpdate);
+	return ( message_id == CS_UM_ProcessSpottedEntityUpdate );
 }
 
-bool RadarHackBlocker::UserMessageBeginCallback(SourceSdk::IRecipientFilter const * const, int const message_id)
+bool RadarHackBlocker::RT_UserMessageBeginCallback ( SourceSdk::IRecipientFilter const * const, int const message_id )
 {
-	return (message_id == UpdateRadar);
+	return ( message_id == UpdateRadar );
 }
 
-void RadarHackBlocker::SendApproximativeRadarUpdate(MRecipientFilter & filter, ClientRadarData const * pData) const
+void RadarHackBlocker::RT_SendApproximativeRadarUpdate ( MRecipientFilter & filter, ClientRadarData const * pData ) const
 {
-	MathInfo const & player_maths = MathCache::GetInstance()->GetCachedMaths(pData->m_origin_index);
+	MathInfo const & player_maths ( MathCache::GetInstance ()->RT_GetCachedMaths ( pData->m_origin_index ) );
 
-	if (SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive)
+	if( SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive )
 	{
-		CCSUsrMsg_ProcessSpottedEntityUpdate_SpottedEntityUpdate* pBuffer = (CCSUsrMsg_ProcessSpottedEntityUpdate_SpottedEntityUpdate *)g_Cstrike15UsermessageHelpers.GetPrototype(CS_UM_ProcessSpottedEntityUpdate)->New();
+		CCSUsrMsg_ProcessSpottedEntityUpdate_SpottedEntityUpdate* pBuffer = ( CCSUsrMsg_ProcessSpottedEntityUpdate_SpottedEntityUpdate * ) g_Cstrike15UsermessageHelpers.GetPrototype ( CS_UM_ProcessSpottedEntityUpdate )->New ();
 
-		pBuffer->set_entity_idx(pData->m_origin_index);
-		pBuffer->set_class_id(35);
-		pBuffer->set_origin_x((int32_t)(player_maths.m_abs_origin.x * 0.25f));
-		pBuffer->set_origin_y((int32_t)(player_maths.m_abs_origin.y * 0.25f));
-		pBuffer->set_origin_z(0);
-		pBuffer->set_angle_y((int32_t)player_maths.m_eyeangles.y);
+		pBuffer->set_entity_idx ( pData->m_origin_index );
+		pBuffer->set_class_id ( 35 );
+		pBuffer->set_origin_x ( ( int32_t ) ( player_maths.m_abs_origin.x * 0.25f ) );
+		pBuffer->set_origin_y ( ( int32_t ) ( player_maths.m_abs_origin.y * 0.25f ) );
+		pBuffer->set_origin_z ( 0 );
+		pBuffer->set_angle_y ( ( int32_t ) player_maths.m_eyeangles.y );
 		//pBuffer->set_defuser();
 		//pBuffer->set_player_has_defuser();
 		//pBuffer->set_player_has_c4();
 
-		SourceSdk::InterfacesProxy::Call_SendUserMessage(&(filter), CS_UM_ProcessSpottedEntityUpdate, *pBuffer);
+		SourceSdk::InterfacesProxy::Call_SendUserMessage ( &( filter ), CS_UM_ProcessSpottedEntityUpdate, *pBuffer );
 		delete pBuffer;
 	}
 	else
 	{
-		SourceSdk::bf_write *pBuffer = SourceSdk::InterfacesProxy::Call_UserMessageBegin(&(filter), /*eUserMsg::UpdateRadar*/ 28);
+		SourceSdk::bf_write *pBuffer ( SourceSdk::InterfacesProxy::Call_UserMessageBegin ( &( filter ), /*eUserMsg::UpdateRadar*/ 28 ) );
 
-		SourceSdk::BfWriteByte(pBuffer, pData->m_origin_index);
-		SourceSdk::BfWriteNBits<int32_t, 13>(pBuffer, (int32_t)(std::round(player_maths.m_abs_origin.x * 0.25f)));
-		SourceSdk::BfWriteNBits<int32_t, 13>(pBuffer, (int32_t)(std::round(player_maths.m_abs_origin.y * 0.25f)));
-		SourceSdk::BfWriteNBits<int32_t, 13>(pBuffer, 0);
-		SourceSdk::BfWriteNBits<int32_t, 9>(pBuffer, (int32_t)(std::round(player_maths.m_eyeangles.y)));
+		SourceSdk::BfWriteByte ( pBuffer, pData->m_origin_index );
+		SourceSdk::BfWriteNBits<int32_t, 13> ( pBuffer, ( int32_t ) ( std::round ( player_maths.m_abs_origin.x * 0.25f ) ) );
+		SourceSdk::BfWriteNBits<int32_t, 13> ( pBuffer, ( int32_t ) ( std::round ( player_maths.m_abs_origin.y * 0.25f ) ) );
+		SourceSdk::BfWriteNBits<int32_t, 13> ( pBuffer, 0 );
+		SourceSdk::BfWriteNBits<int32_t, 9> ( pBuffer, ( int32_t ) ( std::round ( player_maths.m_eyeangles.y ) ) );
 
-		SourceSdk::BfWriteByte(pBuffer, 0);
-		SourceSdk::InterfacesProxy::Call_MessageEnd();
+		SourceSdk::BfWriteByte ( pBuffer, 0 );
+		SourceSdk::InterfacesProxy::Call_MessageEnd ();
 	}
 }
 
-void RadarHackBlocker::SendRandomRadarUpdate(MRecipientFilter & filter, ClientRadarData const * pData) const
+void RadarHackBlocker::RT_SendRandomRadarUpdate ( MRecipientFilter & filter, ClientRadarData const * pData ) const
 {
-	if (SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive)
+	if( SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive )
 	{
-		CCSUsrMsg_ProcessSpottedEntityUpdate_SpottedEntityUpdate* pBuffer = (CCSUsrMsg_ProcessSpottedEntityUpdate_SpottedEntityUpdate *)g_Cstrike15UsermessageHelpers.GetPrototype(CS_UM_ProcessSpottedEntityUpdate)->New();
+		CCSUsrMsg_ProcessSpottedEntityUpdate_SpottedEntityUpdate* pBuffer ( ( CCSUsrMsg_ProcessSpottedEntityUpdate_SpottedEntityUpdate * ) g_Cstrike15UsermessageHelpers.GetPrototype ( CS_UM_ProcessSpottedEntityUpdate )->New () );
 
-		pBuffer->set_entity_idx(pData->m_origin_index);
-		pBuffer->set_class_id(35);
-		pBuffer->set_origin_x((int32_t)std::round((float)std::rand()));
-		pBuffer->set_origin_y((int32_t)std::round((float)std::rand()));
-		pBuffer->set_origin_z((int32_t)std::round((float)std::rand()));
-		pBuffer->set_angle_y((int32_t)std::round((float)std::rand()));
-		pBuffer->set_defuser(false);
-		pBuffer->set_player_has_defuser(false);
-		pBuffer->set_player_has_c4(false);
+		pBuffer->set_entity_idx ( pData->m_origin_index );
+		pBuffer->set_class_id ( 35 );
+		pBuffer->set_origin_x ( ( int32_t ) std::round ( ( float ) std::rand () ) );
+		pBuffer->set_origin_y ( ( int32_t ) std::round ( ( float ) std::rand () ) );
+		pBuffer->set_origin_z ( ( int32_t ) std::round ( ( float ) std::rand () ) );
+		pBuffer->set_angle_y ( ( int32_t ) std::round ( ( float ) std::rand () ) );
+		pBuffer->set_defuser ( false );
+		pBuffer->set_player_has_defuser ( false );
+		pBuffer->set_player_has_c4 ( false );
 
-		SourceSdk::InterfacesProxy::Call_SendUserMessage(&(filter), CS_UM_ProcessSpottedEntityUpdate, *pBuffer);
+		SourceSdk::InterfacesProxy::Call_SendUserMessage ( &( filter ), CS_UM_ProcessSpottedEntityUpdate, *pBuffer );
 		delete pBuffer;
 	}
 	else
 	{
-		SourceSdk::bf_write *pBuffer = SourceSdk::InterfacesProxy::Call_UserMessageBegin(&(filter), /*eUserMsg::UpdateRadar*/ 28);
+		SourceSdk::bf_write *pBuffer ( SourceSdk::InterfacesProxy::Call_UserMessageBegin ( &( filter ), /*eUserMsg::UpdateRadar*/ 28 ) );
 
-		SourceSdk::BfWriteByte(pBuffer, pData->m_origin_index);
-		SourceSdk::BfWriteNBits<int32_t, 13>(pBuffer, (int32_t)(std::round((float)std::rand())));
-		SourceSdk::BfWriteNBits<int32_t, 13>(pBuffer, (int32_t)(std::round((float)std::rand())));
-		SourceSdk::BfWriteNBits<int32_t, 13>(pBuffer, (int32_t)(std::round((float)std::rand())));
-		SourceSdk::BfWriteNBits<int32_t, 9>(pBuffer, (int32_t)(std::round((float)std::rand())));
+		SourceSdk::BfWriteByte ( pBuffer, pData->m_origin_index );
+		SourceSdk::BfWriteNBits<int32_t, 13> ( pBuffer, ( int32_t ) ( std::round ( ( float ) std::rand () ) ) );
+		SourceSdk::BfWriteNBits<int32_t, 13> ( pBuffer, ( int32_t ) ( std::round ( ( float ) std::rand () ) ) );
+		SourceSdk::BfWriteNBits<int32_t, 13> ( pBuffer, ( int32_t ) ( std::round ( ( float ) std::rand () ) ) );
+		SourceSdk::BfWriteNBits<int32_t, 9> ( pBuffer, ( int32_t ) ( std::round ( ( float ) std::rand () ) ) );
 
-		SourceSdk::BfWriteByte(pBuffer, 0);
-		SourceSdk::InterfacesProxy::Call_MessageEnd();
+		SourceSdk::BfWriteByte ( pBuffer, 0 );
+		SourceSdk::InterfacesProxy::Call_MessageEnd ();
 	}
 }
 
-void RadarHackBlocker::ProcessEntity(SourceSdk::edict_t const * const pent)
+void RadarHackBlocker::RT_ProcessEntity ( SourceSdk::edict_t const * const pent )
 {
-	ClientRadarData * pData = GetPlayerDataStructByIndex(Helpers::IndexOfEdict(pent));
+	ClientRadarData * pData ( GetPlayerDataStructByIndex ( Helpers::IndexOfEdict ( pent ) ) );
 
 	static MRecipientFilter filter;
-	filter.RemoveAll();
-	
-	filter.SetReliable(false);
+	filter.RemoveAll ();
 
-	if (pData->m_last_spotted_status == true)
+	filter.SetReliable ( false );
+
+	if( pData->m_last_spotted_status == true )
 	{
 		/*
 			Entity is spotted -> send approximative data to all players
 		*/
 
-		filter.AddAllPlayers(NczPlayerManager::GetInstance()->GetMaxIndex());
+		filter.AddAllPlayers ( NczPlayerManager::GetInstance ()->GetMaxIndex () );
 
-		SendApproximativeRadarUpdate(filter, pData);
+		RT_SendApproximativeRadarUpdate ( filter, pData );
 	}
 	else
 	{
@@ -223,70 +236,71 @@ void RadarHackBlocker::ProcessEntity(SourceSdk::edict_t const * const pent)
 			Entity is not spotted -> send approximative data to teammates and spectators, random for others.
 		*/
 
-		
-		filter.AddTeam(pData->m_team);
-		filter.AddTeam(TEAM_SPECTATOR);
-		filter.AddTeam(TEAM_NONE);
 
-		filter.RemoveRecipient(pData->m_origin_index);
+		filter.AddTeam ( pData->m_team );
+		filter.AddTeam ( TEAM_SPECTATOR );
+		filter.AddTeam ( TEAM_NONE );
 
-		SendApproximativeRadarUpdate(filter, pData);
+		filter.RemoveRecipient ( pData->m_origin_index );
 
-		filter.RemoveAll();
+		RT_SendApproximativeRadarUpdate ( filter, pData );
 
-		if (pData->m_team == TEAM_1)
+		filter.RemoveAll ();
+
+		if( pData->m_team == TEAM_1 )
 		{
-			filter.AddTeam(TEAM_2);
+			filter.AddTeam ( TEAM_2 );
 		}
-		else if(pData->m_team == TEAM_2)
+		else if( pData->m_team == TEAM_2 )
 		{
-			filter.AddTeam(TEAM_1);
+			filter.AddTeam ( TEAM_1 );
 		}
 		else
 		{
 			return;
 		}
 
-		SendRandomRadarUpdate(filter, pData);
+		RT_SendRandomRadarUpdate ( filter, pData );
 	}
 }
 
-void RadarHackBlocker::UpdatePlayerData(NczPlayer* pPlayer)
+void RadarHackBlocker::RT_UpdatePlayerData ( NczPlayer* pPlayer )
 {
-	ClientRadarData * pData = GetPlayerDataStruct(pPlayer);
+	ClientRadarData * pData ( GetPlayerDataStruct ( pPlayer ) );
 
-	SourceSdk::IPlayerInfo * const playerinfo = pPlayer->GetPlayerInfo();
-	if (playerinfo == nullptr) return;
+	SourceSdk::IPlayerInfo * const playerinfo ( pPlayer->GetPlayerInfo () );
+	if( playerinfo == nullptr ) return;
 
-	pData->m_origin_index = pPlayer->GetIndex();
-	pData->m_team = playerinfo->GetTeamIndex();
+	pData->m_origin_index = pPlayer->GetIndex ();
+	pData->m_team = playerinfo->GetTeamIndex ();
 }
 
-void RadarHackBlocker::ProcessOnTick(float const curtime)
+void RadarHackBlocker::RT_ProcessOnTick ( float const curtime )
 {
-	for (PlayerHandler::const_iterator ph = PlayerHandler::begin(); ph != PlayerHandler::end(); ++ph)
+	ProcessFilter::HumanAtLeastConnectedOrBot const filter_class;
+
+	for( PlayerHandler::const_iterator ph ( &filter_class ); ph != PlayerHandler::end (); ph += &filter_class )
 	{
-		if (!CanProcessThisSlot(ph) && ph != BOT) continue;
-		int const index = ph.GetIndex();
+		int const index ( ph.GetIndex () );
 
-		ClientRadarData * pData = GetPlayerDataStructByIndex(index);
+		ClientRadarData * pData ( GetPlayerDataStructByIndex ( index ) );
 
-		if (pData->m_last_spotted_status)
+		if( pData->m_last_spotted_status )
 		{
-			UpdatePlayerData(ph);
-			ProcessEntity(ph->GetEdict());
+			RT_UpdatePlayerData ( ph );
+			RT_ProcessEntity ( ph->GetEdict () );
 		}
 		else
 		{
-			if (curtime > m_next_process)
+			if( curtime > m_next_process )
 			{
-				UpdatePlayerData(ph);
-				ProcessEntity(ph->GetEdict());
+				RT_UpdatePlayerData ( ph );
+				RT_ProcessEntity ( ph->GetEdict () );
 			}
 		}
 	}
 
-	if (curtime > m_next_process)
+	if( curtime > m_next_process )
 	{
 		m_next_process = curtime + 2.0f;
 	}

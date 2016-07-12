@@ -4,7 +4,7 @@
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
-       http://www.apache.org/licenses/LICENSE-2.0
+	   http://www.apache.org/licenses/LICENSE-2.0
 
    Unless required by applicable law or agreed to in writing, software
    distributed under the License is distributed on an "AS IS" BASIS,
@@ -26,187 +26,198 @@
 	We have to make the difference by using statistics.
 */
 
-ShotTester::ShotTester(void) :
-	BaseSystem("ShotTester"),
-	playerdata_class(),
-	PlayerRunCommandHookListener(),
-	singleton_class()
+ShotTester::ShotTester ( void ) :
+	BaseSystem ( "ShotTester" ),
+	playerdata_class (),
+	PlayerRunCommandHookListener (),
+	singleton_class ()
+{}
+
+ShotTester::~ShotTester ( void )
 {
+	Unload ();
 }
 
-ShotTester::~ShotTester(void)
+void ShotTester::Init ()
 {
-	Unload();
+	InitDataStruct ();
 }
 
-void ShotTester::Init()
+void ShotTester::Load ()
 {
-	InitDataStruct();
-}
-
-void ShotTester::Load()
-{
-	for (PlayerHandler::const_iterator it = PlayerHandler::begin(); it != PlayerHandler::end(); ++it)
+	for( PlayerHandler::const_iterator it ( PlayerHandler::begin () ); it != PlayerHandler::end (); ++it )
 	{
-		ResetPlayerDataStructByIndex(it.GetIndex());
+		ResetPlayerDataStructByIndex ( it.GetIndex () );
 	}
 
-	PlayerRunCommandHookListener::RegisterPlayerRunCommandHookListener(this, 4);
+	PlayerRunCommandHookListener::RegisterPlayerRunCommandHookListener ( this, 4 );
 }
 
-void ShotTester::Unload()
+void ShotTester::Unload ()
 {
-	PlayerRunCommandHookListener::RemovePlayerRunCommandHookListener(this);
+	PlayerRunCommandHookListener::RemovePlayerRunCommandHookListener ( this );
 }
 
-void TriggerStat(ShotStatHandlerT* handler, float up_time, float down_time, size_t clicks)
+bool ShotTester::GotJob () const
 {
-	++(handler->n);
-	handler->avg_time = (handler->avg_time + (up_time - down_time) / (float)(handler->n));
-	handler->ratio = ((float)(handler->n) / (float)(clicks)) * 100.0f;
+	// Create a filter
+	ProcessFilter::HumanAtLeastConnected const filter_class;
+	// Initiate the iterator at the first match in the filter
+	PlayerHandler::const_iterator it ( &filter_class );
+	// Return if we have job to do or not ...
+	return it != PlayerHandler::end ();
 }
 
-void OutputStat(ShotStatHandlerT* handler)
+void TriggerStat ( ShotStatHandlerT* handler, float up_time, float down_time, size_t clicks )
 {
-	printf("{ count %u, ratio %3.2f, avg %3.2f }", handler->n, handler->ratio, handler->avg_time);
+	++( handler->n );
+	handler->avg_time = ( handler->avg_time + ( up_time - down_time ) / ( float ) ( handler->n ) );
+	handler->ratio = ( ( float ) ( handler->n ) / ( float ) ( clicks ) ) * 100.0f;
 }
 
-PlayerRunCommandRet ShotTester::PlayerRunCommandCallback(PlayerHandler::const_iterator ph, void* pCmd, void* lastcmd)
-{	
-	PlayerRunCommandRet drop_cmd = CONTINUE;
+void OutputStat ( ShotStatHandlerT* handler )
+{
+	printf ( "{ count %u, ratio %3.2f, avg %3.2f }", handler->n, handler->ratio, handler->avg_time );
+}
 
-	ShotStatsT * const playerData = GetPlayerDataStructByIndex(ph.GetIndex());
+PlayerRunCommandRet ShotTester::RT_PlayerRunCommandCallback ( PlayerHandler::const_iterator ph, void* pCmd, void* lastcmd )
+{
+	PlayerRunCommandRet drop_cmd = PlayerRunCommandRet::CONTINUE;
+
+	ShotStatsT * const playerData ( GetPlayerDataStructByIndex ( ph.GetIndex () ) );
+
+	float const curtime ( Plat_FloatTime () );
 
 	bool cur_in_attack;
 	bool past_in_attack;
 
-	if (SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive)
+	if( SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive )
 	{
-		cur_in_attack = (static_cast<SourceSdk::CUserCmd_csgo*>(pCmd)->buttons & IN_ATTACK) != 0;
-		past_in_attack = (static_cast<SourceSdk::CUserCmd_csgo*>(lastcmd)->buttons & IN_ATTACK) != 0;
+		cur_in_attack = ( static_cast< SourceSdk::CUserCmd_csgo* >( pCmd )->buttons & IN_ATTACK ) != 0;
+		past_in_attack = ( static_cast< SourceSdk::CUserCmd_csgo* >( lastcmd )->buttons & IN_ATTACK ) != 0;
 	}
 	else
 	{
-		cur_in_attack = (static_cast<SourceSdk::CUserCmd*>(pCmd)->buttons & IN_ATTACK) != 0;
-		past_in_attack = (static_cast<SourceSdk::CUserCmd*>(lastcmd)->buttons & IN_ATTACK) != 0;
+		cur_in_attack = ( static_cast< SourceSdk::CUserCmd* >( pCmd )->buttons & IN_ATTACK ) != 0;
+		past_in_attack = ( static_cast< SourceSdk::CUserCmd* >( lastcmd )->buttons & IN_ATTACK ) != 0;
 	}
 
-	if(cur_in_attack && !past_in_attack)
+	if( cur_in_attack && !past_in_attack )
 	{
 		//SystemVerbose1(Helpers::format("Player %s : IN_ATTACK button down.", ph->GetName()));
-		playerData->down_time = Plat_FloatTime();
+		playerData->down_time = curtime;
 	}
-	else if(past_in_attack && !cur_in_attack)
+	else if( past_in_attack && !cur_in_attack )
 	{
-		playerData->up_time = Plat_FloatTime();
-		TriggerStat(&(playerData->clicks), playerData->up_time, playerData->down_time, playerData->clicks.n);
+		playerData->up_time = curtime;
+		TriggerStat ( &( playerData->clicks ), playerData->up_time, playerData->down_time, playerData->clicks.n );
 		//SystemVerbose1(Helpers::format("Player %s : IN_ATTACK button up.", ph->GetName()));
 
-		if(playerData->up_time - playerData->down_time <= SHORT_TIME)
+		if( playerData->up_time - playerData->down_time <= SHORT_TIME )
 		{
-			if(Plat_FloatTime() - playerData->last_detection > 1.0)
+			if( curtime - playerData->last_detection > 1.0 )
 			{
-				if(playerData->row == 1)
+				if( playerData->row == 1 )
 				{
-					if(playerData->on_target.ratio > 25.0 && playerData->clicks.n > 50)
+					if( playerData->on_target.ratio > 25.0 && playerData->clicks.n > 50 )
 					{
-						Detection_TriggerBot pDetection = Detection_TriggerBot();
-						pDetection.PrepareDetectionData(playerData);
-						pDetection.PrepareDetectionLog(ph, this);
-						pDetection.Log();
+						Detection_TriggerBot pDetection;
+						pDetection.PrepareDetectionData ( playerData );
+						pDetection.PrepareDetectionLog ( ph, this );
+						pDetection.Log ();
 
-						ph->Ban();
+						ph->Ban ();
 					}
 				}
 				playerData->row = 0;
 			}
-			if(playerData->row > 10)
+			if( playerData->row > 10 )
 			{
-				if(playerData->short_clicks.ratio > 40.0 && playerData->clicks.n > 50)
+				if( playerData->short_clicks.ratio > 40.0 && playerData->clicks.n > 50 )
 				{
-					Detection_AutoPistol pDetection = Detection_AutoPistol();
-					pDetection.PrepareDetectionData(playerData);
-					pDetection.PrepareDetectionLog(ph, this);
-					pDetection.Log();
+					Detection_AutoPistol pDetection;
+					pDetection.PrepareDetectionData ( playerData );
+					pDetection.PrepareDetectionLog ( ph, this );
+					pDetection.Log ();
 
-					ph->Ban();
+					ph->Ban ();
 				}
 			}
-			playerData->last_detection = Plat_FloatTime();
-			++(playerData->row);
+			playerData->last_detection = curtime;
+			++( playerData->row );
 
-			TriggerStat(&(playerData->short_clicks), playerData->up_time, playerData->down_time, playerData->clicks.n);
-			if(ph->GetWpnShotType() == HAND) TriggerStat(&(playerData->with_hand), playerData->up_time, playerData->down_time, playerData->clicks.n);
-			else if(ph->GetWpnShotType() == PISTOL) TriggerStat(&(playerData->with_pistol), playerData->up_time, playerData->down_time, playerData->clicks.n);
-			else TriggerStat(&(playerData->with_auto), playerData->up_time, playerData->down_time, playerData->clicks.n);
-			if(ph->aimingAt() > 0) TriggerStat(&(playerData->on_target), playerData->up_time, playerData->down_time, playerData->clicks.n);
-			drop_cmd = INERT;
+			TriggerStat ( &( playerData->short_clicks ), playerData->up_time, playerData->down_time, playerData->clicks.n );
+			if( ph->GetWpnShotType () == HAND ) TriggerStat ( &( playerData->with_hand ), playerData->up_time, playerData->down_time, playerData->clicks.n );
+			else if( ph->GetWpnShotType () == PISTOL ) TriggerStat ( &( playerData->with_pistol ), playerData->up_time, playerData->down_time, playerData->clicks.n );
+			else TriggerStat ( &( playerData->with_auto ), playerData->up_time, playerData->down_time, playerData->clicks.n );
+			if( ph->aimingAt () > 0 ) TriggerStat ( &( playerData->on_target ), playerData->up_time, playerData->down_time, playerData->clicks.n );
+			drop_cmd = PlayerRunCommandRet::INERT;
 
-			if(this->m_verbose)
+			if( this->m_verbose )
 			{
-				printf("%f - clicks ", Plat_FloatTime());
-				OutputStat(&(playerData->clicks));
-				printf(", short_clicks ");
-				OutputStat(&(playerData->short_clicks));
-				printf(", with_hand ");
-				OutputStat(&(playerData->with_hand));
-				printf(", with_pistol ");
-				OutputStat(&(playerData->with_pistol));
-				printf(", with_auto ");
-				OutputStat(&(playerData->with_auto));
-				printf(", on_target ");
-				OutputStat(&(playerData->on_target));
-				printf(", row %d\n", playerData->row);
+				printf ( "%f - clicks ", curtime );
+				OutputStat ( &( playerData->clicks ) );
+				printf ( ", short_clicks " );
+				OutputStat ( &( playerData->short_clicks ) );
+				printf ( ", with_hand " );
+				OutputStat ( &( playerData->with_hand ) );
+				printf ( ", with_pistol " );
+				OutputStat ( &( playerData->with_pistol ) );
+				printf ( ", with_auto " );
+				OutputStat ( &( playerData->with_auto ) );
+				printf ( ", on_target " );
+				OutputStat ( &( playerData->on_target ) );
+				printf ( ", row %u\n", playerData->row );
 			}
 		}
 	}
 	return drop_cmd;
 }
 
-basic_string ShotDetection::GetDataDump()
+basic_string ShotDetection::GetDataDump ()
 {
-	return Helpers::format( ":::: ShotStatsT {\n"
-							":::::::: Attack1 Button Up At (Time) : %f,\n"
-							":::::::: Attack1 Button Down At (Time) : %f,\n"
-							":::::::: Clicks {\n"
-							":::::::::::: Clicks Count : %lu,\n"
-							":::::::::::: Detection Ratio : %f,\n"
-							":::::::::::: Average Button Down Hold Time : %f s\n"
-							":::::::: },\n"
-							":::::::: ShortClicks {\n"
-							":::::::::::: Clicks Count : %lu,\n"
-							":::::::::::: Detection Ratio : %f,\n"
-							":::::::::::: Average Button Down Hold Time : %f s\n"
-							":::::::: },\n"
-							":::::::: WithHand {\n"
-							":::::::::::: Clicks Count : %lu,\n"
-							":::::::::::: Detection Ratio : %f,\n"
-							":::::::::::: Average Button Down Hold Time : %f s\n"
-							":::::::: },\n"
-							":::::::: WithPistol {\n"
-							":::::::::::: Clicks Count : %lu,\n"
-							":::::::::::: Detection Ratio : %f,\n"
-							":::::::::::: Average Button Down Hold Time : %f s\n"
-							":::::::: },\n"
-							":::::::: WithAuto {\n"
-							":::::::::::: Clicks Count : %lu,\n"
-							":::::::::::: Detection Ratio : %f,\n"
-							":::::::::::: Average Button Down Hold Time : %f s\n"
-							":::::::: },\n"
-							":::::::: OnTarget {\n"
-							":::::::::::: Clicks Count : %lu,\n"
-							":::::::::::: Detection Ratio : %f,\n"
-							":::::::::::: Average Button Down Hold Time : %f s\n"
-							":::::::: },\n"
-							":::::::: Consecutive Detections Count : %lu,\n"
-							":::::::: Last Detection Time : %f\n"
-							":::: }",
-							GetDataStruct()->up_time, GetDataStruct()->down_time, 
-							GetDataStruct()->clicks.n, GetDataStruct()->clicks.ratio, GetDataStruct()->clicks.avg_time, 
-							GetDataStruct()->short_clicks.n, GetDataStruct()->short_clicks.ratio, GetDataStruct()->short_clicks.avg_time, 
-							GetDataStruct()->with_hand.n, GetDataStruct()->with_hand.ratio, GetDataStruct()->with_hand.avg_time, 
-							GetDataStruct()->with_pistol.n, GetDataStruct()->with_pistol.ratio, GetDataStruct()->with_pistol.avg_time, 
-							GetDataStruct()->with_auto.n, GetDataStruct()->with_auto.ratio, GetDataStruct()->with_auto.avg_time, 
-							GetDataStruct()->on_target.n, GetDataStruct()->on_target.ratio, GetDataStruct()->on_target.avg_time, 
-							GetDataStruct()->row, GetDataStruct()->last_detection);
+	return Helpers::format ( ":::: ShotStatsT {\n"
+							 ":::::::: Attack1 Button Up At (Time) : %f,\n"
+							 ":::::::: Attack1 Button Down At (Time) : %f,\n"
+							 ":::::::: Clicks {\n"
+							 ":::::::::::: Clicks Count : %lu,\n"
+							 ":::::::::::: Detection Ratio : %f,\n"
+							 ":::::::::::: Average Button Down Hold Time : %f s\n"
+							 ":::::::: },\n"
+							 ":::::::: ShortClicks {\n"
+							 ":::::::::::: Clicks Count : %lu,\n"
+							 ":::::::::::: Detection Ratio : %f,\n"
+							 ":::::::::::: Average Button Down Hold Time : %f s\n"
+							 ":::::::: },\n"
+							 ":::::::: WithHand {\n"
+							 ":::::::::::: Clicks Count : %lu,\n"
+							 ":::::::::::: Detection Ratio : %f,\n"
+							 ":::::::::::: Average Button Down Hold Time : %f s\n"
+							 ":::::::: },\n"
+							 ":::::::: WithPistol {\n"
+							 ":::::::::::: Clicks Count : %lu,\n"
+							 ":::::::::::: Detection Ratio : %f,\n"
+							 ":::::::::::: Average Button Down Hold Time : %f s\n"
+							 ":::::::: },\n"
+							 ":::::::: WithAuto {\n"
+							 ":::::::::::: Clicks Count : %lu,\n"
+							 ":::::::::::: Detection Ratio : %f,\n"
+							 ":::::::::::: Average Button Down Hold Time : %f s\n"
+							 ":::::::: },\n"
+							 ":::::::: OnTarget {\n"
+							 ":::::::::::: Clicks Count : %lu,\n"
+							 ":::::::::::: Detection Ratio : %f,\n"
+							 ":::::::::::: Average Button Down Hold Time : %f s\n"
+							 ":::::::: },\n"
+							 ":::::::: Consecutive Detections Count : %lu,\n"
+							 ":::::::: Last Detection Time : %f\n"
+							 ":::: }",
+							 GetDataStruct ()->up_time, GetDataStruct ()->down_time,
+							 GetDataStruct ()->clicks.n, GetDataStruct ()->clicks.ratio, GetDataStruct ()->clicks.avg_time,
+							 GetDataStruct ()->short_clicks.n, GetDataStruct ()->short_clicks.ratio, GetDataStruct ()->short_clicks.avg_time,
+							 GetDataStruct ()->with_hand.n, GetDataStruct ()->with_hand.ratio, GetDataStruct ()->with_hand.avg_time,
+							 GetDataStruct ()->with_pistol.n, GetDataStruct ()->with_pistol.ratio, GetDataStruct ()->with_pistol.avg_time,
+							 GetDataStruct ()->with_auto.n, GetDataStruct ()->with_auto.ratio, GetDataStruct ()->with_auto.avg_time,
+							 GetDataStruct ()->on_target.n, GetDataStruct ()->on_target.ratio, GetDataStruct ()->on_target.avg_time,
+							 GetDataStruct ()->row, GetDataStruct ()->last_detection );
 }

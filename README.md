@@ -1,4 +1,4 @@
-# NoCheatZ-4
+# NoCheatZ-4 [![Build Status](https://travis-ci.org/L-EARN/NoCheatZ-4.svg?branch=master)](https://travis-ci.org/L-EARN/NoCheatZ-4)
 Source Engine serversided anti-cheat plugin. (CS:S, CS:GO).
 
 # Table of content

@@ -18,91 +18,95 @@ limitations under the License.
 #include "Interfaces/InterfacesProxy.h"
 
 UserMessageHookListener::ListenersList_t UserMessageHookListener::m_listeners;
-bool UserMessageHookListener::bypass(false);
-SourceSdk::bf_write* UserMessageHookListener::m_buffer(nullptr);
+bool UserMessageHookListener::bypass ( false );
+SourceSdk::bf_write* UserMessageHookListener::m_buffer ( nullptr );
 
-UserMessageHookListener::UserMessageHookListener()
+UserMessageHookListener::UserMessageHookListener ()
 {
-
+	HookGuard<UserMessageHookListener>::Required ();
 }
 
-UserMessageHookListener::~UserMessageHookListener()
+UserMessageHookListener::~UserMessageHookListener ()
 {
-
+	if( HookGuard<UserMessageHookListener>::IsCreated () )
+	{
+		HookGuard<UserMessageHookListener>::GetInstance ()->UnhookAll ();
+		HookGuard<UserMessageHookListener>::DestroyInstance ();
+	}
 }
 
-void UserMessageHookListener::HookUserMessage()
+void UserMessageHookListener::HookUserMessage ()
 {
-	if (SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive)
+	if( SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive )
 	{
 		//HookInfo sendusermessage_info(SourceSdk::InterfacesProxy::m_engineserver, 45, (DWORD)nSendUserMessage);
 		//HookGuard::GetInstance()->VirtualTableHook(sendusermessage_info);
 	}
 	else
 	{
-		HookInfo usermessagebegin_info(SourceSdk::InterfacesProxy::m_engineserver, 43, (DWORD)nUserMessageBegin);
-		HookGuard::GetInstance()->VirtualTableHook(usermessagebegin_info);
-		HookInfo messageend_info(SourceSdk::InterfacesProxy::m_engineserver, 44, (DWORD)nMessageEnd);
-		HookGuard::GetInstance()->VirtualTableHook(messageend_info);
+		HookInfo usermessagebegin_info ( SourceSdk::InterfacesProxy::m_engineserver, 43, ( DWORD ) RT_nUserMessageBegin );
+		HookGuard<UserMessageHookListener>::GetInstance ()->VirtualTableHook ( usermessagebegin_info );
+		HookInfo messageend_info ( SourceSdk::InterfacesProxy::m_engineserver, 44, ( DWORD ) RT_nMessageEnd );
+		HookGuard<UserMessageHookListener>::GetInstance ()->VirtualTableHook ( messageend_info );
 	}
 
-	
+
 }
 
-void UserMessageHookListener::RegisterUserMessageHookListener(UserMessageHookListener const * const listener)
+void UserMessageHookListener::RegisterUserMessageHookListener ( UserMessageHookListener const * const listener )
 {
-	m_listeners.Add(listener);
+	m_listeners.Add ( listener );
 }
 
-void UserMessageHookListener::RemoveUserMessageHookListener(UserMessageHookListener const * const listener)
+void UserMessageHookListener::RemoveUserMessageHookListener ( UserMessageHookListener const * const listener )
 {
-	m_listeners.Remove(listener);
+	m_listeners.Remove ( listener );
 }
 
 #ifdef GNUC
-void HOOKFN_INT UserMessageHookListener::nSendUserMessage(SourceSdk::IVEngineServer023csgo const * const thisptr, SourceSdk::IRecipientFilter const & filter, int const message_id, google::protobuf::Message const & buffer)
+void HOOKFN_INT UserMessageHookListener::RT_nSendUserMessage ( SourceSdk::IVEngineServer023csgo const * const thisptr, SourceSdk::IRecipientFilter const & filter, int const message_id, google::protobuf::Message const & buffer )
 #else
-void HOOKFN_INT UserMessageHookListener::nSendUserMessage(SourceSdk::IVEngineServer023csgo const * const thisptr, void*, SourceSdk::IRecipientFilter const & filter, int const message_id, google::protobuf::Message const & buffer)
+void HOOKFN_INT UserMessageHookListener::RT_nSendUserMessage ( SourceSdk::IVEngineServer023csgo const * const thisptr, void*, SourceSdk::IRecipientFilter const & filter, int const message_id, google::protobuf::Message const & buffer )
 #endif
 {
-	Assert(bypass == false);
+	Assert ( bypass == false );
 	bypass = false;
 
-	ListenersList_t::elem_t* it = m_listeners.GetFirst();
-	while (it != nullptr)
+	ListenersList_t::elem_t* it ( m_listeners.GetFirst () );
+	while( it != nullptr )
 	{
-		bypass |= it->m_value.listener->SendUserMessageCallback(filter, message_id, buffer);
+		bypass |= it->m_value.listener->RT_SendUserMessageCallback ( filter, message_id, buffer );
 
 		it = it->m_next;
 	}
 
-	if (!bypass)
+	if( !bypass )
 	{
-		SourceSdk::InterfacesProxy::Call_SendUserMessage(&const_cast<SourceSdk::IRecipientFilter&>(filter), message_id, buffer);
+		SourceSdk::InterfacesProxy::Call_SendUserMessage ( &const_cast< SourceSdk::IRecipientFilter& >( filter ), message_id, buffer );
 	}
 }
 
 #ifdef GNUC
-SourceSdk::bf_write* HOOKFN_INT UserMessageHookListener::nUserMessageBegin(SourceSdk::IVEngineServer023 const * const thisptr, SourceSdk::IRecipientFilter const * const filter, int const message_id)
+SourceSdk::bf_write* HOOKFN_INT UserMessageHookListener::RT_nUserMessageBegin ( SourceSdk::IVEngineServer023 const * const thisptr, SourceSdk::IRecipientFilter const * const filter, int const message_id )
 #else
-SourceSdk::bf_write* HOOKFN_INT UserMessageHookListener::nUserMessageBegin(SourceSdk::IVEngineServer023 const * const thisptr, void * const, SourceSdk::IRecipientFilter const * const filter, int const message_id)
+SourceSdk::bf_write* HOOKFN_INT UserMessageHookListener::RT_nUserMessageBegin ( SourceSdk::IVEngineServer023 const * const thisptr, void * const, SourceSdk::IRecipientFilter const * const filter, int const message_id )
 #endif
 {
-	Assert(bypass == false);
+	Assert ( bypass == false );
 	bypass = false;
 
-	ListenersList_t::elem_t* it = m_listeners.GetFirst();
-	while (it != nullptr)
+	ListenersList_t::elem_t* it ( m_listeners.GetFirst () );
+	while( it != nullptr )
 	{
-		bypass |= it->m_value.listener->UserMessageBeginCallback(filter, message_id);
+		bypass |= it->m_value.listener->RT_UserMessageBeginCallback ( filter, message_id );
 
 		it = it->m_next;
 	}
 
-	if (bypass)
+	if( bypass )
 	{
 		m_buffer = new SourceSdk::bf_write;
-		m_buffer->m_pData = new unsigned long[128];
+		m_buffer->m_pData = new unsigned long[ 128 ];
 		m_buffer->m_nDataBytes = m_buffer->m_nDataBits = m_buffer->m_iCurBit = m_buffer->m_bOverflow = 0;
 		m_buffer->m_bAssertOnOverflow = true;
 		m_buffer->m_pDebugName = "Intercepted Buffer";
@@ -110,25 +114,28 @@ SourceSdk::bf_write* HOOKFN_INT UserMessageHookListener::nUserMessageBegin(Sourc
 	}
 	else
 	{
-		return SourceSdk::InterfacesProxy::Call_UserMessageBegin(const_cast<SourceSdk::IRecipientFilter*>(filter), message_id);
+		return SourceSdk::InterfacesProxy::Call_UserMessageBegin ( const_cast< SourceSdk::IRecipientFilter* >( filter ), message_id );
 	}
 }
 
 #ifdef GNUC
-void HOOKFN_INT UserMessageHookListener::nMessageEnd(void * const thisptr)
+void HOOKFN_INT UserMessageHookListener::RT_nMessageEnd ( void * const thisptr )
 #else
-void HOOKFN_INT UserMessageHookListener::nMessageEnd(void * const thisptr, void * const)
+void HOOKFN_INT UserMessageHookListener::RT_nMessageEnd ( void * const thisptr, void * const )
 #endif
 {
-	if (bypass)
+	if( bypass )
 	{
-		if (m_buffer->m_pData) delete m_buffer->m_pData;
-		if (m_buffer) delete m_buffer;
+		if( m_buffer )
+		{
+			if( m_buffer->m_pData ) delete m_buffer->m_pData;
+			delete m_buffer;
+		}
 		m_buffer = nullptr;
 		bypass = false;
 	}
 	else
 	{
-		SourceSdk::InterfacesProxy::Call_MessageEnd();
+		SourceSdk::InterfacesProxy::Call_MessageEnd ();
 	}
 }

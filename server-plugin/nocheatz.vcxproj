@@ -25,7 +25,7 @@
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <PlatformToolset>v140</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
-    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <WholeProgramOptimization>false</WholeProgramOptimization>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Profiler|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
@@ -71,6 +71,8 @@
     <LinkIncremental>false</LinkIncremental>
     <GenerateManifest>false</GenerateManifest>
     <PostBuildEventUseInBuild>true</PostBuildEventUseInBuild>
+    <CodeAnalysisRuleSet>BasicDesignGuidelineRules.ruleset</CodeAnalysisRuleSet>
+    <RunCodeAnalysis>false</RunCodeAnalysis>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Profiler|Win32'">
     <OutDir>C:\steamcmd\CSGO\csgo\addons\NoCheatZ\</OutDir>
@@ -176,7 +178,7 @@ copy "$(TargetPath)" ..\..\..\game\bin\"$(TargetName)".pdb
       <Outputs>..\..\..\game\bin\serverplugin_empty.dll;..\..\..\game\bin\serverplugin_empty.pdb;%(Outputs)</Outputs>
     </CustomBuildStep>
     <ClCompile>
-      <Optimization>MaxSpeed</Optimization>
+      <Optimization>Full</Optimization>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
@@ -202,10 +204,10 @@ copy "$(TargetPath)" ..\..\..\game\bin\"$(TargetName)".pdb
       <CompileAs>CompileAsCpp</CompileAs>
       <ErrorReporting>Prompt</ErrorReporting>
       <CompileAsWinRT>false</CompileAsWinRT>
-      <SDLCheck>false</SDLCheck>
+      <SDLCheck>true</SDLCheck>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <OmitFramePointers>true</OmitFramePointers>
-      <WholeProgramOptimization>true</WholeProgramOptimization>
+      <WholeProgramOptimization>false</WholeProgramOptimization>
       <EnableParallelCodeGeneration>true</EnableParallelCodeGeneration>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions</EnableEnhancedInstructionSet>
       <FloatingPointExceptions>false</FloatingPointExceptions>
@@ -214,6 +216,7 @@ copy "$(TargetPath)" ..\..\..\game\bin\"$(TargetName)".pdb
       <EnableFiberSafeOptimizations>true</EnableFiberSafeOptimizations>
       <ControlFlowGuard>false</ControlFlowGuard>
       <ForcedIncludeFiles>version.h</ForcedIncludeFiles>
+      <EnablePREfast>false</EnablePREfast>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>NDEBUG;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -237,17 +240,18 @@ copy "$(TargetPath)" ..\..\..\game\bin\"$(TargetName)".pdb
       </BaseAddress>
       <TargetMachine>MachineX86</TargetMachine>
       <LinkErrorReporting>PromptImmediately</LinkErrorReporting>
-      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
+      <LinkTimeCodeGeneration>Default</LinkTimeCodeGeneration>
       <FullProgramDatabaseFile>true</FullProgramDatabaseFile>
       <AssemblyDebug>true</AssemblyDebug>
       <TurnOffAssemblyGeneration>true</TurnOffAssemblyGeneration>
-      <SectionAlignment>32</SectionAlignment>
+      <SectionAlignment>
+      </SectionAlignment>
       <MapExports>true</MapExports>
       <Version>
       </Version>
       <StripPrivateSymbols>
       </StripPrivateSymbols>
-      <Profile>true</Profile>
+      <Profile>false</Profile>
     </Link>
     <Manifest>
       <SuppressStartupBanner>true</SuppressStartupBanner>
@@ -379,6 +383,7 @@ copy "$(TargetPath)" ..\..\..\game\bin\"$(TargetName)".pdb
   <ItemGroup>
     <ClCompile Include="Code\Hooks\ThinkPostHookListener.cpp" />
     <ClCompile Include="Code\Hooks\UserMessageHookListener.cpp" />
+    <ClCompile Include="Code\Misc\HeapMemoryManager.cpp" />
     <ClCompile Include="Code\Misc\MathCache.cpp" />
     <ClCompile Include="Code\Systems\AutoTVRecord.cpp" />
     <ClCompile Include="Code\Systems\Blockers\RadarHackBlocker.cpp" />
@@ -407,17 +412,11 @@ copy "$(TargetPath)" ..\..\..\game\bin\"$(TargetName)".pdb
     <ClCompile Include="Code\Hooks\Hook.cpp" />
     <ClCompile Include="Code\Hooks\OnGroundHookListener.cpp" />
     <ClCompile Include="Code\Hooks\PlayerRunCommandHookListener.cpp" />
-    <ClCompile Include="Code\Hooks\RayTraceCache.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Profiler|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
     <ClCompile Include="Code\Hooks\SetTransmitHookListener.cpp" />
     <ClCompile Include="Code\Hooks\WeaponHookListener.cpp" />
     <ClCompile Include="Code\Misc\EntityProps.cpp" />
     <ClCompile Include="Code\Misc\Helpers.cpp" />
     <ClCompile Include="Code\Misc\MRecipientFilter.cpp" />
-    <ClCompile Include="Code\Players\NczFilteredPlayersList.cpp" />
     <ClCompile Include="Code\Players\NczPlayer.cpp" />
     <ClCompile Include="Code\Players\NczPlayerManager.cpp" />
     <ClCompile Include="Code\plugin.cpp" />
@@ -428,7 +427,6 @@ copy "$(TargetPath)" ..\..\..\game\bin\"$(TargetName)".pdb
     <ClCompile Include="Code\Systems\Blockers\BadUserCmdBlocker.cpp" />
     <ClCompile Include="Code\Systems\Blockers\WallhackBlocker.cpp" />
     <ClCompile Include="Code\Systems\Logger.cpp" />
-    <ClCompile Include="Code\Systems\OnFrameListener.cpp" />
     <ClCompile Include="Code\Systems\OnTickListener.cpp" />
     <ClCompile Include="Code\Systems\Testers\ConCommandTester.cpp" />
     <ClCompile Include="Code\Systems\Testers\ShotTester.cpp" />
@@ -444,14 +442,17 @@ copy "$(TargetPath)" ..\..\..\game\bin\"$(TargetName)".pdb
   <ItemGroup>
     <ClInclude Include="Code\Hooks\ThinkPostHookListener.h" />
     <ClInclude Include="Code\Hooks\UserMessageHookListener.h" />
+    <ClInclude Include="Code\Misc\ClassSpecifications.h" />
+    <ClInclude Include="Code\Misc\HeapMemoryManager.h" />
     <ClInclude Include="Code\Misc\MathCache.h" />
     <ClInclude Include="Code\Misc\temp_basiclist.h" />
     <ClInclude Include="Code\Misc\temp_basicstring.h" />
     <ClInclude Include="Code\Misc\temp_singleton.h" />
+    <ClInclude Include="Code\Players\ProcessFilter.h" />
     <ClInclude Include="Code\Systems\AutoTVRecord.h" />
     <ClInclude Include="Code\Systems\Blockers\RadarHackBlocker.h" />
     <ClInclude Include="Code\Systems\ConfigManager.h" />
-    <ClInclude Include="Code\version.h" />
+    <ClInclude Include="Code\Systems\i18nManager.h" />
     <ClInclude Include="SourceSdk\Console\color.h" />
     <ClInclude Include="SourceSdk\Console\convar.h" />
     <ClInclude Include="SourceSdk\Console\iconvar.h" />
@@ -504,7 +505,6 @@ copy "$(TargetPath)" ..\..\..\game\bin\"$(TargetName)".pdb
     <ClInclude Include="Code\Hooks\Hook.h" />
     <ClInclude Include="Code\Hooks\OnGroundHookListener.h" />
     <ClInclude Include="Code\Hooks\PlayerRunCommandHookListener.h" />
-    <ClInclude Include="Code\Hooks\RayTraceCache.h" />
     <ClInclude Include="Code\Hooks\SetTransmitHookListener.h" />
     <ClInclude Include="Code\Hooks\WeaponHookListener.h" />
     <ClInclude Include="Code\MagicValues.h" />
@@ -515,7 +515,6 @@ copy "$(TargetPath)" ..\..\..\game\bin\"$(TargetName)".pdb
     <ClInclude Include="Code\Misc\MRecipientFilter.h" />
     <ClInclude Include="Code\Misc\temp_BaseDataStruct.h" />
     <ClInclude Include="Code\Misc\UserMsg.h" />
-    <ClInclude Include="Code\Players\NczFilteredPlayersList.h" />
     <ClInclude Include="Code\Players\NczPlayer.h" />
     <ClInclude Include="Code\Players\NczPlayerManager.h" />
     <ClInclude Include="Code\Players\temp_PlayerDataStruct.h" />
@@ -528,7 +527,6 @@ copy "$(TargetPath)" ..\..\..\game\bin\"$(TargetName)".pdb
     <ClInclude Include="Code\Systems\Blockers\BadUserCmdBlocker.h" />
     <ClInclude Include="Code\Systems\Blockers\WallhackBlocker.h" />
     <ClInclude Include="Code\Systems\Logger.h" />
-    <ClInclude Include="Code\Systems\OnFrameListener.h" />
     <ClInclude Include="Code\Systems\OnTickListener.h" />
     <ClInclude Include="Code\Systems\Testers\ConCommandTester.h" />
     <ClInclude Include="Code\Systems\Testers\ShotTester.h" />

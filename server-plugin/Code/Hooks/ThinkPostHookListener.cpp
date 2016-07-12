@@ -21,47 +21,52 @@ limitations under the License.
 
 ThinkPostHookListener::ListenersList_t ThinkPostHookListener::m_listeners;
 
-ThinkPostHookListener::ThinkPostHookListener()
+ThinkPostHookListener::ThinkPostHookListener ()
 {
-
+	HookGuard<ThinkPostHookListener>::Required ();
 }
 
-ThinkPostHookListener::~ThinkPostHookListener()
+ThinkPostHookListener::~ThinkPostHookListener ()
 {
+	if( HookGuard<ThinkPostHookListener>::IsCreated () )
+	{
+		HookGuard<ThinkPostHookListener>::GetInstance ()->UnhookAll ();
+		HookGuard<ThinkPostHookListener>::DestroyInstance ();
+	}
 }
 
-void ThinkPostHookListener::HookThinkPost(SourceSdk::edict_t const * const entity)
+void ThinkPostHookListener::HookThinkPost ( SourceSdk::edict_t const * const entity )
 {
-	HookInfo info(entity->m_pUnk, ConfigManager::GetInstance()->vfid_thinkpost, (DWORD)nThinkPost);
-	HookGuard::GetInstance()->VirtualTableHook(info, true);
+	HookInfo info ( entity->m_pUnk, ConfigManager::GetInstance ()->vfid_thinkpost, ( DWORD ) RT_nThinkPost );
+	HookGuard<ThinkPostHookListener>::GetInstance ()->VirtualTableHook ( info, true );
 }
 
-void ThinkPostHookListener::RegisterThinkPostHookListener(ThinkPostHookListener const * const listener)
+void ThinkPostHookListener::RegisterThinkPostHookListener ( ThinkPostHookListener const * const listener )
 {
-	m_listeners.Add(listener);
+	m_listeners.Add ( listener );
 }
 
-void ThinkPostHookListener::RemoveThinkPostHookListener(ThinkPostHookListener const * const listener)
+void ThinkPostHookListener::RemoveThinkPostHookListener ( ThinkPostHookListener const * const listener )
 {
-	m_listeners.Remove(listener);
+	m_listeners.Remove ( listener );
 }
 
 #ifdef GNUC
-void HOOKFN_INT ThinkPostHookListener::nThinkPost(void * const baseentity)
+void HOOKFN_INT ThinkPostHookListener::RT_nThinkPost ( void * const baseentity )
 #else
-void HOOKFN_INT ThinkPostHookListener::nThinkPost(void * const baseentity, void * const)
+void HOOKFN_INT ThinkPostHookListener::RT_nThinkPost ( void * const baseentity, void * const )
 #endif
 {
 	PostThink_t gpOldFn;
-	*(DWORD*)&gpOldFn = HookGuard::GetInstance()->GetOldFunction(baseentity, ConfigManager::GetInstance()->vfid_thinkpost);
-	gpOldFn(baseentity);
+	*( DWORD* ) &gpOldFn = HookGuard<ThinkPostHookListener>::GetInstance ()->RT_GetOldFunction ( baseentity, ConfigManager::GetInstance ()->vfid_thinkpost );
+	gpOldFn ( baseentity );
 
-	ListenersList_t::elem_t const * it = m_listeners.GetFirst();
-	SourceSdk::edict_t const * const pent = SourceSdk::InterfacesProxy::Call_BaseEntityToEdict(baseentity);
+	ListenersList_t::elem_t const * it ( m_listeners.GetFirst () );
+	SourceSdk::edict_t const * const pent ( SourceSdk::InterfacesProxy::Call_BaseEntityToEdict ( baseentity ) );
 
-	while (it != nullptr)
+	while( it != nullptr )
 	{
-		it->m_value.listener->ThinkPostCallback(pent);
+		it->m_value.listener->RT_ThinkPostCallback ( pent );
 
 		it = it->m_next;
 	}

@@ -4,7 +4,7 @@
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
-       http://www.apache.org/licenses/LICENSE-2.0
+	   http://www.apache.org/licenses/LICENSE-2.0
 
    Unless required by applicable law or agreed to in writing, software
    distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,47 +20,45 @@ template <typename DataT, int MAX_ELEM>
 class BaseDataStructHandler
 {
 public:
-	BaseDataStructHandler()
-	{
-	};
-	virtual ~BaseDataStructHandler()
-	{
-	};
+	BaseDataStructHandler ()
+	{};
+	virtual ~BaseDataStructHandler ()
+	{};
 
-	void ResetAll(const DataT* src)
+	void ResetAll ( const DataT* src )
 	{
-		if(src)
+		if( src )
 		{
-			for(size_t index = 0; index < MAX_ELEM; ++index)
-				m_dataStruct[index] = *src;
+			for( size_t index ( 0 ); index < MAX_ELEM; ++index )
+				m_dataStruct[ index ] = *src;
 		}
 		else
 		{
-			for(int x = 0; x < MAX_ELEM; ++x)
+			for( int x = 0; x < MAX_ELEM; ++x )
 			{
-				m_dataStruct[x] = DataT();
+				m_dataStruct[ x ] = DataT ();
 			}
 		}
 	};
 
 protected:
-	inline DataT& GetDataStruct(const int elem) const
+	inline DataT& RT_GetDataStruct ( const int elem ) const
 	{
-		return m_dataStruct[elem];
+		return m_dataStruct[ elem ];
 	};
 
-	inline void InitDataStruct()
+	inline void InitDataStruct ()
 	{
-		for(int x = 0; x < MAX_ELEM; ++x)
-			m_dataStruct[x] = DataT();
+		for( int x ( 0 ); x < MAX_ELEM; ++x )
+			m_dataStruct[ x ] = DataT ();
 	};
 
-	inline void ResetDataStruct(const int elem)
+	inline void ResetDataStruct ( const int elem )
 	{
-		m_dataStruct[elem] = DataT();
+		m_dataStruct[ elem ] = DataT ();
 	};
 
-	DataT m_dataStruct[MAX_ELEM];
+	DataT m_dataStruct[ MAX_ELEM ];
 };
 
 #endif

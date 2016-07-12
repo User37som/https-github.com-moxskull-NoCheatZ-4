@@ -21,52 +21,52 @@ limitations under the License.
 #include "Players/NczPlayerManager.h"
 #include "Hooks/PlayerRunCommandHookListener.h"
 
-MathCache::MathCache()
+MathCache::MathCache ()
 {
-	SetCacheExpired();
+	RT_SetCacheExpired ();
 }
 
-MathCache::~MathCache()
+MathCache::~MathCache ()
 {
-	SetCacheExpired();
+	RT_SetCacheExpired ();
 }
 
-MathInfo& MathCache::GetCachedMaths(int const player_index, bool const force_update /* = false */)
+MathInfo& MathCache::RT_GetCachedMaths ( int const player_index, bool const force_update /* = false */ )
 {
-	Assert(player_index > 0 && player_index <= 66);
+	Assert ( player_index > 0 && player_index <= 66 );
 
-	CacheInfo& item = m_cache[player_index];
-	MathInfo& info = item.m_info;
-	if ( (item.m_is_not_expired == false) || force_update)
+	CacheInfo& item ( m_cache[ player_index ] );
+	MathInfo& info ( item.m_info );
+	if( ( item.m_is_not_expired == false ) || force_update )
 	{
-		PlayerHandler::const_iterator ph(player_index);
+		PlayerHandler::const_iterator ph ( player_index );
 
-		Assert(ph > INVALID);
+		Assert ( ph > SlotStatus::INVALID );
 
-		SourceSdk::IPlayerInfo * const playerinfo = ph->GetPlayerInfo();
+		SourceSdk::IPlayerInfo * const playerinfo ( ph->GetPlayerInfo () );
 
-		if (playerinfo)
+		if( playerinfo )
 		{
 
-			SourceSdk::VectorCopy(playerinfo->GetAbsOrigin(), info.m_abs_origin);
-			ph->GetAbsEyePos(info.m_eyepos);
-			if (playerinfo->IsFakeClient())
+			SourceSdk::VectorCopy ( playerinfo->GetAbsOrigin (), info.m_abs_origin );
+			ph->GetAbsEyePos ( info.m_eyepos );
+			if( playerinfo->IsFakeClient () )
 			{
-				SourceSdk::VectorCopy(playerinfo->GetAbsAngles(), info.m_eyeangles);
+				SourceSdk::VectorCopy ( playerinfo->GetAbsAngles (), info.m_eyeangles );
 			}
 			else
 			{
-				ph->GetEyeAngles(info.m_eyeangles);
+				ph->GetEyeAngles ( info.m_eyeangles );
 			}
-			SourceSdk::VectorCopy(*EntityProps::GetInstance()->GetPropValue<SourceSdk::Vector, PROP_ABS_VELOCITY>(ph->GetEdict(), true), info.m_velocity);
-			SourceSdk::VectorMultiply(info.m_velocity, 0.01f);
-			SourceSdk::VectorAbs(info.m_velocity, info.m_abs_velocity);
-			SourceSdk::VectorCopy(playerinfo->GetPlayerMins(), info.m_mins);
-			SourceSdk::VectorCopy(playerinfo->GetPlayerMaxs(), info.m_maxs);
+			SourceSdk::VectorCopy ( *EntityProps::GetInstance ()->GetPropValue<SourceSdk::Vector, PROP_ABS_VELOCITY> ( ph->GetEdict (), true ), info.m_velocity );
+			SourceSdk::VectorMultiply ( info.m_velocity, 0.01f );
+			SourceSdk::VectorAbs ( info.m_velocity, info.m_abs_velocity );
+			SourceSdk::VectorCopy ( playerinfo->GetPlayerMins (), info.m_mins );
+			SourceSdk::VectorCopy ( playerinfo->GetPlayerMaxs (), info.m_maxs );
 		}
 		else
 		{
-			DebugMessage("Encountered null playerinfo in MathCache");
+			DebugMessage ( "Encountered null playerinfo in MathCache" );
 		}
 	}
 	return info;

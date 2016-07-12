@@ -4,7 +4,7 @@
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
-       http://www.apache.org/licenses/LICENSE-2.0
+	   http://www.apache.org/licenses/LICENSE-2.0
 
    Unless required by applicable law or agreed to in writing, software
    distributed under the License is distributed on an "AS IS" BASIS,
@@ -34,15 +34,13 @@ typedef struct OnGroundHolder
 
 	int jumpCount;
 
-	OnGroundHolder()
+	OnGroundHolder ()
 	{
-		onGround_Tick = notOnGround_Tick = jumpCount = 0;
+		memset ( this, 0, sizeof ( OnGroundHolder ) );
 	};
-	OnGroundHolder(const OnGroundHolder& other)
+	OnGroundHolder ( const OnGroundHolder& other )
 	{
-		onGround_Tick = other.onGround_Tick;
-		notOnGround_Tick = other.notOnGround_Tick;
-		jumpCount = other.jumpCount;
+		memcpy ( this, &other, sizeof ( OnGroundHolder ) );
 	};
 } OnGroundHolderT;
 
@@ -55,17 +53,13 @@ typedef struct JumpCmdHolder
 
 	int outsideJumpCmdCount; // Jumps made while the player doesn't touch the ground
 
-	JumpCmdHolder()
+	JumpCmdHolder ()
 	{
-		lastJumpCmdState = false;
-		JumpDown_Tick = JumpUp_Tick = outsideJumpCmdCount = 0;
+		memset ( this, 0, sizeof ( JumpCmdHolder ) );
 	};
-	JumpCmdHolder(const JumpCmdHolder& other)
+	JumpCmdHolder ( const JumpCmdHolder& other )
 	{
-		lastJumpCmdState = other.lastJumpCmdState;
-		JumpDown_Tick = other.JumpDown_Tick;
-		JumpUp_Tick = other.JumpUp_Tick;
-		outsideJumpCmdCount = other.outsideJumpCmdCount;
+		memcpy ( this, &other, sizeof ( JumpCmdHolder ) );
 	};
 } JumpCmdHolderT;
 
@@ -81,22 +75,13 @@ typedef struct JumpInfo
 
 	bool isOnGround;
 
-	JumpInfo()
+	JumpInfo ()
 	{
-		onGroundHolder = OnGroundHolder();
-		jumpCmdHolder = JumpCmdHolder();
-		total_bhopCount = goodBhopsCount = perfectBhopsPercent = perfectBhopsCount = 0;
-		isOnGround = false;
+		memset ( this, 0, sizeof ( JumpInfo ) );
 	};
-	JumpInfo(const JumpInfo& other)
+	JumpInfo ( const JumpInfo& other )
 	{
-		onGroundHolder = other.onGroundHolder;
-		jumpCmdHolder = other.jumpCmdHolder;
-		total_bhopCount = other.total_bhopCount;
-		goodBhopsCount = other.goodBhopsCount;
-		perfectBhopsPercent = other.perfectBhopsPercent;
-		perfectBhopsCount = other.perfectBhopsCount;
-		isOnGround = other.isOnGround;
+		memcpy ( this, &other, sizeof ( JumpInfo ) );
 	};
 } JumpInfoT;
 
@@ -104,11 +89,13 @@ class Detection_BunnyHopScript : public LogDetection<JumpInfoT>
 {
 	typedef LogDetection<JumpInfoT> hClass;
 public:
-	Detection_BunnyHopScript() : hClass() {};
-	virtual ~Detection_BunnyHopScript() override {};
+	Detection_BunnyHopScript () : hClass ()
+	{};
+	virtual ~Detection_BunnyHopScript () override
+	{};
 
-	virtual basic_string GetDataDump() final;
-	virtual basic_string GetDetectionLogMessage()
+	virtual basic_string GetDataDump () final;
+	virtual basic_string GetDetectionLogMessage ()
 	{
 		return "BunnyHop Script";
 	};
@@ -117,10 +104,12 @@ public:
 class Detection_BunnyHopProgram : public Detection_BunnyHopScript
 {
 public:
-	Detection_BunnyHopProgram() : Detection_BunnyHopScript() {};
-	virtual ~Detection_BunnyHopProgram() override final {};
+	Detection_BunnyHopProgram () : Detection_BunnyHopScript ()
+	{};
+	virtual ~Detection_BunnyHopProgram () override final
+	{};
 
-	virtual basic_string GetDetectionLogMessage() override final
+	virtual basic_string GetDetectionLogMessage () override final
 	{
 		return "BunnyHop Program";
 	};
@@ -137,18 +126,20 @@ class JumpTester :
 	typedef PlayerDataStructHandler<JumpInfoT> playerdata_class;
 
 public:
-	JumpTester();
-	virtual ~JumpTester() final;
+	JumpTester ();
+	virtual ~JumpTester () final;
 
-	virtual void Init() override final;
+	virtual void Init () override final;
 
-	virtual void Load() override final;
+	virtual void Load () override final;
 
-	virtual void Unload() override final;
+	virtual void Unload () override final;
 
-	virtual void m_hGroundEntityStateChangedCallback(PlayerHandler::const_iterator ph, bool const new_isOnGround) override final;
+	virtual bool GotJob () const override final;
 
-	virtual PlayerRunCommandRet PlayerRunCommandCallback(PlayerHandler::const_iterator ph, void * const cmd, void * const old_cmd) override final;
+	virtual void RT_m_hGroundEntityStateChangedCallback ( PlayerHandler::const_iterator ph, bool const new_isOnGround ) override final;
+
+	virtual PlayerRunCommandRet RT_PlayerRunCommandCallback ( PlayerHandler::const_iterator ph, void * const cmd, void * const old_cmd ) override final;
 };
 
 #endif // JUMPTESTER_H
