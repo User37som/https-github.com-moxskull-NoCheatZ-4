@@ -150,21 +150,36 @@ bool WallhackBlocker::RT_SetTransmitCallback ( PlayerHandler::const_iterator sen
 		SpectatorMode const receiver_spec ( *EntityProps::GetInstance ()->GetPropValue<SpectatorMode, PROP_OBSERVER_MODE> ( receiver_player->GetEdict (), false ) );
 		if( receiver_spec == OBS_MODE_IN_EYE )
 		{
-			SourceSdk::CBaseHandle &bh ( *EntityProps::GetInstance ()->GetPropValue<SourceSdk::CBaseHandle, PROP_OBSERVER_TARGET> ( receiver_player->GetEdict (), false ) );
-			if( bh.IsValid () )
+			SourceSdk::CBaseHandle const * const bh ( EntityProps::GetInstance ()->GetPropValue<SourceSdk::CBaseHandle, PROP_OBSERVER_TARGET> ( receiver_player->GetEdict (), false ) );
+			if( bh->IsValid () )
 			{
-				PlayerHandler::const_iterator spec_player ( bh.GetEntryIndex () );
+				/*
+					The handle can still be invalid now https://github.com/L-EARN/NoCheatZ-4/issues/67#issuecomment-232063885
+					Perform more checks.
+				*/
 
-				if( spec_player && sender_player != spec_player )
+				int const bh_index ( bh->GetEntryIndex () );
+				if( bh_index > 0 && bh_index <= NczPlayerManager::GetInstance ()->GetMaxIndex () )
 				{
-					if( !cache.IsValid ( sender_player.GetIndex (), spec_player.GetIndex () ) )
+					PlayerHandler::const_iterator spec_player ( bh_index );
+
+					if( spec_player && sender_player != spec_player )
 					{
-						cache.SetVisibility ( sender_player.GetIndex (), spec_player.GetIndex (), RT_IsAbleToSee ( sender_player, spec_player ) );
+						if( !cache.IsValid ( sender_player.GetIndex (), spec_player.GetIndex () ) )
+						{
+							cache.SetVisibility ( sender_player.GetIndex (), spec_player.GetIndex (), RT_IsAbleToSee ( sender_player, spec_player ) );
+						}
+						cache.SetVisibility ( sender_player.GetIndex (), receiver_player.GetIndex (), cache.IsVisible ( sender_player.GetIndex (), spec_player.GetIndex () ) );
 					}
-					cache.SetVisibility ( sender_player.GetIndex (), receiver_player.GetIndex (), cache.IsVisible ( sender_player.GetIndex (), spec_player.GetIndex () ) );
+					else
+					{
+						cache.SetVisibility ( sender_player.GetIndex (), receiver_player.GetIndex (), true );
+					}
 				}
 				else
 				{
+					// Might flood the logs
+					DebugMessage ( Helpers::format("Cannot process vis tests : Encountered invalid index in CBaseHandle (%p -> %d) in WallhackBlocker::RT_SetTransmitCallback:154", bh, bh_index ) );
 					cache.SetVisibility ( sender_player.GetIndex (), receiver_player.GetIndex (), true );
 				}
 			}
