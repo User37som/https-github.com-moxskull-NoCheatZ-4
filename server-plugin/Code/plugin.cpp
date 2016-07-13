@@ -354,7 +354,7 @@ void CNoCheatZPlugin::LevelInit ( char const *pMapName )
 //---------------------------------------------------------------------------------
 void CNoCheatZPlugin::ServerActivate ( SourceSdk::edict_t *pEdictList, int edictCount, int clientMax )
 {
-	DebugMessage ( Helpers::format("CNoCheatZPlugin::ServerActivate (pEdictList:%p, edictCount:%d, clientMax:%d)", edictCount, clientMax) );
+	DebugMessage ( Helpers::format("CNoCheatZPlugin::ServerActivate (pEdictList:%p, edictCount:%d, clientMax:%d)", pEdictList, edictCount, clientMax) );
 
 	Helpers::m_EdictList = pEdictList;
 	//Helpers::m_EdictList_csgo = pEdictList;
