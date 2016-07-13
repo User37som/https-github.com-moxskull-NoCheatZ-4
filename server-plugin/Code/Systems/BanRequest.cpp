@@ -83,22 +83,35 @@ void BanRequest::BanInternal ( int ban_time, char const * steam_id, int userid, 
 	}
 	if( cmd_sm_ban )
 	{
-		SourceSdk::InterfacesProxy::Call_ServerCommand ( Helpers::format ( "sm_ban %d %d \"%s\"\n", userid, ban_time, kick_message ) );
+		if( userid == -1 )
+		{
+			Logger::GetInstance ()->Msg<MSG_ERROR> ( "BanRequest::BanInternal : Bad userid -> Cannot forward to sm_ban command." );
+		}
+		else
+		{
+			SourceSdk::InterfacesProxy::Call_ServerCommand ( Helpers::format ( "sm_ban %d %d \"%s\"\n", userid, ban_time, kick_message ) );
+		}
 	}
-	else
-	{
+	/*
+		Commenting because https://github.com/L-EARN/NoCheatZ-4/issues/64 :
+			This code do sm_ban by userid but userid can be not ready sometimes.
+			So I enforce my code to be sure the player is kicked if ever sourcemod fails.
+	*/
+	//else // 
+	//{
+
+		SourceSdk::InterfacesProxy::Call_ServerCommand ( Helpers::format ( "kickid %d [NoCheatZ 4] %s\n", userid, kick_message ) );
 		if( SteamGameServer_BSecure () && steam_id != nullptr )
 		{
 			SourceSdk::InterfacesProxy::Call_ServerCommand ( Helpers::format ( "banid %d %s\n", ban_time, steam_id ) );
 		}
-		SourceSdk::InterfacesProxy::Call_ServerCommand ( Helpers::format ( "kickid %d [NoCheatZ 4] %s\n", userid, kick_message ) );
 		if( strcmp ( "127.0.0.1", ip ) )
 		{
 			SourceSdk::InterfacesProxy::Call_ServerCommand ( Helpers::format ( "addip 1440 \"%s\"\n", ip ) );
 		}
 
 		m_do_writeid = true;
-	}
+	//}
 }
 
 void BanRequest::BanNow ( NczPlayer * const player, int ban_time, const char * kick_message )
