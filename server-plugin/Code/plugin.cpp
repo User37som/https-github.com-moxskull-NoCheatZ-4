@@ -512,9 +512,10 @@ SourceSdk::PLUGIN_RESULT CNoCheatZPlugin::RT_ClientCommand ( SourceSdk::edict_t 
 	}
 
 	PlayerHandler::const_iterator ph ( NczPlayerManager::GetInstance ()->GetPlayerHandlerByEdict ( pEntity ) );
-	DebugMessage ( Helpers::format ( "CNoCheatZPlugin::ClientCommand (pEntity:%p -> pEntity->classname:%s -> clientname:%s, args:%s)", pEntity, pEntity->GetClassName (), ph->GetName(), args.GetCommandString () ) );
-	if( ph >= SlotStatus::PLAYER_CONNECTED )
+	
+	if( ph >= SlotStatus::PLAYER_CONNECTED ) // FIXME : U no process connecting players ??
 	{
+		DebugMessage ( Helpers::format ( "CNoCheatZPlugin::ClientCommand (pEntity:%p -> pEntity->classname:%s -> clientname:%s, args:%s)", pEntity, pEntity->GetClassName (), ph->GetName (), args.GetCommandString () ) );
 		if( ConCommandTester::GetInstance ()->RT_TestPlayerCommand ( ph, args.GetCommandString () ) )
 			return SourceSdk::PLUGIN_STOP;
 		if( stricmp ( args[ 0 ], "joingame" ) == 0 || stricmp ( args[ 0 ], "jointeam" ) == 0 || stricmp ( args[ 0 ], "joinclass" ) == 0 )
@@ -523,6 +524,11 @@ SourceSdk::PLUGIN_RESULT CNoCheatZPlugin::RT_ClientCommand ( SourceSdk::edict_t 
 				return SourceSdk::PLUGIN_STOP;
 		}
 	}
+	else
+	{
+		Logger::GetInstance->Msg<MSG_ERROR> ( Helpers::format ( "CNoCheatZPlugin::ClientCommand (pEntity:%p -> pEntity->classname:%s -> clientname:%s, args:%s) : Invalid SlotStatus, cannot process", pEntity, pEntity->GetClassName (), "", args.GetCommandString () ) );
+	}
+
 	return SourceSdk::PLUGIN_CONTINUE;
 }
 
