@@ -526,7 +526,7 @@ SourceSdk::PLUGIN_RESULT CNoCheatZPlugin::RT_ClientCommand ( SourceSdk::edict_t 
 	}
 	else
 	{
-		Logger::GetInstance->Msg<MSG_ERROR> ( Helpers::format ( "CNoCheatZPlugin::ClientCommand (pEntity:%p -> pEntity->classname:%s -> clientname:%s, args:%s) : Invalid SlotStatus, cannot process", pEntity, pEntity->GetClassName (), "", args.GetCommandString () ) );
+		Logger::GetInstance()->Msg<MSG_ERROR> ( Helpers::format ( "CNoCheatZPlugin::ClientCommand (pEntity:%p -> pEntity->classname:%s -> clientname:%s, args:%s) : Invalid SlotStatus, cannot process", pEntity, pEntity->GetClassName (), "", args.GetCommandString () ) );
 	}
 
 	return SourceSdk::PLUGIN_CONTINUE;
