@@ -1,0 +1,18 @@
+* text=auto
+
+*.c text
+*.cpp text
+*.h text
+*.cc text
+*.proto text
+*.cfg text
+*.vdf text
+*.txt text
+
+*.sln text eol=crlf
+*.vcxproj text eol=crlf
+*.vcxproj.filters text eol=crlf
+*.bat text eol=crlf
+
+*.sh text eol=lf
+*.ini text eol=lf
