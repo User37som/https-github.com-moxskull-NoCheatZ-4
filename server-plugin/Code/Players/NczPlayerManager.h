@@ -158,10 +158,6 @@ public:
 		*/
 		inline bool operator!() const;
 		/*
-			Convert the iterator to the NczPlayer pointer in the handler (might be null)
-		*/
-		inline operator NczPlayer_ptr() const;
-		/*
 			Convert the iterator to the handler's status
 		*/
 		inline operator SlotStatus() const;
@@ -275,12 +271,6 @@ inline bool PlayerHandler::iterator::operator!() const
 {
 	Assert ( IsIteratorValid () );
 	return m_ptr->status == SlotStatus::INVALID;
-}
-
-inline PlayerHandler::iterator::operator NczPlayer_ptr() const
-{
-	Assert ( IsIteratorValid () );
-	return m_ptr->playerClass;
 }
 
 inline int PlayerHandler::iterator::GetIndex () const
