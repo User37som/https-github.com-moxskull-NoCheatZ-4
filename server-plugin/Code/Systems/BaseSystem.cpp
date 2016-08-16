@@ -129,6 +129,30 @@ void BaseSystem::ncz_cmd_fn ( const SourceSdk::CCommand &args )
 						it->SetActive ( false );
 					}
 				}
+				else if( stricmp ( "on", args.Arg ( 2 ) ) == 0 )
+				{
+					if( it->IsStatic () )
+					{
+						printf ( "System %s is static and cannot be loaded or unloaded\n", it->GetName () );
+					}
+					else
+					{
+						it->SetConfig ( true );
+						it->SetActive ( true );
+					}
+				}
+				else if( stricmp ( "off", args.Arg ( 2 ) ) == 0 )
+				{
+					if( it->IsStatic () )
+					{
+						printf ( "System %s is static and cannot be loaded or unloaded\n", it->GetName () );
+					}
+					else
+					{
+						it->SetConfig ( false );
+						it->SetActive ( false );
+					}
+				}
 				else if( stricmp ( "verbose", args.Arg ( 2 ) ) == 0 )
 				{
 					if( args.ArgC () > 2 )
