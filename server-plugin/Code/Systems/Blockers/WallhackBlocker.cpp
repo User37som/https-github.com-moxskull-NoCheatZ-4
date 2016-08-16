@@ -224,7 +224,7 @@ bool WallhackBlocker::RT_SetTransmitWeaponCallback ( SourceSdk::edict_t const * 
 void WallhackBlocker::RT_WeaponEquipCallback ( PlayerHandler::const_iterator ph, SourceSdk::edict_t const * const weapon )
 {
 	const int weapon_index ( Helpers::IndexOfEdict ( weapon ) );
-	WallhackBlocker::GetInstance ()->m_weapon_owner[ weapon_index ] = ph;
+	WallhackBlocker::GetInstance ()->m_weapon_owner[ weapon_index ] = *ph;
 	SetTransmitHookListener::HookSetTransmit ( weapon );
 }
 
@@ -399,7 +399,7 @@ void WallhackBlocker::ClientDisconnect ( PlayerHandler::const_iterator ph )
 {
 	for( int x ( 0 ); x < MAX_EDICTS; ++x )
 	{
-		if( m_weapon_owner[ x ] == ph )
+		if( m_weapon_owner[ x ] == *ph )
 			m_weapon_owner[ x ] = nullptr;
 	}
 	m_viscache.Invalidate ();

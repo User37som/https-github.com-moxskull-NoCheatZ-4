@@ -123,7 +123,7 @@ PlayerRunCommandRet ShotTester::RT_PlayerRunCommandCallback ( PlayerHandler::con
 					{
 						Detection_TriggerBot pDetection;
 						pDetection.PrepareDetectionData ( playerData );
-						pDetection.PrepareDetectionLog ( ph, this );
+						pDetection.PrepareDetectionLog ( *ph, this );
 						pDetection.Log ();
 
 						ph->Ban ();
@@ -137,7 +137,7 @@ PlayerRunCommandRet ShotTester::RT_PlayerRunCommandCallback ( PlayerHandler::con
 				{
 					Detection_AutoPistol pDetection;
 					pDetection.PrepareDetectionData ( playerData );
-					pDetection.PrepareDetectionLog ( ph, this );
+					pDetection.PrepareDetectionLog ( *ph, this );
 					pDetection.Log ();
 
 					ph->Ban ();

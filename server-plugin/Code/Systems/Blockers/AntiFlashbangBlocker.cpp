@@ -124,7 +124,7 @@ void AntiFlashbangBlocker::FireGameEvent ( SourceSdk::IGameEvent* ev ) // player
 
 	if( ph >= SlotStatus::PLAYER_CONNECTED )
 	{
-		FlashInfoT* const pInfo ( GetPlayerDataStruct ( ph ) );
+		FlashInfoT* const pInfo ( GetPlayerDataStruct ( *ph ) );
 		const float flash_alpha ( *EntityProps::GetInstance ()->GetPropValue<float, PROP_FLASH_MAX_ALPHA> ( ph->GetEdict () ) );
 		const float flash_duration ( *EntityProps::GetInstance ()->GetPropValue<float, PROP_FLASH_DURATION> ( ph->GetEdict () ) );
 
@@ -133,7 +133,7 @@ void AntiFlashbangBlocker::FireGameEvent ( SourceSdk::IGameEvent* ev ) // player
 		if( flash_alpha < 255.0f )
 		{
 			Helpers::FadeUser ( ph->GetEdict (), 0 );
-			ResetPlayerDataStruct ( ph );
+			ResetPlayerDataStruct ( *ph );
 			METRICS_LEAVE_SECTION ( "AntiFlashbangBlocker::FireGameEvent" );
 			return;
 		}
@@ -157,7 +157,7 @@ void AntiFlashbangBlocker::RT_ProcessOnTick ( float const curtime )
 	ProcessFilter::HumanAtLeastConnected filter_class;
 	for( PlayerHandler::const_iterator ph ( &filter_class ); ph != PlayerHandler::end (); ph += &filter_class )
 	{
-		FlashInfoT* const pInfo ( GetPlayerDataStruct ( ph ) );
+		FlashInfoT* const pInfo ( GetPlayerDataStruct ( *ph ) );
 
 		if( pInfo->flash_end_time != 0.0 )
 		{

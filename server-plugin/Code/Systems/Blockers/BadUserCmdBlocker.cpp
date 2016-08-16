@@ -76,7 +76,7 @@ PlayerRunCommandRet BadUserCmdBlocker::RT_PlayerRunCommandCallback ( PlayerHandl
 		return PlayerRunCommandRet::BLOCK;
 	}
 
-	UserCmdInfo* const pInfo ( GetPlayerDataStruct ( ph ));
+	UserCmdInfo* const pInfo ( GetPlayerDataStruct ( *ph ));
 
 	if( k_newcmd->tick_count <= 0 )
 		pInfo->m_tick_status = IN_RESET;

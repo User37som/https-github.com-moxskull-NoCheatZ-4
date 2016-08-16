@@ -118,7 +118,7 @@ void RadarHackBlocker::RT_ThinkPostCallback ( SourceSdk::edict_t const * const p
 
 			if( pData->m_last_spotted_status )
 			{
-				RT_UpdatePlayerData ( ph );
+				RT_UpdatePlayerData ( *ph );
 				RT_ProcessEntity ( ph->GetEdict () );
 			}
 			else
@@ -287,14 +287,14 @@ void RadarHackBlocker::RT_ProcessOnTick ( float const curtime )
 
 		if( pData->m_last_spotted_status )
 		{
-			RT_UpdatePlayerData ( ph );
+			RT_UpdatePlayerData ( *ph );
 			RT_ProcessEntity ( ph->GetEdict () );
 		}
 		else
 		{
 			if( curtime > m_next_process )
 			{
-				RT_UpdatePlayerData ( ph );
+				RT_UpdatePlayerData ( *ph );
 				RT_ProcessEntity ( ph->GetEdict () );
 			}
 		}

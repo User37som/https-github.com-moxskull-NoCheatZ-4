@@ -98,7 +98,7 @@ void ConVarTester::RT_ProcessPlayerTest ( PlayerHandler::const_iterator ph, floa
 					{
 						Detection_ConVar pDetection;
 						pDetection.PrepareDetectionData ( req );
-						pDetection.PrepareDetectionLog ( ph, this );
+						pDetection.PrepareDetectionLog ( *ph, this );
 						pDetection.Log ();
 						ph->Kick ( "ConVar request timed out" );
 					}
@@ -246,9 +246,9 @@ void ConVarTester::RT_OnQueryCvarValueFinished ( PlayerHandler::const_iterator p
 					{
 						Detection_ConVar pDetection;
 						pDetection.PrepareDetectionData ( req );
-						pDetection.PrepareDetectionLog ( ph, this );
+						pDetection.PrepareDetectionLog ( *ph, this );
 						pDetection.Log ();
-						BanRequest::GetInstance ()->AddAsyncBan ( ph, 0, "Banned by NoCheatZ 4" );
+						BanRequest::GetInstance ()->AddAsyncBan ( *ph, 0, "Banned by NoCheatZ 4" );
 					}
 					else if( ruleset->rule == ConVarRule::SAME )
 					{
@@ -256,9 +256,9 @@ void ConVarTester::RT_OnQueryCvarValueFinished ( PlayerHandler::const_iterator p
 						{
 							Detection_ConVar pDetection;
 							pDetection.PrepareDetectionData ( req );
-							pDetection.PrepareDetectionLog ( ph, this );
+							pDetection.PrepareDetectionLog ( *ph, this );
 							pDetection.Log ();
-							BanRequest::GetInstance ()->AddAsyncBan ( ph, 0, "Banned by NoCheatZ 4" );
+							BanRequest::GetInstance ()->AddAsyncBan ( *ph, 0, "Banned by NoCheatZ 4" );
 						}
 					}
 					else if( ruleset->rule == ConVarRule::SAME_AS_SERVER )
@@ -267,9 +267,9 @@ void ConVarTester::RT_OnQueryCvarValueFinished ( PlayerHandler::const_iterator p
 						{
 							Detection_ConVar pDetection;
 							pDetection.PrepareDetectionData ( req );
-							pDetection.PrepareDetectionLog ( ph, this );
+							pDetection.PrepareDetectionLog ( *ph, this );
 							pDetection.Log ();
-							BanRequest::GetInstance ()->AddAsyncBan ( ph, 0, "Banned by NoCheatZ 4" );
+							BanRequest::GetInstance ()->AddAsyncBan ( *ph, 0, "Banned by NoCheatZ 4" );
 						}
 					}
 					else if( ruleset->rule == ConVarRule::SAME_FLOAT )
@@ -280,9 +280,9 @@ void ConVarTester::RT_OnQueryCvarValueFinished ( PlayerHandler::const_iterator p
 						{
 							Detection_ConVar pDetection;
 							pDetection.PrepareDetectionData ( req );
-							pDetection.PrepareDetectionLog ( ph, this );
+							pDetection.PrepareDetectionLog ( *ph, this );
 							pDetection.Log ();
-							BanRequest::GetInstance ()->AddAsyncBan ( ph, 0, "Banned by NoCheatZ 4" );
+							BanRequest::GetInstance ()->AddAsyncBan ( *ph, 0, "Banned by NoCheatZ 4" );
 						}
 					}
 					else if( ruleset->rule == ConVarRule::SAME_FLOAT_AS_SERVER )
@@ -293,9 +293,9 @@ void ConVarTester::RT_OnQueryCvarValueFinished ( PlayerHandler::const_iterator p
 						{
 							Detection_ConVar pDetection;
 							pDetection.PrepareDetectionData ( req );
-							pDetection.PrepareDetectionLog ( ph, this );
+							pDetection.PrepareDetectionLog ( *ph, this );
 							pDetection.Log ();
-							BanRequest::GetInstance ()->AddAsyncBan ( ph, 0, "Banned by NoCheatZ 4" );
+							BanRequest::GetInstance ()->AddAsyncBan ( *ph, 0, "Banned by NoCheatZ 4" );
 						}
 					}
 					break;
@@ -309,9 +309,9 @@ void ConVarTester::RT_OnQueryCvarValueFinished ( PlayerHandler::const_iterator p
 					{
 						Detection_ConVar pDetection;
 						pDetection.PrepareDetectionData ( req );
-						pDetection.PrepareDetectionLog ( ph, this );
+						pDetection.PrepareDetectionLog ( *ph, this );
 						pDetection.Log ();
-						BanRequest::GetInstance ()->AddAsyncBan ( ph, 0, "Banned by NoCheatZ 4" );
+						BanRequest::GetInstance ()->AddAsyncBan ( *ph, 0, "Banned by NoCheatZ 4" );
 					}
 					break;
 				}
@@ -342,9 +342,9 @@ void ConVarTester::RT_OnQueryCvarValueFinished ( PlayerHandler::const_iterator p
 unexpected2:
 		Detection_ConVar pDetection;
 		pDetection.PrepareDetectionData ( req );
-		pDetection.PrepareDetectionLog ( ph, this );
+		pDetection.PrepareDetectionLog ( *ph, this );
 		pDetection.Log ();
-		BanRequest::GetInstance ()->AddAsyncBan ( ph, 0, "Banned by NoCheatZ 4" );
+		BanRequest::GetInstance ()->AddAsyncBan ( *ph, 0, "Banned by NoCheatZ 4" );
 	}
 }
 

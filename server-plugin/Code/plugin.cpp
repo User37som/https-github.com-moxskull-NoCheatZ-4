@@ -472,7 +472,7 @@ SourceSdk::PLUGIN_RESULT CNoCheatZPlugin::ClientConnect ( bool *bAllowConnect, S
 #define MAX_CHARS_NAME 32
 
 	NczPlayerManager::GetInstance ()->ClientConnect ( pEntity );
-	NczPlayer* player ( NczPlayerManager::GetInstance ()->GetPlayerHandlerByEdict ( pEntity ) );
+	NczPlayer* player ( *(NczPlayerManager::GetInstance ()->GetPlayerHandlerByEdict ( pEntity )) );
 
 	SpamConnectTester::GetInstance ()->ClientConnect ( bAllowConnect, pEntity, pszName, pszAddress, reject, maxrejectlen );
 	SpamChangeNameTester::GetInstance ()->ClientConnect ( bAllowConnect, pEntity, pszName, pszAddress, reject, maxrejectlen );

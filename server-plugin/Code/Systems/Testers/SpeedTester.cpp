@@ -86,7 +86,7 @@ void SpeedTester::RT_ProcessOnTick ( float const curtime )
 			{
 				Detection_SpeedHack pDetection;
 				pDetection.PrepareDetectionData ( pInfo );
-				pDetection.PrepareDetectionLog ( ph, this );
+				pDetection.PrepareDetectionLog ( *ph, this );
 				pDetection.Log ();
 
 				pInfo->lastDetectionTime = curtime;

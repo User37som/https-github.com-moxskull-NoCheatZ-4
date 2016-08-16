@@ -104,7 +104,7 @@ void SpamChangeNameTester::FireGameEvent ( SourceSdk::IGameEvent* ev )
 
 	if( ph < SlotStatus::PLAYER_CONNECTED ) return;
 
-	ChangeNameInfo* const pInfo ( GetPlayerDataStruct ( ph ) );
+	ChangeNameInfo* const pInfo ( GetPlayerDataStruct ( *ph ) );
 
 	++( pInfo->namechange_count );
 }
@@ -114,7 +114,7 @@ void SpamChangeNameTester::RT_ProcessOnTick ( float const curtime )
 	ProcessFilter::HumanAtLeastConnected filter_class;
 	for( PlayerHandler::const_iterator ph ( &filter_class ); ph != PlayerHandler::end (); ph+=&filter_class )
 	{
-		ChangeNameInfo* const pInfo ( GetPlayerDataStruct ( ph ) );
+		ChangeNameInfo* const pInfo ( GetPlayerDataStruct ( *ph ) );
 
 		{
 			if( pInfo->namechange_count >= 5 )
@@ -122,7 +122,7 @@ void SpamChangeNameTester::RT_ProcessOnTick ( float const curtime )
 				{
 					ph->Ban ( "Banned for namechange spamming", 10 );
 				}
-			ResetPlayerDataStruct ( ph );
+			ResetPlayerDataStruct ( *ph );
 		}
 	}
 }

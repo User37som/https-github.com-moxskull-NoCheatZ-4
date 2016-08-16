@@ -92,7 +92,7 @@ bool ValidationTester::JoinCallback ( PlayerHandler::const_iterator ph )
 {
 	if( IsActive () && SteamGameServer_BSecure () )
 	{
-		if( !GetPlayerDataStruct ( ph )->b )
+		if( !GetPlayerDataStruct ( *ph )->b )
 		{
 			if( !WasPreviouslyValidated ( ph ) )
 			{

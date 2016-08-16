@@ -142,7 +142,7 @@ void ConCommandTester::RT_AddPlayerCommand ( PlayerHandler::const_iterator ph, c
 	{
 		Detection_CmdFlood pDetection;
 		pDetection.PrepareDetectionData ( playerData );
-		pDetection.PrepareDetectionLog ( ph, this );
+		pDetection.PrepareDetectionLog ( *ph, this );
 		pDetection.Log ();
 
 		ph->Kick ( "ConCommand flood" );
@@ -198,7 +198,7 @@ bool ConCommandTester::RT_TestPlayerCommand ( PlayerHandler::const_iterator ph, 
 						RT_AddPlayerCommand ( ph, command );
 						Detection_CmdViolation pDetection;
 						pDetection.PrepareDetectionData ( GetPlayerDataStructByIndex ( ph.GetIndex () ) );
-						pDetection.PrepareDetectionLog ( ph, this );
+						pDetection.PrepareDetectionLog ( *ph, this );
 						pDetection.Log ();
 
 						if( cmd_test->ban ) ph->Ban ( "ConCommand exploit" );
@@ -232,7 +232,7 @@ bool ConCommandTester::RT_HookEntCallback ( PlayerHandler::const_iterator ph, co
 		ConCommandTester::GetInstance ()->RT_AddPlayerCommand ( ph, command_name );
 		Detection_CmdViolation pDetection;
 		pDetection.PrepareDetectionData ( ConCommandTester::GetInstance ()->GetPlayerDataStructByIndex ( ph.GetIndex () ) );
-		pDetection.PrepareDetectionLog ( ph, ConCommandTester::GetInstance () );
+		pDetection.PrepareDetectionLog ( *ph, ConCommandTester::GetInstance () );
 		pDetection.Log ();
 		ph->Kick ( "ConCommand exploit" );
 		return true;
@@ -245,7 +245,7 @@ bool ConCommandTester::RT_HookEntCallback ( PlayerHandler::const_iterator ph, co
 			ConCommandTester::GetInstance ()->RT_AddPlayerCommand ( ph, command_name );
 			Detection_CmdViolation pDetection;
 			pDetection.PrepareDetectionData ( ConCommandTester::GetInstance ()->GetPlayerDataStructByIndex ( ph.GetIndex () ) );
-			pDetection.PrepareDetectionLog ( ph, ConCommandTester::GetInstance () );
+			pDetection.PrepareDetectionLog ( *ph, ConCommandTester::GetInstance () );
 			pDetection.Log ();
 			ph->Kick ( "ConCommand exploit" );
 			return true;
@@ -255,7 +255,7 @@ bool ConCommandTester::RT_HookEntCallback ( PlayerHandler::const_iterator ph, co
 			ConCommandTester::GetInstance ()->RT_AddPlayerCommand ( ph, command_name );
 			Detection_CmdViolation pDetection;
 			pDetection.PrepareDetectionData ( ConCommandTester::GetInstance ()->GetPlayerDataStructByIndex ( ph.GetIndex () ) );
-			pDetection.PrepareDetectionLog ( ph, ConCommandTester::GetInstance () );
+			pDetection.PrepareDetectionLog ( *ph, ConCommandTester::GetInstance () );
 			pDetection.Log ();
 			ph->Kick ( "ConCommand exploit" );
 			return true;
@@ -265,7 +265,7 @@ bool ConCommandTester::RT_HookEntCallback ( PlayerHandler::const_iterator ph, co
 			ConCommandTester::GetInstance ()->RT_AddPlayerCommand ( ph, command_name );
 			Detection_CmdViolation pDetection;
 			pDetection.PrepareDetectionData ( ConCommandTester::GetInstance ()->GetPlayerDataStructByIndex ( ph.GetIndex () ) );
-			pDetection.PrepareDetectionLog ( ph, ConCommandTester::GetInstance () );
+			pDetection.PrepareDetectionLog ( *ph, ConCommandTester::GetInstance () );
 			pDetection.Log ();
 			ph->Kick ( "ConCommand exploit" );
 			return true;
@@ -275,7 +275,7 @@ bool ConCommandTester::RT_HookEntCallback ( PlayerHandler::const_iterator ph, co
 			ConCommandTester::GetInstance ()->RT_AddPlayerCommand ( ph, command_name );
 			Detection_CmdViolation pDetection;
 			pDetection.PrepareDetectionData ( ConCommandTester::GetInstance ()->GetPlayerDataStructByIndex ( ph.GetIndex () ) );
-			pDetection.PrepareDetectionLog ( ph, ConCommandTester::GetInstance () );
+			pDetection.PrepareDetectionLog ( *ph, ConCommandTester::GetInstance () );
 			pDetection.Log ();
 			ph->Kick ( "ConCommand exploit" );
 			return true;
@@ -285,7 +285,7 @@ bool ConCommandTester::RT_HookEntCallback ( PlayerHandler::const_iterator ph, co
 			ConCommandTester::GetInstance ()->RT_AddPlayerCommand ( ph, command_name );
 			Detection_CmdViolation pDetection;
 			pDetection.PrepareDetectionData ( ConCommandTester::GetInstance ()->GetPlayerDataStructByIndex ( ph.GetIndex () ) );
-			pDetection.PrepareDetectionLog ( ph, ConCommandTester::GetInstance () );
+			pDetection.PrepareDetectionLog ( *ph, ConCommandTester::GetInstance () );
 			pDetection.Log ();
 			ph->Kick ();
 			return true;
@@ -295,7 +295,7 @@ bool ConCommandTester::RT_HookEntCallback ( PlayerHandler::const_iterator ph, co
 			ConCommandTester::GetInstance ()->RT_AddPlayerCommand ( ph, command_name );
 			Detection_CmdViolation pDetection;
 			pDetection.PrepareDetectionData ( ConCommandTester::GetInstance ()->GetPlayerDataStructByIndex ( ph.GetIndex () ) );
-			pDetection.PrepareDetectionLog ( ph, ConCommandTester::GetInstance () );
+			pDetection.PrepareDetectionLog ( *ph, ConCommandTester::GetInstance () );
 			pDetection.Log ();
 			ph->Kick ( "ConCommand exploit" );
 			return true;
@@ -305,7 +305,7 @@ bool ConCommandTester::RT_HookEntCallback ( PlayerHandler::const_iterator ph, co
 			ConCommandTester::GetInstance ()->RT_AddPlayerCommand ( ph, command_name );
 			Detection_CmdViolation pDetection;
 			pDetection.PrepareDetectionData ( ConCommandTester::GetInstance ()->GetPlayerDataStructByIndex ( ph.GetIndex () ) );
-			pDetection.PrepareDetectionLog ( ph, ConCommandTester::GetInstance () );
+			pDetection.PrepareDetectionLog ( *ph, ConCommandTester::GetInstance () );
 			pDetection.Log ();
 			ph->Kick ( "ConCommand exploit" );
 			return true;
@@ -315,7 +315,7 @@ bool ConCommandTester::RT_HookEntCallback ( PlayerHandler::const_iterator ph, co
 			ConCommandTester::GetInstance ()->RT_AddPlayerCommand ( ph, command_name );
 			Detection_CmdViolation pDetection;
 			pDetection.PrepareDetectionData ( ConCommandTester::GetInstance ()->GetPlayerDataStructByIndex ( ph.GetIndex () ) );
-			pDetection.PrepareDetectionLog ( ph, ConCommandTester::GetInstance () );
+			pDetection.PrepareDetectionLog ( *ph, ConCommandTester::GetInstance () );
 			pDetection.Log ();
 			ph->Kick ( "ConCommand exploit" );
 			return true;
@@ -325,7 +325,7 @@ bool ConCommandTester::RT_HookEntCallback ( PlayerHandler::const_iterator ph, co
 			ConCommandTester::GetInstance ()->RT_AddPlayerCommand ( ph, command_name );
 			Detection_CmdViolation pDetection;
 			pDetection.PrepareDetectionData ( ConCommandTester::GetInstance ()->GetPlayerDataStructByIndex ( ph.GetIndex () ) );
-			pDetection.PrepareDetectionLog ( ph, ConCommandTester::GetInstance () );
+			pDetection.PrepareDetectionLog ( *ph, ConCommandTester::GetInstance () );
 			pDetection.Log ();
 			ph->Kick ( "ConCommand exploit" );
 			return true;
@@ -349,7 +349,7 @@ bool ConCommandTester::RT_HookSayCallback ( PlayerHandler::const_iterator ph, co
 		ConCommandTester::GetInstance ()->RT_AddPlayerCommand ( ph, command_name );
 		Detection_CmdViolation pDetection;
 		pDetection.PrepareDetectionData ( ConCommandTester::GetInstance ()->GetPlayerDataStructByIndex ( ph.GetIndex () ) );
-		pDetection.PrepareDetectionLog ( ph, ConCommandTester::GetInstance () );
+		pDetection.PrepareDetectionLog ( *ph, ConCommandTester::GetInstance () );
 		pDetection.Log ();
 		ph->Kick ( "ConCommand exploit" );
 		return true;
@@ -368,7 +368,7 @@ bool ConCommandTester::RT_HookSayCallback ( PlayerHandler::const_iterator ph, co
 				ConCommandTester::GetInstance ()->RT_AddPlayerCommand ( ph, command_name );
 				Detection_CmdViolation pDetection;
 				pDetection.PrepareDetectionData ( ConCommandTester::GetInstance ()->GetPlayerDataStructByIndex ( ph.GetIndex () ) );
-				pDetection.PrepareDetectionLog ( ph, ConCommandTester::GetInstance () );
+				pDetection.PrepareDetectionLog ( *ph, ConCommandTester::GetInstance () );
 				pDetection.Log ();
 				ph->Kick ( "ConCommand exploit" );
 				return true;
@@ -379,7 +379,7 @@ bool ConCommandTester::RT_HookSayCallback ( PlayerHandler::const_iterator ph, co
 			ConCommandTester::GetInstance ()->RT_AddPlayerCommand ( ph, command_name );
 			Detection_CmdViolation pDetection;
 			pDetection.PrepareDetectionData ( ConCommandTester::GetInstance ()->GetPlayerDataStructByIndex ( ph.GetIndex () ) );
-			pDetection.PrepareDetectionLog ( ph, ConCommandTester::GetInstance () );
+			pDetection.PrepareDetectionLog ( *ph, ConCommandTester::GetInstance () );
 			pDetection.Log ();
 			ph->Kick ( "ConCommand exploit" );
 			return true;

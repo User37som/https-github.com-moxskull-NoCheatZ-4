@@ -106,7 +106,7 @@ PlayerRunCommandRet EyeAnglesTester::RT_PlayerRunCommandCallback ( PlayerHandler
 
 				Detection_EyeAngleX pDetection;
 				pDetection.PrepareDetectionData ( playerData );
-				pDetection.PrepareDetectionLog ( ph, this );
+				pDetection.PrepareDetectionLog ( *ph, this );
 				pDetection.Log ();
 			}
 		}
@@ -119,7 +119,7 @@ PlayerRunCommandRet EyeAnglesTester::RT_PlayerRunCommandCallback ( PlayerHandler
 
 				Detection_EyeAngleY pDetection;
 				pDetection.PrepareDetectionData ( playerData );
-				pDetection.PrepareDetectionLog ( ph, this );
+				pDetection.PrepareDetectionLog ( *ph, this );
 				pDetection.Log ();
 			}
 		}
@@ -132,12 +132,12 @@ PlayerRunCommandRet EyeAnglesTester::RT_PlayerRunCommandCallback ( PlayerHandler
 
 				Detection_EyeAngleZ pDetection;
 				pDetection.PrepareDetectionData ( playerData );
-				pDetection.PrepareDetectionLog ( ph, this );
+				pDetection.PrepareDetectionLog ( *ph, this );
 				pDetection.Log ();
 			}
 		}
 
-		BanRequest::GetInstance ()->AddAsyncBan ( ph, 0, "Banned by NoCheatZ 4" );
+		BanRequest::GetInstance ()->AddAsyncBan ( *ph, 0, "Banned by NoCheatZ 4" );
 	}
 	return drop_cmd;
 }
