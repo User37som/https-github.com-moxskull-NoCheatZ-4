@@ -20,7 +20,7 @@
 #include "Systems/Logger.h"
 
 ConCommandTester::ConCommandTester () :
-	BaseSystem ( "ConCommandTester" ),
+	BaseDynamicSystem ( "ConCommandTester" ),
 	ConCommandHookListener (),
 	playerdatahandler_class (),
 	singleton_class (),

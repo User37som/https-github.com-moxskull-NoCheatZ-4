@@ -67,7 +67,7 @@ typedef struct ShotStats
 } ShotStatsT;
 
 class ShotTester :
-	public BaseSystem,
+	public BaseDynamicSystem,
 	public PlayerDataStructHandler<ShotStatsT>,
 	public PlayerRunCommandHookListener,
 	public Singleton<ShotTester>

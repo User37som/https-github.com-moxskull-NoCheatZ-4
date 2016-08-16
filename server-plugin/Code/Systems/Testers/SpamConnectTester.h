@@ -59,7 +59,7 @@ struct ConnectInfo
 };
 
 class SpamConnectTester :
-	private BaseSystem,
+	private BaseDynamicSystem,
 	public Singleton<SpamConnectTester>
 {
 	typedef Singleton<SpamConnectTester> singleton_class;

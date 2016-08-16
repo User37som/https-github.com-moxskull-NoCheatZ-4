@@ -27,7 +27,7 @@
 */
 
 ShotTester::ShotTester ( void ) :
-	BaseSystem ( "ShotTester" ),
+	BaseDynamicSystem ( "ShotTester" ),
 	playerdata_class (),
 	PlayerRunCommandHookListener (),
 	singleton_class ()

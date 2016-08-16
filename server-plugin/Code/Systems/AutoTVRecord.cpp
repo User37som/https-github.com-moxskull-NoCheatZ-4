@@ -21,7 +21,7 @@ limitations under the License.
 #include "Logger.h"
 
 AutoTVRecord::AutoTVRecord () :
-	BaseSystem ( "AutoTVRecord", "Enable - Disable - Verbose - SetMinPlayers - SetPrefix" ),
+	BaseDynamicSystem ( "AutoTVRecord", "Enable - Disable - Verbose" ),
 	ConCommandHookListener (),
 	singleton_class (),
 	m_demofile ( "" ),

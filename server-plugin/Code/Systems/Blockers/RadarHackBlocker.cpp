@@ -24,7 +24,7 @@ limitations under the License.
 #include "Systems/AutoTVRecord.h"
 
 RadarHackBlocker::RadarHackBlocker () :
-	BaseSystem ( "RadarHackBlocker" ),
+	BaseDynamicSystem ( "RadarHackBlocker" ),
 	OnTickListener (),
 	playerdatahandler_class (),
 	singleton_class (),

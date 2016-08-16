@@ -116,7 +116,7 @@ public:
 };
 
 class JumpTester :
-	public BaseSystem,
+	public BaseDynamicSystem,
 	public OnGroundHookListener,
 	public PlayerDataStructHandler<JumpInfoT>,
 	public PlayerRunCommandHookListener,

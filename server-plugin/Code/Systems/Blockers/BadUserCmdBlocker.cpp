@@ -20,7 +20,7 @@
 #include "Systems/Logger.h"
 
 BadUserCmdBlocker::BadUserCmdBlocker () :
-	BaseSystem ( "BadUserCmdBlocker" ),
+	BaseDynamicSystem ( "BadUserCmdBlocker" ),
 	playerdatahandler_class (),
 	PlayerRunCommandHookListener (),
 	singleton_class ()

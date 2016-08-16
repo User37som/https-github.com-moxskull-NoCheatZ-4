@@ -89,7 +89,7 @@ typedef struct ValidatedInfo
 } ValidatedInfoT;
 
 class ValidationTester :
-	private BaseSystem,
+	private BaseDynamicSystem,
 	private SourceSdk::IGameEventListener002,
 	private OnTickListener,
 	public PlayerDataStructHandler<ValidationInfoT>,

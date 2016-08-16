@@ -21,6 +21,7 @@
 #include "Preprocessors.h"
 #include "Players/NczPlayer.h"
 #include "Systems/TimerListener.h"
+#include "Systems/BaseSystem.h"
 
 typedef struct PlayerBanRequest
 {
@@ -87,6 +88,7 @@ typedef struct PlayerBanRequest
 typedef basic_slist<PlayerBanRequestT> BanRequestListT;
 
 class BanRequest :
+	public BaseStaticSystem,
 	public Singleton<BanRequest>,
 	public TimerListener
 {
@@ -107,7 +109,7 @@ public:
 	BanRequest ();
 	virtual ~BanRequest () override final;
 
-	void Init ();
+	virtual void Init () override final;
 
 	void OnLevelInit ();
 

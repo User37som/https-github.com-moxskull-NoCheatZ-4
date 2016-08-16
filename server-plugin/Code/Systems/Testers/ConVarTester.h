@@ -137,7 +137,7 @@ public:
 };
 
 class ConVarTester :
-	public BaseSystem,
+	public BaseDynamicSystem,
 	public OnTickListener,
 	public PlayerDataStructHandler<CurrentConVarRequestT>,
 	public Singleton<ConVarTester>

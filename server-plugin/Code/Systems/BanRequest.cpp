@@ -23,6 +23,7 @@
 
 
 BanRequest::BanRequest () :
+	BaseStaticSystem ( "BanRequest", "Verbose - CanKick - CanBan" ),
 	singleton_class (),
 	TimerListener (),
 	m_wait_time ( 10.0 ),

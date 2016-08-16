@@ -133,7 +133,7 @@ typedef struct CommandInfoS
 typedef CUtlVector<CommandInfoT> CommandListT;
 
 class ConCommandTester :
-	public BaseSystem,
+	public BaseDynamicSystem,
 	public ConCommandHookListener,
 	public PlayerDataStructHandler<LastPlayerCommandsT>,
 	public Singleton<ConCommandTester>

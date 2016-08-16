@@ -68,7 +68,7 @@ struct ClientRadarData
 };
 
 class RadarHackBlocker :
-	public BaseSystem,
+	public BaseDynamicSystem,
 	public OnTickListener,
 	public PlayerDataStructHandler<ClientRadarData>,
 	public Singleton<RadarHackBlocker>,

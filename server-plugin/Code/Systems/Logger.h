@@ -22,6 +22,7 @@
 #include "Misc/temp_basicstring.h"
 #include "Misc/temp_singleton.h"
 #include "Containers/utlvector.h"
+#include "Systems/BaseSystem.h"
 
 /*
 	Messages to be written on the plugin's logfile.
@@ -53,6 +54,7 @@ enum msg_type
 };
 
 class Logger :
+	public BaseStaticSystem,
 	public Singleton<Logger>
 {
 	typedef Singleton<Logger> singleton_class;
@@ -62,9 +64,12 @@ private:
 	basic_string const prolog;
 
 public:
-	Logger () : singleton_class (), m_msg (), prolog ( "[NoCheatZ " NCZ_VERSION_STR "] " )
+	Logger () : BaseStaticSystem ( "Logger" ), singleton_class (), m_msg (), prolog ( "[NoCheatZ " NCZ_VERSION_STR "] " )
 	{};
 	virtual ~Logger () override final
+	{};
+
+	virtual void Init () override final
 	{};
 
 	void Push ( const char * msg );

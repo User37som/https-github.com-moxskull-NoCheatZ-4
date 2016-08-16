@@ -25,15 +25,15 @@
 // BaseSystem
 /////////////////////////////////////////////////////////////////////////
 
+
 BaseSystem::BaseSystem ( char const * const name, char const * const commands ) :
 	ListMeClass (),
 	m_name ( name ),
 	m_cmd_list ( commands ),
-	m_isActive ( false ),
-	m_isDisabled ( false ),
-	m_configState ( true ),
 	m_verbose ( false )
-{}
+{
+
+}
 
 BaseSystem::~BaseSystem ()
 {}
@@ -53,7 +53,10 @@ void BaseSystem::TryUnloadSystems ()
 	BaseSystem* it ( GetFirst () );
 	while( it != nullptr )
 	{
-		if( ! it->GotJob () ) it->SetActive ( false );
+		if( it->IsDynamic () )
+		{
+			if( !it->GotJob () ) it->SetActive ( false );
+		}
 		GetNext ( it );
 	}
 }
@@ -63,7 +66,10 @@ void BaseSystem::TryLoadSystems ()
 	BaseSystem* it ( GetFirst () );
 	while( it != nullptr )
 	{
-		it->SetActive ( true );
+		if( it->IsDynamic () )
+		{
+			it->SetActive ( true );
+		}
 		GetNext ( it );
 	}
 }
@@ -90,41 +96,6 @@ BaseSystem * BaseSystem::FindSystemByName ( const char * name )
 	return nullptr;
 }
 
-void BaseSystem::SetActive ( bool active )
-{
-	if( m_isActive == active ) return;
-	else if( active )
-	{
-		if( !m_isDisabled )
-		{
-			if( m_configState )
-			{
-				// Should load
-				if( this->GotJob() )
-				{
-					Logger::GetInstance ()->Msg<MSG_HINT> ( Helpers::format ( "Starting %s", GetName () ) );
-					Load ();
-					m_isActive = true;
-				}
-				else
-				{
-					//DebugMessage ( Helpers::format ( "System %s has nothing to do and will not be loaded", GetName () ) ); // That spam ...
-				}
-			}
-			else
-			{
-				SystemVerbose1 ( Helpers::format ( "Wont start system %s : Disabled by server configuration file", GetName () ) );
-			}
-		}
-	}
-	else
-	{
-		Logger::GetInstance ()->Msg<MSG_HINT> ( Helpers::format ( "Stoping %s", GetName () ) );
-		m_isActive = false;
-		Unload ();
-	}
-}
-
 void BaseSystem::ncz_cmd_fn ( const SourceSdk::CCommand &args )
 {
 	if( args.ArgC () > 1 )
@@ -136,13 +107,27 @@ void BaseSystem::ncz_cmd_fn ( const SourceSdk::CCommand &args )
 			{
 				if( stricmp ( "enable", args.Arg ( 2 ) ) == 0 )
 				{
-					it->SetConfig ( true );
-					it->SetActive ( true );
+					if( it->IsStatic () )
+					{
+						printf ( "System %s is static and cannot be loaded or unloaded\n", it->GetName () );
+					}
+					else
+					{
+						it->SetConfig ( true );
+						it->SetActive ( true );
+					}
 				}
 				else if( stricmp ( "disable", args.Arg ( 2 ) ) == 0 )
 				{
-					it->SetConfig ( false );
-					it->SetActive ( false );
+					if( it->IsStatic () )
+					{
+						printf ( "System %s is static and cannot be loaded or unloaded\n", it->GetName () );
+					}
+					else
+					{
+						it->SetConfig ( false );
+						it->SetActive ( false );
+					}
 				}
 				else if( stricmp ( "verbose", args.Arg ( 2 ) ) == 0 )
 				{
@@ -181,7 +166,11 @@ void BaseSystem::ncz_cmd_fn ( const SourceSdk::CCommand &args )
 		while( it != nullptr )
 		{
 			printf ( "%s", it->GetName () );
-			if( it->IsActive () )
+			if( it->IsStatic () )
+			{
+				printf ( " (Static)\n" );
+			}
+			else if( it->IsActive () )
 			{
 				printf ( " (Running)\n" );
 			}
@@ -200,5 +189,65 @@ void BaseSystem::ncz_cmd_fn ( const SourceSdk::CCommand &args )
 			printf ( "\tCommands : %s\n", it->cmd_list () );
 			GetNext ( it );
 		}
+	}
+}
+
+/////////////////////////////////////////////////////////////////////////
+// BaseStaticSystem
+/////////////////////////////////////////////////////////////////////////
+
+BaseStaticSystem::BaseStaticSystem ( char const * const name, char const * const commands ) :
+	BaseSystem ( name, commands )
+{}
+
+BaseStaticSystem::~BaseStaticSystem ()
+{}
+
+/////////////////////////////////////////////////////////////////////////
+// BaseDynamicSystem
+/////////////////////////////////////////////////////////////////////////
+
+BaseDynamicSystem::BaseDynamicSystem ( char const * const name, char const * const commands ) :
+	BaseSystem ( name, commands ),
+	m_isActive ( false ),
+	m_isDisabled ( false ),
+	m_configState ( true )
+{}
+
+BaseDynamicSystem::~BaseDynamicSystem ()
+{}
+
+void BaseDynamicSystem::SetActive ( bool active )
+{
+	if( IsActive () == active ) return;
+	else if( active )
+	{
+		if( !GetDisabledByConfigIni () )
+		{
+			if( IsEnabledByConfig () )
+			{
+				// Should load
+				if( this->GotJob () )
+				{
+					Logger::GetInstance ()->Msg<MSG_HINT> ( Helpers::format ( "Starting %s", GetName () ) );
+					Load ();
+					m_isActive = true;
+				}
+				else
+				{
+					//DebugMessage ( Helpers::format ( "System %s has nothing to do and will not be loaded", GetName () ) ); // That spam ...
+				}
+			}
+			else
+			{
+				SystemVerbose1 ( Helpers::format ( "Wont start system %s : Disabled by server configuration", GetName () ) );
+			}
+		}
+	}
+	else
+	{
+		Logger::GetInstance ()->Msg<MSG_HINT> ( Helpers::format ( "Stoping %s", GetName () ) );
+		m_isActive = false;
+		Unload ();
 	}
 }

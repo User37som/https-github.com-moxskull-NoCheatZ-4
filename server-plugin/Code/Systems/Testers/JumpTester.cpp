@@ -28,7 +28,7 @@
 */
 
 JumpTester::JumpTester () :
-	BaseSystem ( "JumpTester" ),
+	BaseDynamicSystem ( "JumpTester" ),
 	OnGroundHookListener (),
 	playerdata_class (),
 	PlayerRunCommandHookListener (),

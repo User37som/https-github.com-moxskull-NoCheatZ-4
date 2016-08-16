@@ -26,7 +26,7 @@
 #include "Misc/MathCache.h"
 
 WallhackBlocker::WallhackBlocker () :
-	BaseSystem ( "WallhackBlocker" ),
+	BaseDynamicSystem ( "WallhackBlocker" ),
 	OnTickListener (),
 	playerdatahandler_class (),
 	SetTransmitHookListener (),

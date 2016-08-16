@@ -21,7 +21,7 @@
 #include "Systems/BanRequest.h"
 
 SpamConnectTester::SpamConnectTester () :
-	BaseSystem ( "SpamConnectTester" ),
+	BaseDynamicSystem ( "SpamConnectTester" ),
 	singleton_class ()
 {}
 

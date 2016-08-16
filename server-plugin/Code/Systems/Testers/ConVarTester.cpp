@@ -25,7 +25,7 @@
 /////////////////////////////////////////////////////////////////////////
 
 ConVarTester::ConVarTester () :
-	BaseSystem ( "ConVarTester", "Enable - Disable - Verbose - AddRule - ResetRules" ),
+	BaseDynamicSystem ( "ConVarTester", "Enable - Disable - Verbose - AddRule - ResetRules" ),
 	OnTickListener (),
 	playerdata_class (),
 	singleton_class (),

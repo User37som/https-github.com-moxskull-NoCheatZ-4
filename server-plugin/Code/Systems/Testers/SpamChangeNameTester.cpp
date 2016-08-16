@@ -24,7 +24,7 @@
 #include "Systems/BanRequest.h"
 
 SpamChangeNameTester::SpamChangeNameTester () :
-	BaseSystem ( "SpamChangeNameTester" ),
+	BaseDynamicSystem ( "SpamChangeNameTester" ),
 	SourceSdk::IGameEventListener002 (),
 	OnTickListener (),
 	playerdata_class (),

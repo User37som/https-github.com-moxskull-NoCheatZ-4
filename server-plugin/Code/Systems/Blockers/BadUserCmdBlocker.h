@@ -49,7 +49,7 @@ struct UserCmdInfo
 };
 
 class BadUserCmdBlocker :
-	public BaseSystem,
+	public BaseDynamicSystem,
 	public PlayerDataStructHandler<UserCmdInfo>,
 	public PlayerRunCommandHookListener,
 	public Singleton<BadUserCmdBlocker>

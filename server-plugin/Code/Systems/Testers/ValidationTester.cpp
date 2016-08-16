@@ -25,7 +25,7 @@
 /////////////////////////////////////////////////////////////////////////
 
 ValidationTester::ValidationTester () :
-	BaseSystem ( "ValidationTester" ),
+	BaseDynamicSystem ( "ValidationTester" ),
 	SourceSdk::IGameEventListener002 (),
 	OnTickListener (),
 	playerdata_class (),

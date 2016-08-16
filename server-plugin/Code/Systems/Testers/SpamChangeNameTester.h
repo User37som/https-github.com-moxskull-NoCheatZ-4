@@ -41,7 +41,7 @@ struct ChangeNameInfo
 };
 
 class SpamChangeNameTester :
-	public BaseSystem,
+	public BaseDynamicSystem,
 	public SourceSdk::IGameEventListener002,
 	public OnTickListener,
 	public PlayerDataStructHandler<ChangeNameInfo>,

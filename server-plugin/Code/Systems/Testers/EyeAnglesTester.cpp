@@ -22,7 +22,7 @@
 #include "Systems/BanRequest.h"
 
 EyeAnglesTester::EyeAnglesTester ( void ) :
-	BaseSystem ( "EyeAnglesTester" ),
+	BaseDynamicSystem ( "EyeAnglesTester" ),
 	SourceSdk::IGameEventListener002 (),
 	playerdata_class (),
 	PlayerRunCommandHookListener (),

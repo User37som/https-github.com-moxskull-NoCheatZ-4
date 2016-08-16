@@ -18,7 +18,7 @@
 #include "Systems/Logger.h"
 
 SpeedTester::SpeedTester () :
-	BaseSystem ( "SpeedTester" ),
+	BaseDynamicSystem ( "SpeedTester" ),
 	OnTickListener (),
 	playerdata_class (),
 	PlayerRunCommandHookListener (),

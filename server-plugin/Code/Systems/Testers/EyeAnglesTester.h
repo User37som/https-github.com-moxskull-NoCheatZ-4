@@ -105,7 +105,7 @@ public:
 };
 
 class EyeAnglesTester :
-	public BaseSystem,
+	public BaseDynamicSystem,
 	public SourceSdk::IGameEventListener002,
 	public PlayerDataStructHandler<EyeAngleInfoT>,
 	public PlayerRunCommandHookListener,

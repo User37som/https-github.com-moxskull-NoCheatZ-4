@@ -29,7 +29,7 @@ limitations under the License.
 */
 
 class AutoTVRecord :
-	private BaseSystem,
+	private BaseDynamicSystem,
 	private ConCommandHookListener,
 	public Singleton<AutoTVRecord>
 {
