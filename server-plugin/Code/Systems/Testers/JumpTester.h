@@ -140,6 +140,14 @@ public:
 	virtual void RT_m_hGroundEntityStateChangedCallback ( PlayerHandler::const_iterator ph, bool const new_isOnGround ) override final;
 
 	virtual PlayerRunCommandRet RT_PlayerRunCommandCallback ( PlayerHandler::const_iterator ph, void * const cmd, void * const old_cmd ) override final;
+
+	void OnPlayerTouchGround ( PlayerHandler::const_iterator ph, int game_tick );
+
+	void OnPlayerLeaveGround ( PlayerHandler::const_iterator ph, int game_tick );
+
+	void OnPlayerJumpButtonDown ( PlayerHandler::const_iterator ph, int game_tick );
+
+	void OnPlayerJumpButtonUp ( PlayerHandler::const_iterator ph, int game_tick );
 };
 
 #endif // JUMPTESTER_H

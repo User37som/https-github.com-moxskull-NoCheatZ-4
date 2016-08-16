@@ -86,104 +86,163 @@ int GetGameTickCount ()
 
 void JumpTester::RT_m_hGroundEntityStateChangedCallback ( PlayerHandler::const_iterator ph, bool new_isOnGround )
 {
-	JumpInfoT* playerData ( GetPlayerDataStructByIndex ( ph.GetIndex () ) );
-
 	if( new_isOnGround )
 	{
-		playerData->onGroundHolder.onGround_Tick = GetGameTickCount ();
-		playerData->isOnGround = true;
-		SystemVerbose1 ( Helpers::format ( "Player %s touched the ground.", ph->GetName () ) );
-		if( playerData->jumpCmdHolder.outsideJumpCmdCount > 10 ) // Il serait plus judicieux d'utiliser le RMS
-		{
-			Detection_BunnyHopScript pDetection;
-			pDetection.PrepareDetectionData ( playerData );
-			pDetection.PrepareDetectionLog ( ph, this );
-			pDetection.Log ();
-			ph->Kick ( "You have to turn off your BunnyHop Script to play on this server." );
-		}
-		else if( playerData->jumpCmdHolder.outsideJumpCmdCount == 0 && playerData->perfectBhopsCount > 5 )
-		{
-			Detection_BunnyHopProgram pDetection;
-			pDetection.PrepareDetectionData ( playerData );
-			pDetection.PrepareDetectionLog ( ph, this );
-			pDetection.Log ();
-
-			ph->Ban ( "[NoCheatZ 4] You have been banned for using BunnyHop on this server." );
-		}
-		playerData->jumpCmdHolder.outsideJumpCmdCount = 0;
+		OnPlayerTouchGround ( ph, GetGameTickCount () );
 	}
 	else
 	{
-		playerData->onGroundHolder.notOnGround_Tick = GetGameTickCount ();
-		++playerData->onGroundHolder.jumpCount;
-		playerData->isOnGround = false;
-		SystemVerbose1 ( Helpers::format ( "Player %s leaved the ground.", ph->GetName () ) );
+		OnPlayerLeaveGround ( ph, GetGameTickCount () );
 	}
 }
 
 PlayerRunCommandRet JumpTester::RT_PlayerRunCommandCallback ( PlayerHandler::const_iterator ph, void* pCmd, void* old_cmd )
 {
-	PlayerRunCommandRet drop_cmd ( PlayerRunCommandRet::CONTINUE );
+	PlayerRunCommandRet const constexpr drop_cmd ( PlayerRunCommandRet::CONTINUE );
 
-	JumpInfoT* playerData ( GetPlayerDataStructByIndex ( ph.GetIndex () ) );
-
-	bool cur_in_jump;
+	bool last_jump_button_state;
+	bool cur_jump_button_state;
 
 	if( SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive )
 	{
-		cur_in_jump = ( static_cast< SourceSdk::CUserCmd_csgo* >( pCmd )->buttons & IN_JUMP ) != 0;
+		last_jump_button_state = ( static_cast< SourceSdk::CUserCmd_csgo* >( old_cmd )->buttons & IN_JUMP ) != 0;
+		cur_jump_button_state = ( static_cast< SourceSdk::CUserCmd_csgo* >( pCmd )->buttons & IN_JUMP ) != 0;
 	}
 	else
 	{
-		cur_in_jump = ( static_cast< SourceSdk::CUserCmd* >( pCmd )->buttons & IN_JUMP ) != 0;
+		last_jump_button_state = ( static_cast< SourceSdk::CUserCmd* >( old_cmd )->buttons & IN_JUMP ) != 0;
+		cur_jump_button_state = ( static_cast< SourceSdk::CUserCmd* >( pCmd )->buttons & IN_JUMP ) != 0;
 	}
 
-	if( ( playerData->jumpCmdHolder.lastJumpCmdState == false ) && cur_in_jump )
-	{
-		playerData->jumpCmdHolder.JumpDown_Tick = GetGameTickCount ();
-		if( playerData->isOnGround )
-		{
-			int diff ( abs ( playerData->jumpCmdHolder.JumpDown_Tick - playerData->onGroundHolder.onGround_Tick ) );
-			if( diff < 10 )
-			{
-				++playerData->total_bhopCount;
-#				ifdef DEBUG
-				printf ( "Player %s : total_bhopCount = %d\n", ph->GetName (), playerData->total_bhopCount );
-#				endif
-				if( diff < 3 && diff > 0 )
-				{
-					++playerData->goodBhopsCount;
-#					ifdef DEBUG
-					printf ( "Player %s : goodBhopsCount = %d\n", ph->GetName (), playerData->goodBhopsCount );
-#					endif
-					drop_cmd = PlayerRunCommandRet::INERT;
-				}
-				if( diff == 0 )
-				{
-					++playerData->perfectBhopsCount;
-#					ifdef DEBUG
-					printf ( "Player %s : perfectBhopsCount = %d\n", ph->GetName (), playerData->perfectBhopsCount );
-#					endif
-					drop_cmd = PlayerRunCommandRet::INERT;
-				}
-			}
+	bool const jump_button_changed ( last_jump_button_state ^ cur_jump_button_state );
 
-			SystemVerbose1 ( Helpers::format ( "Player %s pushed the jump button.", ph->GetName () ) );
+	if( !jump_button_changed )
+	{
+		Assert ( last_jump_button_state == cur_jump_button_state );
+		return drop_cmd;
+	}
+	else
+	{
+		Assert ( last_jump_button_state != cur_jump_button_state );
+
+		if( cur_jump_button_state )
+		{
+			OnPlayerJumpButtonDown ( ph, GetGameTickCount () );
 		}
 		else
 		{
-			++playerData->jumpCmdHolder.outsideJumpCmdCount;
-			SystemVerbose1 ( Helpers::format ( "Player %s pushed the jump button while flying.", ph->GetName () ) );
+			OnPlayerJumpButtonUp ( ph, GetGameTickCount () );
 		}
-		playerData->jumpCmdHolder.lastJumpCmdState = true;
 	}
-	else if( ( playerData->jumpCmdHolder.lastJumpCmdState == true ) && !cur_in_jump )
-	{
-		playerData->jumpCmdHolder.lastJumpCmdState = false;
-		playerData->jumpCmdHolder.JumpUp_Tick = GetGameTickCount ();
-		SystemVerbose1 ( Helpers::format ( "Player %s released the jump button.", ph->GetName () ) );
-	}
+
 	return drop_cmd;
+}
+
+void JumpTester::OnPlayerTouchGround ( PlayerHandler::const_iterator ph, int game_tick )
+{
+	JumpInfoT * const playerData ( GetPlayerDataStructByIndex ( ph.GetIndex () ) );
+
+	playerData->onGroundHolder.onGround_Tick = game_tick;
+	playerData->isOnGround = true;
+	SystemVerbose1 ( Helpers::format ( "Player %s touched the ground.", ph->GetName () ) );
+
+	// Detect bunny hop scripts
+
+	// Compute the average number of time a second the player is pushing the jump button, detect if it's too high
+	float const fly_time = ( game_tick - playerData->onGroundHolder.notOnGround_Tick ) * SourceSdk::InterfacesProxy::Call_GetTickInterval ();
+	if( fly_time >= 0.25f ) // this is to prevent collision bugs to make fake detections, and also prevents divide by zero crash below.
+	{
+		float const avg_jmp_per_second = ( float ) ( playerData->jumpCmdHolder.outsideJumpCmdCount ) / fly_time;
+
+		if( avg_jmp_per_second > 10.0f && playerData->total_bhopCount > 1 )
+		{
+			Detection_BunnyHopScript pDetection;
+			pDetection.PrepareDetectionData ( playerData );
+			pDetection.PrepareDetectionLog ( *ph, this );
+			pDetection.Log ();
+			ph->Kick ( "You have to turn off your BunnyHop Script to play on this server." );
+		}
+	}
+
+	if( playerData->jumpCmdHolder.outsideJumpCmdCount == 0 && playerData->perfectBhopsCount > 5 && playerData->perfectBhopsPercent >= std::max (0, ( 100 - std::min ( 95, playerData->perfectBhopsCount * 2 ) ) ) )
+	{
+		Detection_BunnyHopProgram pDetection;
+		pDetection.PrepareDetectionData ( playerData );
+		pDetection.PrepareDetectionLog ( *ph, this );
+		pDetection.Log ();
+
+		ph->Ban ( "[NoCheatZ 4] You have been banned for using BunnyHop on this server." );
+	}
+
+	playerData->jumpCmdHolder.outsideJumpCmdCount = 0;
+}
+
+void JumpTester::OnPlayerLeaveGround ( PlayerHandler::const_iterator ph, int game_tick )
+{
+	JumpInfoT * const playerData ( GetPlayerDataStructByIndex ( ph.GetIndex () ) );
+
+	playerData->onGroundHolder.notOnGround_Tick = GetGameTickCount ();
+	++playerData->onGroundHolder.jumpCount;
+	playerData->isOnGround = false;
+	SystemVerbose1 ( Helpers::format ( "Player %s leaved the ground.", ph->GetName () ) );
+}
+
+void JumpTester::OnPlayerJumpButtonDown ( PlayerHandler::const_iterator ph, int game_tick )
+{
+	JumpInfoT * const playerData ( GetPlayerDataStructByIndex ( ph.GetIndex () ) );
+
+	playerData->jumpCmdHolder.JumpDown_Tick = game_tick;
+	playerData->jumpCmdHolder.lastJumpCmdState = true;
+
+	int const cmd_diff ( game_tick - playerData->jumpCmdHolder.JumpUp_Tick );
+	int const wd_diff ( game_tick - playerData->onGroundHolder.onGround_Tick );
+
+	if( cmd_diff > 0 && cmd_diff <= 3 )
+	{
+		Detection_BunnyHopScript pDetection;
+		pDetection.PrepareDetectionData ( playerData );
+		pDetection.PrepareDetectionLog ( *ph, this );
+		pDetection.Log ();
+		ph->Kick ( "You have to turn off your BunnyHop Script to play on this server." );
+	}
+
+	if( playerData->isOnGround )
+	{
+		if( wd_diff >= 0 && wd_diff < 10 )
+		{
+			++playerData->total_bhopCount;
+			SystemVerbose1 ( Helpers::format ( "Player %s : total_bhopCount = %d\n", ph->GetName (), playerData->total_bhopCount ) );
+
+			if( wd_diff == 0 )
+			{
+				++playerData->perfectBhopsCount;
+				__assume ( playerData->perfectBhopsCount <= playerData->total_bhopCount );
+				playerData->perfectBhopsPercent = ( int ) ( ( playerData->perfectBhopsCount / playerData->total_bhopCount ) * 100.0f );
+				SystemVerbose1 ( Helpers::format ( "Player %s : perfectBhopsCount = %d\n", ph->GetName (), playerData->perfectBhopsCount ) );
+			}
+			else if( wd_diff < 3 )
+			{
+				++playerData->goodBhopsCount;
+				SystemVerbose1 ( Helpers::format ( "Player %s : goodBhopsCount = %d\n", ph->GetName (), playerData->goodBhopsCount ) );
+			}
+		}
+	}
+	else
+	{
+		++playerData->jumpCmdHolder.outsideJumpCmdCount;
+	}
+
+	SystemVerbose1 ( Helpers::format ( "Player %s pushed the jump button.", ph->GetName () ) );
+}
+
+void JumpTester::OnPlayerJumpButtonUp ( PlayerHandler::const_iterator ph, int game_tick )
+{
+	JumpInfoT * const playerData ( GetPlayerDataStructByIndex ( ph.GetIndex () ) );
+
+	SystemVerbose1 ( Helpers::format ( "Player %s released the jump button.", ph->GetName () ) );
+
+	playerData->jumpCmdHolder.JumpUp_Tick = game_tick;
+	playerData->jumpCmdHolder.lastJumpCmdState = false;
 }
 
 const char * ConvertButton ( bool v )
@@ -201,7 +260,7 @@ basic_string Detection_BunnyHopScript::GetDataDump ()
 							 ":::::::::::: Jump Count : %d\n"
 							 ":::::::: },\n"
 							 ":::::::: JumpCmdHolderT {\n"
-							 ":::::::::::: Last Jump Command : %s,\n"
+							 ":::::::::::: Last Jump Command : %s s,\n"
 							 ":::::::::::: Jump Button Down At (Tick #) : %d,\n"
 							 ":::::::::::: Jump Button Up At (Tick #) : %d,\n"
 							 ":::::::::::: Jump Commands Done While Flying : %d\n"
