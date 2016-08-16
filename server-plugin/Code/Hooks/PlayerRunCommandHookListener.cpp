@@ -129,7 +129,7 @@ void HOOKFN_INT PlayerRunCommandHookListener::RT_nPlayerRunCommand ( void* This,
 	}
 	else
 	{
-		DebugMessage ( "Blocked CUserCmd" );
+		//DebugMessage ( "Blocked CUserCmd" );
 	}
 }
 
