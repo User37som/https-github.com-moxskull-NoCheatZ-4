@@ -93,7 +93,7 @@ bool AntiFlashbangBlocker::RT_SetTransmitCallback ( PlayerHandler::const_iterato
 		return false;
 	}
 
-	FlashInfoT* const pInfo ( GetPlayerDataStruct ( receiver ) );
+	FlashInfoT* const pInfo ( GetPlayerDataStruct ( *receiver ) );
 
 	if( pInfo->flash_end_time != 0.0 )
 	{
@@ -104,7 +104,7 @@ bool AntiFlashbangBlocker::RT_SetTransmitCallback ( PlayerHandler::const_iterato
 		}
 
 		Helpers::FadeUser ( receiver->GetEdict (), 0 );
-		ResetPlayerDataStruct ( receiver );
+		ResetPlayerDataStruct ( *receiver );
 	}
 
 	METRICS_LEAVE_SECTION ( "AntiFlashbangBlocker::SetTransmitCallback" );
