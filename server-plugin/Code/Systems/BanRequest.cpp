@@ -28,11 +28,61 @@ BanRequest::BanRequest () :
 	TimerListener (),
 	m_wait_time ( 10.0 ),
 	m_do_writeid ( false ),
+	m_can_kick ( true ),
+	m_can_ban ( true ),
 	cmd_gb_ban ( nullptr ),
 	cmd_sm_ban ( nullptr ),
 	m_requests ()
 {
 
+}
+
+bool BanRequest::sys_cmd_fn ( const SourceSdk::CCommand &args )
+{
+	if( stricmp ( "CanKick", args.Arg ( 2 ) ) == 0 )
+	{
+		if( stricmp ( "Yes", args.Arg ( 3 )) == 0  )
+		{
+			m_can_kick = true;
+			printf ( "NoCheatZ is: Able to kick (%s), Able to ban (%s)\n", Helpers::boolToString ( m_can_kick ), Helpers::boolToString ( m_can_ban ) );
+			return true;
+		}
+		else if (stricmp ( "No", args.Arg ( 3 )) == 0 )
+		{
+			m_can_kick = false;
+			m_can_ban = false;
+			printf ( "NoCheatZ is: Able to kick (%s), Able to ban (%s)\n", Helpers::boolToString ( m_can_kick ), Helpers::boolToString ( m_can_ban ) );
+			return true;
+		}
+		else
+		{
+			printf ( "Available arguments for \"ncz BanRequest CanKick\" : Yes - No\n" );
+		}
+	}
+	else if( stricmp ( "CanBan", args.Arg ( 2 ) ) == 0 )
+	{
+		if( stricmp ( "Yes", args.Arg ( 3 ) ) == 0 )
+		{
+			m_can_kick = true;
+			m_can_ban = true;
+			printf ( "NoCheatZ is: Able to kick (%s), Able to ban (%s)\n", Helpers::boolToString ( m_can_kick ), Helpers::boolToString ( m_can_ban ) );
+			return true;
+		}
+		else if( stricmp ( "No", args.Arg ( 3 ) ) == 0 )
+		{
+			m_can_ban = false;
+			printf ( "NoCheatZ is: Able to kick (%s), Able to ban (%s)\n", Helpers::boolToString ( m_can_kick ), Helpers::boolToString ( m_can_ban ) );
+			return true;
+		}
+		else
+		{
+			printf ( "Available arguments for \"ncz BanRequest CanBan\" : Yes - No\n" );
+		}
+	}
+
+	printf ( "NoCheatZ is: Able to kick (%s), Able to ban (%s)\n", Helpers::boolToString ( m_can_kick ), Helpers::boolToString ( m_can_ban ) );
+
+	return false;
 }
 
 void BanRequest::Init ()
@@ -58,50 +108,55 @@ void BanRequest::SetWaitTime ( float wait_time )
 
 void BanRequest::AddAsyncBan ( NczPlayer* player, int ban_time, const char * kick_message )
 {
-	PlayerBanRequestT req;
-	req.userid = SourceSdk::InterfacesProxy::Call_GetPlayerUserid ( player->GetEdict () );
-
-	if( m_requests.Find ( req ) == nullptr )
+	if( CanBan () )
 	{
-		req.ban_time = ban_time;
-		req.request_time = Plat_FloatTime ();
-		req.kick_message = kick_message;
-		strcpy_s ( req.player_name, 24, player->GetName () );
-		strcpy_s ( req.steamid, 24, player->GetSteamID () );
-		strcpy_s ( req.ip, 24, player->GetIPAddress () );
-		strcpy_s ( req.identity, 64, player->GetReadableIdentity ().c_str () );
-		m_requests.Add ( req );
-	}
+		PlayerBanRequestT req;
+		req.userid = SourceSdk::InterfacesProxy::Call_GetPlayerUserid ( player->GetEdict () );
 
-	AddTimer ( m_wait_time, player->GetName (), true );
+		if( m_requests.Find ( req ) == nullptr )
+		{
+			req.ban_time = ban_time;
+			req.request_time = Plat_FloatTime ();
+			req.kick_message = kick_message;
+			strcpy_s ( req.player_name, 24, player->GetName () );
+			strcpy_s ( req.steamid, 24, player->GetSteamID () );
+			strcpy_s ( req.ip, 24, player->GetIPAddress () );
+			strcpy_s ( req.identity, 64, player->GetReadableIdentity ().c_str () );
+			m_requests.Add ( req );
+		}
+
+		AddTimer ( m_wait_time, player->GetName (), true );
+	}
 }
 
 void BanRequest::BanInternal ( int ban_time, char const * steam_id, int userid, char const * kick_message, char const * ip )
 {
-	if( cmd_gb_ban )
+	if( CanBan () )
 	{
-	//	SourceSdk::InterfacesProxy::Call_ServerCommand(Helpers::format("gb_externalBanUser \"%s\" \"%s\" \"%s\" %d minutes \"%s\"\n", gb_admin_id.c_str(), SteamID, gb_reason_id.c_str(), minutes, this->getName()));
-	}
-	if( cmd_sm_ban )
-	{
-		if( userid == -1 )
+		if( cmd_gb_ban )
 		{
-			Logger::GetInstance ()->Msg<MSG_ERROR> ( "BanRequest::BanInternal : Bad userid -> Cannot forward to sm_ban command." );
+		//	SourceSdk::InterfacesProxy::Call_ServerCommand(Helpers::format("gb_externalBanUser \"%s\" \"%s\" \"%s\" %d minutes \"%s\"\n", gb_admin_id.c_str(), SteamID, gb_reason_id.c_str(), minutes, this->getName()));
 		}
-		else
+		if( cmd_sm_ban )
 		{
-			SourceSdk::InterfacesProxy::Call_ServerCommand ( Helpers::format ( "sm_ban %d %d \"%s\"\n", userid, ban_time, kick_message ) );
+			if( userid == -1 )
+			{
+				Logger::GetInstance ()->Msg<MSG_ERROR> ( "BanRequest::BanInternal : Bad userid -> Cannot forward to sm_ban command." );
+			}
+			else
+			{
+				SourceSdk::InterfacesProxy::Call_ServerCommand ( Helpers::format ( "sm_ban %d %d \"%s\"\n", userid, ban_time, kick_message ) );
+			}
 		}
-	}
-	/*
-		Commenting because https://github.com/L-EARN/NoCheatZ-4/issues/64 :
-			This code do sm_ban by userid but userid can be not ready sometimes.
-			So I enforce my code to be sure the player is kicked if ever sourcemod fails.
-	*/
-	//else // 
-	//{
+		/*
+			Commenting because https://github.com/L-EARN/NoCheatZ-4/issues/64 :
+				This code do sm_ban by userid but userid can be not ready sometimes.
+				So I enforce my code to be sure the player is kicked if ever sourcemod fails.
+		*/
+		//else // 
+		//{
 
-		SourceSdk::InterfacesProxy::Call_ServerCommand ( Helpers::format ( "kickid %d [NoCheatZ 4] %s\n", userid, kick_message ) );
+		KickNow ( userid, kick_message );
 		if( SteamGameServer_BSecure () && steam_id != nullptr )
 		{
 			SourceSdk::InterfacesProxy::Call_ServerCommand ( Helpers::format ( "banid %d %s\n", ban_time, steam_id ) );
@@ -113,24 +168,41 @@ void BanRequest::BanInternal ( int ban_time, char const * steam_id, int userid, 
 
 		m_do_writeid = true;
 	//}
+	}
+}
+
+void BanRequest::KickNow (int userid, const char * kick_message ) const
+{
+	if( CanKick () )
+	{
+		if( userid == -1 )
+		{
+			Logger::GetInstance ()->Msg<MSG_ERROR> ( "BanRequest::KickNow : Bad userid" );
+		}
+		else
+		{
+			NczPlayerManager * const inst ( NczPlayerManager::GetInstance () );
+			inst->DeclareKickedPlayer ( inst->GetPlayerHandlerByUserId( userid ).GetIndex() );
+			SourceSdk::InterfacesProxy::Call_ServerCommand ( Helpers::format ( "kickid %d [NoCheatZ 4] %s\n", userid, kick_message ) );
+		}
+	}
 }
 
 void BanRequest::BanNow ( NczPlayer * const player, int ban_time, const char * kick_message )
 {
-	// Remove player from process list until he entirely gets removed from the server
-
-	NczPlayerManager::GetInstance ()->DeclareKickedPlayer ( player->GetIndex () );
-
-	// Ban
-
-	BanInternal ( ban_time, player->GetSteamID (), SourceSdk::InterfacesProxy::Call_GetPlayerUserid ( player->GetEdict () ), kick_message, player->GetIPAddress () );
-
-	// Remove from async requests if any
-
-	BanRequestListT::elem_t* it ( m_requests.Find ( SourceSdk::InterfacesProxy::Call_GetPlayerUserid ( player->GetEdict () ) ) );
-	if( it != nullptr )
+	if( CanBan () )
 	{
-		m_requests.Remove ( it );
+		// Ban
+
+		BanInternal ( ban_time, player->GetSteamID (), SourceSdk::InterfacesProxy::Call_GetPlayerUserid ( player->GetEdict () ), kick_message, player->GetIPAddress () );
+
+		// Remove from async requests if any
+
+		BanRequestListT::elem_t* it ( m_requests.Find ( SourceSdk::InterfacesProxy::Call_GetPlayerUserid ( player->GetEdict () ) ) );
+		if( it != nullptr )
+		{
+			m_requests.Remove ( it );
+		}
 	}
 }
 

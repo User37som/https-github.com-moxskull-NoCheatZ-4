@@ -97,6 +97,8 @@ class BanRequest :
 private:
 	float m_wait_time;
 	bool m_do_writeid;
+	bool m_can_kick;
+	bool m_can_ban;
 
 	void * cmd_gb_ban;
 	void * cmd_sm_ban;
@@ -111,6 +113,8 @@ public:
 
 	virtual void Init () override final;
 
+	virtual bool sys_cmd_fn ( const SourceSdk::CCommand &args ) override final;
+
 	void OnLevelInit ();
 
 	void WriteBansIfNeeded ();
@@ -121,7 +125,24 @@ public:
 
 	void BanNow ( NczPlayer * const player, int ban_time, const char * kick_message );
 
+	void KickNow ( int userid, const char * kick_message ) const;
+
+	inline void KickNow ( NczPlayer * const player, const char * kick_message ) const
+	{
+		KickNow ( SourceSdk::InterfacesProxy::Call_GetPlayerUserid ( player->GetEdict () ), kick_message );
+	}
+
 	void RT_TimerCallback ( char const * const timer_name );
+
+	bool CanKick () const
+	{
+		return m_can_kick;
+	}
+
+	bool CanBan () const
+	{
+		return m_can_kick && m_can_ban;
+	}
 };
 
 #endif

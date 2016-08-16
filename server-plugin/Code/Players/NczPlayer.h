@@ -76,8 +76,8 @@ public:
 
 	void OnConnect ();
 
-	void Kick ( const char * msg = "Kicked by NoCheatZ 4" );
-	void Ban ( const char * msg = "Banned by NoCheatZ 4", int minutes = 0 );
+	void Kick ( const char * msg = "NoCheatZ 4" );
+	void Ban ( const char * msg = "NoCheatZ 4", int minutes = 0 );
 };
 
 inline int NczPlayer::GetIndex () const

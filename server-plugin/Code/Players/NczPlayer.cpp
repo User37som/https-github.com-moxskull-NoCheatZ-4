@@ -389,21 +389,26 @@ void NczPlayer::OnConnect ()
 
 void NczPlayer::Kick ( const char * msg )
 {
-	NczPlayerManager::GetInstance ()->DeclareKickedPlayer ( m_index );
-	Helpers::writeToLogfile ( Helpers::format (
-		"Kicked %s with reason : %s\n", this->GetReadableIdentity ().c_str (), msg ) );
+	if( BanRequest::GetInstance ()->CanKick () )
+	{
+		Helpers::writeToLogfile ( Helpers::format (
+			"Kicked %s with reason : %s\n", this->GetReadableIdentity ().c_str (), msg ) );
 
-	SourceSdk::InterfacesProxy::Call_ServerCommand (
-		Helpers::format ( "kickid %d [NoCheatZ 4] %s\n", SourceSdk::InterfacesProxy::Call_GetPlayerUserid ( m_edict ), msg )
-	);
+		BanRequest::GetInstance ()->KickNow ( this, msg );
+	}
 }
 
 void NczPlayer::Ban ( const char * msg, int minutes )
 {
-	Helpers::writeToLogfile ( Helpers::format (
-		"Banned %s with reason : %s\n", this->GetReadableIdentity ().c_str (), msg ) );
+	if( BanRequest::GetInstance ()->CanBan () )
 	{
+		Helpers::writeToLogfile ( Helpers::format (	"Banned %s with reason : %s\n", this->GetReadableIdentity ().c_str (), msg ) );
+
 		BanRequest::GetInstance ()->BanNow ( this, minutes, msg );
+	}
+	else if( BanRequest::GetInstance ()->CanKick () )
+	{
+		Kick ( msg );
 	}
 }
 

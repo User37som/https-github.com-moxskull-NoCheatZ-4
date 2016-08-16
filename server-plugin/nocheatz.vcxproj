@@ -377,7 +377,6 @@ copy "$(TargetPath)" ..\..\..\game\bin\"$(TargetName)".pdb
     <None Include="SourceSdk\Interfaces\Protobuf\netmessages.proto" />
     <None Include="Makefile" />
     <None Include="Res\nocheatz-CSGO.cfg" />
-    <None Include="Res\nocheatz-CSS.cfg" />
     <None Include="Res\nocheatz.vdf" />
   </ItemGroup>
   <ItemGroup>

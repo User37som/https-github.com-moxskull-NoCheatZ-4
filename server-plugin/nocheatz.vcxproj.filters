@@ -91,9 +91,6 @@
     <None Include="Makefile">
       <Filter>Resources</Filter>
     </None>
-    <None Include="Res\nocheatz-CSS.cfg">
-      <Filter>Resources\Config Files</Filter>
-    </None>
     <None Include="Res\nocheatz-CSGO.cfg">
       <Filter>Resources\Config Files</Filter>
     </None>
