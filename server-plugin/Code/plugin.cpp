@@ -45,6 +45,7 @@
 
 static void* __CreatePlugin_interface ()
 {
+	printf ( "__CreatePlugin_interface - HeapMemoryManager::InitPool()\n" );
 	HeapMemoryManager::InitPool ();
 	CNoCheatZPlugin::CreateInstance ();
 	printf ( "CNoCheatZPlugin interface created with CSGO callbacks ...\n" );
@@ -53,7 +54,7 @@ static void* __CreatePlugin_interface ()
 
 void* CreateInterfaceInternal ( char const *pName, int *pReturnCode )
 {
-	printf ( "Game engine asking for %s\n", pName );
+	printf ( "NoCheatZ plugin.cpp : CreateInterfaceInternal - Game engine asking for %s\n", pName );
 	if( pReturnCode ) *pReturnCode = SourceSdk::IFACE_OK;
 	return __CreatePlugin_interface ();
 }
@@ -481,8 +482,15 @@ SourceSdk::PLUGIN_RESULT CNoCheatZPlugin::ClientConnect ( bool *bAllowConnect, S
 
 	if( !*bAllowConnect )
 	{
-		NczPlayerManager::GetInstance ()->ClientDisconnect ( pEntity );
-		return SourceSdk::PLUGIN_STOP;
+		if( BanRequest::GetInstance ()->CanKick () )
+		{
+			NczPlayerManager::GetInstance ()->ClientDisconnect ( pEntity );
+			return SourceSdk::PLUGIN_STOP;
+		}
+		else
+		{
+			Logger::GetInstance ()->Msg<MSG_LOG> ( Helpers::format ( "CNoCheatZPlugin::ClientConnect : Would have rejected access to player %s - %s but plugin is set to not kick.", pszName, pszAddress ) );
+		}
 	}
 
 	JumpTester::GetInstance ()->ResetPlayerDataStruct ( player );

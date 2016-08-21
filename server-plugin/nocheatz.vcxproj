@@ -373,6 +373,7 @@ copy "$(TargetPath)" ..\..\..\game\bin\"$(TargetName)".pdb
     <None Include="..\scripts\make-protobuf.sh" />
     <None Include="..\scripts\prepare-build.bat" />
     <None Include="..\scripts\prepare-test.bat" />
+    <None Include="Res\nocheatz.cfg" />
     <None Include="SourceSdk\Interfaces\Protobuf\cstrike15_usermessages.proto" />
     <None Include="SourceSdk\Interfaces\Protobuf\netmessages.proto" />
     <None Include="Makefile" />
