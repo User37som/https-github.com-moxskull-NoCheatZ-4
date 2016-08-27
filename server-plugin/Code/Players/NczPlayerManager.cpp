@@ -69,6 +69,7 @@ void NczPlayerManager::LoadPlayerManager ()
 	SourceSdk::InterfacesProxy::GetGameEventManager ()->AddListener ( this, "player_spawn", true );
 	SourceSdk::InterfacesProxy::GetGameEventManager ()->AddListener ( this, "round_end", true );
 	SourceSdk::InterfacesProxy::GetGameEventManager ()->AddListener ( this, "round_freeze_end", true );
+	SourceSdk::InterfacesProxy::GetGameEventManager ()->AddListener ( this, "bot_takeover", true );
 
 	//Helpers::FastScan_EntList();
 	Helpers::m_EdictList = Helpers::PEntityOfEntIndex ( 0 );
@@ -220,9 +221,18 @@ bot_takeover
 	{
 		for( int x ( 1 ); x <= maxcl; ++x )
 		{
-			SlotStatus& pstat ( FullHandlersList[ x ].status );
-			if( pstat == SlotStatus::PLAYER_IN_TESTS )
-				pstat = SlotStatus::PLAYER_CONNECTED;
+			PlayerHandler::const_iterator ph ( x );
+			if( ph == SlotStatus::PLAYER_IN_TESTS )
+			{
+				ph.GetHandler()->status = SlotStatus::PLAYER_CONNECTED;
+			}
+			else if( ph == SlotStatus::PLAYER_IN_TESTS_TAKEOVER )
+			{
+				ph->GetTakeover ()->StopBotTakeover ();
+				ph->StopBotTakeover ();
+				ph.GetHandler ()->status = SlotStatus::PLAYER_CONNECTED;
+				ph.GetHandler ()->in_tests_time = std::numeric_limits<float>::max ();
+			}
 		}
 
 		ProcessFilter::HumanAtLeastConnected filter_class;
@@ -262,6 +272,22 @@ bot_takeover
 	}
 
 	PlayerHandler::const_iterator ph ( GetPlayerHandlerByUserId ( ev->GetInt ( "userid" ) ) );
+
+	if( *event_name == 'k' ) // bot_takeover
+	{
+		PlayerHandler::const_iterator bh1 ( GetPlayerHandlerByUserId ( ev->GetInt ( "botid" ) ) );
+		PlayerHandler::const_iterator bh2 ( GetPlayerHandlerByUserId ( ev->GetInt ( "index" ) ) );
+		DebugMessage ( Helpers::format ( "Player %s taking control of bot %s or bot %s", ph->GetName (), bh1->GetName (), bh2->GetName () ));
+
+		ph->EnterBotTakeover ( ev->GetInt ( "index" ) );
+		bh2->EnterBotTakeover ( ph.GetIndex () );
+
+		ph.GetHandler ()->status = SlotStatus::PLAYER_IN_TESTS_TAKEOVER;
+		ph.GetHandler ()->in_tests_time = std::numeric_limits<float>::max ();
+
+		return;
+	}
+
 	++event_name;
 
 	if( *event_name == 's' ) // player_spawn
@@ -282,6 +308,16 @@ bot_takeover
 				}
 			}
 		}
+		else if( ph == SlotStatus::BOT )
+		{
+			if( ph->IsControllingBot () )
+			{
+				ph->GetTakeover ()->StopBotTakeover (); // release link from player to bot
+				ph->GetTakeover ().GetHandler ()->status = SlotStatus::PLAYER_CONNECTED;
+				ph->GetTakeover ().GetHandler ()->in_tests_time = std::numeric_limits<float>::max ();
+				ph->StopBotTakeover (); // release link from bot to player
+			}
+		}
 		BaseSystem::ManageSystems ();
 		return;
 	}
@@ -299,13 +335,32 @@ bot_takeover
 				ph.GetHandler ()->in_tests_time = std::numeric_limits<float>::max ();
 			}
 		}
+		else if( ph == SlotStatus::BOT )
+		{
+			if( ph->IsControllingBot () )
+			{
+				ph->GetTakeover ()->StopBotTakeover (); // release link from player to bot
+				ph->GetTakeover ().GetHandler ()->status = SlotStatus::PLAYER_CONNECTED;
+				ph->GetTakeover ().GetHandler ()->in_tests_time = std::numeric_limits<float>::max ();
+				ph->StopBotTakeover (); // release link from bot to player
+			}
+		}
 		BaseSystem::ManageSystems ();
 		return;
 	}
 	//else // player_death
 	//{
 
-	if( ph <= SlotStatus::PLAYER_CONNECTED )
+	if( ph == SlotStatus::BOT )
+	{
+		if( ph->IsControllingBot () ) // is bot controlled
+		{
+			ph->GetTakeover ()->StopBotTakeover (); // release link from player to bot
+			ph->GetTakeover ().GetHandler ()->status = SlotStatus::PLAYER_CONNECTED;
+			ph->GetTakeover ().GetHandler ()->in_tests_time = std::numeric_limits<float>::max ();
+			ph->StopBotTakeover (); // release link from bot to player
+		}
+	}
 	if( ph </*=*/ SlotStatus::PLAYER_CONNECTED ) /// fixed :  https://github.com/L-EARN/NoCheatZ-4/issues/79#issuecomment-240174457
 		return;
 	ph.GetHandler ()->status = SlotStatus::PLAYER_CONNECTED;

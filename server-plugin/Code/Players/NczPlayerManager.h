@@ -360,10 +360,10 @@ class NczPlayerManager :
 private:
 	static PlayerHandler FullHandlersList[ MAX_PLAYERS + 1 ];
 	int m_max_index;
-
+	
 public:
 	NczPlayerManager ();
-	virtual ~NczPlayerManager () final;
+	virtual ~NczPlayerManager ();
 
 	/* Force la mise à jour des slots en scannant la mémoire pour EdictList
 	   S'inscrit aux événements pour mettre à jour les slots en temps réel */
