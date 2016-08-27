@@ -36,6 +36,7 @@ NczPlayer::NczPlayer ( const int index ) :
 	m_edict ( Helpers::PEntityOfEntIndex ( index ) ),
 	m_channelinfo ( SourceSdk::InterfacesProxy::Call_GetPlayerNetInfo ( index ) ),
 	m_playerinfo ( nullptr ),
+	m_takeover( ),
 	m_time_connected ( 0.0 )
 {}
 
@@ -318,6 +319,16 @@ WpnShotType const NczPlayer::GetWpnShotType () const
 			}
 	};
 	return HAND;
+}
+
+void NczPlayer::EnterBotTakeover ( int bot_ent_index )
+{
+	m_takeover = PlayerHandler::const_iterator ( bot_ent_index );
+}
+
+void NczPlayer::StopBotTakeover ()
+{
+	m_takeover = PlayerHandler::const_iterator ();
 }
 
 int const NczPlayer::aimingAt ()

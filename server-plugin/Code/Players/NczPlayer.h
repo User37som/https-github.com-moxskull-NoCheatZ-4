@@ -43,6 +43,7 @@ private:
 	SourceSdk::edict_t * const m_edict;
 	SourceSdk::INetChannelInfo* m_channelinfo;
 	SourceSdk::IPlayerInfo * m_playerinfo;
+	PlayerHandler::const_iterator m_takeover;
 	float m_time_connected;
 
 public:
@@ -60,6 +61,14 @@ public:
 	WpnShotType const GetWpnShotType () const;
 	int const aimingAt (); // Retourne index de la cible présente sur le viseur
 
+	void EnterBotTakeover ( int bot_ent_index );
+
+	void StopBotTakeover ();
+
+	inline PlayerHandler::const_iterator GetTakeover () const;
+
+	inline bool IsControllingBot () const;
+	
 	void GetAbsOrigin ( SourceSdk::Vector & out );
 
 	void GetRelEyePos ( SourceSdk::Vector & out ) const;
@@ -79,6 +88,16 @@ public:
 	void Kick ( const char * msg = "NoCheatZ 4" );
 	void Ban ( const char * msg = "NoCheatZ 4", int minutes = 0 );
 };
+
+inline PlayerHandler::const_iterator NczPlayer::GetTakeover () const
+{
+	return m_takeover;
+}
+
+inline bool NczPlayer::IsControllingBot () const
+{
+	return GetTakeover () != SlotStatus::INVALID;
+}
 
 inline int NczPlayer::GetIndex () const
 {
