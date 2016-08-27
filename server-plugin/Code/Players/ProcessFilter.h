@@ -25,6 +25,8 @@ typedef enum class SlotStatus : unsigned int
 	PLAYER_CONNECTING, // Not a bot, not connected
 	PLAYER_CONNECTED, // Connected as spectator or dead
 	PLAYER_IN_TESTS // Playing the round and shooting people everywhere like a mad nerd :)
+	PLAYER_IN_TESTS, // Playing the round and shooting people everywhere like a mad nerd :)
+	PLAYER_IN_TESTS_TAKEOVER // Controling a bot
 } SlotStatus_t;
 
 enum SlotFilterBehavior
@@ -116,7 +118,7 @@ namespace ProcessFilter
 	{
 		virtual bool CanProcessThisSlot ( SlotStatus const player_slot_status ) const
 		{
-			return TemplatedProcessFilter::CanProcessThisSlot<STATUS_STRICT, true, SlotStatus::PLAYER_IN_TESTS> ( player_slot_status );
+			return TemplatedProcessFilter::CanProcessThisSlot<STATUS_EQUAL_OR_BETTER, true, SlotStatus::PLAYER_IN_TESTS> ( player_slot_status );
 		}
 	};
 
@@ -125,7 +127,7 @@ namespace ProcessFilter
 	{
 		virtual bool CanProcessThisSlot ( SlotStatus const player_slot_status ) const
 		{
-			return TemplatedProcessFilter::CanProcessThisSlot<STATUS_STRICT, false, SlotStatus::PLAYER_IN_TESTS> ( player_slot_status );
+			return TemplatedProcessFilter::CanProcessThisSlot<STATUS_EQUAL_OR_BETTER, false, SlotStatus::PLAYER_IN_TESTS> ( player_slot_status );
 		}
 	};
 
