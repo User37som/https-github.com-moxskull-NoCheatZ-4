@@ -305,7 +305,7 @@ bot_takeover
 	//else // player_death
 	//{
 
-	if( ph <= SlotStatus::PLAYER_CONNECTED )
+	if( ph < SlotStatus::PLAYER_CONNECTED )
 		return;
 	ph.GetHandler ()->status = SlotStatus::PLAYER_CONNECTED;
 	ph.GetHandler ()->in_tests_time = std::numeric_limits<float>::max ();
