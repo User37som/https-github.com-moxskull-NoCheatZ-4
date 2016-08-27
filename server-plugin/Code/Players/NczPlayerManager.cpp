@@ -26,8 +26,8 @@
 #include "Systems/AutoTVRecord.h"
 
 PlayerHandler NczPlayerManager::FullHandlersList[ MAX_PLAYERS + 1 ];
-PlayerHandler::const_iterator PlayerHandler::invalid(NczPlayerManager::FullHandlersList);
-PlayerHandler::const_iterator PlayerHandler::first( invalid );
+PlayerHandler::const_iterator PlayerHandler::invalid ( NczPlayerManager::FullHandlersList );
+PlayerHandler::const_iterator PlayerHandler::first ( invalid );
 PlayerHandler::const_iterator PlayerHandler::last ( invalid );
 
 
@@ -159,7 +159,7 @@ void NczPlayerManager::ClientActive ( SourceSdk::edict_t* pEntity )
 		ph.playerClass->m_playerinfo = ( SourceSdk::IPlayerInfo * )SourceSdk::InterfacesProxy::Call_GetPlayerInfo ( ph.playerClass->m_edict );
 		Assert ( ph.playerClass->m_playerinfo );
 #undef GetClassName
-		if( strcmp(pEntity->GetClassName(), "player") == 0 )
+		if( strcmp ( pEntity->GetClassName (), "player" ) == 0 )
 			ph.status = SlotStatus::TV;
 		else
 			ph.status = SlotStatus::BOT;
@@ -204,13 +204,14 @@ void NczPlayerManager::ClientDisconnect ( SourceSdk::edict_t* pEntity )
 }
 
 void NczPlayerManager::FireGameEvent ( SourceSdk::IGameEvent* ev )
-	/*
-		player_death
-		player_team
-		player_spawn
-		round_freeze_end
-		round_end
-	*/
+/*
+player_death
+player_team
+player_spawn
+round_freeze_end
+round_end
+bot_takeover
+*/
 {
 	const char* event_name ( ev->GetName () + 6 );
 	const int maxcl ( m_max_index );
@@ -407,7 +408,7 @@ PlayerHandler::const_iterator NczPlayerManager::GetPlayerHandlerByName ( const c
 short NczPlayerManager::GetPlayerCount ( BaseProcessFilter const * const filter ) const
 {
 	short count ( 0 );
-	for( PlayerHandler::const_iterator it ( filter ); it != PlayerHandler::end (); it+=filter )
+	for( PlayerHandler::const_iterator it ( filter ); it != PlayerHandler::end (); it += filter )
 	{
 		++count;
 	}
