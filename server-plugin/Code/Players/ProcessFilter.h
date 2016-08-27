@@ -24,7 +24,6 @@ typedef enum class SlotStatus : unsigned int
 	BOT, // A bot ...
 	PLAYER_CONNECTING, // Not a bot, not connected
 	PLAYER_CONNECTED, // Connected as spectator or dead
-	PLAYER_IN_TESTS // Playing the round and shooting people everywhere like a mad nerd :)
 	PLAYER_IN_TESTS, // Playing the round and shooting people everywhere like a mad nerd :)
 	PLAYER_IN_TESTS_TAKEOVER // Controling a bot
 } SlotStatus_t;
