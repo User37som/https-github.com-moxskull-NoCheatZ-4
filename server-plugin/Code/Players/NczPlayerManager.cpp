@@ -306,6 +306,7 @@ bot_takeover
 	//{
 
 	if( ph <= SlotStatus::PLAYER_CONNECTED )
+	if( ph </*=*/ SlotStatus::PLAYER_CONNECTED ) /// fixed :  https://github.com/L-EARN/NoCheatZ-4/issues/79#issuecomment-240174457
 		return;
 	ph.GetHandler ()->status = SlotStatus::PLAYER_CONNECTED;
 	ph.GetHandler ()->in_tests_time = std::numeric_limits<float>::max ();
