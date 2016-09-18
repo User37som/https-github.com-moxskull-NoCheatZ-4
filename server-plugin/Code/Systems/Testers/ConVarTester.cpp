@@ -203,8 +203,6 @@ bool ConVarTester::sys_cmd_fn ( const SourceSdk::CCommand &args )
 	else if( stricmp ( "ResetRules", args.Arg ( 2 ) ) == 0 )
 		// example : ncz ConVarTester ResetRules
 	{
-		Unload ();
-		Load ();
 		LoadDefaultRules ();
 		return true;
 	}
@@ -380,7 +378,7 @@ void ConVarTester::LoadDefaultRules ()
 	AddConvarRuleset ( "r_visualizetraces", "0", ConVarRule::SAME_AS_SERVER );
 	AddConvarRuleset ( "mat_normalmaps", "0", ConVarRule::SAME_AS_SERVER );
 	AddConvarRuleset ( "mp_playerid", "0", ConVarRule::SAME_AS_SERVER );
-	AddConvarRuleset ( "mp_forcecamera", "1", ConVarRule::SAME_AS_SERVER );
+	//AddConvarRuleset ( "mp_forcecamera", "1", ConVarRule::SAME_AS_SERVER );
 	AddConvarRuleset ( "net_fakeloss", "0", ConVarRule::SAME );
 	AddConvarRuleset ( "net_fakelag", "0", ConVarRule::SAME );
 	AddConvarRuleset ( "net_fakejitter", "0", ConVarRule::SAME );
