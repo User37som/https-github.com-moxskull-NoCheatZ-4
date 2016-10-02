@@ -212,4 +212,30 @@ namespace ProcessFilter
 	};
 }
 
+inline const char * const SlotStatusToString ( SlotStatus_t status )
+{
+	switch( status )
+	{
+		case SlotStatus::INVALID:
+			return "INVALID";
+		case SlotStatus::KICK:
+			return "KICK";
+		case SlotStatus::TV:
+			return "TV";
+		case SlotStatus::BOT:
+			return "BOT";
+		case SlotStatus::PLAYER_CONNECTING:
+			return "PLAYER_CONNECTING";
+		case SlotStatus::PLAYER_CONNECTED:
+			return "PLAYER_CONNECTED";
+		case SlotStatus::PLAYER_IN_TESTS:
+			return "PLAYER_IN_TESTS";
+		case SlotStatus::PLAYER_IN_TESTS_TAKEOVER:
+			return "PLAYER_IN_TESTS_TAKEOVER";
+		default:
+			Assert ( 0 && "Undefined SLoStatus in SlotStatusToString" );
+			return "ERROR";
+	}
+}
+
 #endif // PROCESSFILTER_H
