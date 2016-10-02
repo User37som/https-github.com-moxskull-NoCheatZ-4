@@ -102,8 +102,8 @@ public:
 		SourceSdk::InterfacesProxy::Call_LogPrint ( text2 );
 		Helpers::chatprintf ( text2 );
 
+		Helpers::writeToLogfile ( NCZ_VERSION_GIT );
 		Helpers::writeToLogfile ( this->GetDataDump () );
-
 	};
 
 	void PrepareDetectionLog ( NczPlayer* player, BaseSystem* tester )
