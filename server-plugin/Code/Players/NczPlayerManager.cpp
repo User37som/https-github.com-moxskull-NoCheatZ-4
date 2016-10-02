@@ -228,10 +228,10 @@ bot_takeover
 			}
 			else if( ph == SlotStatus::PLAYER_IN_TESTS_TAKEOVER )
 			{
-				ph->GetTakeover ()->StopBotTakeover ();
+				/*ph->GetTakeover ()->StopBotTakeover ();
 				ph->StopBotTakeover ();
 				ph.GetHandler ()->status = SlotStatus::PLAYER_CONNECTED;
-				ph.GetHandler ()->in_tests_time = std::numeric_limits<float>::max ();
+				ph.GetHandler ()->in_tests_time = std::numeric_limits<float>::max ();*/
 			}
 		}
 
@@ -310,13 +310,13 @@ bot_takeover
 		}
 		else if( ph == SlotStatus::BOT )
 		{
-			if( ph->IsControllingBot () )
+			/*if( ph->IsControllingBot () )
 			{
 				ph->GetTakeover ()->StopBotTakeover (); // release link from player to bot
 				ph->GetTakeover ().GetHandler ()->status = SlotStatus::PLAYER_CONNECTED;
 				ph->GetTakeover ().GetHandler ()->in_tests_time = std::numeric_limits<float>::max ();
 				ph->StopBotTakeover (); // release link from bot to player
-			}
+			}*/
 		}
 		BaseSystem::ManageSystems ();
 		return;
@@ -337,13 +337,13 @@ bot_takeover
 		}
 		else if( ph == SlotStatus::BOT )
 		{
-			if( ph->IsControllingBot () )
+			/*if( ph->IsControllingBot () )
 			{
 				ph->GetTakeover ()->StopBotTakeover (); // release link from player to bot
 				ph->GetTakeover ().GetHandler ()->status = SlotStatus::PLAYER_CONNECTED;
 				ph->GetTakeover ().GetHandler ()->in_tests_time = std::numeric_limits<float>::max ();
 				ph->StopBotTakeover (); // release link from bot to player
-			}
+			}*/
 		}
 		BaseSystem::ManageSystems ();
 		return;
@@ -353,13 +353,13 @@ bot_takeover
 
 	if( ph == SlotStatus::BOT )
 	{
-		if( ph->IsControllingBot () ) // is bot controlled
+		/*if( ph->IsControllingBot () ) // is bot controlled
 		{
 			ph->GetTakeover ()->StopBotTakeover (); // release link from player to bot
 			ph->GetTakeover ().GetHandler ()->status = SlotStatus::PLAYER_CONNECTED;
 			ph->GetTakeover ().GetHandler ()->in_tests_time = std::numeric_limits<float>::max ();
 			ph->StopBotTakeover (); // release link from bot to player
-		}
+		}*/
 	}
 	if( ph </*=*/ SlotStatus::PLAYER_CONNECTED ) /// fixed :  https://github.com/L-EARN/NoCheatZ-4/issues/79#issuecomment-240174457
 		return;
