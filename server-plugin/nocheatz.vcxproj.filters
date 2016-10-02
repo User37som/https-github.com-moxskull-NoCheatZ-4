@@ -240,6 +240,9 @@
     <ClCompile Include="Code\Misc\HeapMemoryManager.cpp">
       <Filter>Code\Misc</Filter>
     </ClCompile>
+    <ClCompile Include="Code\Systems\Testers\AutoAttackTester.cpp">
+      <Filter>Code\Systems\Testers</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Code\plugin.h">
@@ -538,6 +541,12 @@
     </ClInclude>
     <ClInclude Include="Code\Systems\i18nManager.h">
       <Filter>Code\Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Systems\Testers\AutoAttackTester.h">
+      <Filter>Code\Systems\Testers</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Misc\temp_Throwback.h">
+      <Filter>Code\Misc</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
