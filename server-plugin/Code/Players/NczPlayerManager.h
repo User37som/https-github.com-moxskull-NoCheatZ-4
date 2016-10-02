@@ -22,8 +22,9 @@
 #include "SdkPreprocessors.h"
 #include "Interfaces/IGameEventManager/IGameEventManager.h"
 
-#include "Preprocessors.h"
 #include "NczPlayer.h"
+
+#include "Preprocessors.h"
 #include "Players/ProcessFilter.h"
 #include "Misc/temp_singleton.h"
 #include "Misc/Helpers.h"
