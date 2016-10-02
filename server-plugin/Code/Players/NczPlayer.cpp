@@ -323,12 +323,12 @@ WpnShotType const NczPlayer::GetWpnShotType () const
 
 void NczPlayer::EnterBotTakeover ( int bot_ent_index )
 {
-	m_takeover = PlayerHandler::const_iterator ( bot_ent_index );
+	m_takeover = bot_ent_index;
 }
 
 void NczPlayer::StopBotTakeover ()
 {
-	m_takeover = PlayerHandler::const_iterator ();
+	m_takeover = std::numeric_limits<int>::max();
 }
 
 int const NczPlayer::aimingAt ()
@@ -391,6 +391,11 @@ int const NczPlayer::aimingAt ()
 		}
 	}
 	return -1;
+}
+
+int NczPlayer::GetTakeover () const
+{
+	return m_takeover;
 }
 
 void NczPlayer::OnConnect ()
