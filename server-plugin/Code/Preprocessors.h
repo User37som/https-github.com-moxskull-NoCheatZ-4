@@ -50,6 +50,7 @@
 #define NCZ_PLUGIN_NAME			"NoCheatZ" // Name of the plugin
 
 #define IN_ATTACK (1 << 0)
+#define IN_ATTACK2	(1 << 11)
 #define IN_JUMP   (1 << 1)
 
 /*
