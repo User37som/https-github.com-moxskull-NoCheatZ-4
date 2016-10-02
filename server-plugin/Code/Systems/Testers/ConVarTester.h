@@ -178,6 +178,8 @@ private:
 
 	void AddConvarRuleset ( const char * name, const char * value, ConVarRuleT rule, bool safe = true );
 
+	void LoadDefaultRules ();
+
 	ConVarInfoT* RT_FindConvarRuleset ( const char * name );
 
 	PlayerHandler::const_iterator m_current_player;
