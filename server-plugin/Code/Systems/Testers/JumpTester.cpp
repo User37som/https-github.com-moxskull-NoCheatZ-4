@@ -72,27 +72,15 @@ bool JumpTester::GotJob () const
 	return it != PlayerHandler::end ();
 }
 
-int GetGameTickCount ()
-{
-	if( SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive )
-	{
-		return static_cast< SourceSdk::CGlobalVars_csgo* >( SourceSdk::InterfacesProxy::Call_GetGlobalVars () )->tickcount;
-	}
-	else
-	{
-		return static_cast< SourceSdk::CGlobalVars* >( SourceSdk::InterfacesProxy::Call_GetGlobalVars () )->tickcount;
-	}
-}
-
 void JumpTester::RT_m_hGroundEntityStateChangedCallback ( PlayerHandler::const_iterator ph, bool new_isOnGround )
 {
 	if( new_isOnGround )
 	{
-		OnPlayerTouchGround ( ph, GetGameTickCount () );
+		OnPlayerTouchGround ( ph, Helpers::GetGameTickCount () );
 	}
 	else
 	{
-		OnPlayerLeaveGround ( ph, GetGameTickCount () );
+		OnPlayerLeaveGround ( ph, Helpers::GetGameTickCount () );
 	}
 }
 
@@ -127,11 +115,11 @@ PlayerRunCommandRet JumpTester::RT_PlayerRunCommandCallback ( PlayerHandler::con
 
 		if( cur_jump_button_state )
 		{
-			OnPlayerJumpButtonDown ( ph, GetGameTickCount () );
+			OnPlayerJumpButtonDown ( ph, Helpers::GetGameTickCount () );
 		}
 		else
 		{
-			OnPlayerJumpButtonUp ( ph, GetGameTickCount () );
+			OnPlayerJumpButtonUp ( ph, Helpers::GetGameTickCount () );
 		}
 	}
 
@@ -181,7 +169,7 @@ void JumpTester::OnPlayerLeaveGround ( PlayerHandler::const_iterator ph, int gam
 {
 	JumpInfoT * const playerData ( GetPlayerDataStructByIndex ( ph.GetIndex () ) );
 
-	playerData->onGroundHolder.notOnGround_Tick = GetGameTickCount ();
+	playerData->onGroundHolder.notOnGround_Tick = Helpers::GetGameTickCount ();
 	++playerData->onGroundHolder.jumpCount;
 	playerData->isOnGround = false;
 	SystemVerbose1 ( Helpers::format ( "Player %s leaved the ground.", ph->GetName () ) );
