@@ -25,7 +25,7 @@
 /////////////////////////////////////////////////////////////////////////
 
 ConVarTester::ConVarTester () :
-	BaseDynamicSystem ( "ConVarTester", "Enable - Disable - Verbose - AddRule - ResetRules" ),
+	BaseDynamicSystem ( "ConVarTester", "Enable - Disable - Verbose - AddRule - RemoveRule - ResetRules" ),
 	OnTickListener (),
 	playerdata_class (),
 	singleton_class (),
@@ -40,6 +40,7 @@ ConVarTester::~ConVarTester ()
 void ConVarTester::Init ()
 {
 	InitDataStruct ();
+	LoadDefaultRules ();
 }
 
 bool ConVarTester::GotJob () const
@@ -183,11 +184,26 @@ bool ConVarTester::sys_cmd_fn ( const SourceSdk::CCommand &args )
 			return true;
 		}
 	}
-	if( stricmp ( "ResetRules", args.Arg ( 2 ) ) == 0 )
+	else if( stricmp ( "RemoveRule", args.Arg ( 2 ) ) == 0 )
+	{
+		size_t pos ( 0 );
+		size_t const max ( m_convars_rules.Size () );
+		while( pos < max )
+		{
+			if( stricmp ( m_convars_rules[ pos ].name, args.Arg ( 3 ) ) == 0 )
+			{
+				m_convars_rules.Remove ( pos );
+				return true;
+			}
+			++pos;
+		}
+		printf ( "Can't find such convar to remove.\n" );
+		return false;
+	}
+	else if( stricmp ( "ResetRules", args.Arg ( 2 ) ) == 0 )
 		// example : ncz ConVarTester ResetRules
 	{
-		Unload ();
-		Load ();
+		LoadDefaultRules ();
 		return true;
 	}
 	return false;
@@ -348,12 +364,9 @@ unexpected2:
 	}
 }
 
-void ConVarTester::Load ()
+void ConVarTester::LoadDefaultRules ()
 {
-	for( PlayerHandler::const_iterator it ( PlayerHandler::begin () ); it != PlayerHandler::end (); ++it )
-	{
-		ResetPlayerDataStructByIndex ( it.GetIndex () );
-	}
+	m_convars_rules.RemoveAll ();
 
 	AddConvarRuleset ( "developer", "0", ConVarRule::SAME );
 	AddConvarRuleset ( "sv_cheats", "0", ConVarRule::SAME_AS_SERVER );
@@ -365,7 +378,7 @@ void ConVarTester::Load ()
 	AddConvarRuleset ( "r_visualizetraces", "0", ConVarRule::SAME_AS_SERVER );
 	AddConvarRuleset ( "mat_normalmaps", "0", ConVarRule::SAME_AS_SERVER );
 	AddConvarRuleset ( "mp_playerid", "0", ConVarRule::SAME_AS_SERVER );
-	AddConvarRuleset ( "mp_forcecamera", "1", ConVarRule::SAME_AS_SERVER );
+	//AddConvarRuleset ( "mp_forcecamera", "1", ConVarRule::SAME_AS_SERVER );
 	AddConvarRuleset ( "net_fakeloss", "0", ConVarRule::SAME );
 	AddConvarRuleset ( "net_fakelag", "0", ConVarRule::SAME );
 	AddConvarRuleset ( "net_fakejitter", "0", ConVarRule::SAME );
@@ -425,6 +438,14 @@ void ConVarTester::Load ()
 	AddConvarRuleset ( "byp_render_rdp", "", ConVarRule::NO_VALUE );
 	AddConvarRuleset ( "byp_fake_lag", "", ConVarRule::NO_VALUE );
 	AddConvarRuleset ( "byp_fake_loss", "", ConVarRule::NO_VALUE );
+}
+
+void ConVarTester::Load ()
+{
+	for( PlayerHandler::const_iterator it ( PlayerHandler::begin () ); it != PlayerHandler::end (); ++it )
+	{
+		ResetPlayerDataStructByIndex ( it.GetIndex () );
+	}
 
 	var_sv_cheats = SourceSdk::InterfacesProxy::ICvar_FindVar ( "sv_cheats" );
 
@@ -436,7 +457,7 @@ void ConVarTester::Load ()
 void ConVarTester::Unload ()
 {
 	OnTickListener::RemoveOnTickListener ( this );
-	m_convars_rules.RemoveAll ();
+	//m_convars_rules.RemoveAll ();
 }
 
 const char* ConvertRule ( ConVarRule rule )
