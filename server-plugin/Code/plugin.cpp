@@ -23,7 +23,8 @@
 #include "Systems/Testers/JumpTester.h"
 #include "Systems/Testers/ValidationTester.h"
 #include "Systems/Testers/ConVarTester.h"
-#include "Systems/Testers/ShotTester.h"
+//#include "Systems/Testers/ShotTester.h"
+#include "Systems/Testers/AutoAttackTester.h"
 #include "Systems/Testers/SpeedTester.h"
 #include "Systems/Testers/ConCommandTester.h"
 #include "Systems/Testers/SpamConnectTester.h"
@@ -87,7 +88,8 @@ void CNoCheatZPlugin::CreateSingletons ()
 	ConVarTester::CreateInstance ();
 	EyeAnglesTester::CreateInstance ();
 	JumpTester::CreateInstance ();
-	ShotTester::CreateInstance ();
+	//ShotTester::CreateInstance ();
+	AutoAttackTester::CreateInstance ();
 	SpamChangeNameTester::CreateInstance ();
 	SpamConnectTester::CreateInstance ();
 	SpeedTester::CreateInstance ();
@@ -104,7 +106,8 @@ void CNoCheatZPlugin::DestroySingletons ()
 	SpeedTester::DestroyInstance ();
 	SpamConnectTester::DestroyInstance ();
 	SpamChangeNameTester::DestroyInstance ();
-	ShotTester::DestroyInstance ();
+	//ShotTester::DestroyInstance ();
+	AutoAttackTester::DestroyInstance ();
 	JumpTester::DestroyInstance ();
 	EyeAnglesTester::DestroyInstance ();
 	ConVarTester::DestroyInstance ();
@@ -496,7 +499,8 @@ SourceSdk::PLUGIN_RESULT CNoCheatZPlugin::ClientConnect ( bool *bAllowConnect, S
 	JumpTester::GetInstance ()->ResetPlayerDataStruct ( player );
 	EyeAnglesTester::GetInstance ()->ResetPlayerDataStruct ( player );
 	ConVarTester::GetInstance ()->ResetPlayerDataStruct ( player );
-	ShotTester::GetInstance ()->ResetPlayerDataStruct ( player );
+	//ShotTester::GetInstance ()->ResetPlayerDataStruct ( player );
+	AutoAttackTester::GetInstance ()->ResetPlayerDataStruct ( player );
 	SpeedTester::GetInstance ()->ResetPlayerDataStruct ( player );
 	ConCommandTester::GetInstance ()->ResetPlayerDataStruct ( player );
 	AntiFlashbangBlocker::GetInstance ()->ResetPlayerDataStruct ( player );
