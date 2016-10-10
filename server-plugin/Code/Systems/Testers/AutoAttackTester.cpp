@@ -19,26 +19,7 @@ limitations under the License.
 
 #include "AutoAttackTester.h"
 #include "Systems/Logger.h"
-
-/*
-Test each player to see if they use any script to help them fire more bullets (= RapidFire)
-
-Some old mouses can also make multiple clicks because of an electronic issue, not because the player itself use a script.
-We have to make the difference by using statistics.
-
-This particular tester will do simples tests about the fire rate of a player, nothing more.
-So it is more sensible about electronic issues of the mouse.
-
-In a way to perform better, this tester will analyse :
-- The count of clicks per seconds
-- The time between last click-up and last click-down in seconds
-- The average time between clicks-up and clicks-down in seconds
-
-Detections will trigger only if :
-- The count of detected clicks is almost constant by 5% ( Higher = Bad mouse ? Lesser = Cheat ? )
-- The time between last click-up and last click-down is too short ( Cheat or bad mouse or using mwheel like a troll ? )
-- The number of consecutive detections is high or not ( Very bad mouse or very bad cheat ? )
-*/
+#include "Systems/BanRequest.h"
 
 AutoAttackTester::AutoAttackTester ( void ) :
 	BaseDynamicSystem ( "AutoAttackTester" ),
@@ -186,4 +167,127 @@ void AutoAttackTester::OnAttack2Down ( PlayerHandler::const_iterator ph, int gam
 	AttackTriggerStats * const pdata ( GetPlayerDataStructByIndex ( ph.GetIndex () ) );
 
 	pdata->attack2_down_tick = game_tick;
+}
+
+void AutoAttackTester::FindDetection ( PlayerHandler::const_iterator ph, tb_int* graph )
+{
+	// get trigger graph
+
+	tb_int::inner_type attack_graph[ TB_MAX_HISTORY ];
+	size_t amount;
+
+	graph->CopyHistory ( attack_graph, amount, TB_MAX_HISTORY );
+
+	if( amount == TB_MAX_HISTORY ) // wait for the graph to be full before trying to detect
+	{
+		float const ti ( SourceSdk::InterfacesProxy::Call_GetTickInterval () );
+		__assume ( ti > 0.0f && ti < 1.0f );
+
+		float const average_sustain_ticks ( graph->Average (0, ( int ) ( ( 0.5 / ti ) - 0.5f ) ) );
+		int const max_sustain_ticks ( graph->Max () );
+		int const min_sustain_ticks ( graph->Min () );
+		
+		int const short_time_ticks = (int)((SHORT_TIME / ti)-0.5f);
+
+		if( average_sustain_ticks < float ( short_time_ticks ) )
+		{
+			// walk the graph and get the amount of detections
+
+			size_t c ( 0 );
+			tb_int::inner_type* it ( attack_graph );
+			tb_int::inner_type const * const it_end ( attack_graph + TB_MAX_HISTORY );
+			do
+			{
+				if( it->v < short_time_ticks )
+				{
+					++c;
+				}
+			}
+			while( ++it != it_end );
+
+			// how much percent detected ?
+
+			float const percent ( ( (float)(c) / (float)(TB_MAX_HISTORY) ) * 100.0f );
+
+			if( percent >= 66.0f )
+			{
+				// construct detection info
+
+				detection_info info;
+				info.average = average_sustain_ticks;
+				info.detection_count = c;
+				info.detection_percent = percent;
+				memcpy ( info.history, attack_graph, sizeof ( tb_int::inner_type ) * TB_MAX_HISTORY );
+				info.max = max_sustain_ticks;
+				info.min = min_sustain_ticks;
+				info.time_span = graph->TimeSpan ();
+
+				// push detection
+
+				Detection_AutoAttack pDetection;
+				pDetection.PrepareDetectionData ( &info );
+				pDetection.PrepareDetectionLog ( *ph, this );
+				pDetection.Log ();
+
+				BanRequest::GetInstance ()->AddAsyncBan ( *ph, 0, "Banned by NoCheatZ 4" );
+
+				// reset the graph ( let others detections be incoming without adding error or flooding )
+
+				graph->Reset ();
+			}
+		}
+	}
+}
+
+basic_string Detection_AutoAttack::GetDataDump ()
+{
+	float const ti_s ( SourceSdk::InterfacesProxy::Call_GetTickInterval () );
+	float const ti_ms ( ti_s * 1000.0f );
+	int const short_time_ticks = ( int ) ( ( SHORT_TIME / ( ti_s ) ) - 0.5f );
+
+	basic_string m ( Helpers::format (
+		":::: Important Server-Related Informations {\n"
+		":::::::: Tick Interval : %f seconds -> %f ms,\n"
+		":::::::: Ticks per second : %f,\n"
+		":::::::: Short Attack Detection Threshold : %f seconds -> %d ticks\n"
+		":::: }\n"
+		":::: detection_info {\n"
+		":::::::: Average Attack Button Sustain : %f ticks -> %f ms,\n"
+		":::::::: Min Attack Button Sustain : %d ticks -> %f ms,\n"
+		":::::::: Max Attack Button Sustain : %d ticks -> %f ms,\n"
+		":::::::: Attack-Sustain Too Short Detected Count : %d ( %f %% of history ),\n"
+		":::::::: Attacks History {\n",
+		ti_s, ti_ms,
+		1.0f / ti_s,
+		short_time_ticks * ti_s, short_time_ticks,
+		m_dataStruct.average, m_dataStruct.average * ti_ms,
+		m_dataStruct.min, m_dataStruct.min * ti_ms,
+		m_dataStruct.max, m_dataStruct.max * ti_ms,
+		m_dataStruct.detection_count, m_dataStruct.detection_percent ));
+
+	tb_int::inner_type const * it ( m_dataStruct.history );
+	tb_int::inner_type const * const it_end ( m_dataStruct.history + TB_MAX_HISTORY );
+	size_t shot_id ( 0 );
+
+	do
+	{
+		m.append( Helpers::format ( 
+			":::::::::::: Attack %u {\n"
+			":::::::::::::::: Start Tick : %d\n"
+			":::::::::::::::: Sustain Time (ticks) : %d ( Ends at tick # %d )\n"
+			":::::::::::::::: Sustain Time (ms) : %f\n"
+			":::::::::::::::: Is detected ? : %s\n"
+			":::::::::::: }\n",
+			++shot_id,
+			it->t,
+			it->v, it->t + it->v,
+			it->v * ti_ms,
+			Helpers::boolToString( it->v < short_time_ticks )
+			));
+	}
+	while( ++it != it_end );
+
+	m.append ( ":::::::: }\n:::: }\n" );
+
+	return m;
 }

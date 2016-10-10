@@ -23,9 +23,11 @@ limitations under the License.
 #include "Misc/temp_singleton.h"
 #include "Misc/temp_Throwback.h"
 
-#define SHORT_TIME 0.09 // sec
+#define SHORT_TIME (float)(0.09) // sec
 
-typedef Throwback_Arithmetic<int, int, 15> tb_int;
+#define TB_MAX_HISTORY 15
+
+typedef Throwback_Arithmetic<int, int, TB_MAX_HISTORY> tb_int;
 
 struct AttackTriggerStats
 {
@@ -76,19 +78,54 @@ public:
 	void OnAttack2Up ( PlayerHandler::const_iterator ph, int game_tick );
 
 	void OnAttack2Down ( PlayerHandler::const_iterator ph, int game_tick );
+
+	void FindDetection ( PlayerHandler::const_iterator ph, tb_int* graph );
 };
 
-class Detection_AutoPistol : public BaseDetection
+/*
+	This is a temporary hack until I implement the html logs and xml detections
+*/
+struct detection_info
 {
+	tb_int::inner_type history[ TB_MAX_HISTORY];
+	size_t detection_count;
+	float detection_percent;
+	size_t time_span;
+	float average;
+	int min;
+	int max;
+
+	detection_info () : history()
+	{
+
+	}
+
+	detection_info ( detection_info const & other )
+	{
+		memcpy ( this, &other, sizeof ( detection_info ) );
+	}
+
+	detection_info& operator= ( detection_info const & other )
+	{
+		Assert ( this != &other );
+		memcpy ( this, &other, sizeof ( detection_info ) );
+		return *this;
+	}
+};
+
+class Detection_AutoAttack : public LogDetection<detection_info>
+{
+	typedef LogDetection<detection_info> hClass;
 public:
-	Detection_AutoPistol () : BaseDetection ()
+	Detection_AutoAttack () : hClass ()
 	{};
-	virtual ~Detection_AutoPistol () override final
+	virtual ~Detection_AutoAttack () override final
 	{};
 
+	virtual basic_string GetDataDump () override final;
 	virtual basic_string GetDetectionLogMessage () final
 	{
-		return "AutoPistol";
+		return "AutoAttack";
 	};
 };
 
