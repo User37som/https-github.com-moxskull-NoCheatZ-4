@@ -144,31 +144,45 @@ all: $(OBJECTS)
 
 release:
 	@$(MAKE) prepare-build DEBUG=false COVERAGE=false
+	@$(MAKE) unit-tests DEBUG=false COVERAGE=false
 	@$(MAKE) -j6 all DEBUG=false COVERAGE=false
 
 debug:
 	@$(MAKE) prepare-build DEBUG=true COVERAGE=false
+	@$(MAKE) unit-tests DEBUG=false COVERAGE=false
 	@$(MAKE) -j6 all DEBUG=true COVERAGE=false
 
 coverage:
 	@$(MAKE) prepare-build COVERAGE=true
+	@$(MAKE) unit-tests DEBUG=false COVERAGE=false
 	@$(MAKE) -j6 all COVERAGE=true
 
 clean:
-	@rm -rf $(RELEASE_DIR)
-	@rm -rf $(DEBUG_DIR)
+	rm -rf $(RELEASE_DIR)
+	rm -rf $(DEBUG_DIR)
 
 superclean: clean
-	@rm -rf $(BINARY_DIR)/$(BINARY_NAME)
+	rm -rf $(BINARY_DIR)/$(BINARY_NAME)
 
+unittests:
+	@echo "Building unit-tests"
+	@$(d_CXX) -I./SourceSdk/Interfaces/Protobuf/protobuf-2.5.0/gtest/include -I./SourceSdk/Interfaces/Protobuf/protobuf-2.5.0/gtest $(CFLAGS) -o ./unit-tests/Release/gtest-all.o -c ./SourceSdk/Interfaces/Protobuf/protobuf-2.5.0/gtest/src/gtest-all.cc
+	@$(d_CXX) -I./Code/ -I./SourceSdk/ $(CFLAGS) -o ./unit-tests/Release/HeapMemoryManager.o -c ./Code/Misc/HeapMemoryManager.cpp
+	@$(d_CXX) -I./Code/ -I./SourceSdk/ I./SourceSdk/Interfaces/Protobuf/protobuf-2.5.0/gtest/include -I./SourceSdk/Interfaces/Protobuf/protobuf-2.5.0/gtest $(CFLAGS) -o ./unit-tests/Release/unit-tests.o -c ./unit-tests/unit-tests.cpp
+	@$(d_CXX) -I./Code/ -I./SourceSdk/ I./SourceSdk/Interfaces/Protobuf/protobuf-2.5.0/gtest/include -I./SourceSdk/Interfaces/Protobuf/protobuf-2.5.0/gtest $(CFLAGS) ./unit-tests/Release/unit-tests.o ./unit-tests/Release/HeapMemoryManager.o ./unit-tests/Release/gtest-all.o -v -Wl,--as-needed,--no-undefined -static-libgcc -ldl -lm -m32 -o ./unit-tests/unit-tests.so
+	@echo "Starting unit-tests"
+	@./unit-tests/unit-tests.o
+	rm -rf ./unit-tests/Release
+	rm -rf ./unit-tests/unit-tests.o
+	
 prepare-build:
-	@mkdir -p $(BUILD_DIR)/addons/NoCheatZ/
-	@mkdir -p $(BUILD_DIR)/cfg/
-	@mkdir -p $(BUILD_DIR)/logs/NoCheatZ_4_Logs/
-	@mkdir -p $(BUILD_DIR)/NoCheatZ-autorecords
+	mkdir -p $(BUILD_DIR)/addons/NoCheatZ/
+	mkdir -p $(BUILD_DIR)/cfg/
+	mkdir -p $(BUILD_DIR)/logs/NoCheatZ_4_Logs/
+	mkdir -p $(BUILD_DIR)/NoCheatZ-autorecords
 	@touch $(BUILD_DIR)/logs/NoCheatZ_4_Logs/.gitignore
 	@touch $(BUILD_DIR)/NoCheatZ-autorecords/.gitignore
-	@cp ./Res/nocheatz.vdf $(BUILD_DIR)/addons/
-	@cp ./Res/config.ini $(BUILD_DIR)/addons/NoCheatZ/
-	@cp ./Res/nocheatz.cfg $(BUILD_DIR)/cfg/nocheatz.cfg ;true
+	cp ./Res/nocheatz.vdf $(BUILD_DIR)/addons/
+	cp ./Res/config.ini $(BUILD_DIR)/addons/NoCheatZ/
+	cp ./Res/nocheatz.cfg $(BUILD_DIR)/cfg/nocheatz.cfg ;true
 	@sh $(BASE)/scripts/make-protobuf.sh
