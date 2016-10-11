@@ -49,7 +49,7 @@ public:
 
 	void PrepareDetectionData ( playerDataStructT* dataStruct )
 	{
-		static_assert ( std::is_copy_assignable<playerDataStructT>::value );
+		static_assert ( std::is_copy_assignable<playerDataStructT>::value, "Data must be copy-assignable" );
 
 		this->m_timestamp = Plat_FloatTime ();
 		if( SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive )
