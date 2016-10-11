@@ -482,20 +482,34 @@ public:
 	{
 		if( !m_alloc )
 			return;
-		String<wchar_t> t;
+		/*String<wchar_t> t;
 		ConvertToWideChar ( *this, t );
 		t.lower ();
-		ConvertToChar ( t, *this );
+		ConvertToChar ( t, *this );*/
+
+		char * me ( m_alloc );
+		do
+		{
+			if( *me >= 'A' && *me <= 'Z' ) *me += 0x20;
+		}
+		while( *++me != 0);
 	}
 
 	inline void upper ()
 	{
 		if( !m_alloc )
 			return;
-		String<wchar_t> t;
+		/*String<wchar_t> t;
 		ConvertToWideChar ( *this, t );
 		t.upper ();
-		ConvertToChar ( t, *this );
+		ConvertToChar ( t, *this );*/
+
+		char * me ( m_alloc );
+		do
+		{
+			if( *me >= 'a' && *me <= 'z' ) *me -= 0x20;
+		}
+		while( *++me != 0 );
 	}
 
 	pod& operator[] ( size_t const index ) const

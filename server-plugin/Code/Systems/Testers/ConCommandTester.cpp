@@ -180,8 +180,8 @@ bool ConCommandTester::RT_TestPlayerCommand ( PlayerHandler::const_iterator ph, 
 	{
 		// To lower
 		basic_string lower_cmd ( command );
-		if( basic_string::IsValidMultibyteString ( lower_cmd ) )
-		{
+		//if( basic_string::IsValidMultibyteString ( lower_cmd ) )
+		//{
 			lower_cmd.lower ();
 
 			size_t id ( 0 );
@@ -208,13 +208,13 @@ bool ConCommandTester::RT_TestPlayerCommand ( PlayerHandler::const_iterator ph, 
 				}
 			}
 			RT_AddPlayerCommand ( ph, command );
-		}
-		else
-		{
-			Logger::GetInstance ()->Msg<MSG_LOG> ( Helpers::format("Dropped invalid command from %s", ph->GetName () ));
-			ph->Kick ( "Invalid ConCommand" );
-			return true;
-		}
+		//}
+		//else
+		//{
+		//	Logger::GetInstance ()->Msg<MSG_LOG> ( Helpers::format("Dropped invalid command from %s", ph->GetName () ));
+		//	ph->Kick ( "Invalid ConCommand" );
+		//	return true;
+		//}
 	}
 	return false;
 }
@@ -225,8 +225,8 @@ bool ConCommandTester::RT_TestPlayerCommand_Anon ( PlayerHandler::const_iterator
 	{
 		// To lower
 		basic_string lower_cmd ( command );
-		if( basic_string::IsValidMultibyteString ( lower_cmd ) )
-		{
+		//if( basic_string::IsValidMultibyteString ( lower_cmd ) )
+		//{
 			lower_cmd.lower ();
 
 			size_t id ( 0 );
@@ -253,13 +253,13 @@ bool ConCommandTester::RT_TestPlayerCommand_Anon ( PlayerHandler::const_iterator
 				}
 			}
 			//RT_AddPlayerCommand ( ph, command );
-		}
-		else
-		{
+		//}
+		//else
+		//{
 			//Logger::GetInstance ()->Msg<MSG_LOG> ( Helpers::format ( "Dropped invalid command from %s", ph->GetName () ) );
 			//ph->Kick ( "Invalid ConCommand" );
-			return true;
-		}
+		//	return true;
+		//}
 	}
 	return false;
 }
