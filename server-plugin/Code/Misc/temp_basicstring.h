@@ -356,12 +356,12 @@ public:
 		{
 			if( diff <= 0 )
 			{
-				memcpy ( m_alloc + pos, replace_by.m_alloc, sizeof ( pod ) * replace_by.m_size - 1 );
+				memcpy ( m_alloc + pos, replace_by.m_alloc, sizeof ( pod ) * replace_by.m_size );
 				if( diff < 0 ) remove ( pos + replace_by.m_size, pos + replace_this.m_size - 1 );
 			}
 			else if( diff > 0 )
 			{
-				memcpy ( m_alloc + pos, replace_by.m_alloc, sizeof ( pod ) * replace_this.m_size - 1 );
+				memcpy ( m_alloc + pos, replace_by.m_alloc, sizeof ( pod ) * replace_this.m_size );
 				Grow ( m_size + diff + 1 );
 				size_t move_from_here ( m_size + diff );
 				size_t const move_until_here ( pos + replace_this.m_size - 1 );
