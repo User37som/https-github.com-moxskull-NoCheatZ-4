@@ -48,19 +48,28 @@ private:
 	inner_type m_stack[ count ];
 	inner_type* m_current;
 
+	/*
+		Returns the index of the internal pointer as m_stack[index];
+	*/
 	inline int GetCurrentIndex ()
 	{
 		return m_current - m_stack;
 	}
 
+	/*
+		Returns the pointer the last internal element
+	*/
 	inline inner_type* GetLastPointer ()
 	{
 		return m_stack + count - 1;
 	}
 
+	/*
+		Returns the index of the internal pointer starting from the end of the stack
+	*/
 	inline int GetCurrentIndexReverse ()
 	{
-		return GetLastPointer () - m_current;
+		return count - 1 - GetCurrentIndex ();
 	}
 
 	template <size_t distance = 1>
@@ -68,9 +77,9 @@ private:
 	{
 		static_assert ( distance < count, "distance collides with size" );
 
-		if( m_current + distance > GetLastPointer () )
+		if( (m_current + distance) > GetLastPointer () )
 		{
-			return m_stack + ( distance - GetCurrentIndexReverse () );
+			return m_stack + ( ( distance + GetCurrentIndex () ) % count );
 		}
 		else
 		{
@@ -85,7 +94,7 @@ private:
 
 		if( m_current - distance < m_stack )
 		{
-			return GetLastPointer () - ( distance - GetCurrentIndex () );
+			return GetLastPointer () - ( ( distance + GetCurrentIndexReverse () ) % count );
 		}
 		else
 		{
@@ -121,7 +130,7 @@ public:
 	{
 		static_assert ( std::is_arithmetic< value_type>::value, "value_type is not arithmetic" );
 		static_assert ( std::is_arithmetic< time_type>::value, "time_type is not arithmetic" );
-		static_assert ( std::is_signed< time_type >::value, "time_type can't be negative" );
+		static_assert ( std::is_signed< time_type >::value, "time_type must be signed" );
 
 		Reset ();
 	}
