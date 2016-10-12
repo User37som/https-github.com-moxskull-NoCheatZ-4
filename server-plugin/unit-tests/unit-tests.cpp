@@ -186,6 +186,24 @@ TEST ( Sring_Class, Modifiers )
 	ASSERT_STREQ ( "bbaaaaaaaqq", g.c_str () );
 }
 
+TEST ( Sring_Class, Size_Consistency )
+{
+	basic_string g ( "aaaaa:aaaa" );
+	ASSERT_EQ ( 10, g.length () );
+
+	g.replace ( ':', '\0' );
+	ASSERT_EQ ( 5, g.length () );
+
+	g.append ( "\0\0" );
+	ASSERT_EQ ( 5, g.length () );
+
+	g.append ( '\0' );
+	ASSERT_EQ ( 5, g.length () );
+
+	g.replace ( "a", "" );
+	ASSERT_EQ ( 0, g.length () );
+}
+
 // main
 
 int main ( int argc, char **argv )
