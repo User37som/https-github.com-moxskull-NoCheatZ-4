@@ -165,13 +165,13 @@ unit-tests: prepare-build
 	@echo "Building unit-tests"
 	@mkdir -p ./unit-tests/Release
 	@echo "gtest-all.o"
-	@$(d_CXX) -I./SourceSdk/Interfaces/Protobuf/protobuf-2.5.0/gtest/include -I./SourceSdk/Interfaces/Protobuf/protobuf-2.5.0/gtest $(CFLAGS) -o ./unit-tests/Release/gtest-all.o -c ./SourceSdk/Interfaces/Protobuf/protobuf-2.5.0/gtest/src/gtest-all.cc
+	@$(d_CXX) -I./SourceSdk/Interfaces/Protobuf/protobuf-2.5.0/gtest/include -I./SourceSdk/Interfaces/Protobuf/protobuf-2.5.0/gtest $(ARCH_CFLAGS) -o ./unit-tests/Release/gtest-all.o -c ./SourceSdk/Interfaces/Protobuf/protobuf-2.5.0/gtest/src/gtest-all.cc
 	@echo "HeapMemoryManager.o"
-	@$(d_CXX) -I./Code/ -I./SourceSdk/ $(CFLAGS) -o ./unit-tests/Release/HeapMemoryManager.o -c ./Code/Misc/HeapMemoryManager.cpp
+	@$(d_CXX) -I./Code/ -I./SourceSdk/ $(ARCH_CFLAGS) -o ./unit-tests/Release/HeapMemoryManager.o -c ./Code/Misc/HeapMemoryManager.cpp
 	@echo "unit-tests.o"
-	@$(d_CXX) -I./Code/ -I./SourceSdk/ -I./SourceSdk/Interfaces/Protobuf/protobuf-2.5.0/gtest/include -I./SourceSdk/Interfaces/Protobuf/protobuf-2.5.0/gtest $(CFLAGS) -o ./unit-tests/Release/unit-tests.o -c ./unit-tests/unit-tests.cpp
+	@$(d_CXX) -I./Code/ -I./SourceSdk/ -I./SourceSdk/Interfaces/Protobuf/protobuf-2.5.0/gtest/include -I./SourceSdk/Interfaces/Protobuf/protobuf-2.5.0/gtest $(ARCH_CFLAGS) -o ./unit-tests/Release/unit-tests.o -c ./unit-tests/unit-tests.cpp
 	@echo "unit-tests.so"
-	@$(d_CXX) $(CFLAGS) ./unit-tests/Release/unit-tests.o ./unit-tests/Release/HeapMemoryManager.o ./unit-tests/Release/gtest-all.o -v -Wl,--as-needed,--no-undefined -static-libgcc -ldl -lm -m32 -o ./unit-tests/unit-tests.so
+	@$(d_CXX) $(ARCH_CFLAGS) ./unit-tests/Release/unit-tests.o ./unit-tests/Release/HeapMemoryManager.o ./unit-tests/Release/gtest-all.o -v -Wl,--as-needed,--no-undefined -static-libgcc -ldl -lm -m32 -o ./unit-tests/unit-tests.so
 	@echo "Starting unit-tests"
 	@./unit-tests/unit-tests.so
 	rm -rf ./unit-tests/Release
