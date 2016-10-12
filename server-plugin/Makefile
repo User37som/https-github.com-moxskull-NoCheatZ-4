@@ -163,6 +163,7 @@ superclean: clean
 
 unit-tests: prepare-build
 	@echo "Building unit-tests"
+	@mkdir -p ./unit-tests/Release
 	@$(d_CXX) -I./SourceSdk/Interfaces/Protobuf/protobuf-2.5.0/gtest/include -I./SourceSdk/Interfaces/Protobuf/protobuf-2.5.0/gtest $(CFLAGS) -o ./unit-tests/Release/gtest-all.o -c ./SourceSdk/Interfaces/Protobuf/protobuf-2.5.0/gtest/src/gtest-all.cc
 	@$(d_CXX) -I./Code/ -I./SourceSdk/ $(CFLAGS) -o ./unit-tests/Release/HeapMemoryManager.o -c ./Code/Misc/HeapMemoryManager.cpp
 	@$(d_CXX) -I./Code/ -I./SourceSdk/ I./SourceSdk/Interfaces/Protobuf/protobuf-2.5.0/gtest/include -I./SourceSdk/Interfaces/Protobuf/protobuf-2.5.0/gtest $(CFLAGS) -o ./unit-tests/Release/unit-tests.o -c ./unit-tests/unit-tests.cpp
