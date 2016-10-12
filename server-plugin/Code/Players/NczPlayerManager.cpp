@@ -219,20 +219,23 @@ bot_takeover
 
 	if( *event_name == 'e' ) // round_end
 	{
+		DebugMessage("event round_end");
 		for( int x ( 1 ); x <= maxcl; ++x )
 		{
 			PlayerHandler::const_iterator ph ( x );
 			if( ph == SlotStatus::PLAYER_IN_TESTS )
 			{
 				ph.GetHandler()->status = SlotStatus::PLAYER_CONNECTED;
+				ph.GetHandler()->in_tests_time = std::numeric_limits<float>::max ();
+				DebugMessage(Helpers::format("Players %s : Status changed from PLAYER_IN_TESTS to PLAYER_CONNECTED", ph->GetName()));
 			}
-			else if( ph == SlotStatus::PLAYER_IN_TESTS_TAKEOVER )
+			/*else if( ph == SlotStatus::PLAYER_IN_TESTS_TAKEOVER )
 			{
-				/*ph->GetTakeover ()->StopBotTakeover ();
+				ph->GetTakeover ()->StopBotTakeover ();
 				ph->StopBotTakeover ();
 				ph.GetHandler ()->status = SlotStatus::PLAYER_CONNECTED;
-				ph.GetHandler ()->in_tests_time = std::numeric_limits<float>::max ();*/
-			}
+				ph.GetHandler ()->in_tests_time = std::numeric_limits<float>::max ();
+			}*/
 		}
 
 		ProcessFilter::HumanAtLeastConnected filter_class;
@@ -245,22 +248,24 @@ bot_takeover
 	}
 	/*else*/ if( *event_name == 'f' ) // round_freeze_end = round_start
 	{
+		DebugMessage("event round_freeze_end");
 		for( int x ( 1 ); x <= maxcl; ++x )
 		{
 			PlayerHandler& ph ( FullHandlersList[ x ] );
 			if( ph.status == SlotStatus::INVALID ) continue;
-			if( ph.status == SlotStatus::PLAYER_CONNECTED )
+			if( ph.status >= SlotStatus::PLAYER_CONNECTED )
 			{
+				ph.status = SlotStatus::PLAYER_CONNECTED;
 				SourceSdk::IPlayerInfo * const pinfo ( ph.playerClass->GetPlayerInfo () );
 				if( pinfo )
 				{
 					if( pinfo->GetTeamIndex () > 1 )
 					{
+						DebugMessage(Helpers::format("Players %s : Will enter in status PLAYER_IN_TESTS in 1 second", ph.playerClass->GetName()));
 						ph.in_tests_time = Plat_FloatTime () + 1.0f;
 					}
 					else
 					{
-						ph.status = SlotStatus::PLAYER_CONNECTED;
 						ph.in_tests_time = std::numeric_limits<float>::max ();
 					}
 				}
@@ -275,23 +280,25 @@ bot_takeover
 
 	if( *event_name == 'k' ) // bot_takeover
 	{
-		PlayerHandler::const_iterator bh1 ( GetPlayerHandlerByUserId ( ev->GetInt ( "botid" ) ) );
-		PlayerHandler::const_iterator bh2 ( GetPlayerHandlerByUserId ( ev->GetInt ( "index" ) ) );
-		DebugMessage ( Helpers::format ( "Player %s taking control of bot %s or bot %s", ph->GetName (), bh1->GetName (), bh2->GetName () ));
+		DebugMessage(Helpers::format("event bot_takeover : %s -> %s", ph->GetName (), GetPlayerHandlerByUserId ( ev->GetInt ( "botid" ) )->GetName ()));
+		//PlayerHandler::const_iterator bh1 ( GetPlayerHandlerByUserId ( ev->GetInt ( "botid" ) ) );
+		//PlayerHandler::const_iterator bh2 ( GetPlayerHandlerByUserId (  ) );
+		//DebugMessage ( Helpers::format ( "Player %s taking control of bot %s or bot %d", ph->GetName (), bh1->GetName (), ev->GetInt ( "index" ) ));
 
-		ph->EnterBotTakeover ( ev->GetInt ( "index" ) );
-		bh2->EnterBotTakeover ( ph.GetIndex () );
+		//ph->EnterBotTakeover ( ev->GetInt ( "index" ) );
+		//bh2->EnterBotTakeover ( ph.GetIndex () );
 
-		ph.GetHandler ()->status = SlotStatus::PLAYER_IN_TESTS_TAKEOVER;
-		ph.GetHandler ()->in_tests_time = std::numeric_limits<float>::max ();
+		//ph.GetHandler ()->status = SlotStatus::PLAYER_IN_TESTS_TAKEOVER;
+		//ph.GetHandler ()->in_tests_time = std::numeric_limits<float>::max ();
 
 		return;
 	}
 
 	++event_name;
 
-	if( *event_name == 's' ) // player_spawn
+	if( *event_name == 's' ) // player_spawn(ed)
 	{
+		DebugMessage(Helpers::format("event player_spawn : %s", ph->GetName()));
 		if( ph > SlotStatus::BOT )
 		{
 			SourceSdk::IPlayerInfo * const pinfo ( ph->GetPlayerInfo () );
@@ -299,10 +306,13 @@ bot_takeover
 			{
 				if( pinfo->GetTeamIndex () > 1 )
 				{
+					DebugMessage(Helpers::format("Players %s : Will enter in status PLAYER_IN_TESTS in 3 seconds", ph->GetName()));
+					ph.GetHandler ()->status = SlotStatus::PLAYER_CONNECTED;
 					ph.GetHandler ()->in_tests_time = Plat_FloatTime () + 3.0f;
 				}
 				else
 				{
+					DebugMessage(Helpers::format("Players %s : Status forced to PLAYER_CONNECTED", ph->GetName()));
 					ph.GetHandler ()->status = SlotStatus::PLAYER_CONNECTED;
 					ph.GetHandler ()->in_tests_time = std::numeric_limits<float>::max ();
 				}
@@ -323,14 +333,18 @@ bot_takeover
 	}
 	if( *event_name == 't' ) // player_team
 	{
+		DebugMessage("event player_team");
 		if( ph > SlotStatus::BOT )
 		{
 			if( ev->GetInt ( "teamid" ) > 1 )
 			{
+				DebugMessage(Helpers::format("Players %s : Will enter in status PLAYER_IN_TESTS in 3 seconds", ph->GetName()));
+				ph.GetHandler ()->status = SlotStatus::PLAYER_CONNECTED;
 				ph.GetHandler ()->in_tests_time = Plat_FloatTime () + 3.0f;
 			}
 			else
 			{
+				DebugMessage(Helpers::format("Players %s : Status forced to PLAYER_CONNECTED", ph->GetName()));
 				ph.GetHandler ()->status = SlotStatus::PLAYER_CONNECTED;
 				ph.GetHandler ()->in_tests_time = std::numeric_limits<float>::max ();
 			}
@@ -351,6 +365,7 @@ bot_takeover
 	//else // player_death
 	//{
 
+	DebugMessage(Helpers::format("event player_death : %s", ph->GetName()));
 	if( ph == SlotStatus::BOT )
 	{
 		/*if( ph->IsControllingBot () ) // is bot controlled
@@ -363,6 +378,7 @@ bot_takeover
 	}
 	if( ph </*=*/ SlotStatus::PLAYER_CONNECTED ) /// fixed :  https://github.com/L-EARN/NoCheatZ-4/issues/79#issuecomment-240174457
 		return;
+	DebugMessage(Helpers::format("Players %s : Status forced to PLAYER_CONNECTED", ph->GetName()));
 	ph.GetHandler ()->status = SlotStatus::PLAYER_CONNECTED;
 	ph.GetHandler ()->in_tests_time = std::numeric_limits<float>::max ();
 	BaseSystem::ManageSystems ();
@@ -397,15 +413,24 @@ void NczPlayerManager::RT_Think ( float const curtime )
 	{
 		PlayerHandler& ph ( FullHandlersList[ x ] );
 		if( ph.status <= SlotStatus::PLAYER_CONNECTING ) continue;
-
-		if( curtime > ph.in_tests_time )
+		
+		if( ph.status == SlotStatus::PLAYER_IN_TESTS )
 		{
+			if( curtime < ph.in_tests_time )
+			{
+				DebugMessage(Helpers::format("Players %s : Status changed from PLAYER_IN_TESTS to PLAYER_CONNECTED", ph.playerClass->GetName()));
+				ph.status = SlotStatus::PLAYER_CONNECTED;
+			}
+			else
+			{
+				++in_tests_count;
+			}
+		}
+		else if( curtime > ph.in_tests_time )
+		{
+			DebugMessage(Helpers::format("Players %s : Status changed from PLAYER_CONNECTED to PLAYER_IN_TESTS", ph.playerClass->GetName()));
 			ph.status = SlotStatus::PLAYER_IN_TESTS;
 			++in_tests_count;
-		}
-		else
-		{
-			ph.status = SlotStatus::PLAYER_CONNECTED;
 		}
 	}
 	if( in_tests_count >= 1 ) AutoTVRecord::GetInstance ()->StartRecord ();

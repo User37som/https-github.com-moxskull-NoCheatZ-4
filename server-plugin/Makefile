@@ -188,4 +188,4 @@ prepare-build:
 	cp ./Res/nocheatz.vdf $(BUILD_DIR)/addons/
 	cp ./Res/config.ini $(BUILD_DIR)/addons/NoCheatZ/
 	cp ./Res/nocheatz.cfg $(BUILD_DIR)/cfg/nocheatz.cfg ;true
-	@sh $(BASE)/scripts/make-protobuf.sh
+	@sh $(BASE)/scripts/make-protobuf.sh $(d_CXX)

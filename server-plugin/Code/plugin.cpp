@@ -343,10 +343,13 @@ const char *CNoCheatZPlugin::GetPluginDescription ( void )
 // Purpose: called on level start
 //---------------------------------------------------------------------------------
 void CNoCheatZPlugin::LevelInit ( char const *pMapName )
-{
+{	
 	Logger::GetInstance ()->Msg<MSG_LOG> ( Helpers::format ( "PLAYING ON A NEW MAP : %s", pMapName ) );
 
 	Logger::GetInstance ()->Flush ();
+	
+	GlobalTimer::GetInstance ()->EnterSection (); // reset timer
+	
 	NczPlayerManager::GetInstance ()->OnLevelInit ();
 
 	BanRequest::GetInstance ()->OnLevelInit ();
