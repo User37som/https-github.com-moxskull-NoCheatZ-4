@@ -143,17 +143,14 @@ all: $(OBJECTS)
 	@$(d_CXX) $(INCLUDE) $(CFLAGS) $(OBJECTS) $(LINK) -m32 -o $(BINARY_DIR)/$(BINARY_NAME)  2>&1 | tee "error_link.txt"
 
 release:
-	@$(MAKE) prepare-build DEBUG=false COVERAGE=false
 	@$(MAKE) unit-tests DEBUG=false COVERAGE=false
 	@$(MAKE) -j6 all DEBUG=false COVERAGE=false
 
 debug:
-	@$(MAKE) prepare-build DEBUG=true COVERAGE=false
-	@$(MAKE) unit-tests DEBUG=false COVERAGE=false
+	@$(MAKE) unit-tests DEBUG=true COVERAGE=false
 	@$(MAKE) -j6 all DEBUG=true COVERAGE=false
 
 coverage:
-	@$(MAKE) prepare-build COVERAGE=true
 	@$(MAKE) unit-tests DEBUG=false COVERAGE=false
 	@$(MAKE) -j6 all COVERAGE=true
 
@@ -164,7 +161,7 @@ clean:
 superclean: clean
 	rm -rf $(BINARY_DIR)/$(BINARY_NAME)
 
-unittests:
+unittests: prepare-build
 	@echo "Building unit-tests"
 	@$(d_CXX) -I./SourceSdk/Interfaces/Protobuf/protobuf-2.5.0/gtest/include -I./SourceSdk/Interfaces/Protobuf/protobuf-2.5.0/gtest $(CFLAGS) -o ./unit-tests/Release/gtest-all.o -c ./SourceSdk/Interfaces/Protobuf/protobuf-2.5.0/gtest/src/gtest-all.cc
 	@$(d_CXX) -I./Code/ -I./SourceSdk/ $(CFLAGS) -o ./unit-tests/Release/HeapMemoryManager.o -c ./Code/Misc/HeapMemoryManager.cpp
