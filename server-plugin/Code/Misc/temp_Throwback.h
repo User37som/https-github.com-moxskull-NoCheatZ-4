@@ -140,7 +140,7 @@ public:
 		memcpy ( m_stack, other.m_stack, sizeof ( value_type ) * count );
 	}
 
-	Throwback_Arithmetic ( value_type const & v ) : Throwback ()
+	Throwback_Arithmetic ( value_type const & v ) : Throwback_Arithmetic ()
 	{
 		m_current->v = v;
 	}
