@@ -43,6 +43,7 @@ private:
 	SourceSdk::edict_t * const m_edict;
 	SourceSdk::INetChannelInfo* m_channelinfo;
 	SourceSdk::IPlayerInfo * m_playerinfo;
+	int m_takeover;
 	float m_time_connected;
 
 public:
@@ -60,6 +61,12 @@ public:
 	WpnShotType const GetWpnShotType () const;
 	int const aimingAt (); // Retourne index de la cible présente sur le viseur
 
+	void EnterBotTakeover ( int bot_ent_index );
+
+	void StopBotTakeover ();
+
+	int GetTakeover () const;
+	
 	void GetAbsOrigin ( SourceSdk::Vector & out );
 
 	void GetRelEyePos ( SourceSdk::Vector & out ) const;

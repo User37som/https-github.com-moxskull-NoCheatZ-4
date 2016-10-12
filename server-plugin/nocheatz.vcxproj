@@ -392,6 +392,7 @@ copy "$(TargetPath)" ..\..\..\game\bin\"$(TargetName)".pdb
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Profiler|Win32'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="Code\Systems\Testers\AutoAttackTester.cpp" />
     <ClCompile Include="SourceSdk\Interfaces\Protobuf\cstrike15_usermessages.pb.cc">
       <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">TurnOffAllWarnings</WarningLevel>
       <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">TurnOffAllWarnings</WarningLevel>
@@ -448,11 +449,13 @@ copy "$(TargetPath)" ..\..\..\game\bin\"$(TargetName)".pdb
     <ClInclude Include="Code\Misc\temp_basiclist.h" />
     <ClInclude Include="Code\Misc\temp_basicstring.h" />
     <ClInclude Include="Code\Misc\temp_singleton.h" />
+    <ClInclude Include="Code\Misc\temp_Throwback.h" />
     <ClInclude Include="Code\Players\ProcessFilter.h" />
     <ClInclude Include="Code\Systems\AutoTVRecord.h" />
     <ClInclude Include="Code\Systems\Blockers\RadarHackBlocker.h" />
     <ClInclude Include="Code\Systems\ConfigManager.h" />
     <ClInclude Include="Code\Systems\i18nManager.h" />
+    <ClInclude Include="Code\Systems\Testers\AutoAttackTester.h" />
     <ClInclude Include="SourceSdk\Console\color.h" />
     <ClInclude Include="SourceSdk\Console\convar.h" />
     <ClInclude Include="SourceSdk\Console\iconvar.h" />

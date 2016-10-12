@@ -69,6 +69,18 @@ namespace Helpers
 		return 1;
 	}
 
+	int GetGameTickCount ()
+	{
+		if( SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive )
+		{
+			return static_cast< SourceSdk::CGlobalVars_csgo* >( SourceSdk::InterfacesProxy::Call_GetGlobalVars () )->tickcount;
+		}
+		else
+		{
+			return static_cast< SourceSdk::CGlobalVars* >( SourceSdk::InterfacesProxy::Call_GetGlobalVars () )->tickcount;
+		}
+	}
+
 	bool IsValidUTF8Char ( const char* const o_c, const size_t bytes )
 	{
 		const char* str ( o_c );

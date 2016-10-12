@@ -23,7 +23,8 @@
 #include "Systems/Testers/JumpTester.h"
 #include "Systems/Testers/ValidationTester.h"
 #include "Systems/Testers/ConVarTester.h"
-#include "Systems/Testers/ShotTester.h"
+//#include "Systems/Testers/ShotTester.h"
+#include "Systems/Testers/AutoAttackTester.h"
 #include "Systems/Testers/SpeedTester.h"
 #include "Systems/Testers/ConCommandTester.h"
 #include "Systems/Testers/SpamConnectTester.h"
@@ -87,7 +88,8 @@ void CNoCheatZPlugin::CreateSingletons ()
 	ConVarTester::CreateInstance ();
 	EyeAnglesTester::CreateInstance ();
 	JumpTester::CreateInstance ();
-	ShotTester::CreateInstance ();
+	//ShotTester::CreateInstance ();
+	AutoAttackTester::CreateInstance ();
 	SpamChangeNameTester::CreateInstance ();
 	SpamConnectTester::CreateInstance ();
 	SpeedTester::CreateInstance ();
@@ -104,7 +106,8 @@ void CNoCheatZPlugin::DestroySingletons ()
 	SpeedTester::DestroyInstance ();
 	SpamConnectTester::DestroyInstance ();
 	SpamChangeNameTester::DestroyInstance ();
-	ShotTester::DestroyInstance ();
+	//ShotTester::DestroyInstance ();
+	AutoAttackTester::DestroyInstance ();
 	JumpTester::DestroyInstance ();
 	EyeAnglesTester::DestroyInstance ();
 	ConVarTester::DestroyInstance ();
@@ -340,10 +343,13 @@ const char *CNoCheatZPlugin::GetPluginDescription ( void )
 // Purpose: called on level start
 //---------------------------------------------------------------------------------
 void CNoCheatZPlugin::LevelInit ( char const *pMapName )
-{
+{	
 	Logger::GetInstance ()->Msg<MSG_LOG> ( Helpers::format ( "PLAYING ON A NEW MAP : %s", pMapName ) );
 
 	Logger::GetInstance ()->Flush ();
+	
+	GlobalTimer::GetInstance ()->EnterSection (); // reset timer
+	
 	NczPlayerManager::GetInstance ()->OnLevelInit ();
 
 	BanRequest::GetInstance ()->OnLevelInit ();
@@ -496,7 +502,8 @@ SourceSdk::PLUGIN_RESULT CNoCheatZPlugin::ClientConnect ( bool *bAllowConnect, S
 	JumpTester::GetInstance ()->ResetPlayerDataStruct ( player );
 	EyeAnglesTester::GetInstance ()->ResetPlayerDataStruct ( player );
 	ConVarTester::GetInstance ()->ResetPlayerDataStruct ( player );
-	ShotTester::GetInstance ()->ResetPlayerDataStruct ( player );
+	//ShotTester::GetInstance ()->ResetPlayerDataStruct ( player );
+	AutoAttackTester::GetInstance ()->ResetPlayerDataStruct ( player );
 	SpeedTester::GetInstance ()->ResetPlayerDataStruct ( player );
 	ConCommandTester::GetInstance ()->ResetPlayerDataStruct ( player );
 	AntiFlashbangBlocker::GetInstance ()->ResetPlayerDataStruct ( player );
@@ -520,21 +527,24 @@ SourceSdk::PLUGIN_RESULT CNoCheatZPlugin::RT_ClientCommand ( SourceSdk::edict_t 
 	}
 
 	PlayerHandler::const_iterator ph ( NczPlayerManager::GetInstance ()->GetPlayerHandlerByEdict ( pEntity ) );
+
+	if( stricmp ( args[ 0 ], "joingame" ) == 0 || stricmp ( args[ 0 ], "jointeam" ) == 0 || stricmp ( args[ 0 ], "joinclass" ) == 0 )
+	{
+		if( ValidationTester::GetInstance ()->JoinCallback ( ph ) )
+			return SourceSdk::PLUGIN_STOP;
+	}
 	
-	if( ph >= SlotStatus::PLAYER_CONNECTED ) // FIXME : U no process connecting players ??
+	if( ph >= SlotStatus::PLAYER_CONNECTED )
 	{
 		DebugMessage ( Helpers::format ( "CNoCheatZPlugin::ClientCommand (pEntity:%p -> pEntity->classname:%s -> clientname:%s, args:%s)", pEntity, pEntity->GetClassName (), ph->GetName (), args.GetCommandString () ) );
 		if( ConCommandTester::GetInstance ()->RT_TestPlayerCommand ( ph, args.GetCommandString () ) )
 			return SourceSdk::PLUGIN_STOP;
-		if( stricmp ( args[ 0 ], "joingame" ) == 0 || stricmp ( args[ 0 ], "jointeam" ) == 0 || stricmp ( args[ 0 ], "joinclass" ) == 0 )
-		{
-			if( ValidationTester::GetInstance ()->JoinCallback ( ph ) )
-				return SourceSdk::PLUGIN_STOP;
-		}
 	}
 	else
 	{
-		Logger::GetInstance()->Msg<MSG_ERROR> ( Helpers::format ( "CNoCheatZPlugin::ClientCommand (pEntity:%p -> pEntity->classname:%s -> clientname:%s, args:%s) : Invalid SlotStatus, cannot process", pEntity, pEntity->GetClassName (), "", args.GetCommandString () ) );
+		Logger::GetInstance()->Msg<MSG_WARNING> ( Helpers::format ( "CNoCheatZPlugin::ClientCommand (pEntity:%p -> pEntity->classname:%s -> clientname:%s, args:%s) : Dangerous SlotStatus %s", pEntity, pEntity->GetClassName (), "", args.GetCommandString () , SlotStatusToString( ph.operator SlotStatus() )));
+		if( ConCommandTester::GetInstance ()->RT_TestPlayerCommand_Anon ( ph, args.GetCommandString () ) )
+			return SourceSdk::PLUGIN_STOP;
 	}
 
 	return SourceSdk::PLUGIN_CONTINUE;

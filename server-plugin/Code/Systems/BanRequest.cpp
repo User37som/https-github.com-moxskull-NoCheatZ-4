@@ -141,7 +141,16 @@ void BanRequest::BanInternal ( int ban_time, char const * steam_id, int userid, 
 		{
 			if( userid == -1 )
 			{
-				Logger::GetInstance ()->Msg<MSG_ERROR> ( "BanRequest::BanInternal : Bad userid -> Cannot forward to sm_ban command." );
+				Logger::GetInstance ()->Msg<MSG_WARNING> ( "BanRequest::BanInternal : Bad userid -> Cannot forward to sm_ban command." );
+				if( SteamGameServer_BSecure () )
+				{
+					Logger::GetInstance ()->Msg<MSG_HINT> ( "BanRequest::BanInternal : Using sm_addban ..." );
+					SourceSdk::InterfacesProxy::Call_ServerCommand ( Helpers::format ( "sm_addban %d \"%s\" \"%s\"\n", ban_time, steam_id, kick_message ) );
+				}
+				else
+				{
+					Logger::GetInstance ()->Msg<MSG_WARNING> ( "BanRequest::BanInternal : Server not steam-secured -> Cannot forward to sm_addban command." );
+				}
 			}
 			else
 			{
@@ -161,9 +170,13 @@ void BanRequest::BanInternal ( int ban_time, char const * steam_id, int userid, 
 		{
 			SourceSdk::InterfacesProxy::Call_ServerCommand ( Helpers::format ( "banid %d %s\n", ban_time, steam_id ) );
 		}
-		if( strcmp ( "127.0.0.1", ip ) )
+
+		basic_string ip_stripped ( ip );
+		ip_stripped.replace ( ':', '\0' );
+
+		if( ip_stripped != "0" && ip_stripped != "127.0.0.1" && ip_stripped != "localhost" )
 		{
-			SourceSdk::InterfacesProxy::Call_ServerCommand ( Helpers::format ( "addip 1440 \"%s\"\n", ip ) );
+			SourceSdk::InterfacesProxy::Call_ServerCommand ( Helpers::format ( "addip 1440 \"%s\"\n", ip_stripped.c_str() ) );
 		}
 
 		m_do_writeid = true;

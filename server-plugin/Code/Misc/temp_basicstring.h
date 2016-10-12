@@ -46,6 +46,11 @@ private:
 		}
 	}
 
+	inline void FixSilentRemovals ()
+	{
+		m_size = autolen ( m_alloc );
+	}
+
 	/*  -need- always contains the zero char. */
 	void Grow ( size_t need, bool copy = true )
 	{
@@ -249,21 +254,27 @@ public:
 
 	String<pod>& append ( pod const * t )
 	{
-		size_t const len ( autolen ( t ) + 1 );
-		Grow ( m_size + len );
-		memcpy ( m_alloc + m_size, t, sizeof ( pod ) * len );
-		m_size = autolen ( m_alloc );
+		if( *t != 0 )
+		{
+			size_t const len ( autolen ( t ) + 1 );
+			Grow ( m_size + len );
+			memcpy ( m_alloc + m_size, t, sizeof ( pod ) * len );
+			m_size = autolen ( m_alloc );
+		}
 		return *this;
 	}
 
 	String<pod>& append ( pod const c )
 	{
-		size_t pos ( m_size );
-		Grow ( pos + 2 ); // should be + 1 but when m_alloc is not allocated we also need to add '\0'
-		m_alloc[ pos ] = c;
-		++pos;
-		m_alloc[ pos ] = 0;
-		++m_size;
+		if( c != 0 )
+		{
+			size_t pos ( m_size );
+			Grow ( pos + 2 ); // should be + 1 but when m_alloc is not allocated we also need to add '\0'
+			m_alloc[ pos ] = c;
+			++pos;
+			m_alloc[ pos ] = 0;
+			++m_size;
+		}
 		return *this;
 	}
 
@@ -288,6 +299,11 @@ public:
 		return m_size;
 	}
 
+	size_t capacity () const
+	{
+		return m_capacity;
+	}
+
 	String<pod>& replace ( pod const replace_this, pod const replace_by )
 	{
 		__assume( m_alloc > 0 );
@@ -300,6 +316,7 @@ public:
 			}
 			while( *++me != 0 );
 		}
+		FixSilentRemovals ();
 
 		return *this;
 	}
@@ -314,6 +331,7 @@ public:
 				++replace_list;
 			}
 		}
+		FixSilentRemovals ();
 
 		return *this;
 	}
@@ -356,12 +374,12 @@ public:
 		{
 			if( diff <= 0 )
 			{
-				memcpy ( m_alloc + pos, replace_by.m_alloc, sizeof ( pod ) * replace_by.m_size - 1 );
+				memcpy ( m_alloc + pos, replace_by.m_alloc, sizeof ( pod ) * replace_by.m_size );
 				if( diff < 0 ) remove ( pos + replace_by.m_size, pos + replace_this.m_size - 1 );
 			}
 			else if( diff > 0 )
 			{
-				memcpy ( m_alloc + pos, replace_by.m_alloc, sizeof ( pod ) * replace_this.m_size - 1 );
+				memcpy ( m_alloc + pos, replace_by.m_alloc, sizeof ( pod ) * replace_this.m_size );
 				Grow ( m_size + diff + 1 );
 				size_t move_from_here ( m_size + diff );
 				size_t const move_until_here ( pos + replace_this.m_size - 1 );
@@ -375,6 +393,7 @@ public:
 			}
 			pos = find ( replace_this, pos );
 		}
+		FixSilentRemovals ();
 		return *this;
 	}
 
@@ -482,20 +501,34 @@ public:
 	{
 		if( !m_alloc )
 			return;
-		String<wchar_t> t;
+		/*String<wchar_t> t;
 		ConvertToWideChar ( *this, t );
 		t.lower ();
-		ConvertToChar ( t, *this );
+		ConvertToChar ( t, *this );*/
+
+		char * me ( m_alloc );
+		do
+		{
+			if( *me >= 'A' && *me <= 'Z' ) *me += 0x20;
+		}
+		while( *++me != 0);
 	}
 
 	inline void upper ()
 	{
 		if( !m_alloc )
 			return;
-		String<wchar_t> t;
+		/*String<wchar_t> t;
 		ConvertToWideChar ( *this, t );
 		t.upper ();
-		ConvertToChar ( t, *this );
+		ConvertToChar ( t, *this );*/
+
+		char * me ( m_alloc );
+		do
+		{
+			if( *me >= 'a' && *me <= 'z' ) *me -= 0x20;
+		}
+		while( *++me != 0 );
 	}
 
 	pod& operator[] ( size_t const index ) const

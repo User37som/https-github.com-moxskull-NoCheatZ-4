@@ -24,7 +24,8 @@ typedef enum class SlotStatus : unsigned int
 	BOT, // A bot ...
 	PLAYER_CONNECTING, // Not a bot, not connected
 	PLAYER_CONNECTED, // Connected as spectator or dead
-	PLAYER_IN_TESTS // Playing the round and shooting people everywhere like a mad nerd :)
+	PLAYER_IN_TESTS, // Playing the round and shooting people everywhere like a mad nerd :)
+	PLAYER_IN_TESTS_TAKEOVER // Controling a bot
 } SlotStatus_t;
 
 enum SlotFilterBehavior
@@ -116,7 +117,7 @@ namespace ProcessFilter
 	{
 		virtual bool CanProcessThisSlot ( SlotStatus const player_slot_status ) const
 		{
-			return TemplatedProcessFilter::CanProcessThisSlot<STATUS_STRICT, true, SlotStatus::PLAYER_IN_TESTS> ( player_slot_status );
+			return TemplatedProcessFilter::CanProcessThisSlot<STATUS_EQUAL_OR_BETTER, true, SlotStatus::PLAYER_IN_TESTS> ( player_slot_status );
 		}
 	};
 
@@ -125,7 +126,7 @@ namespace ProcessFilter
 	{
 		virtual bool CanProcessThisSlot ( SlotStatus const player_slot_status ) const
 		{
-			return TemplatedProcessFilter::CanProcessThisSlot<STATUS_STRICT, false, SlotStatus::PLAYER_IN_TESTS> ( player_slot_status );
+			return TemplatedProcessFilter::CanProcessThisSlot<STATUS_EQUAL_OR_BETTER, false, SlotStatus::PLAYER_IN_TESTS> ( player_slot_status );
 		}
 	};
 
@@ -209,6 +210,32 @@ namespace ProcessFilter
 			return player_slot_status == SlotStatus::BOT || player_slot_status == SlotStatus::TV;
 		}
 	};
+}
+
+inline const char * const SlotStatusToString ( SlotStatus_t status )
+{
+	switch( status )
+	{
+		case SlotStatus::INVALID:
+			return "INVALID";
+		case SlotStatus::KICK:
+			return "KICK";
+		case SlotStatus::TV:
+			return "TV";
+		case SlotStatus::BOT:
+			return "BOT";
+		case SlotStatus::PLAYER_CONNECTING:
+			return "PLAYER_CONNECTING";
+		case SlotStatus::PLAYER_CONNECTED:
+			return "PLAYER_CONNECTED";
+		case SlotStatus::PLAYER_IN_TESTS:
+			return "PLAYER_IN_TESTS";
+		case SlotStatus::PLAYER_IN_TESTS_TAKEOVER:
+			return "PLAYER_IN_TESTS_TAKEOVER";
+		default:
+			Assert ( 0 && "Undefined SLoStatus in SlotStatusToString" );
+			return "ERROR";
+	}
 }
 
 #endif // PROCESSFILTER_H

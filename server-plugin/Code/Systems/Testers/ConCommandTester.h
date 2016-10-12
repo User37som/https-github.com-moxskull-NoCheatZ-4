@@ -162,6 +162,7 @@ private:
 public:
 	/* Called by the plugin */
 	bool RT_TestPlayerCommand ( PlayerHandler::const_iterator ph, const basic_string& command );
+	bool RT_TestPlayerCommand_Anon ( PlayerHandler::const_iterator ph, const basic_string& command );
 
 private:
 	void AddCommandInfo ( const basic_string& name, const bool ignore = false, const bool ban = false );

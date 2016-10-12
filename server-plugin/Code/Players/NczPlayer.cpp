@@ -36,6 +36,7 @@ NczPlayer::NczPlayer ( const int index ) :
 	m_edict ( Helpers::PEntityOfEntIndex ( index ) ),
 	m_channelinfo ( SourceSdk::InterfacesProxy::Call_GetPlayerNetInfo ( index ) ),
 	m_playerinfo ( nullptr ),
+	m_takeover( ),
 	m_time_connected ( 0.0 )
 {}
 
@@ -320,6 +321,16 @@ WpnShotType const NczPlayer::GetWpnShotType () const
 	return HAND;
 }
 
+void NczPlayer::EnterBotTakeover ( int bot_ent_index )
+{
+	m_takeover = bot_ent_index;
+}
+
+void NczPlayer::StopBotTakeover ()
+{
+	m_takeover = std::numeric_limits<int>::max();
+}
+
 int const NczPlayer::aimingAt ()
 {
 	SourceSdk::CTraceFilterWorldAndPropsOnly filter;
@@ -380,6 +391,11 @@ int const NczPlayer::aimingAt ()
 		}
 	}
 	return -1;
+}
+
+int NczPlayer::GetTakeover () const
+{
+	return m_takeover;
 }
 
 void NczPlayer::OnConnect ()

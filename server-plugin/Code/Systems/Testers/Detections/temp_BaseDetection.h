@@ -49,6 +49,8 @@ public:
 
 	void PrepareDetectionData ( playerDataStructT* dataStruct )
 	{
+		static_assert ( std::is_copy_assignable<playerDataStructT>::value, "Data must be copy-assignable" );
+
 		this->m_timestamp = Plat_FloatTime ();
 		if( SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive )
 		{
@@ -102,8 +104,8 @@ public:
 		SourceSdk::InterfacesProxy::Call_LogPrint ( text2 );
 		Helpers::chatprintf ( text2 );
 
+		Helpers::writeToLogfile ( NCZ_VERSION_GIT );
 		Helpers::writeToLogfile ( this->GetDataDump () );
-
 	};
 
 	void PrepareDetectionLog ( NczPlayer* player, BaseSystem* tester )

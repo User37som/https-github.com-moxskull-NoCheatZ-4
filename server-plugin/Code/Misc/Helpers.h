@@ -48,6 +48,8 @@ namespace Helpers
 	/* Permet d'avoir un format style C dans un conteneur C++ */
 	const char * format ( const char *fmt, ... );
 
+	int GetGameTickCount ();
+
 	/* Retourne vrai si la valeur est impaire ... */
 	bool isOdd ( const int value );
 

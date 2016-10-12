@@ -1,0 +1,6 @@
+Debug/
+Release/
+*.so
+*.exe
+error_compile.txt
+error_link.txt

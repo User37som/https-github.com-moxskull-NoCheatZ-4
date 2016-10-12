@@ -25,7 +25,7 @@ else
 	echo "Configuring protobuf 2.5.0"
 	chmod +x autogen.sh
 	./autogen.sh
-	./configure --build=i686-pc-linux-gnu --prefix=/usr CFLAGS="-m32 -DNDEBUG" CXXFLAGS="-m32 -DNDEBUG" LDFLAGS=-m32
+	./configure --build=i686-pc-linux-gnu --prefix=/usr CFLAGS="-m32 -DNDEBUG" CXXFLAGS="-m32 -DNDEBUG" LDFLAGS=-m32 CXX=$1
 	echo "Building protobuf 2.5.0"
 	make -j6
 fi

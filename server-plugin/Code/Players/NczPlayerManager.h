@@ -22,8 +22,9 @@
 #include "SdkPreprocessors.h"
 #include "Interfaces/IGameEventManager/IGameEventManager.h"
 
-#include "Preprocessors.h"
 #include "NczPlayer.h"
+
+#include "Preprocessors.h"
 #include "Players/ProcessFilter.h"
 #include "Misc/temp_singleton.h"
 #include "Misc/Helpers.h"
@@ -360,10 +361,10 @@ class NczPlayerManager :
 private:
 	static PlayerHandler FullHandlersList[ MAX_PLAYERS + 1 ];
 	int m_max_index;
-
+	
 public:
 	NczPlayerManager ();
-	virtual ~NczPlayerManager () final;
+	virtual ~NczPlayerManager ();
 
 	/* Force la mise à jour des slots en scannant la mémoire pour EdictList
 	   S'inscrit aux événements pour mettre à jour les slots en temps réel */
