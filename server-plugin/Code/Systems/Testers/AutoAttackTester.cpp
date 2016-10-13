@@ -145,6 +145,8 @@ void AutoAttackTester::OnAttack1Up ( PlayerHandler::const_iterator ph, int game_
 
 	pdata->attack1_up_tick = game_tick;
 	pdata->attack1_sustain_stats.Store ( pdata->attack1_down_tick - game_tick, pdata->attack1_down_tick );
+
+	FindDetection ( ph, &( pdata->attack1_sustain_stats ) );
 }
 
 void AutoAttackTester::OnAttack1Down ( PlayerHandler::const_iterator ph, int game_tick )
@@ -160,6 +162,8 @@ void AutoAttackTester::OnAttack2Up ( PlayerHandler::const_iterator ph, int game_
 
 	pdata->attack2_up_tick = game_tick;
 	pdata->attack2_sustain_stats.Store ( pdata->attack2_down_tick - game_tick, pdata->attack2_down_tick );
+
+	FindDetection ( ph, &( pdata->attack2_sustain_stats ) );
 }
 
 void AutoAttackTester::OnAttack2Down ( PlayerHandler::const_iterator ph, int game_tick )
