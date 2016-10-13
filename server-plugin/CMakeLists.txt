@@ -55,7 +55,7 @@ ADD_LIBRARY(nocheatzX SHARED ${server-plugin_SRC})
 set_target_properties(nocheatzX PROPERTIES
   PREFIX ""
 )
-target_link_libraries(nocheatzX "${PROJECT_SOURCE_DIR}/SourceSdk/Interfaces/Protobuf/protobuf-2.5.0/src/.libs/libprotobuf.a")
+target_link_libraries(nocheatzX ${CMAKE_DL_LIBS} "${PROJECT_SOURCE_DIR}/SourceSdk/Interfaces/Protobuf/protobuf-2.5.0/src/.libs/libprotobuf.a")
 set(CMAKE_SHARED_LINKER_FLAGS "-Wl,--as-needed,--no-undefined -static-libgcc -ldl -lm -m32")
 message ("compiling protobuf")
 execute_process(
