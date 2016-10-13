@@ -42,7 +42,7 @@ int Throwback_SpinTest_5values ( int v1, int v2, int v3, int v4, int v5, int v6,
 	tb.Store ( v8, 0 );
 	tb.Store ( v9, 0 );
 
-	tb_int::inner_type values[ 2 ];
+	tb_int::inner_type values[ 5 ];
 	size_t amount;
 
 	tb.CopyHistory ( values, amount );
