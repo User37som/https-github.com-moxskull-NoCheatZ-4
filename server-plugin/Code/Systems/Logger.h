@@ -59,18 +59,30 @@ class Logger :
 {
 	typedef Singleton<Logger> singleton_class;
 
+	typedef void ( *MsgFunc_t ) ( const char* pMsg, ... );
+
 private:
 	CUtlVector<basic_string> m_msg;
 	basic_string const prolog;
 
+	MsgFunc_t m_msg_func;
+
 public:
-	Logger () : BaseStaticSystem ( "Logger" ), singleton_class (), m_msg (), prolog ( "[NoCheatZ " NCZ_VERSION_STR "] " )
-	{};
+	Logger () : BaseStaticSystem ( "Logger" ), singleton_class (), m_msg (), prolog ( "[NoCheatZ " NCZ_VERSION_STR "] " ), m_msg_func( nullptr )
+	{
+		ConnectToServerConsole ();
+	};
 	virtual ~Logger () override final
-	{};
+	{
+		m_msg_func = nullptr;
+	};
 
 	virtual void Init () override final
 	{};
+
+	void ConnectToServerConsole ();
+
+	inline bool IsConsoleConnected () const;
 
 	void Push ( const char * msg );
 	void Flush ();
@@ -84,6 +96,11 @@ public:
 		Msg<type> ( msg.c_str (), verbose );
 	}
 };
+
+inline bool Logger::IsConsoleConnected () const
+{
+	return m_msg_func != nullptr;
+}
 
 #define SystemVerbose1(x) Logger::GetInstance()->Msg<MSG_VERBOSE1>(x, this->m_verbose)
 #define SystemVerbose2(x) Logger::GetInstance()->Msg<MSG_VERBOSE2>(x, this->m_verbose)

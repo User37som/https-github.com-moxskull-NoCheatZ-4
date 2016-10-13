@@ -24,6 +24,66 @@
 #include "Players/NczPlayerManager.h"
 #include "Systems/AutoTVRecord.h"
 
+#ifdef GNUC
+
+#include <dlfcn.h>
+
+void * GetModuleHandle ( const char *name )
+{
+	void *handle ( dlopen ( name, RTLD_NOW ) );
+
+	if( handle == nullptr )
+	{
+		return nullptr;
+	}
+
+	dlclose ( handle );
+	return handle;
+}
+
+#endif
+
+void Logger::ConnectToServerConsole ()
+{
+	/* Too lazy to compile with tier0, now pay the price ... */
+
+#ifdef WIN32
+	*(void **)&m_msg_func = GetProcAddress ( GetModuleHandleA ( "tier0.dll" ), "Msg" );
+
+#else
+
+	void* module ( GetModuleHandle ( "libtier0_srv.so" ) );
+	if( module == nullptr )
+	{
+		module = GetModuleHandle ( "tier0_srv.so" );
+	}
+	if( module == nullptr )
+	{
+		module = GetModuleHandle ( "libtier0.so" );
+	}
+	if( module == nullptr )
+	{
+		module = GetModuleHandle ( "tier0.so" );
+	}
+	if( module == nullptr )
+	{
+		std::cout << "Unable to locate any tier0 shared library.\n" ;
+		return;
+	}
+
+	*( void ** ) &m_msg_func = dlsym ( module, "Msg" );
+#endif
+
+	if( m_msg_func == nullptr )
+	{
+		std::cout << "Unable to locate tier0.Msg function.\n";
+	}
+	else
+	{
+		std::cout << "Connected to console.\n";
+	}
+}
+
 void Logger::Push ( const char * msg )
 {
 	/*
@@ -74,12 +134,20 @@ void Logger::Push ( const char * msg )
 template <>
 void Logger::Msg<MSG_CONSOLE> ( const char * msg, int verbose /*= 0*/ )
 {
-	std::cout << prolog.c_str () << ' ' << Plat_FloatTime() << ' ' << msg << '\n';
+	if( this->IsConsoleConnected () )
+	{
+		m_msg_func ( "%s%f %s\n", prolog.c_str (), Plat_FloatTime (), msg );
+	}
+	else
+	{
+		std::cout << prolog.c_str () << Plat_FloatTime () << ' ' << msg << '\n';
 #ifdef WIN32
-	OutputDebugStringA ( prolog.c_str () );
-	OutputDebugStringA ( msg );
-	OutputDebugStringA ( "\n" );
+		OutputDebugStringA ( prolog.c_str () );
+		OutputDebugStringA ( msg );
+		OutputDebugStringA ( "\n" );
 #endif
+	}
+
 }
 
 template <>
@@ -138,7 +206,8 @@ void Logger::Msg<MSG_ERROR> ( const char * msg, int verbose /*= 0*/ )
 template <>
 void Logger::Msg<MSG_HINT> ( const char * msg, int verbose /*= 0*/ )
 {
-	std::cerr << prolog.c_str () << Plat_FloatTime () << " : " << msg << '\n';
+	//std::cerr << prolog.c_str () << Plat_FloatTime () << " : " << msg << '\n';
+	Msg<MSG_CONSOLE> ( msg, verbose );
 }
 
 template <>
@@ -162,10 +231,7 @@ void Logger::Msg<MSG_VERBOSE2> ( const char * msg, int verbose /*= 0*/ )
 template <>
 void Logger::Msg<MSG_DEBUG> ( const char * msg, int verbose /*= 0*/ )
 {
-	if( verbose > 2 )
-	{
-		Msg<MSG_CONSOLE> ( basic_string ( "DEBUG : " ).append ( msg ) );
-	}
+	Msg<MSG_CONSOLE> ( basic_string ( "DEBUG : " ).append ( msg ) );
 }
 
 void Logger::Flush ()
