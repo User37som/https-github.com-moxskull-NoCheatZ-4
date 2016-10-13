@@ -103,8 +103,8 @@ PlayerRunCommandRet AutoAttackTester::RT_PlayerRunCommandCallback ( PlayerHandle
 	}
 	else
 	{
-		int const last_buttons ( static_cast< SourceSdk::CUserCmd_csgo* >( lastcmd )->buttons );
-		int const cur_buttons ( static_cast< SourceSdk::CUserCmd_csgo* >( pCmd )->buttons );
+		int const last_buttons ( static_cast< SourceSdk::CUserCmd* >( lastcmd )->buttons );
+		int const cur_buttons ( static_cast< SourceSdk::CUserCmd* >( pCmd )->buttons );
 
 		int const attack1_button_changed ( ( last_buttons ^ cur_buttons ) & ( IN_ATTACK ) );
 		int const attack2_button_changed ( ( last_buttons ^ cur_buttons ) & ( IN_ATTACK2 ) );
@@ -144,7 +144,7 @@ void AutoAttackTester::OnAttack1Up ( PlayerHandler::const_iterator ph, int game_
 	AttackTriggerStats * const pdata ( GetPlayerDataStructByIndex ( ph.GetIndex () ) );
 
 	pdata->attack1_up_tick = game_tick;
-	pdata->attack1_sustain_stats.Store ( pdata->attack1_down_tick - game_tick, pdata->attack1_down_tick );
+	pdata->attack1_sustain_stats.Store ( game_tick - pdata->attack1_down_tick , pdata->attack1_down_tick );
 
 	FindDetection ( ph, &( pdata->attack1_sustain_stats ) );
 }
@@ -161,7 +161,7 @@ void AutoAttackTester::OnAttack2Up ( PlayerHandler::const_iterator ph, int game_
 	AttackTriggerStats * const pdata ( GetPlayerDataStructByIndex ( ph.GetIndex () ) );
 
 	pdata->attack2_up_tick = game_tick;
-	pdata->attack2_sustain_stats.Store ( pdata->attack2_down_tick - game_tick, pdata->attack2_down_tick );
+	pdata->attack2_sustain_stats.Store ( game_tick - pdata->attack2_down_tick , pdata->attack2_down_tick );
 
 	FindDetection ( ph, &( pdata->attack2_sustain_stats ) );
 }

@@ -5,7 +5,7 @@
 
 // TEST FUNCTIONS
 
-int Throwback_SpinTest_2values (int v1, int v2, int v3)
+int Throwback_SpinTest_2values ( int v1, int v2, int v3 )
 {
 	typedef Throwback_Arithmetic<int, int, 2> tb_int;
 
@@ -24,6 +24,30 @@ int Throwback_SpinTest_2values (int v1, int v2, int v3)
 	tb.CopyHistory ( values, amount );
 
 	return values[ 1 ].v; // return the oldest value in history
+}
+
+int Throwback_SpinTest_5values ( int v1, int v2, int v3, int v4, int v5, int v6, int v7, int v8, int v9 )
+{
+	typedef Throwback_Arithmetic<int, int, 5> tb_int;
+
+	tb_int tb;
+
+	tb.Store ( v1, 0 );
+	tb.Store ( v2, 0 );
+	tb.Store ( v3, 0 );
+	tb.Store ( v4, 0 );
+	tb.Store ( v5, 0 );
+	tb.Store ( v6, 0 );
+	tb.Store ( v7, 0 );
+	tb.Store ( v8, 0 );
+	tb.Store ( v9, 0 );
+
+	tb_int::inner_type values[ 2 ];
+	size_t amount;
+
+	tb.CopyHistory ( values, amount );
+
+	return values[ 1 ].v; // return the second value ( past the latest stored = v8 )
 }
 
 float Throwback_AvgTest ( int v1, int v2, int v3 )
@@ -69,7 +93,8 @@ int Throwback_MaxTest ( int v1, int v2, int v3 )
 
 TEST ( Throwback_Class, SpinTest )
 {
-	ASSERT_EQ ( 4, Throwback_SpinTest_2values(5,8,4) );
+	ASSERT_EQ ( 4, Throwback_SpinTest_2values ( 5, 8, 4 ) );
+	ASSERT_EQ ( 8, Throwback_SpinTest_5values ( 1, 2, 3, 4, 5, 6, 7, 8, 9 ) );
 }
 
 TEST ( Throwback_Class, AvgTest )
@@ -80,7 +105,7 @@ TEST ( Throwback_Class, AvgTest )
 
 TEST ( Throwback_Class, AvgTest_Neg )
 {
-	ASSERT_EQ ( -5.0f/3.0f, Throwback_AvgTest ( 0, -10, 5 ) );
+	ASSERT_EQ ( -5.0f / 3.0f, Throwback_AvgTest ( 0, -10, 5 ) );
 }
 
 TEST ( Throwback_Class, MinTest )
@@ -121,7 +146,7 @@ TEST ( Sring_Class, Constructors )
 	basic_string s ( t.c_str () );
 	ASSERT_STREQ ( "a", s.c_str () );
 
-	basic_string q ( std::move(t) );
+	basic_string q ( std::move ( t ) );
 	ASSERT_STREQ ( "a", q.c_str () );
 	ASSERT_STREQ ( "", t.c_str () );
 	ASSERT_TRUE ( t.isempty () );
@@ -145,7 +170,7 @@ TEST ( Sring_Class, Assignements )
 	g = std::move ( t );
 	ASSERT_STREQ ( "u", g.c_str () );
 	ASSERT_STREQ ( "", t.c_str () );
-	ASSERT_TRUE ( t.isempty() );
+	ASSERT_TRUE ( t.isempty () );
 }
 
 TEST ( Sring_Class, Booleans )
@@ -155,7 +180,7 @@ TEST ( Sring_Class, Booleans )
 
 	ASSERT_TRUE ( g == q );
 	ASSERT_FALSE ( g == "egg" );
-	ASSERT_FALSE ( g.isempty() );
+	ASSERT_FALSE ( g.isempty () );
 	//ASSERT_TRUE ( basic_string::IsValidMultibyteString(q )); // This fucking function takes 23 ms !!!!!
 }
 

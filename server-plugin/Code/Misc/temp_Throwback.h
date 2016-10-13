@@ -48,68 +48,38 @@ private:
 	inner_type m_stack[ count ];
 	inner_type* m_current;
 
-	/*
-		Returns the index of the internal pointer as m_stack[index];
-	*/
-	inline int GetCurrentIndex ()
-	{
-		return m_current - m_stack;
-	}
-
-	/*
-		Returns the pointer the last internal element
-	*/
-	inline inner_type* GetLastPointer ()
-	{
-		return m_stack + count - 1;
-	}
-
-	/*
-		Returns the index of the internal pointer starting from the end of the stack
-	*/
-	inline int GetCurrentIndexReverse ()
-	{
-		return count - 1 - GetCurrentIndex ();
-	}
-
-	template <size_t distance = 1>
 	inner_type * GetForward ()
 	{
-		static_assert ( distance < count, "distance collides with size" );
-
-		if( (m_current + distance) > GetLastPointer () )
+		if( ( m_current + 1 ) >= ( m_stack + count ) )
 		{
-			return m_stack + ( ( distance + GetCurrentIndex () ) % count );
+			return m_stack;
 		}
 		else
 		{
-			return m_current + distance;
+			return m_current + 1;
 		}
 	}
 
-	template <size_t distance = 1>
 	inner_type * GetBackward ()
 	{
-		static_assert ( distance < count, "distance collides with size" );
-
-		if( m_current - distance < m_stack )
+		if( m_current == m_stack )
 		{
-			return GetLastPointer () - ( ( distance + GetCurrentIndexReverse () ) % count );
+			return m_stack + count - 1;
 		}
 		else
 		{
-			return m_current - distance;
+			return m_current - 1;
 		}
 	}
 
 	void GoForward ()
 	{
-		m_current = GetForward<1> ();
+		m_current = GetForward ();
 	}
 
 	void GoBackward ()
 	{
-		m_current = GetBackward<1> ();
+		m_current = GetBackward ();
 	}
 
 public:
@@ -126,7 +96,7 @@ public:
 		while( m_current != cp_current );
 	}
 
-	Throwback_Arithmetic () :	m_current ( m_stack )
+	Throwback_Arithmetic () :	m_current ( &(m_stack[0]) )
 	{
 		static_assert ( std::is_arithmetic< value_type>::value, "value_type is not arithmetic" );
 		static_assert ( std::is_arithmetic< time_type>::value, "time_type is not arithmetic" );
@@ -137,7 +107,7 @@ public:
 
 	Throwback_Arithmetic ( this_type const & other ) : m_current ( m_stack + ( other.m_current - other.m_stack ) )
 	{
-		memcpy ( m_stack, other.m_stack, sizeof ( value_type ) * count );
+		memcpy ( m_stack, other.m_stack, sizeof ( inner_type ) * count );
 	}
 
 	Throwback_Arithmetic ( value_type const & v ) : Throwback_Arithmetic ()
@@ -149,11 +119,21 @@ public:
 	{
 	}
 
+	Throwback_Arithmetic& operator=( this_type const & other )
+	{
+		Assert ( this != &other );
+
+		memcpy ( m_stack, other.m_stack, sizeof ( inner_type ) * count );
+		m_current = m_stack + ( other.m_current - other.m_stack );
+
+		return *this;
+	}
+
 	void Revert ()
 	{
-		inner_type const * const past ( GetBackward<1> () );
+		inner_type const * const past ( GetBackward () );
 		GoForward ();
-		*m_current = *past;
+		memcpy ( m_current, past, sizeof ( inner_type ) );
 	}
 
 	/*value_type operator value_type() const
@@ -175,7 +155,7 @@ public:
 
 	void CopyHistory ( inner_type* dest, size_t& amount, size_t max_amount = count, time_type time_range = std::numeric_limits<time_type>::max (), time_type now = std::numeric_limits<time_type>::max () )
 	{
-		inner_type const * const cp_current ( m_current );
+		inner_type * const cp_current ( m_current );
 		amount = 0;
 
 		do
@@ -188,6 +168,10 @@ public:
 			{
 				break;
 			}
+			if( amount >= max_amount )
+			{
+				break;
+			}
 			memcpy ( dest, m_current, sizeof ( inner_type ) );
 			//*dest = m_current->v;
 			++dest;
@@ -195,12 +179,14 @@ public:
 			GoBackward ();
 		}
 		while( m_current != cp_current );
+
+		m_current = cp_current;
 	}
 
 	float Average ( value_type range_value_min = std::numeric_limits<value_type>::min(),
 					value_type range_value_max = std::numeric_limits<value_type>::max ())
 	{
-		inner_type const * const cp_current ( m_current );
+		inner_type * const cp_current ( m_current );
 		value_type sum ( 0 );
 
 		size_t amount ( 0 );
@@ -220,16 +206,17 @@ public:
 		}
 		while( m_current != cp_current );
 
+		m_current = cp_current;
+
 		return (float)sum / (float) amount;
 	}
 
 	value_type Min ()
 	{
-		inner_type const * const cp_current ( m_current );
+		inner_type * const cp_current ( m_current );
 		value_type min ( m_current->v );
 
-		GoBackward ();
-		while( m_current != cp_current )
+		do
 		{
 			if( m_current->v == std::numeric_limits<value_type>::max () && m_current->t == std::numeric_limits<time_type>::max () )
 			{
@@ -241,17 +228,19 @@ public:
 			}
 			GoBackward ();
 		}
+		while( m_current != cp_current );
+
+		m_current = cp_current;
 
 		return min;
 	}
 
 	value_type Max ()
 	{
-		inner_type const * const cp_current ( m_current );
+		inner_type * const cp_current ( m_current );
 		value_type max ( m_current->v );
 
-		GoBackward ();
-		while( m_current != cp_current )
+		do
 		{
 			if( m_current->v == std::numeric_limits<value_type>::max () && m_current->t == std::numeric_limits<time_type>::max () )
 			{
@@ -263,18 +252,20 @@ public:
 			}
 			GoBackward ();
 		}
+		while( m_current != cp_current );
+
+		m_current = cp_current;
 
 		return max;
 	}
 
 	time_type TimeSpan ()
 	{
-		inner_type const * const cp_current ( m_current );
+		inner_type * const cp_current ( m_current );
 		inner_type const * min ( m_current );
 		time_type const max ( m_current->t );
 
-		GoBackward ();
-		while( m_current != cp_current )
+		do
 		{
 			if( m_current->v == std::numeric_limits<value_type>::max () && m_current->t == std::numeric_limits<time_type>::max () )
 			{
@@ -283,6 +274,9 @@ public:
 			min = m_current;
 			GoBackward ();
 		}
+		while( m_current != cp_current );
+
+		m_current = cp_current;
 
 		return max - min->t;
 	}

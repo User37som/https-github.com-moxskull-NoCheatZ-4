@@ -41,10 +41,21 @@ struct AttackTriggerStats
 	AttackTriggerStats () : attack1_sustain_stats(), attack2_sustain_stats()
 	{
 	};
-	AttackTriggerStats ( const AttackTriggerStats& other )
+	AttackTriggerStats ( const AttackTriggerStats& other ) : attack1_sustain_stats (other.attack1_sustain_stats), attack2_sustain_stats ( other.attack2_sustain_stats )
 	{
-		memcpy ( this, &other, sizeof ( AttackTriggerStats ) );
+		memcpy ( this, &other, sizeof ( int ) * 4);
 	};
+
+	AttackTriggerStats& operator=( const AttackTriggerStats& other )
+	{
+		Assert ( this != &other );
+
+		memcpy ( this, &other, sizeof ( int ) * 4 );
+		attack1_sustain_stats = other.attack1_sustain_stats;
+		attack2_sustain_stats = other.attack2_sustain_stats;
+
+		return *this;
+	}
 };
 
 class AutoAttackTester :
