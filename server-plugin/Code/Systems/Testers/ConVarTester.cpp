@@ -154,7 +154,7 @@ bool ConVarTester::sys_cmd_fn ( const SourceSdk::CCommand &args )
 			else if( stricmp ( "SAME_FLOAT_AS_SERVER", args.Arg ( 5 ) ) == 0 ) rule = ConVarRule::SAME_FLOAT_AS_SERVER;
 			else
 			{
-				printf ( "Arg %s not found.\n", args.Arg ( 5 ) );
+				Logger::GetInstance()->Msg<MSG_CONSOLE> ( Helpers::format ( "Arg %s not found.", args.Arg ( 5 ) ) );
 				return true;
 			}
 
@@ -175,12 +175,12 @@ bool ConVarTester::sys_cmd_fn ( const SourceSdk::CCommand &args )
 			}
 
 			AddConvarRuleset ( args.Arg ( 3 ), args.Arg ( 4 ), rule, false );
-			printf ( "Added convar test rule.\n" );
+			Logger::GetInstance ()->Msg<MSG_CONSOLE> ( "Added convar test rule." );
 			return true;
 		}
 		else
 		{
-			printf ( "ncz ConVarTester AddRule [ConVar] [value] [TestType]\nTestType : NO_VALUE - SAME - SAME_FLOAT - SAME_AS_SERVER - SAME_FLOAT_AS_SERVER\n" );
+			Logger::GetInstance ()->Msg<MSG_CONSOLE> ( "ncz ConVarTester AddRule [ConVar] [value] [TestType]\nTestType : NO_VALUE - SAME - SAME_FLOAT - SAME_AS_SERVER - SAME_FLOAT_AS_SERVER" );
 			return true;
 		}
 	}
@@ -197,7 +197,7 @@ bool ConVarTester::sys_cmd_fn ( const SourceSdk::CCommand &args )
 			}
 			++pos;
 		}
-		printf ( "Can't find such convar to remove.\n" );
+		Logger::GetInstance ()->Msg<MSG_CONSOLE> ( "Can't find such convar to remove." );
 		return false;
 	}
 	else if( stricmp ( "ResetRules", args.Arg ( 2 ) ) == 0 )

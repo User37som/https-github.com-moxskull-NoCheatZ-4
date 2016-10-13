@@ -85,18 +85,12 @@ PlayerRunCommandRet EyeAnglesTester::RT_PlayerRunCommandCallback ( PlayerHandler
 
 	if( playerData->x.abs_value > 89.0f || playerData->z.abs_value > 0.0f || playerData->y.abs_value > 180.0f )
 	{
-#		ifdef DEBUG
-		printf ( "Player %s : Bad Eye Angles %f, %f, %f\n", ph->GetName (), playerData->x.value, playerData->y.value, playerData->z.value );
-#		endif
 		if( playerData->ignore_last ) --( playerData->ignore_last );
 		else drop_cmd = PlayerRunCommandRet::INERT;
 	}
 
 	if( drop_cmd > PlayerRunCommandRet::CONTINUE )
 	{
-#		ifdef DEBUG
-		printf ( "Player %s : Droping command #%d\n", ph->GetName (), static_cast< SourceSdk::CUserCmd_csgo* >( pCmd )->command_number );
-#		endif
 		if( playerData->x.abs_value > 89.0f )
 		{
 			++playerData->x.detectionsCount;

@@ -44,19 +44,19 @@ bool BanRequest::sys_cmd_fn ( const SourceSdk::CCommand &args )
 		if( stricmp ( "Yes", args.Arg ( 3 )) == 0  )
 		{
 			m_can_kick = true;
-			printf ( "NoCheatZ is: Able to kick (%s), Able to ban (%s)\n", Helpers::boolToString ( m_can_kick ), Helpers::boolToString ( m_can_ban ) );
+			Logger::GetInstance ()->Msg<MSG_CONSOLE> ( Helpers::format ( "NoCheatZ is: Able to kick (%s), Able to ban (%s)", Helpers::boolToString ( m_can_kick ), Helpers::boolToString ( m_can_ban ) ) );
 			return true;
 		}
 		else if (stricmp ( "No", args.Arg ( 3 )) == 0 )
 		{
 			m_can_kick = false;
 			m_can_ban = false;
-			printf ( "NoCheatZ is: Able to kick (%s), Able to ban (%s)\n", Helpers::boolToString ( m_can_kick ), Helpers::boolToString ( m_can_ban ) );
+			Logger::GetInstance ()->Msg<MSG_CONSOLE> ( Helpers::format ( "NoCheatZ is: Able to kick (%s), Able to ban (%s)", Helpers::boolToString ( m_can_kick ), Helpers::boolToString ( m_can_ban ) ) );
 			return true;
 		}
 		else
 		{
-			printf ( "Available arguments for \"ncz BanRequest CanKick\" : Yes - No\n" );
+			Logger::GetInstance ()->Msg<MSG_CONSOLE> ( Helpers::format ( "Available arguments for \"ncz BanRequest CanKick\" : Yes - No" ) );
 		}
 	}
 	else if( stricmp ( "CanBan", args.Arg ( 2 ) ) == 0 )
@@ -65,22 +65,22 @@ bool BanRequest::sys_cmd_fn ( const SourceSdk::CCommand &args )
 		{
 			m_can_kick = true;
 			m_can_ban = true;
-			printf ( "NoCheatZ is: Able to kick (%s), Able to ban (%s)\n", Helpers::boolToString ( m_can_kick ), Helpers::boolToString ( m_can_ban ) );
+			Logger::GetInstance ()->Msg<MSG_CONSOLE> ( Helpers::format ( "NoCheatZ is: Able to kick (%s), Able to ban (%s)", Helpers::boolToString ( m_can_kick ), Helpers::boolToString ( m_can_ban ) ) );
 			return true;
 		}
 		else if( stricmp ( "No", args.Arg ( 3 ) ) == 0 )
 		{
 			m_can_ban = false;
-			printf ( "NoCheatZ is: Able to kick (%s), Able to ban (%s)\n", Helpers::boolToString ( m_can_kick ), Helpers::boolToString ( m_can_ban ) );
+			Logger::GetInstance ()->Msg<MSG_CONSOLE> ( Helpers::format ( "NoCheatZ is: Able to kick (%s), Able to ban (%s)", Helpers::boolToString ( m_can_kick ), Helpers::boolToString ( m_can_ban ) ) );
 			return true;
 		}
 		else
 		{
-			printf ( "Available arguments for \"ncz BanRequest CanBan\" : Yes - No\n" );
+			Logger::GetInstance ()->Msg<MSG_CONSOLE> ( "Available arguments for \"ncz BanRequest CanBan\" : Yes - No" );
 		}
 	}
 
-	printf ( "NoCheatZ is: Able to kick (%s), Able to ban (%s)\n", Helpers::boolToString ( m_can_kick ), Helpers::boolToString ( m_can_ban ) );
+	Logger::GetInstance ()->Msg<MSG_CONSOLE> ( Helpers::format ( "NoCheatZ is: Able to kick (%s), Able to ban (%s)", Helpers::boolToString ( m_can_kick ), Helpers::boolToString ( m_can_ban ) ) );
 
 	return false;
 }

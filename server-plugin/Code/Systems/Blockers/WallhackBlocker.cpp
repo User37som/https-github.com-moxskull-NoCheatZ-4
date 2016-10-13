@@ -583,7 +583,6 @@ bool WallhackBlocker::RT_IsAbleToSee ( PlayerHandler::const_iterator sender, Pla
 
 				if( RT_IsVisible ( receiver_ear_pos, shadow_trace_end ) )
 				{
-					//printf("shadow was visible\n");
 					return true;
 				}
 			}

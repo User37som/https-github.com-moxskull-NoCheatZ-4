@@ -109,7 +109,7 @@ void BaseSystem::ncz_cmd_fn ( const SourceSdk::CCommand &args )
 				{
 					if( it->IsStatic () )
 					{
-						printf ( "System %s is static and cannot be loaded or unloaded\n", it->GetName () );
+						Logger::GetInstance ()->Msg<MSG_CONSOLE> ( Helpers::format ( "System %s is static and cannot be loaded or unloaded", it->GetName () ) );
 					}
 					else
 					{
@@ -121,7 +121,7 @@ void BaseSystem::ncz_cmd_fn ( const SourceSdk::CCommand &args )
 				{
 					if( it->IsStatic () )
 					{
-						printf ( "System %s is static and cannot be loaded or unloaded\n", it->GetName () );
+						Logger::GetInstance ()->Msg<MSG_CONSOLE> ( Helpers::format ( "System %s is static and cannot be loaded or unloaded", it->GetName () ) );
 					}
 					else
 					{
@@ -133,7 +133,7 @@ void BaseSystem::ncz_cmd_fn ( const SourceSdk::CCommand &args )
 				{
 					if( it->IsStatic () )
 					{
-						printf ( "System %s is static and cannot be loaded or unloaded\n", it->GetName () );
+						Logger::GetInstance ()->Msg<MSG_CONSOLE> ( Helpers::format ( "System %s is static and cannot be loaded or unloaded", it->GetName () ) );
 					}
 					else
 					{
@@ -145,7 +145,7 @@ void BaseSystem::ncz_cmd_fn ( const SourceSdk::CCommand &args )
 				{
 					if( it->IsStatic () )
 					{
-						printf ( "System %s is static and cannot be loaded or unloaded\n", it->GetName () );
+						Logger::GetInstance ()->Msg<MSG_CONSOLE> ( Helpers::format ( "System %s is static and cannot be loaded or unloaded", it->GetName () ) );
 					}
 					else
 					{
@@ -173,46 +173,48 @@ void BaseSystem::ncz_cmd_fn ( const SourceSdk::CCommand &args )
 #endif
 				else if( !it->sys_cmd_fn ( args ) )
 				{
-					printf ( "action %s not found.\nTry : %s\n", args.Arg ( 2 ), it->cmd_list () );
+					Logger::GetInstance ()->Msg<MSG_CONSOLE> ( Helpers::format ( "action %s not found.\nTry : %s", args.Arg ( 2 ), it->cmd_list () ) );
 				}
 
 				return;
 			}
 			GetNext ( it );
 		}
-		printf ( "System %s not found.\n", args.Arg ( 1 ) );
+		Logger::GetInstance ()->Msg<MSG_CONSOLE> ( Helpers::format ( "System %s not found.", args.Arg ( 1 ) ) );
 	}
 	else
 	{
-		printf ( "Usage: ncz system arg1 arg2 ...\n" );
-		printf ( "Systems list :\n" );
+		basic_string prepared_message ("Usage: ncz system arg1 arg2 ...\nSystems list :\n");
+
 		BaseSystem* it ( GetFirst () );
 		while( it != nullptr )
 		{
-			printf ( "%s", it->GetName () );
+			prepared_message.append( it->GetName () );
 			if( it->IsStatic () )
 			{
-				printf ( " (Static)\n" );
+				prepared_message.append ( " (Static)\n" );
 			}
 			else if( it->IsActive () )
 			{
-				printf ( " (Running)\n" );
+				prepared_message.append ( " (Running)\n" );
 			}
 			else if( !it->IsEnabledByConfig () )
 			{
-				printf ( " (Disabled manually)\n" );
+				prepared_message.append ( " (Disabled manually)\n" );
 			}
 			else if( it->GetDisabledByConfigIni () )
 			{
-				printf ( " (Disabled by config.ini)\n" );
+				prepared_message.append ( " (Disabled by config.ini)\n" );
 			}
 			else
 			{
-				printf ( " (Sleeping - Waiting for players)\n" );
+				prepared_message.append ( " (Sleeping - Waiting for players)\n" );
 			}
-			printf ( "\tCommands : %s\n", it->cmd_list () );
+			prepared_message.append ( Helpers::format( "\tCommands : %s\n", it->cmd_list () ) );
 			GetNext ( it );
 		}
+
+		Logger::GetInstance ()->Msg<MSG_CONSOLE> ( prepared_message.c_str () );
 	}
 }
 

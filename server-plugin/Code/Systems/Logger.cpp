@@ -180,12 +180,7 @@ void Logger::Msg<MSG_WARNING> ( const char * msg, int verbose /*= 0*/ )
 	m1.append ( msg );
 	Push ( m1.c_str () );
 
-	basic_string m2 ( prolog );
-	m2.append ( m1 ).append ( '\n' );
-	std::cout << m2.c_str ();
-#ifdef WIN32
-	OutputDebugStringA ( m2.c_str () );
-#endif
+	Msg<MSG_CONSOLE> ( m1 );
 }
 
 template <>
@@ -195,12 +190,7 @@ void Logger::Msg<MSG_ERROR> ( const char * msg, int verbose /*= 0*/ )
 	m1.append ( msg );
 	Push ( m1.c_str () );
 
-	basic_string m2 ( prolog );
-	m2.append ( m1 ).append ( '\n' );
-	std::cout << m2.c_str ();
-#ifdef WIN32
-	OutputDebugStringA ( m2.c_str () );
-#endif
+	Msg<MSG_CONSOLE> ( m1 );
 }
 
 template <>

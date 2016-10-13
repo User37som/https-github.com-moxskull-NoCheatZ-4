@@ -60,9 +60,7 @@ void HOOKFN_INT ConCommandHookListener::RT_nDispatch ( void* cmd, void*, SourceS
 			if( ph > SlotStatus::INVALID )
 			{
 
-#ifdef DEBUG
-				printf ( "Testing ConCommand %s of %s\n", SourceSdk::InterfacesProxy::ConCommand_GetName ( cmd ), ph->GetName () );
-#endif
+				DebugMessage( Helpers::format ( "Testing ConCommand %s of %s\n", SourceSdk::InterfacesProxy::ConCommand_GetName ( cmd ), ph->GetName () ) );
 
 				ConCommandListenersListT::elem_t* it ( m_listeners.GetFirst () );
 				while( it != nullptr )
@@ -75,9 +73,7 @@ void HOOKFN_INT ConCommandHookListener::RT_nDispatch ( void* cmd, void*, SourceS
 					it = it->m_next;
 				}
 
-#ifdef DEBUG
-				printf ( "Bypassed ConCommand %s of %s\n", SourceSdk::InterfacesProxy::ConCommand_GetName ( cmd ), ph->GetName () );
-#endif
+				DebugMessage ( Helpers::format ( "Bypassed ConCommand %s of %s\n", SourceSdk::InterfacesProxy::ConCommand_GetName ( cmd ), ph->GetName () ) );
 			}
 		}
 	}
@@ -107,9 +103,7 @@ void HOOKFN_INT ConCommandHookListener::RT_nDispatch ( void* cmd, void*, SourceS
 	}
 	else
 	{
-#ifdef DEBUG
-		printf ( "Bypassed ConCommand %s of %d\n", SourceSdk::InterfacesProxy::ConCommand_GetName ( cmd ), index );
-#endif
+		DebugMessage ( Helpers::format ( "Bypassed ConCommand %s of %d\n", SourceSdk::InterfacesProxy::ConCommand_GetName ( cmd ), index ) );
 	}
 }
 
