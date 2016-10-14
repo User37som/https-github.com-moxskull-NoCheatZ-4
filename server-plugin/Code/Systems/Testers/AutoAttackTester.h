@@ -38,12 +38,23 @@ struct AttackTriggerStats
 	tb_int attack1_sustain_stats;
 	tb_int attack2_sustain_stats;
 
-	AttackTriggerStats () : attack1_sustain_stats(), attack2_sustain_stats()
+	AttackTriggerStats () :
+		attack1_down_tick(0),
+		attack2_down_tick(0),
+		attack1_up_tick(0),
+		attack2_up_tick(0),
+		attack1_sustain_stats(),
+		attack2_sustain_stats()
 	{
 	};
-	AttackTriggerStats ( const AttackTriggerStats& other ) : attack1_sustain_stats (other.attack1_sustain_stats), attack2_sustain_stats ( other.attack2_sustain_stats )
+	AttackTriggerStats ( const AttackTriggerStats& other ) :
+		attack1_down_tick ( other.attack1_down_tick ),
+		attack2_down_tick ( other.attack2_down_tick ),
+		attack1_up_tick ( other.attack1_up_tick ),
+		attack2_up_tick ( other.attack2_up_tick ),
+		attack1_sustain_stats ( other.attack1_sustain_stats ),
+		attack2_sustain_stats ( other.attack2_sustain_stats )
 	{
-		memcpy ( this, &other, sizeof ( int ) * 4);
 	};
 
 	AttackTriggerStats& operator=( const AttackTriggerStats& other )
@@ -106,7 +117,14 @@ struct detection_info
 	int min;
 	int max;
 
-	detection_info () : history()
+	detection_info () :
+		history(),
+		detection_count(0),
+		detection_percent(0.0f),
+		time_span(0),
+		average(0.0f),
+		min(0),
+		max(0)
 	{
 
 	}
