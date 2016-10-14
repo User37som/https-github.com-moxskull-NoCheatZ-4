@@ -67,6 +67,8 @@ void NczPlayerManager::LoadPlayerManager ()
 	SourceSdk::InterfacesProxy::GetGameEventManager ()->AddListener ( this, "player_death", true );
 	SourceSdk::InterfacesProxy::GetGameEventManager ()->AddListener ( this, "player_team", true );
 	SourceSdk::InterfacesProxy::GetGameEventManager ()->AddListener ( this, "player_spawn", true );
+	SourceSdk::InterfacesProxy::GetGameEventManager ()->AddListener ( this, "player_connect", true );
+	SourceSdk::InterfacesProxy::GetGameEventManager ()->AddListener ( this, "player_disconnect", true );
 	SourceSdk::InterfacesProxy::GetGameEventManager ()->AddListener ( this, "round_end", true );
 	SourceSdk::InterfacesProxy::GetGameEventManager ()->AddListener ( this, "round_freeze_end", true );
 	SourceSdk::InterfacesProxy::GetGameEventManager ()->AddListener ( this, "bot_takeover", true );
@@ -209,6 +211,8 @@ void NczPlayerManager::FireGameEvent ( SourceSdk::IGameEvent* ev )
 player_death
 player_team
 player_spawn
+player_connect
+player_disconnect
 round_freeze_end
 round_end
 bot_takeover
@@ -296,6 +300,43 @@ bot_takeover
 
 	++event_name;
 
+	if( *event_name == 'c' ) // player_connect
+	{
+		if( ev->GetBool ( "bot" ) == false )
+		{
+			if( SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive )
+			{
+				SourceSdk::IGameEvent_csgo* rev ( reinterpret_cast< SourceSdk::IGameEvent_csgo* >( ev ) );
+				Logger::GetInstance ()->Msg<MSG_LOG> ( Helpers::format ( "Player connect : %s [%s]", rev->GetString ( "name", "unknown-name" ), rev->GetString ( "networkid", "unknown-networkid" ) ) );
+			}
+			else
+			{
+				Logger::GetInstance ()->Msg<MSG_LOG> ( Helpers::format ( "Player connect : %s [%s - %s]", ev->GetString ( "name", "unknown-name" ), ev->GetString ( "networkid", "unknown-networkid" ), ev->GetString ( "address", "unknown-address" ) ) );
+			}
+		}
+
+		return;
+	}
+	if( *event_name == 'd' ) // player_disconnect
+	{
+		if( ev->GetBool ( "bot" ) == false )
+		{
+			if( SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive )
+			{
+				SourceSdk::IGameEvent_csgo* rev ( reinterpret_cast< SourceSdk::IGameEvent_csgo* >( ev ) );
+				if( !rev->IsEmpty ( "name" ) )
+				{
+					Logger::GetInstance ()->Msg<MSG_LOG> ( Helpers::format ( "Player disconnect : %s [%s] -> Reason : %s", rev->GetString ( "name", "unknown-name" ), rev->GetString ( "networkid", "unknown-networkid" ), rev->GetString ( "reason", "unknown-reason" ) ) );
+				}
+			}
+			else
+			{
+				Logger::GetInstance ()->Msg<MSG_LOG> ( Helpers::format ( "Player disconnect : %s [%s - %s] -> Reason : %s", ev->GetString ( "name", "unknown-name" ), ev->GetString ( "networkid", "unknown-networkid" ), ev->GetString ( "address", "unknown-address" ), ev->GetString ( "reason", "unknown-reason" ) ) );
+			}
+		}
+
+		return;
+	}
 	if( *event_name == 's' ) // player_spawn(ed)
 	{
 		DebugMessage(Helpers::format("event player_spawn : %s", ph->GetName()));
