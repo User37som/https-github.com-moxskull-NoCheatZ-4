@@ -317,7 +317,7 @@ bot_takeover
 
 		return;
 	}
-	if( *event_name == 'd' ) // player_disconnect
+	if( *(event_name + 1) == 'i' ) // player_disconnect
 	{
 		if( ev->GetBool ( "bot" ) == false )
 		{
