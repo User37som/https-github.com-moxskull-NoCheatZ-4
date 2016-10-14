@@ -158,6 +158,7 @@ void BaseSystem::ncz_cmd_fn ( const SourceSdk::CCommand &args )
 					if( args.ArgC () > 2 )
 					{
 						it->m_verbose = atoi ( args.Arg ( 3 ) );
+						Logger::GetInstance ()->Msg<MSG_CMD_REPLY> ( Helpers::format ( "System %s verbose level is now %d", it->GetName (), it->m_verbose ) );
 					}
 					return;
 				}
