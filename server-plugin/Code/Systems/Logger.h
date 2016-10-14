@@ -104,8 +104,8 @@ inline bool Logger::IsConsoleConnected () const
 	return m_msg_func != nullptr;
 }
 
-#define SystemVerbose1(x) Logger::GetInstance()->Msg<MSG_VERBOSE1>(x, this->m_verbose)
-#define SystemVerbose2(x) Logger::GetInstance()->Msg<MSG_VERBOSE2>(x, this->m_verbose)
+#define SystemVerbose1(x) if( this->m_verbose >= 1 ) Logger::GetInstance()->Msg<MSG_VERBOSE1>(x, 1)
+#define SystemVerbose2(x) if( this->m_verbose >= 2 ) Logger::GetInstance()->Msg<MSG_VERBOSE2>(x, 2)
 
 #ifdef DEBUG
 #	define DebugMessage(x) Logger::GetInstance()->Msg<MSG_DEBUG>(x, 3)

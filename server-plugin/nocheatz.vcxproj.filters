@@ -243,6 +243,9 @@
     <ClCompile Include="Code\Systems\Testers\AutoAttackTester.cpp">
       <Filter>Code\Systems\Testers</Filter>
     </ClCompile>
+    <ClCompile Include="Code\Systems\Blockers\BhopBlocker.cpp">
+      <Filter>Code\Systems\Blockers</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Code\plugin.h">
@@ -547,6 +550,9 @@
     </ClInclude>
     <ClInclude Include="Code\Misc\temp_Throwback.h">
       <Filter>Code\Misc</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Systems\Blockers\BhopBlocker.h">
+      <Filter>Code\Systems\Blockers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

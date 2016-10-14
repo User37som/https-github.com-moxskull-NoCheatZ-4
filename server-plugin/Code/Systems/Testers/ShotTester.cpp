@@ -50,7 +50,7 @@ void ShotTester::Load ()
 		ResetPlayerDataStructByIndex ( it.GetIndex () );
 	}
 
-	PlayerRunCommandHookListener::RegisterPlayerRunCommandHookListener ( this, 4 );
+	PlayerRunCommandHookListener::RegisterPlayerRunCommandHookListener ( this, SystemPriority::UserCmdHookListener::ShotTester );
 }
 
 void ShotTester::Unload ()

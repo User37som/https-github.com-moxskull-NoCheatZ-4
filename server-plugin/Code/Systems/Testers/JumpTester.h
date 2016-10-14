@@ -125,6 +125,10 @@ class JumpTester :
 	typedef Singleton<JumpTester> singleton_class;
 	typedef PlayerDataStructHandler<JumpInfoT> playerdata_class;
 
+private:
+	void * convar_sv_enablebunnyhopping;
+	void * convar_sv_autobunnyhopping;
+
 public:
 	JumpTester ();
 	virtual ~JumpTester () final;

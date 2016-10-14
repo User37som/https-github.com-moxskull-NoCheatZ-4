@@ -45,7 +45,7 @@ void BadUserCmdBlocker::Load ()
 		ResetPlayerDataStructByIndex ( it.GetIndex () );
 	}
 
-	RegisterPlayerRunCommandHookListener ( this, 0, SlotStatus::PLAYER_CONNECTED );
+	RegisterPlayerRunCommandHookListener ( this, SystemPriority::UserCmdHookListener::BadUserCmdBlocker, SlotStatus::PLAYER_CONNECTED );
 }
 
 void BadUserCmdBlocker::Unload ()

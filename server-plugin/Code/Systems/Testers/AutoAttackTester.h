@@ -23,7 +23,7 @@ limitations under the License.
 #include "Misc/temp_singleton.h"
 #include "Misc/temp_Throwback.h"
 
-#define SHORT_TIME (float)(0.09) // sec
+#define SHORT_TIME (float)(0.055) // sec
 
 #define TB_MAX_HISTORY 15
 

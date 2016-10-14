@@ -43,4 +43,18 @@
 
 #define MAX_PLAYERS 66
 
+namespace SystemPriority
+{
+	namespace UserCmdHookListener
+	{
+		size_t const constexpr BadUserCmdBlocker ( 0 );
+		size_t const constexpr SpeedTester ( BadUserCmdBlocker + 1 );
+		size_t const constexpr EyeAnglesTester ( SpeedTester + 1 );
+		size_t const constexpr AutoAttackTester ( EyeAnglesTester + 1 );
+		size_t const constexpr ShotTester ( AutoAttackTester + 1 );
+		size_t const constexpr JumpTester ( ShotTester + 1 );
+		size_t const constexpr BhopBlocker ( JumpTester + 1 );
+	}
+}
+
 #endif // MAGICVALUES_H

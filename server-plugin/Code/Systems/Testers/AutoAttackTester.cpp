@@ -45,7 +45,7 @@ void AutoAttackTester::Load ()
 		ResetPlayerDataStructByIndex ( it.GetIndex () );
 	}
 
-	PlayerRunCommandHookListener::RegisterPlayerRunCommandHookListener ( this, 4 );
+	PlayerRunCommandHookListener::RegisterPlayerRunCommandHookListener ( this, SystemPriority::UserCmdHookListener::AutoAttackTester );
 }
 
 void AutoAttackTester::Unload ()
@@ -213,7 +213,7 @@ void AutoAttackTester::FindDetection ( PlayerHandler::const_iterator ph, tb_int*
 
 			float const percent ( ( (float)(c) / (float)(TB_MAX_HISTORY) ) * 100.0f );
 
-			if( percent >= 66.0f )
+			if( percent >= 70.0f )
 			{
 				// construct detection info
 
