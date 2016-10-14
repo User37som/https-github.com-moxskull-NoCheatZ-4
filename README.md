@@ -22,7 +22,7 @@ Source Engine serversided anti-cheat plugin. (CS:S, CS:GO).
     4. [What to do with the code ?](#what-to-do)
 
 <a name="Introduction"></a>
-# Notes about anti-cheat systems in general (*especially for hlmod.ru*)
+# Notes about anti-cheat systems in general
  
 > * Be aware that no anti-cheat in this world can detect every cheating for this game.
 * Also be aware that there is no such a thing as an anti-cheat system that detects each and every cheating method.
@@ -71,7 +71,7 @@ Currently [CS:S](http://store.steampowered.com/app/240) is the base of this proj
 # Current Project Status
 ___
 
-* **Status** : [Testing / Fixing](https://github.com/L-EARN/NoCheatZ-4/issues)
+* **Status** : [Enhancing](https://github.com/L-EARN/NoCheatZ-4/issues)
 
 <a name="Features"></a> 
 # Features
@@ -89,7 +89,7 @@ ___
 * ConVarTester : Test and detect players using old ConVar bypassers. **Can link the value to the server if the ConVar exists on the server**
 * EyeAnglesTester : Provides good detection against badly coded aimbots and spinhacks.
 * JumpTester : Detects bunnyhop programs and scripts (**Is able to make the difference**)
-* ShotTester : Detects crosshair triggerbots and robotic shot button spam.
+* AutoAttackTester : Detects robotic shot button spam.
 * SpamChangeNameTester : Detects when a players changes his name too often (_Is now fixed internally by the Source Engine_)
 * SpamConnectTester : Detects when a client is flooding the connection (Trying to connect and disconnect too much)
 * SpeedTester : Detects SpeedHacks using CUserCmd and tickrate ratio.
@@ -104,11 +104,12 @@ ___
 * BadUserCmdBlocker : Reject malformed or cheated CUserCmds.
 * WallhackBlocker : Player visibility is tested against the walls.
 * RadarHackBlocker : Block aimbots and ESPs that use the radar positions.
+* BhopBlocker : Rejects jumps that are sent when the player lands on world for a short period of time.
 
 <a name="other-systems"></a> 
 ### Other Systems
 
-* AutoTVRecord : Automatically spawn the SourceTV. Automatically record the game when at least one huan player is in game (*Rather than record when the server is empty ...*). **Detection logs also store the tick of the current record for easier reviewing**.
+* AutoTVRecord : Automatically spawn the SourceTV. Automatically record the game when at least one human player is in game (*Rather than record when the server is empty ...*). **Detection logs also store the tick of the current record for easier reviewing**.
 * BanRequest : Some bans are delayed by 20 seconds to try to detect more things.
 * ConfigManager : Store informations about the different games the plugin can be used for ([config.ini](https://github.com/L-EARN/NoCheatZ-4/blob/master/server-plugin/Res/config.ini))
 * Logger : Outputs NoCheatZ logs into `logs/NoCheatZ_4_Logs/`
@@ -119,14 +120,25 @@ ___
 
 `ncz [system] [args ...]`
 
-* Print status of systems : `ncz`
+* Print status of systems and available commands : `ncz`
+
 * You can disable a system using `ncz [system] disable` or `ncz [system] off`
 * Enable a system using `ncz [system] enable` or `ncz [system] on`
+
 * Print additionnal informations if available (**Will slow down the server**) `ncz [system] verbose 1`
-* Print more informations if available (**Will slow down the server**) `ncz [system] verbose 2`
+* Print more informations if available (**Will slow down the server even more**) `ncz [system] verbose 2`
 * Stop that verbose thingy that slow down the server for nothing `ncz [system] verbose 0`
+
 * Add a ConVar to be tested by ConVarTester : `ncz ConVarTester AddRule sv_cheats 0 SAME_AS_SERVER` means the clients must have the same value as the server
+* Add a floating point ConVar : `ncz ConVarTester AddRule mp_convar_to_test 0.0 SAME_FLOAT`
+* Add a string ConVar : `ncz ConVarTester AddRule r_stringconvar oye SAME`
 * Reset default rules of ConVarTester : `ncz ConVarTester ResetRules`
+* Remove a specific ConVar from ConVarTester : `ncz ConVarTester RemoveRule sv_cheats`
+
+* Disable kick ( Will also disable bans ) : `ncz BanRequest CanKick No`
+* Disable ban ( Bans will be translated in to kicks ) : `ncz BanRequest CanBan No`
+* Enable kick : `ncz BanRequest CanKick Yes`
+* Enable ban ( Will also enable kick ) : `ncz BanRequest CanBan Yes`
 
 <a name="Contributing"></a> 
 # Contributing
@@ -135,17 +147,26 @@ ___
 <a name="Installation"></a> 
 ## Installing a Game Server
 ___
+
+* Even though you're not forced to install a local game-server to build the project, it's more convenient to test your build directly.
+However, running the game-server and the client game on the same computer will introduce a lot of lags.
+
 See https://developer.valvesoftware.com/wiki/SteamCMD
 
 * It is recommanded, with Windows, to install your server into his own directory.
 The Visual Studio project launches a commandfile (to auto-update the server before running the debugger) that expects steamcmd to be installed at C:\steamcmd\steamcmd.exe
-
-* For Linux, please make a new user using adduser. You will also have to copy the files manually to your server after each builds.
+You can disable this script in the post-build event options of the project.
 
 ```bash
 login anonymous
 force_install_dir C:\steamcmd\CSS
 app_update 232330 validate
+```
+
+```bash
+login anonymous
+force_install_dir C:\steamcmd\CSGO
+app_update 740 validate
 ```
 
 <a name="Cloning"></a> 
@@ -175,12 +196,18 @@ ___
 ```sh
 dpkg --add-architecture i386
 apt-get update
-apt-get install build-essential gcc-multilib g++-multilib ia32-libs lib32gcc1 libc6-i386 libc6-dev-i386 autotools-dev autoconf libtool gdb screen
+apt-get install git g++ g++-multilib build-essential ia32-libs lib32gcc1 libc6-i386 libc6-dev-i386 autotools-dev autoconf libtool gdb screen
+```
+
+If your version of g++ is higher than g++ 4.8.4, then you must install g++-4.8 instead :
+
+```sh
+apt-get install g++-4.8 g++-4.8-multilib
 ```
 
 3. `su` to your srcds user.
 
-4. With your console, go to the `server-plugin` directory and type `make debug`
+4. With your console, go to the `server-plugin` directory and type `make debug CXX=g++-4.8` or `make release CXX=g++-4.8`
 
 The binary and all other stuff will go in `NoCheatZ-4/Builds/[CONFIG]/addons/NoCheatZ`
 
@@ -200,9 +227,13 @@ gdb --args ./srcds_linux -console -game cstrike -steam_dir ../ -steamcmd_script 
 ### With Windows
 ___
 
-1. Make sure you installed steamcmd at `C:\steamcmd\steamcmd.exe`
+1. Make sure you installed steamcmd at `C:\steamcmd\steamcmd.exe` if you want a local game-server
 
 2. Download and extract [libprotobuf src 2.5.0](https://github.com/google/protobuf/archive/v2.5.0.zip) in server-plugin\SourceSdk\Interfaces\Protobuf\
+
+3. Download and extract [googletest src 1.5.0](https://github.com/google/googletest/archive/release-1.5.0.zip) in server-plugin\SourceSdk\Interfaces\Protobuf\protobuf-2.5.0\
+
+4. Rename the extracted folder of googletest into `gtest`
 
 3. Open the solution with Visual Studio 2015
 
