@@ -67,11 +67,13 @@ void BhopBlocker::Load ()
 	}
 
 	RegisterPlayerRunCommandHookListener ( this, SystemPriority::UserCmdHookListener::BhopBlocker, SlotStatus::PLAYER_IN_TESTS );
+	RegisterOnGroundHookListener ( this );
 }
 
 void BhopBlocker::Unload ()
 {
 	RemovePlayerRunCommandHookListener ( this );
+	RemoveOnGroundHookListener ( this );
 }
 
 bool BhopBlocker::GotJob () const
@@ -151,7 +153,7 @@ PlayerRunCommandRet BhopBlocker::RT_PlayerRunCommandCallback ( PlayerHandler::co
 			{
 				// button down				
 
-				if( gtick - pdata->jmp_up_tick < blocking_delay_ticks )
+				if( gtick - pdata->on_ground_tick < blocking_delay_ticks )
 				{
 					// block it
 
@@ -165,14 +167,12 @@ PlayerRunCommandRet BhopBlocker::RT_PlayerRunCommandCallback ( PlayerHandler::co
 			}
 			else
 			{
-				// button up
-
-				pdata->jmp_up_tick = gtick;
+				pdata->has_been_blocked = false;
 			}
 		}
 		else if( pdata->has_been_blocked == true )
 		{
-			if( gtick - pdata->jmp_up_tick >= blocking_delay_ticks )
+			if( gtick - pdata->on_ground_tick >= blocking_delay_ticks )
 			{
 				// resend
 
@@ -198,7 +198,7 @@ PlayerRunCommandRet BhopBlocker::RT_PlayerRunCommandCallback ( PlayerHandler::co
 			{
 				// button down				
 
-				if( gtick - pdata->jmp_up_tick < blocking_delay_ticks )
+				if( gtick - pdata->on_ground_tick < blocking_delay_ticks )
 				{
 					// block it
 
@@ -212,14 +212,12 @@ PlayerRunCommandRet BhopBlocker::RT_PlayerRunCommandCallback ( PlayerHandler::co
 			}
 			else
 			{
-				// button up
-
-				pdata->jmp_up_tick = gtick;
+				pdata->has_been_blocked = false;
 			}
 		}
 		else if( pdata->has_been_blocked == true )
 		{
-			if( gtick - pdata->jmp_up_tick >= blocking_delay_ticks )
+			if( gtick - pdata->on_ground_tick >= blocking_delay_ticks )
 			{
 				// resend
 
@@ -231,4 +229,13 @@ PlayerRunCommandRet BhopBlocker::RT_PlayerRunCommandCallback ( PlayerHandler::co
 
 	METRICS_LEAVE_SECTION ( "BhopBlocker::PlayerRunCommandCallback" );
 	return PlayerRunCommandRet::CONTINUE;
+}
+
+void BhopBlocker::RT_m_hGroundEntityStateChangedCallback ( PlayerHandler::const_iterator ph, bool const new_isOnGround )
+{
+	if( new_isOnGround )
+	{
+		JmpInfo * pdata ( GetPlayerDataStructByIndex ( ph.GetIndex () ) );
+		pdata->on_ground_tick = Helpers::GetGameTickCount ();
+	}
 }

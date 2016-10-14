@@ -19,22 +19,23 @@ limitations under the License.
 #include "Systems/BaseSystem.h"
 #include "Players/temp_PlayerDataStruct.h"
 #include "Hooks/PlayerRunCommandHookListener.h"
+#include "Hooks/OnGroundHookListener.h"
 #include "Systems/OnTickListener.h"
 #include "Misc/temp_singleton.h"
 
 struct JmpInfo
 {
-	int jmp_up_tick;
+	int on_ground_tick;
 	bool has_been_blocked;
 
 	JmpInfo ()
 	{
-		jmp_up_tick = 0;
+		on_ground_tick = 0;
 		has_been_blocked = false;
 	};
 	JmpInfo ( const JmpInfo& other )
 	{
-		jmp_up_tick = other.jmp_up_tick;
+		on_ground_tick = other.on_ground_tick;
 		has_been_blocked = other.has_been_blocked;
 	};
 };
@@ -43,6 +44,7 @@ class BhopBlocker :
 	public BaseDynamicSystem,
 	public PlayerDataStructHandler<JmpInfo>,
 	public PlayerRunCommandHookListener,
+	public OnGroundHookListener,
 	public Singleton<BhopBlocker>
 {
 	typedef Singleton<BhopBlocker> singleton_class;
@@ -65,6 +67,8 @@ public:
 	virtual bool GotJob () const override final;
 
 	virtual PlayerRunCommandRet RT_PlayerRunCommandCallback ( PlayerHandler::const_iterator ph, void * const cmd, void * const old_cmd ) override final;
+
+	virtual void RT_m_hGroundEntityStateChangedCallback ( PlayerHandler::const_iterator ph, bool const new_isOnGround ) override final;
 };
 
 #endif // BHOPBLOCKER_H
