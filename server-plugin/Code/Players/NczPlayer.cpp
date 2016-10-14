@@ -36,7 +36,6 @@ NczPlayer::NczPlayer ( const int index ) :
 	m_edict ( Helpers::PEntityOfEntIndex ( index ) ),
 	m_channelinfo ( SourceSdk::InterfacesProxy::Call_GetPlayerNetInfo ( index ) ),
 	m_playerinfo ( nullptr ),
-	m_takeover( ),
 	m_time_connected ( 0.0 )
 {}
 
