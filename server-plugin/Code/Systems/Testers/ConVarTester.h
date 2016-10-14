@@ -83,10 +83,17 @@ typedef struct CurrentConVarRequest
 	basic_string answer;
 	basic_string answer_status;
 
-	CurrentConVarRequest ()
+	CurrentConVarRequest () : 
+		status ( ConVarRequestStatus::NOT_PROCESSING ),
+		timeStart (0.0f),
+		ruleset (0),
+		cookie (0),
+		attempts (0),
+		answer (),
+		answer_status ()
 	{
-		status = ConVarRequestStatus::NOT_PROCESSING; timeStart = 0.0; ruleset = 0;
 	};
+
 	CurrentConVarRequest ( const CurrentConVarRequest& other )
 	{
 		status = other.status; timeStart = other.timeStart; ruleset = other.ruleset; answer = other.answer; answer_status = other.answer_status;
