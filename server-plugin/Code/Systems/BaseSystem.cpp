@@ -109,7 +109,7 @@ void BaseSystem::ncz_cmd_fn ( const SourceSdk::CCommand &args )
 				{
 					if( it->IsStatic () )
 					{
-						Logger::GetInstance ()->Msg<MSG_CONSOLE> ( Helpers::format ( "System %s is static and cannot be loaded or unloaded", it->GetName () ) );
+						Logger::GetInstance ()->Msg<MSG_CMD_REPLY> ( Helpers::format ( "System %s is static and cannot be loaded or unloaded", it->GetName () ) );
 					}
 					else
 					{
@@ -121,7 +121,7 @@ void BaseSystem::ncz_cmd_fn ( const SourceSdk::CCommand &args )
 				{
 					if( it->IsStatic () )
 					{
-						Logger::GetInstance ()->Msg<MSG_CONSOLE> ( Helpers::format ( "System %s is static and cannot be loaded or unloaded", it->GetName () ) );
+						Logger::GetInstance ()->Msg<MSG_CMD_REPLY> ( Helpers::format ( "System %s is static and cannot be loaded or unloaded", it->GetName () ) );
 					}
 					else
 					{
@@ -133,7 +133,7 @@ void BaseSystem::ncz_cmd_fn ( const SourceSdk::CCommand &args )
 				{
 					if( it->IsStatic () )
 					{
-						Logger::GetInstance ()->Msg<MSG_CONSOLE> ( Helpers::format ( "System %s is static and cannot be loaded or unloaded", it->GetName () ) );
+						Logger::GetInstance ()->Msg<MSG_CMD_REPLY> ( Helpers::format ( "System %s is static and cannot be loaded or unloaded", it->GetName () ) );
 					}
 					else
 					{
@@ -145,7 +145,7 @@ void BaseSystem::ncz_cmd_fn ( const SourceSdk::CCommand &args )
 				{
 					if( it->IsStatic () )
 					{
-						Logger::GetInstance ()->Msg<MSG_CONSOLE> ( Helpers::format ( "System %s is static and cannot be loaded or unloaded", it->GetName () ) );
+						Logger::GetInstance ()->Msg<MSG_CMD_REPLY> ( Helpers::format ( "System %s is static and cannot be loaded or unloaded", it->GetName () ) );
 					}
 					else
 					{
@@ -173,14 +173,14 @@ void BaseSystem::ncz_cmd_fn ( const SourceSdk::CCommand &args )
 #endif
 				else if( !it->sys_cmd_fn ( args ) )
 				{
-					Logger::GetInstance ()->Msg<MSG_CONSOLE> ( Helpers::format ( "action %s not found.\nTry : %s", args.Arg ( 2 ), it->cmd_list () ) );
+					Logger::GetInstance ()->Msg<MSG_CMD_REPLY> ( Helpers::format ( "action %s not found.\nTry : %s", args.Arg ( 2 ), it->cmd_list () ) );
 				}
 
 				return;
 			}
 			GetNext ( it );
 		}
-		Logger::GetInstance ()->Msg<MSG_CONSOLE> ( Helpers::format ( "System %s not found.", args.Arg ( 1 ) ) );
+		Logger::GetInstance ()->Msg<MSG_CMD_REPLY> ( Helpers::format ( "System %s not found.", args.Arg ( 1 ) ) );
 	}
 	else
 	{
@@ -214,7 +214,7 @@ void BaseSystem::ncz_cmd_fn ( const SourceSdk::CCommand &args )
 			GetNext ( it );
 		}
 
-		Logger::GetInstance ()->Msg<MSG_CONSOLE> ( prepared_message.c_str () );
+		Logger::GetInstance ()->Msg<MSG_CMD_REPLY> ( prepared_message.c_str () );
 	}
 }
 

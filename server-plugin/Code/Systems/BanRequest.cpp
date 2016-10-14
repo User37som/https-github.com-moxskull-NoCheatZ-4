@@ -44,19 +44,19 @@ bool BanRequest::sys_cmd_fn ( const SourceSdk::CCommand &args )
 		if( stricmp ( "Yes", args.Arg ( 3 )) == 0  )
 		{
 			m_can_kick = true;
-			Logger::GetInstance ()->Msg<MSG_CONSOLE> ( Helpers::format ( "NoCheatZ is: Able to kick (%s), Able to ban (%s)", Helpers::boolToString ( m_can_kick ), Helpers::boolToString ( m_can_ban ) ) );
+			Logger::GetInstance ()->Msg<MSG_CMD_REPLY> ( Helpers::format ( "NoCheatZ is: Able to kick (%s), Able to ban (%s)", Helpers::boolToString ( m_can_kick ), Helpers::boolToString ( m_can_ban ) ) );
 			return true;
 		}
 		else if (stricmp ( "No", args.Arg ( 3 )) == 0 )
 		{
 			m_can_kick = false;
 			m_can_ban = false;
-			Logger::GetInstance ()->Msg<MSG_CONSOLE> ( Helpers::format ( "NoCheatZ is: Able to kick (%s), Able to ban (%s)", Helpers::boolToString ( m_can_kick ), Helpers::boolToString ( m_can_ban ) ) );
+			Logger::GetInstance ()->Msg<MSG_CMD_REPLY> ( Helpers::format ( "NoCheatZ is: Able to kick (%s), Able to ban (%s)", Helpers::boolToString ( m_can_kick ), Helpers::boolToString ( m_can_ban ) ) );
 			return true;
 		}
 		else
 		{
-			Logger::GetInstance ()->Msg<MSG_CONSOLE> ( Helpers::format ( "Available arguments for \"ncz BanRequest CanKick\" : Yes - No" ) );
+			Logger::GetInstance ()->Msg<MSG_CMD_REPLY> ( Helpers::format ( "Available arguments for \"ncz BanRequest CanKick\" : Yes - No" ) );
 		}
 	}
 	else if( stricmp ( "CanBan", args.Arg ( 2 ) ) == 0 )
@@ -65,22 +65,22 @@ bool BanRequest::sys_cmd_fn ( const SourceSdk::CCommand &args )
 		{
 			m_can_kick = true;
 			m_can_ban = true;
-			Logger::GetInstance ()->Msg<MSG_CONSOLE> ( Helpers::format ( "NoCheatZ is: Able to kick (%s), Able to ban (%s)", Helpers::boolToString ( m_can_kick ), Helpers::boolToString ( m_can_ban ) ) );
+			Logger::GetInstance ()->Msg<MSG_CMD_REPLY> ( Helpers::format ( "NoCheatZ is: Able to kick (%s), Able to ban (%s)", Helpers::boolToString ( m_can_kick ), Helpers::boolToString ( m_can_ban ) ) );
 			return true;
 		}
 		else if( stricmp ( "No", args.Arg ( 3 ) ) == 0 )
 		{
 			m_can_ban = false;
-			Logger::GetInstance ()->Msg<MSG_CONSOLE> ( Helpers::format ( "NoCheatZ is: Able to kick (%s), Able to ban (%s)", Helpers::boolToString ( m_can_kick ), Helpers::boolToString ( m_can_ban ) ) );
+			Logger::GetInstance ()->Msg<MSG_CMD_REPLY> ( Helpers::format ( "NoCheatZ is: Able to kick (%s), Able to ban (%s)", Helpers::boolToString ( m_can_kick ), Helpers::boolToString ( m_can_ban ) ) );
 			return true;
 		}
 		else
 		{
-			Logger::GetInstance ()->Msg<MSG_CONSOLE> ( "Available arguments for \"ncz BanRequest CanBan\" : Yes - No" );
+			Logger::GetInstance ()->Msg<MSG_CMD_REPLY> ( "Available arguments for \"ncz BanRequest CanBan\" : Yes - No" );
 		}
 	}
 
-	Logger::GetInstance ()->Msg<MSG_CONSOLE> ( Helpers::format ( "NoCheatZ is: Able to kick (%s), Able to ban (%s)", Helpers::boolToString ( m_can_kick ), Helpers::boolToString ( m_can_ban ) ) );
+	Logger::GetInstance ()->Msg<MSG_CMD_REPLY> ( Helpers::format ( "NoCheatZ is: Able to kick (%s), Able to ban (%s)", Helpers::boolToString ( m_can_kick ), Helpers::boolToString ( m_can_ban ) ) );
 
 	return false;
 }
@@ -108,7 +108,7 @@ void BanRequest::SetWaitTime ( float wait_time )
 
 void BanRequest::AddAsyncBan ( NczPlayer* player, int ban_time, const char * kick_message )
 {
-	if( CanBan () )
+	if( CanKick () )
 	{
 		PlayerBanRequestT req;
 		req.userid = SourceSdk::InterfacesProxy::Call_GetPlayerUserid ( player->GetEdict () );
@@ -182,6 +182,11 @@ void BanRequest::BanInternal ( int ban_time, char const * steam_id, int userid, 
 		m_do_writeid = true;
 	//}
 	}
+	else if( CanKick () )
+	{
+		Logger::GetInstance ()->Msg<MSG_WARNING> ( "BanRequest::BanInternal : Plugin is set to not ban. Player will be kicked instead." );
+		KickNow ( userid, kick_message );
+	}
 }
 
 void BanRequest::KickNow (int userid, const char * kick_message ) const
@@ -203,19 +208,16 @@ void BanRequest::KickNow (int userid, const char * kick_message ) const
 
 void BanRequest::BanNow ( NczPlayer * const player, int ban_time, const char * kick_message )
 {
-	if( CanBan () )
+	// Ban
+
+	BanInternal ( ban_time, player->GetSteamID (), SourceSdk::InterfacesProxy::Call_GetPlayerUserid ( player->GetEdict () ), kick_message, player->GetIPAddress () );
+
+	// Remove from async requests if any
+
+	BanRequestListT::elem_t* it ( m_requests.Find ( SourceSdk::InterfacesProxy::Call_GetPlayerUserid ( player->GetEdict () ) ) );
+	if( it != nullptr )
 	{
-		// Ban
-
-		BanInternal ( ban_time, player->GetSteamID (), SourceSdk::InterfacesProxy::Call_GetPlayerUserid ( player->GetEdict () ), kick_message, player->GetIPAddress () );
-
-		// Remove from async requests if any
-
-		BanRequestListT::elem_t* it ( m_requests.Find ( SourceSdk::InterfacesProxy::Call_GetPlayerUserid ( player->GetEdict () ) ) );
-		if( it != nullptr )
-		{
-			m_requests.Remove ( it );
-		}
+		m_requests.Remove ( it );
 	}
 }
 
@@ -231,19 +233,27 @@ void BanRequest::RT_TimerCallback ( char const * const timer_name )
 		{
 			PlayerHandler::const_iterator ph = SteamGameServer_BSecure () ? NczPlayerManager::GetInstance ()->GetPlayerHandlerBySteamID ( v.steamid ) : NczPlayerManager::GetInstance ()->GetPlayerHandlerByUserId ( v.userid );
 
-			if( ph > SlotStatus::KICK ) // Still connected
+			if( CanKick () )
 			{
-				NczPlayerManager::GetInstance ()->DeclareKickedPlayer ( ph->GetIndex () );
+				if( ph > SlotStatus::KICK ) // Still connected
+				{
+					NczPlayerManager::GetInstance ()->DeclareKickedPlayer ( ph->GetIndex () );
+				}
+
+				BanInternal ( v.ban_time, v.steamid, v.userid, v.kick_message, v.ip );
 			}
-
-			BanInternal ( v.ban_time, v.steamid, v.userid, v.kick_message, v.ip );
-
+			
 			it = m_requests.Remove ( it );
 		}
 		else
 		{
 			it = it->m_next;
 		}
+	}
+
+	if( !CanKick () )
+	{
+		Logger::GetInstance ()->Msg<MSG_WARNING> ( "BanRequest::RT_TimerCallback : Cannot process async ban because plugin is set to not kick players." );
 	}
 }
 

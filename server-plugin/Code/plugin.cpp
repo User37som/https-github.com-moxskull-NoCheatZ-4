@@ -491,11 +491,12 @@ SourceSdk::PLUGIN_RESULT CNoCheatZPlugin::ClientConnect ( bool *bAllowConnect, S
 		if( BanRequest::GetInstance ()->CanKick () )
 		{
 			NczPlayerManager::GetInstance ()->ClientDisconnect ( pEntity );
+			Logger::GetInstance ()->Msg<MSG_LOG> ( Helpers::format ( "CNoCheatZPlugin::ClientConnect : Rejected %s with reason %s", pszAddress, reject ) );
 			return SourceSdk::PLUGIN_STOP;
 		}
 		else
 		{
-			Logger::GetInstance ()->Msg<MSG_LOG> ( Helpers::format ( "CNoCheatZPlugin::ClientConnect : Would have rejected access to player %s - %s but plugin is set to not kick.", pszName, pszAddress ) );
+			Logger::GetInstance ()->Msg<MSG_LOG> ( Helpers::format ( "CNoCheatZPlugin::ClientConnect : Would have rejected access to player %s but plugin is set to not kick.", pszAddress ) );
 		}
 	}
 

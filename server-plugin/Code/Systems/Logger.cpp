@@ -151,6 +151,23 @@ void Logger::Msg<MSG_CONSOLE> ( const char * msg, int verbose /*= 0*/ )
 }
 
 template <>
+void Logger::Msg<MSG_CMD_REPLY> ( const char * msg, int verbose /*= 0*/ )
+{
+	if( this->IsConsoleConnected () )
+	{
+		m_msg_func ( "%s\n", msg );
+	}
+	else
+	{
+		std::cout << msg << '\n';
+#ifdef WIN32
+		OutputDebugStringA ( msg );
+		OutputDebugStringA ( "\n" );
+#endif
+	}
+}
+
+template <>
 void Logger::Msg<MSG_CHAT> ( const char * msg, int verbose /*= 0*/ )
 {
 	Msg<MSG_CONSOLE> ( msg );

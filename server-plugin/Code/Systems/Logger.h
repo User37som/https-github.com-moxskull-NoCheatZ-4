@@ -50,7 +50,9 @@ enum msg_type
 	// Prints to stderr if verbose is 2
 	MSG_VERBOSE2,
 	// Prints to stderr only if the project build is in debug mode and verbose is at least 3
-	MSG_DEBUG
+	MSG_DEBUG,
+	// Used inside ConCommands
+	MSG_CMD_REPLY
 };
 
 class Logger :
