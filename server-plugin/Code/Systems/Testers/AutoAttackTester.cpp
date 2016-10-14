@@ -45,7 +45,7 @@ void AutoAttackTester::Load ()
 		ResetPlayerDataStructByIndex ( it.GetIndex () );
 	}
 
-	PlayerRunCommandHookListener::RegisterPlayerRunCommandHookListener ( this, 4 );
+	PlayerRunCommandHookListener::RegisterPlayerRunCommandHookListener ( this, SystemPriority::UserCmdHookListener::AutoAttackTester );
 }
 
 void AutoAttackTester::Unload ()

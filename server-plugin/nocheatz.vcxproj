@@ -386,6 +386,7 @@ copy "$(TargetPath)" ..\..\..\game\bin\"$(TargetName)".pdb
     <ClCompile Include="Code\Misc\HeapMemoryManager.cpp" />
     <ClCompile Include="Code\Misc\MathCache.cpp" />
     <ClCompile Include="Code\Systems\AutoTVRecord.cpp" />
+    <ClCompile Include="Code\Systems\Blockers\BhopBlocker.cpp" />
     <ClCompile Include="Code\Systems\Blockers\RadarHackBlocker.cpp" />
     <ClCompile Include="Code\Systems\ConfigManager.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
@@ -452,6 +453,7 @@ copy "$(TargetPath)" ..\..\..\game\bin\"$(TargetName)".pdb
     <ClInclude Include="Code\Misc\temp_Throwback.h" />
     <ClInclude Include="Code\Players\ProcessFilter.h" />
     <ClInclude Include="Code\Systems\AutoTVRecord.h" />
+    <ClInclude Include="Code\Systems\Blockers\BhopBlocker.h" />
     <ClInclude Include="Code\Systems\Blockers\RadarHackBlocker.h" />
     <ClInclude Include="Code\Systems\ConfigManager.h" />
     <ClInclude Include="Code\Systems\i18nManager.h" />

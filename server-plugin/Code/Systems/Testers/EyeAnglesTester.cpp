@@ -47,7 +47,7 @@ void EyeAnglesTester::Load ()
 	}
 
 	SourceSdk::InterfacesProxy::GetGameEventManager ()->AddListener ( this, "round_end", true );
-	PlayerRunCommandHookListener::RegisterPlayerRunCommandHookListener ( this, 2 );
+	PlayerRunCommandHookListener::RegisterPlayerRunCommandHookListener ( this, SystemPriority::UserCmdHookListener::EyeAnglesTester );
 }
 
 void EyeAnglesTester::Unload ()

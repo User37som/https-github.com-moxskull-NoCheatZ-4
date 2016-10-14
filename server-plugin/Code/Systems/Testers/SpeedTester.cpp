@@ -43,7 +43,7 @@ void SpeedTester::Load ()
 	}
 
 	OnTickListener::RegisterOnTickListener ( this );
-	PlayerRunCommandHookListener::RegisterPlayerRunCommandHookListener ( this, 1 );
+	PlayerRunCommandHookListener::RegisterPlayerRunCommandHookListener ( this, SystemPriority::UserCmdHookListener::SpeedTester );
 }
 
 void SpeedTester::Unload ()
