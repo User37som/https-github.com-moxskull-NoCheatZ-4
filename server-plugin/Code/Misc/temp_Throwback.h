@@ -271,7 +271,7 @@ class Throwback_Arithmetic : public Throwback<value_type, time_type, count>
 	
 public:
 	typedef Throwback<value_type, time_type, count> base_class;
-	typedef base_class::inner_type inner_type;
+	typedef typename base_class::inner_type inner_type;
 
 	Throwback_Arithmetic () : base_class()
 	{
