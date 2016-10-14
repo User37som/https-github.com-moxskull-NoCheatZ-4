@@ -27,24 +27,64 @@ limitations under the License.
 */
 
 template < typename value_type,
-			typename time_type,
-			size_t count = 2 
-			/* Number of values to store including the current value. Can remember count-1 values back. */
-		>
-class Throwback_Arithmetic
+	typename time_type,
+	size_t count = 2
+	/* Number of values to store including the current value. Can remember count-1 values back. */
+>
+class Throwback
 {
-	typedef Throwback_Arithmetic<value_type, time_type, count> this_type;
+	typedef Throwback<value_type, time_type, count> this_type;
 
-	static_assert ( count >= 2 , "count is history to keep + current value itself");
+	static_assert ( count >= 2, "count is history to keep + current value itself" );
 
 public:
 	struct inner_type
 	{
 		value_type v;
 		time_type t;
+
+		inner_type () : v( std::move ( value_type() ) ), t( std::numeric_limits<time_type>::max () )
+		{
+		}
+
+		inner_type ( value_type value, time_type time ) : v(value), t(time)
+		{
+		}
+
+		inner_type ( inner_type const &other ) : v(other.v), t(other.t)
+		{
+		}
+
+		inner_type ( inner_type &&other ) : v ( std::move(other.v) ), t ( other.t )
+		{
+			other.t = std::numeric_limits<time_type>::max ();
+		}
+
+		inner_type& operator= ( inner_type const &other )
+		{
+			if( this != &other )
+			{
+				v = other.v;
+				t = other.t;
+			}
+
+			return *this;
+		}
+
+		inner_type& operator= ( inner_type &&other )
+		{
+			if( this != &other )
+			{
+				v = std::move(other.v);
+				t = other.t;
+				other.t = std::numeric_limits<time_type>::max ();
+			}
+
+			return *this;
+		}
 	};
-	
-private:
+
+protected:
 	inner_type m_stack[ count ];
 	inner_type* m_current;
 
@@ -86,45 +126,88 @@ public:
 	void Reset ()
 	{
 		inner_type const * const cp_current ( m_current );
+		inner_type default_v;
 
 		do
 		{
-			m_current->v = std::numeric_limits<value_type>::max ();
-			m_current->t = std::numeric_limits<time_type>::max ();
+			*m_current = default_v;
 			GoForward ();
 		}
 		while( m_current != cp_current );
 	}
 
-	Throwback_Arithmetic () :	m_current ( &(m_stack[0]) )
+	Throwback () : m_current ( &( m_stack[ 0 ] ) )
 	{
-		static_assert ( std::is_arithmetic< value_type>::value, "value_type is not arithmetic" );
+		static_assert ( std::is_copy_constructible< value_type>::value, "value_type is not copy constructible" );
+		static_assert ( std::is_copy_assignable< value_type>::value, "value_type is not copy assignable" );
+		static_assert ( std::is_move_constructible< value_type>::value, "value_type is not move constructible" );
+		static_assert ( std::is_move_assignable< value_type>::value, "value_type is not move assignable" );
 		static_assert ( std::is_arithmetic< time_type>::value, "time_type is not arithmetic" );
 		static_assert ( std::is_signed< time_type >::value, "time_type must be signed" );
 
 		Reset ();
 	}
 
-	Throwback_Arithmetic ( this_type const & other ) : m_current ( m_stack + ( other.m_current - other.m_stack ) )
+	Throwback ( this_type const & other ) : m_current ( m_stack + ( other.m_current - other.m_stack ) )
 	{
-		memcpy ( m_stack, other.m_stack, sizeof ( inner_type ) * count );
+		inner_type const * const cp_current ( m_current );
+
+		do
+		{
+			*m_current = other.m_stack[ m_current - m_stack ];
+			GoForward ();
+		}
+		while( m_current != cp_current );
 	}
 
-	Throwback_Arithmetic ( value_type const & v ) : Throwback_Arithmetic ()
+	Throwback ( this_type && other ) : m_current ( m_stack + ( other.m_current - other.m_stack ) )
 	{
-		m_current->v = v;
+		inner_type const * const cp_current ( m_current );
+
+		do
+		{
+			*m_current = std::move( other.m_stack[ m_current - m_stack ] );
+			GoForward ();
+		}
+		while( m_current != cp_current );
 	}
 
-	~Throwback_Arithmetic ()
+	~Throwback ()
 	{
 	}
 
-	Throwback_Arithmetic& operator=( this_type const & other )
+	Throwback& operator=( this_type const & other )
 	{
-		Assert ( this != &other );
+		if( this != &other )
+		{
+			m_current = m_stack + ( other.m_current - other.m_stack );
+			inner_type const * const cp_current ( m_current );
 
-		memcpy ( m_stack, other.m_stack, sizeof ( inner_type ) * count );
-		m_current = m_stack + ( other.m_current - other.m_stack );
+			do
+			{
+				*m_current = other.m_stack [ m_current-m_stack ];
+				GoForward ();
+			}
+			while( m_current != cp_current );
+		}
+
+		return *this;
+	}
+
+	Throwback& operator=( this_type && other )
+	{
+		if( this != &other )
+		{
+			m_current = m_stack + ( other.m_current - other.m_stack );
+			inner_type const * const cp_current ( m_current );
+
+			do
+			{
+				*m_current = std::move ( other.m_stack[ m_current - m_stack ] );
+				GoForward ();
+			}
+			while( m_current != cp_current );
+		}
 
 		return *this;
 	}
@@ -133,24 +216,20 @@ public:
 	{
 		inner_type const * const past ( GetBackward () );
 		GoForward ();
-		memcpy ( m_current, past, sizeof ( inner_type ) );
+		*m_current = *past;
 	}
-
-	/*value_type operator value_type() const
-	{
-		return m_current->v;
-	}*/
-
-	/*inner_type operator inner_type() const // FIXME : inner_type without copy construct
-	{
-		return *m_current;
-	}*/
 
 	void Store ( value_type value, time_type time )
 	{
 		GoForward ();
 		m_current->v = value;
 		m_current->t = time;
+	}
+
+	void Store ( inner_type &&data )
+	{
+		GoForward ();
+		*m_current = std::move(data);
 	}
 
 	void CopyHistory ( inner_type* dest, size_t& amount, size_t max_amount = count, time_type time_range = std::numeric_limits<time_type>::max (), time_type now = std::numeric_limits<time_type>::max () )
@@ -160,7 +239,7 @@ public:
 
 		do
 		{
-			if( m_current->v == std::numeric_limits<value_type>::max () && m_current->t == std::numeric_limits<time_type>::max () )
+			if( m_current->t == std::numeric_limits<time_type>::max () )
 			{
 				break;
 			}
@@ -168,19 +247,61 @@ public:
 			{
 				break;
 			}
-			if( amount >= max_amount )
+			*dest++ = *m_current;
+			if( ++amount >= max_amount )
 			{
 				break;
 			}
-			memcpy ( dest, m_current, sizeof ( inner_type ) );
-			//*dest = m_current->v;
-			++dest;
-			++amount;
 			GoBackward ();
 		}
 		while( m_current != cp_current );
 
 		m_current = cp_current;
+	}
+};
+
+template < typename value_type,
+			typename time_type,
+			size_t count = 2 
+			/* Number of values to store including the current value. Can remember count-1 values back. */
+		>
+class Throwback_Arithmetic : public Throwback<value_type, time_type, count>
+{
+	typedef Throwback_Arithmetic<value_type, time_type, count> this_type;
+	
+public:
+	typedef Throwback<value_type, time_type, count> base_class;
+	typedef base_class::inner_type inner_type;
+
+	Throwback_Arithmetic () : base_class()
+	{
+		static_assert ( std::is_arithmetic< value_type>::value, "value_type is not arithmetic" );
+		static_assert ( std::is_arithmetic< time_type>::value, "time_type is not arithmetic" );
+		static_assert ( std::is_signed< time_type >::value, "time_type must be signed" );
+	}
+
+	Throwback_Arithmetic ( this_type const & other ) : base_class(other)
+	{
+	}
+
+	Throwback_Arithmetic ( this_type && other ) : base_class(other)
+	{
+	}
+
+	~Throwback_Arithmetic ()
+	{
+	}
+
+	Throwback_Arithmetic& operator=( this_type const & other )
+	{
+		base_class::operator=( other );
+		return *this;
+	}
+
+	Throwback_Arithmetic& operator=( this_type const && other )
+	{
+		base_class::operator=( other );
+		return *this;
 	}
 
 	float Average ( value_type range_value_min = std::numeric_limits<value_type>::min(),
@@ -193,7 +314,7 @@ public:
 
 		do
 		{
-			if( m_current->v == std::numeric_limits<value_type>::max () && m_current->t == std::numeric_limits<time_type>::max () )
+			if( m_current->t == std::numeric_limits<time_type>::max () )
 			{
 				break;
 			}
@@ -218,7 +339,7 @@ public:
 
 		do
 		{
-			if( m_current->v == std::numeric_limits<value_type>::max () && m_current->t == std::numeric_limits<time_type>::max () )
+			if( m_current->t == std::numeric_limits<time_type>::max () )
 			{
 				break;
 			}
@@ -242,7 +363,7 @@ public:
 
 		do
 		{
-			if( m_current->v == std::numeric_limits<value_type>::max () && m_current->t == std::numeric_limits<time_type>::max () )
+			if( m_current->t == std::numeric_limits<time_type>::max () )
 			{
 				break;
 			}
@@ -267,7 +388,7 @@ public:
 
 		do
 		{
-			if( m_current->v == std::numeric_limits<value_type>::max () && m_current->t == std::numeric_limits<time_type>::max () )
+			if( m_current->t == std::numeric_limits<time_type>::max () )
 			{
 				break;
 			}
