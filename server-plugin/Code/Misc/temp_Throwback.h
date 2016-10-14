@@ -318,7 +318,7 @@ public:
 			{
 				break;
 			}
-			if( this->m_current->v >= range_value_min && m_current->v <= range_value_max )
+			if( this->m_current->v >= range_value_min && this->m_current->v <= range_value_max )
 			{
 				++amount;
 				sum += this->m_current->v;
@@ -393,7 +393,7 @@ public:
 				break;
 			}
 			min = this->m_current;
-			GoBackward ();
+			this->GoBackward ();
 		}
 		while( this->m_current != cp_current );
 
