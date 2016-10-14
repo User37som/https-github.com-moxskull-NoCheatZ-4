@@ -542,7 +542,7 @@ SourceSdk::PLUGIN_RESULT CNoCheatZPlugin::RT_ClientCommand ( SourceSdk::edict_t 
 	}
 	else
 	{
-		Logger::GetInstance()->Msg<MSG_WARNING> ( Helpers::format ( "CNoCheatZPlugin::ClientCommand (pEntity:%p -> pEntity->classname:%s -> clientname:%s, args:%s) : Dangerous SlotStatus %s", pEntity, pEntity->GetClassName (), "", args.GetCommandString () , SlotStatusToString( ph.operator SlotStatus() )));
+		//Logger::GetInstance()->Msg<MSG_WARNING> ( Helpers::format ( "CNoCheatZPlugin::ClientCommand (pEntity:%p -> pEntity->classname:%s -> clientname:%s, args:%s) : Dangerous SlotStatus %s", pEntity, pEntity->GetClassName (), "", args.GetCommandString () , SlotStatusToString( ph.operator SlotStatus() )));
 		if( ConCommandTester::GetInstance ()->RT_TestPlayerCommand_Anon ( ph, args.GetCommandString () ) )
 			return SourceSdk::PLUGIN_STOP;
 	}
