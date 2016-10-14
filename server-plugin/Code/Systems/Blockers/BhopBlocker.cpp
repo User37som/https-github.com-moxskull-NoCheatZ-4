@@ -23,7 +23,9 @@ BhopBlocker::BhopBlocker () :
 	BaseDynamicSystem ( "BhopBlocker" ),
 	playerdatahandler_class (),
 	PlayerRunCommandHookListener (),
-	singleton_class ()
+	singleton_class (),
+	convar_sv_enablebunnyhopping(nullptr),
+	convar_sv_autobunnyhopping(nullptr)
 {
 	METRICS_ADD_TIMER ( "BhopBlocker::PlayerRunCommandCallback", 2.0 );
 }
@@ -36,6 +38,23 @@ BhopBlocker::~BhopBlocker ()
 void BhopBlocker::Init ()
 {
 	InitDataStruct ();
+
+	convar_sv_enablebunnyhopping = SourceSdk::InterfacesProxy::ICvar_FindVar ( "sv_enablebunnyhopping" );
+
+	if( convar_sv_enablebunnyhopping == nullptr )
+	{
+		Logger::GetInstance ()->Msg<MSG_WARNING> ( "JumpTester::Init : Unable to locate ConVar sv_enablebunnyhopping" );
+	}
+
+	if( SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive )
+	{
+		convar_sv_autobunnyhopping = SourceSdk::InterfacesProxy::ICvar_FindVar ( "sv_autobunnyhopping" );
+
+		if( convar_sv_enablebunnyhopping == nullptr )
+		{
+			Logger::GetInstance ()->Msg<MSG_WARNING> ( "JumpTester::Init : Unable to locate ConVar sv_enablebunnyhopping" );
+		}
+	}
 }
 
 void BhopBlocker::Load ()
@@ -55,6 +74,21 @@ void BhopBlocker::Unload ()
 
 bool BhopBlocker::GotJob () const
 {
+	if( convar_sv_enablebunnyhopping != nullptr )
+	{
+		if( SourceSdk::InterfacesProxy::ConVar_GetBool ( convar_sv_enablebunnyhopping ) )
+		{
+			return false;
+		}
+	}
+	if( convar_sv_autobunnyhopping != nullptr )
+	{
+		if( SourceSdk::InterfacesProxy::ConVar_GetBool ( convar_sv_autobunnyhopping ) )
+		{
+			return false;
+		}
+	}
+
 	// Create a filter
 	ProcessFilter::HumanAtLeastConnecting const filter_class;
 	// Initiate the iterator at the first match in the filter
@@ -67,6 +101,22 @@ PlayerRunCommandRet BhopBlocker::RT_PlayerRunCommandCallback ( PlayerHandler::co
 {
 	METRICS_ENTER_SECTION ( "BhopBlocker::PlayerRunCommandCallback" );
 
+	if( convar_sv_enablebunnyhopping != nullptr )
+	{
+		if( SourceSdk::InterfacesProxy::ConVar_GetBool ( convar_sv_enablebunnyhopping ) )
+		{
+			SetActive ( false );
+			return PlayerRunCommandRet::CONTINUE;
+		}
+	}
+	if( convar_sv_autobunnyhopping != nullptr )
+	{
+		if( SourceSdk::InterfacesProxy::ConVar_GetBool ( convar_sv_autobunnyhopping ) )
+		{
+			SetActive ( false );
+			return PlayerRunCommandRet::CONTINUE;
+		}
+	}
 
 	/*
 		Prevents jumping right after the end of another jump cmd.

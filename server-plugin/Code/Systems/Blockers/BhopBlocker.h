@@ -48,6 +48,10 @@ class BhopBlocker :
 	typedef Singleton<BhopBlocker> singleton_class;
 	typedef PlayerDataStructHandler<JmpInfo> playerdatahandler_class;
 
+private:
+	void * convar_sv_enablebunnyhopping;
+	void * convar_sv_autobunnyhopping;
+
 public:
 	BhopBlocker ();
 	virtual ~BhopBlocker () final;

@@ -32,7 +32,9 @@ JumpTester::JumpTester () :
 	OnGroundHookListener (),
 	playerdata_class (),
 	PlayerRunCommandHookListener (),
-	singleton_class ()
+	singleton_class (),
+	convar_sv_enablebunnyhopping ( nullptr ),
+	convar_sv_autobunnyhopping ( nullptr )
 {}
 
 JumpTester::~JumpTester ()
@@ -43,6 +45,23 @@ JumpTester::~JumpTester ()
 void JumpTester::Init ()
 {
 	InitDataStruct ();
+
+	convar_sv_enablebunnyhopping = SourceSdk::InterfacesProxy::ICvar_FindVar ( "sv_enablebunnyhopping" );
+
+	if( convar_sv_enablebunnyhopping == nullptr )
+	{
+		Logger::GetInstance ()->Msg<MSG_WARNING> ( "JumpTester::Init : Unable to locate ConVar sv_enablebunnyhopping" );
+	}
+
+	if( SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive )
+	{
+		convar_sv_autobunnyhopping = SourceSdk::InterfacesProxy::ICvar_FindVar ( "sv_autobunnyhopping" );
+
+		if( convar_sv_enablebunnyhopping == nullptr )
+		{
+			Logger::GetInstance ()->Msg<MSG_WARNING> ( "JumpTester::Init : Unable to locate ConVar sv_enablebunnyhopping" );
+		}
+	}
 }
 
 void JumpTester::Load ()
@@ -64,6 +83,21 @@ void JumpTester::Unload ()
 
 bool JumpTester::GotJob () const
 {
+	if( convar_sv_enablebunnyhopping != nullptr )
+	{
+		if( SourceSdk::InterfacesProxy::ConVar_GetBool ( convar_sv_enablebunnyhopping ) )
+		{
+			return false;
+		}
+	}
+	if( convar_sv_autobunnyhopping != nullptr )
+	{
+		if( SourceSdk::InterfacesProxy::ConVar_GetBool ( convar_sv_autobunnyhopping ) )
+		{
+			return false;
+		}
+	}
+
 	// Create a filter
 	ProcessFilter::HumanAtLeastConnected const filter_class;
 	// Initiate the iterator at the first match in the filter
@@ -87,6 +121,23 @@ void JumpTester::RT_m_hGroundEntityStateChangedCallback ( PlayerHandler::const_i
 PlayerRunCommandRet JumpTester::RT_PlayerRunCommandCallback ( PlayerHandler::const_iterator ph, void* pCmd, void* old_cmd )
 {
 	PlayerRunCommandRet const constexpr drop_cmd ( PlayerRunCommandRet::CONTINUE );
+
+	if( convar_sv_enablebunnyhopping != nullptr )
+	{
+		if( SourceSdk::InterfacesProxy::ConVar_GetBool ( convar_sv_enablebunnyhopping ) )
+		{
+			SetActive ( false );
+			return PlayerRunCommandRet::CONTINUE;
+		}
+	}
+	if( convar_sv_autobunnyhopping != nullptr )
+	{
+		if( SourceSdk::InterfacesProxy::ConVar_GetBool ( convar_sv_autobunnyhopping ) )
+		{
+			SetActive ( false );
+			return PlayerRunCommandRet::CONTINUE;
+		}
+	}
 
 	bool last_jump_button_state;
 	bool cur_jump_button_state;
