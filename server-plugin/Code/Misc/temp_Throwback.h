@@ -307,97 +307,97 @@ public:
 	float Average ( value_type range_value_min = std::numeric_limits<value_type>::min(),
 					value_type range_value_max = std::numeric_limits<value_type>::max ())
 	{
-		inner_type * const cp_current ( m_current );
+		inner_type * const cp_current ( this->m_current );
 		value_type sum ( 0 );
 
 		size_t amount ( 0 );
 
 		do
 		{
-			if( m_current->t == std::numeric_limits<time_type>::max () )
+			if( this->m_current->t == std::numeric_limits<time_type>::max () )
 			{
 				break;
 			}
-			if( m_current->v >= range_value_min && m_current->v <= range_value_max )
+			if( this->m_current->v >= range_value_min && m_current->v <= range_value_max )
 			{
 				++amount;
-				sum += m_current->v;
+				sum += this->m_current->v;
 			}
-			GoBackward ();
+			this->GoBackward ();
 		}
-		while( m_current != cp_current );
+		while( this->m_current != cp_current );
 
-		m_current = cp_current;
+		this->m_current = cp_current;
 
 		return (float)sum / (float) amount;
 	}
 
 	value_type Min ()
 	{
-		inner_type * const cp_current ( m_current );
-		value_type min ( m_current->v );
+		inner_type * const cp_current ( this->m_current );
+		value_type min ( this->m_current->v );
 
 		do
 		{
-			if( m_current->t == std::numeric_limits<time_type>::max () )
+			if( this->m_current->t == std::numeric_limits<time_type>::max () )
 			{
 				break;
 			}
-			if( m_current->v < min )
+			if( this->m_current->v < min )
 			{
-				min = m_current->v;
+				min = this->m_current->v;
 			}
-			GoBackward ();
+			this->GoBackward ();
 		}
-		while( m_current != cp_current );
+		while( this->m_current != cp_current );
 
-		m_current = cp_current;
+		this->m_current = cp_current;
 
 		return min;
 	}
 
 	value_type Max ()
 	{
-		inner_type * const cp_current ( m_current );
-		value_type max ( m_current->v );
+		inner_type * const cp_current ( this->m_current );
+		value_type max ( this->m_current->v );
 
 		do
 		{
-			if( m_current->t == std::numeric_limits<time_type>::max () )
+			if( this->m_current->t == std::numeric_limits<time_type>::max () )
 			{
 				break;
 			}
-			if( m_current->v > max )
+			if( this->m_current->v > max )
 			{
-				max = m_current->v;
+				max = this->m_current->v;
 			}
-			GoBackward ();
+			this->GoBackward ();
 		}
-		while( m_current != cp_current );
+		while( this->m_current != cp_current );
 
-		m_current = cp_current;
+		this->m_current = cp_current;
 
 		return max;
 	}
 
 	time_type TimeSpan ()
 	{
-		inner_type * const cp_current ( m_current );
-		inner_type const * min ( m_current );
-		time_type const max ( m_current->t );
+		inner_type * const cp_current ( this->m_current );
+		inner_type const * min ( this->m_current );
+		time_type const max ( this->m_current->t );
 
 		do
 		{
-			if( m_current->t == std::numeric_limits<time_type>::max () )
+			if( this->m_current->t == std::numeric_limits<time_type>::max () )
 			{
 				break;
 			}
-			min = m_current;
+			min = this->m_current;
 			GoBackward ();
 		}
-		while( m_current != cp_current );
+		while( this->m_current != cp_current );
 
-		m_current = cp_current;
+		this->m_current = cp_current;
 
 		return max - min->t;
 	}
