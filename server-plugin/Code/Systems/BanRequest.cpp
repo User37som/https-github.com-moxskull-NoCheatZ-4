@@ -94,6 +94,9 @@ void BanRequest::OnLevelInit ()
 {
 	cmd_gb_ban = SourceSdk::InterfacesProxy::ICvar_FindCommand ( "gb_externalBanUser" );
 	cmd_sm_ban = SourceSdk::InterfacesProxy::ICvar_FindCommand ( "sm_ban" );
+
+	SourceSdk::InterfacesProxy::Call_ServerCommand ( "exec banned_user.cfg\n" );
+	SourceSdk::InterfacesProxy::Call_ServerCommand ( "exec banned_ip.cfg\n" );
 }
 
 BanRequest::~BanRequest ()

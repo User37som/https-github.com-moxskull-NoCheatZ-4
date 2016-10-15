@@ -185,12 +185,12 @@ void BaseSystem::ncz_cmd_fn ( const SourceSdk::CCommand &args )
 	}
 	else
 	{
-		basic_string prepared_message ("Usage: ncz system arg1 arg2 ...\nSystems list :\n");
+		Logger::GetInstance ()->Msg<MSG_CMD_REPLY> ( "Usage: ncz system arg1 arg2 ...\nSystems list :\n");
 
 		BaseSystem* it ( GetFirst () );
 		while( it != nullptr )
 		{
-			prepared_message.append( it->GetName () );
+			basic_string prepared_message ( it->GetName () );
 			if( it->IsStatic () )
 			{
 				prepared_message.append ( " (Static)\n" );
@@ -212,10 +212,9 @@ void BaseSystem::ncz_cmd_fn ( const SourceSdk::CCommand &args )
 				prepared_message.append ( " (Sleeping - Waiting for players)\n" );
 			}
 			prepared_message.append ( Helpers::format( "\tCommands : %s\n", it->cmd_list () ) );
+			Logger::GetInstance ()->Msg<MSG_CMD_REPLY> ( prepared_message.c_str () );
 			GetNext ( it );
-		}
-
-		Logger::GetInstance ()->Msg<MSG_CMD_REPLY> ( prepared_message.c_str () );
+		}		
 	}
 }
 
