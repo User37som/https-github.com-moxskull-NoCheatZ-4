@@ -43,6 +43,14 @@
 
 #define MAX_PLAYERS 66
 
+/*
+	When the logging system takes more than this size (bytes) then force it to flush.
+	The better is to have a low value that will not make the server hangs
+	but also a high value that will not make it lag in case there is a high amount
+	of messages to be logged per second.
+*/
+#define LOGGER_FORCE_FLUSH_MAX_MEMORY 65536
+
 namespace SystemPriority
 {
 	namespace UserCmdHookListener

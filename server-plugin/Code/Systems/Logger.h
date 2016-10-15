@@ -69,8 +69,10 @@ private:
 
 	MsgFunc_t m_msg_func;
 
+	size_t m_current_memory_used;
+
 public:
-	Logger () : BaseStaticSystem ( "Logger" ), singleton_class (), m_msg (), prolog ( "[NoCheatZ " NCZ_VERSION_STR "] " ), m_msg_func( nullptr )
+	Logger () : BaseStaticSystem ( "Logger" ), singleton_class (), m_msg (), prolog ( "[NoCheatZ " NCZ_VERSION_STR "] " ), m_msg_func( nullptr ), m_current_memory_used (0)
 	{
 		ConnectToServerConsole ();
 	};
