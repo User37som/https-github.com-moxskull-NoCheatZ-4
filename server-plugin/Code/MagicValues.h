@@ -43,6 +43,8 @@
 
 #define MAX_PLAYERS 66
 
+#define MIN_LOGGING_TIME 4.5f
+
 /*
 	When the logging system takes more than this size (bytes) then force it to flush.
 	The better is to have a low value that will not make the server hangs
