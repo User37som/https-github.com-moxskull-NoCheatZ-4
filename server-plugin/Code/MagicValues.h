@@ -43,7 +43,7 @@
 
 #define MAX_PLAYERS 66
 
-#define MIN_LOGGING_TIME 4.5f
+#define ANTIFLOOD_LOGGING_TIME 4.5f
 
 /*
 	When the logging system takes more than this size (bytes) then force it to flush.
