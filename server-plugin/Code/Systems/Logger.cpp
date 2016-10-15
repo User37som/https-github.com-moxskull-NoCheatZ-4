@@ -285,7 +285,7 @@ void Logger::Flush ()
 		while( ++pos != max );
 	}
 
-	m_msg.PurgeAndDeleteElements ();
+	m_msg.RemoveAll ();
 	m_current_memory_used = 0;
 }
 
