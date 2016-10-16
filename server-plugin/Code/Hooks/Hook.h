@@ -122,6 +122,7 @@ public:
 		DWORD dwOld;
 		if( !VirtualProtect ( info.vf_entry, 2 * sizeof ( DWORD* ), PAGE_EXECUTE_READWRITE, &dwOld ) )
 		{
+			Logger::GetInstance ()->Msg<MSG_ERROR> ( "VirtualTableHook : VirtualProtect error -> Cannot hook function" );
 			return;
 		}
 #else // LINUX
@@ -129,39 +130,48 @@ public:
 		void *p ( ( void * ) ( ( DWORD ) ( info.vf_entry ) & ~( psize - 1 ) ) );
 		if( mprotect ( p, ( ( 2 * sizeof ( void * ) ) + ( ( DWORD ) ( info.vf_entry ) & ( psize - 1 ) ) ), PROT_READ | PROT_WRITE | PROT_EXEC ) < 0 )
 		{
+			Logger::GetInstance ()->Msg<MSG_ERROR> ( "VirtualTableHook : mprotect error -> Cannot hook function" );
 			return;
 		}
 #endif // WIN32
 
-		if( info.oldFn && info.oldFn != *info.vf_entry )
-			Logger::GetInstance ()->Msg<MSG_WARNING> ( "VirtualTableHook : Unexpected virtual table value in VirtualTableHook. Another plugin might be in conflict." );
-		if( info.newFn == *info.vf_entry )
-		{
+		bool can_hook = true;
 
+		if( info.oldFn && info.oldFn != *info.vf_entry )
+		{
+			Logger::GetInstance ()->Msg<MSG_WARNING> ( "VirtualTableHook : Unexpected virtual table value in VirtualTableHook. Another plugin might be in conflict." );
+			can_hook = false;
+		}
+		else if( info.newFn == *info.vf_entry )
+		{
 			if( !m_list.HasElement ( info ) )
 			{
 				Logger::GetInstance ()->Msg<MSG_WARNING> ( "VirtualTableHook : Virtual function pointer was the same but not registered as hooked ..." );
 				m_list.AddToTail ( info );
 				m_list.Sort ( HookCompare );
+				can_hook = false;
 			}
-			return;
 		}
 
-		info.oldFn = *info.vf_entry;
-		*info.vf_entry = info.newFn;
+		if( can_hook )
+		{
+			info.oldFn = *info.vf_entry;
+			*info.vf_entry = info.newFn;
+			DebugMessage ( Helpers::format ( "VirtualTableHook : function 0x%X at 0x%X replaced by 0x%X.", info.oldFn, info.vf_entry, info.newFn ) );
+
+			if( !m_list.HasElement ( info ) )
+			{
+				m_list.AddToTail ( info );
+				m_list.Sort ( HookCompare );
+			}
+		}
 
 #ifdef WIN32
 		VirtualProtect ( info.vf_entry, 2 * sizeof ( DWORD* ), dwOld, &dwOld );
 #else // LINUX
 		mprotect ( p, ( ( 2 * sizeof ( void * ) ) + ( ( DWORD ) ( info.vf_entry ) & ( psize - 1 ) ) ), PROT_READ | PROT_EXEC );
 #endif // WIN32
-		DebugMessage ( Helpers::format ( "VirtualTableHook : function 0x%X at 0x%X replaced by 0x%X.", info.oldFn, info.vf_entry, info.newFn ) );
-
-		if( !m_list.HasElement ( info ) )
-		{
-			m_list.AddToTail ( info );
-			m_list.Sort ( HookCompare );
-		}
+		
 	}
 
 	// Find by virtual table entry address
