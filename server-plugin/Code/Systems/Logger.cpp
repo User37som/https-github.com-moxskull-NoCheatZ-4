@@ -102,13 +102,14 @@ void Logger::Push ( const char * msg )
 		server_tick = static_cast< SourceSdk::CGlobalVars* >( SourceSdk::InterfacesProxy::Call_GetGlobalVars () )->tickcount;
 	}
 
-	if( AutoTVRecord::GetInstance ()->IsRecording () )
+	if( AutoTVRecord::IsCreated() && AutoTVRecord::GetInstance ()->IsRecording () )
 	{
 		basic_string move_msg;
 		move_msg.reserve ( 255 );
 		move_msg.append ( Helpers::getStrDateTime ( "%x %X " ) );
 		move_msg.append ( Helpers::format ( "[ Server Tick #%d, SourceTV:%s.dem : Tick #%d ] ", server_tick, AutoTVRecord::GetInstance ()->GetRecordFilename ().c_str (), AutoTVRecord::GetInstance ()->GetRecordTick () ) );
 		move_msg.append ( copy_msg );
+		m_current_memory_used += move_msg.capacity ();
 		m_msg.AddToTail ( std::move( move_msg ) );
 	}
 	else
@@ -118,16 +119,24 @@ void Logger::Push ( const char * msg )
 		move_msg.append ( Helpers::getStrDateTime ( "%x %X " ) );
 		move_msg.append ( Helpers::format ( "[ Server Tick #%d] ", server_tick ) );
 		move_msg.append ( copy_msg );
+		m_current_memory_used += move_msg.capacity ();
 		m_msg.AddToTail ( std::move ( move_msg ) );
 	}
 
-	ProcessFilter::HumanAtLeastConnected filter_class;
-
-	if( NczPlayerManager::GetInstance ()->GetPlayerCount ( &filter_class ) == 0 )
+	if( m_always_flush || m_current_memory_used >= LOGGER_FORCE_FLUSH_MAX_MEMORY )
 	{
-		// We can flush right now.
-
 		Flush ();
+	}
+	else
+	{
+		ProcessFilter::HumanAtLeastConnected filter_class;
+
+		if( NczPlayerManager::GetInstance ()->GetPlayerCount ( &filter_class ) == 0 )
+		{
+			// We can flush right now.
+
+			Flush ();
+		}
 	}
 }
 
@@ -276,9 +285,36 @@ void Logger::Flush ()
 		while( ++pos != max );
 	}
 
-
 	m_msg.RemoveAll ();
-	m_msg.EnsureCapacity ( 256 );
+	m_current_memory_used = 0;
+}
+
+bool Logger::sys_cmd_fn ( const SourceSdk::CCommand &args )
+{
+	if( stricmp ( "alwaysflush", args.Arg ( 2 ) ) )
+	{
+		if( stricmp ( "on", args.Arg ( 3 ) ) )
+		{
+			SetAlwaysFlush ( true );
+			Msg<MSG_CMD_REPLY> ( "Logger AlwaysFlush is on" );
+			return true;
+		}
+		else if( stricmp ( "off", args.Arg ( 3 ) ) )
+		{
+			SetAlwaysFlush ( false );
+			Msg<MSG_CMD_REPLY> ( "Logger AlwaysFlush is off" );
+			return true;
+		}
+		else
+		{
+			Msg<MSG_CMD_REPLY> ( "Usage : On / Off" );
+			return false;
+		}
+	}
+	else
+	{
+		return false;
+	}
 }
 
 void Helpers::writeToLogfile ( const basic_string &text )

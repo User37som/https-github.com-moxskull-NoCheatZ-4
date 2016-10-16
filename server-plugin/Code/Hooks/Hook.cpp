@@ -15,6 +15,43 @@
 
 #include "Hook.h"
 
+/*
+	This function will help in debugging error messages, and also helps finding what the plugin is doing in debug mode.
+*/
+basic_string GetModuleNameFromMemoryAddress ( DWORD mem_address )
+{
+#ifdef WIN32
+	HMODULE module;
+	if( GetModuleHandleExA ( GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT, reinterpret_cast<LPSTR>(mem_address), &module ) )
+	{
+		char buf[ 1024 ];
+		GetModuleFileNameA ( module, buf, 1023 );
+		buf[ 1023 ] = '\0'; // Windows XP does not null-terminate string when truncated ... I do this even if we don't target XP.
+		basic_string filename ( buf );
+		size_t path_end ( filename.find_last_of ( "/\\" ) );
+		if( path_end != basic_string::npos )
+		{
+			filename.remove ( 0, path_end );
+		}
+		return filename;
+	}
+	else
+	{
+		return "<error determining module>";
+	}
+#else
+	Dl_info info;
+	dladdr ( reinterpret_cast<void*>( mem_address ), &info );
+	basic_string filename ( info.dli_fname );
+	size_t path_end ( filename.find_last_of ( "/\\" ) );
+	if( path_end != basic_string::npos )
+	{
+		filename.remove ( 0, path_end );
+	}
+	return filename;
+#endif
+}
+
 int HookCompare ( HookInfo const * a, HookInfo const * b )
 {
 	if( a->vf_entry > b->vf_entry ) return 1;

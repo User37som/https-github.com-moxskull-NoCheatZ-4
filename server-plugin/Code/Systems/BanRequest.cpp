@@ -94,6 +94,9 @@ void BanRequest::OnLevelInit ()
 {
 	cmd_gb_ban = SourceSdk::InterfacesProxy::ICvar_FindCommand ( "gb_externalBanUser" );
 	cmd_sm_ban = SourceSdk::InterfacesProxy::ICvar_FindCommand ( "sm_ban" );
+
+	SourceSdk::InterfacesProxy::Call_ServerCommand ( "exec banned_user.cfg\n" );
+	SourceSdk::InterfacesProxy::Call_ServerCommand ( "exec banned_ip.cfg\n" );
 }
 
 BanRequest::~BanRequest ()
@@ -154,7 +157,7 @@ void BanRequest::BanInternal ( int ban_time, char const * steam_id, int userid, 
 			}
 			else
 			{
-				SourceSdk::InterfacesProxy::Call_ServerCommand ( Helpers::format ( "sm_ban %d %d \"%s\"\n", userid, ban_time, kick_message ) );
+				SourceSdk::InterfacesProxy::Call_ServerCommand ( Helpers::format ( "sm_ban #%d %d \"%s\"\n", userid, ban_time, kick_message ) );
 			}
 		}
 		/*
