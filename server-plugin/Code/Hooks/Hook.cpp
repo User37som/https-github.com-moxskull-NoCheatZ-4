@@ -42,7 +42,13 @@ basic_string GetModuleNameFromMemoryAddress ( DWORD mem_address )
 #else
 	Dl_info info;
 	dladdr ( reinterpret_cast<void*>( mem_address ), &info );
-	return info.dli_fname;
+	basic_string filename ( info.dli_fname );
+	size_t path_end ( filename.find_last_of ( "/\\" ) );
+	if( path_end != basic_string::npos )
+	{
+		filename.remove ( 0, path_end );
+	}
+	return filename;
 #endif
 }
 

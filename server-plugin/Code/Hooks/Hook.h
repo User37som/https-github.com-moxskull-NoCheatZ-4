@@ -124,7 +124,7 @@ public:
 		DWORD dwOld;
 		if( !VirtualProtect ( info.vf_entry, 2 * sizeof ( DWORD* ), PAGE_EXECUTE_READWRITE, &dwOld ) )
 		{
-			Logger::GetInstance ()->Msg<MSG_ERROR> ( Helpers::format( "VirtualTableHook : VirtualProtect error -> Cannot hook function in %s", GetModuleNameFromMemoryAddress( *( DWORD* ) ( *info.vf_entry) ).c_str() ) );
+			Logger::GetInstance ()->Msg<MSG_ERROR> ( Helpers::format( "VirtualTableHook : VirtualProtect error -> Cannot hook function in %s", GetModuleNameFromMemoryAddress( *info.vf_entry ).c_str() ) );
 			return;
 		}
 #else // LINUX
@@ -132,7 +132,7 @@ public:
 		void *p ( ( void * ) ( ( DWORD ) ( info.vf_entry ) & ~( psize - 1 ) ) );
 		if( mprotect ( p, ( ( 2 * sizeof ( void * ) ) + ( ( DWORD ) ( info.vf_entry ) & ( psize - 1 ) ) ), PROT_READ | PROT_WRITE | PROT_EXEC ) < 0 )
 		{
-			Logger::GetInstance ()->Msg<MSG_ERROR> ( Helpers::format( "VirtualTableHook : mprotect error -> Cannot hook function in %s", GetModuleNameFromMemoryAddress ( *( DWORD* ) ( *info.vf_entry) ).c_str () ) );
+			Logger::GetInstance ()->Msg<MSG_ERROR> ( Helpers::format( "VirtualTableHook : mprotect error -> Cannot hook function in %s", GetModuleNameFromMemoryAddress ( *info.vf_entry ).c_str () ) );
 			return;
 		}
 #endif // WIN32
@@ -141,7 +141,7 @@ public:
 
 		if( info.oldFn && info.oldFn != *info.vf_entry )
 		{
-			Logger::GetInstance ()->Msg<MSG_WARNING> ( Helpers::format ( "VirtualTableHook : Unexpected virtual table value in VirtualTableHook. Plugin (%s) might be in conflict.", GetModuleNameFromMemoryAddress ( *(DWORD*)(*info.vf_entry) ).c_str () ) );
+			Logger::GetInstance ()->Msg<MSG_WARNING> ( Helpers::format ( "VirtualTableHook : Unexpected virtual table value in VirtualTableHook. Module %s might be in conflict.", GetModuleNameFromMemoryAddress ( *info.vf_entry ).c_str () ) );
 			can_hook = false;
 		}
 		else if( info.newFn == *info.vf_entry )
@@ -159,7 +159,7 @@ public:
 		{
 			info.oldFn = *info.vf_entry;
 			*info.vf_entry = info.newFn;
-			DebugMessage ( Helpers::format ( "VirtualTableHook : function 0x%X at 0x%X in %s replaced by 0x%X in %s.", info.oldFn, info.vf_entry, GetModuleNameFromMemoryAddress ( *( DWORD* ) ( info.oldFn ) ).c_str (), info.newFn, GetModuleNameFromMemoryAddress ( *( DWORD* ) ( info.newFn ) ).c_str () ) );
+			DebugMessage ( Helpers::format ( "VirtualTableHook : function 0x%X at 0x%X in %s replaced by 0x%X from %s.", info.oldFn, info.vf_entry, GetModuleNameFromMemoryAddress ( info.oldFn ).c_str (), info.newFn, GetModuleNameFromMemoryAddress ( info.newFn ).c_str () ) );
 
 			if( !m_list.HasElement ( info ) )
 			{
