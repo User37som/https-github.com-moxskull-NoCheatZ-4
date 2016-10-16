@@ -102,7 +102,7 @@ void Logger::Push ( const char * msg )
 		server_tick = static_cast< SourceSdk::CGlobalVars* >( SourceSdk::InterfacesProxy::Call_GetGlobalVars () )->tickcount;
 	}
 
-	if( AutoTVRecord::GetInstance ()->IsRecording () )
+	if( AutoTVRecord::IsCreated() && AutoTVRecord::GetInstance ()->IsRecording () )
 	{
 		basic_string move_msg;
 		move_msg.reserve ( 255 );
@@ -123,7 +123,7 @@ void Logger::Push ( const char * msg )
 		m_msg.AddToTail ( std::move ( move_msg ) );
 	}
 
-	if( m_current_memory_used >= LOGGER_FORCE_FLUSH_MAX_MEMORY )
+	if( m_always_flush || m_current_memory_used >= LOGGER_FORCE_FLUSH_MAX_MEMORY )
 	{
 		Flush ();
 	}
@@ -287,6 +287,34 @@ void Logger::Flush ()
 
 	m_msg.RemoveAll ();
 	m_current_memory_used = 0;
+}
+
+bool Logger::sys_cmd_fn ( const SourceSdk::CCommand &args )
+{
+	if( stricmp ( "alwaysflush", args.Arg ( 2 ) ) )
+	{
+		if( stricmp ( "on", args.Arg ( 3 ) ) )
+		{
+			SetAlwaysFlush ( true );
+			Msg<MSG_CMD_REPLY> ( "Logger AlwaysFlush is on" );
+			return true;
+		}
+		else if( stricmp ( "off", args.Arg ( 3 ) ) )
+		{
+			SetAlwaysFlush ( false );
+			Msg<MSG_CMD_REPLY> ( "Logger AlwaysFlush is off" );
+			return true;
+		}
+		else
+		{
+			Msg<MSG_CMD_REPLY> ( "Usage : On / Off" );
+			return false;
+		}
+	}
+	else
+	{
+		return false;
+	}
 }
 
 void Helpers::writeToLogfile ( const basic_string &text )
