@@ -421,6 +421,24 @@ public:
 #define METRICS_ADD_TIMER(x, y) m_metrics.AddTimer(x, y)
 #define METRICS_ADD_COUNTER(x, y) m_metrics.AddCounter(x, y)
 
+class RAIIMetrics
+{
+private:
+	char const * const m_name;
+	MetricsContainer * const m_metrics;
+
+public:
+	RAIIMetrics ( char const * const name, MetricsContainer * const metrics ) : m_name ( name ), m_metrics ( metrics )
+	{
+		m_metrics->EnterSection ( m_name );
+	}
+
+	~RAIIMetrics ()
+	{
+		m_metrics->LeaveSection ( m_name );
+	}
+};
+
 #else // ! NCZ_USE_METRICS
 
 #define METRICS_ENTER_SECTION(x)
