@@ -439,7 +439,7 @@ bool ConCommandTester::RT_ConCommandCallback ( PlayerHandler::const_iterator ph,
 {
 	char const * const command_name ( SourceSdk::InterfacesProxy::ConCommand_GetName ( cmd ) );
 
-	if( ph != PlayerHandler::end () ) /// https://github.com/L-EARN/NoCheatZ-4/issues/16#issuecomment-225543330
+	if( ph != SlotStatus::INVALID ) /// https://github.com/L-EARN/NoCheatZ-4/issues/16#issuecomment-225543330
 	{
 		if( stricmp ( command_name, "ent_create" ) == 0 || stricmp ( command_name, "ent_fire" ) == 0 )
 		{
