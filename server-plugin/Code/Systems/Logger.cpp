@@ -102,7 +102,7 @@ void Logger::Push ( const char * msg )
 		server_tick = static_cast< SourceSdk::CGlobalVars* >( SourceSdk::InterfacesProxy::Call_GetGlobalVars () )->tickcount;
 	}
 
-	if( AutoTVRecord::GetInstance ()->IsRecording () )
+	if( AutoTVRecord::IsCreated() && AutoTVRecord::GetInstance ()->IsRecording () )
 	{
 		basic_string move_msg;
 		move_msg.reserve ( 255 );
