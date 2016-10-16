@@ -66,11 +66,12 @@ class Logger :
 private:
 	CUtlVector<basic_string> m_msg;
 	basic_string const prolog;
+	bool m_always_flush;
 
 	MsgFunc_t m_msg_func;
 
 public:
-	Logger () : BaseStaticSystem ( "Logger" ), singleton_class (), m_msg (), prolog ( "[NoCheatZ " NCZ_VERSION_STR "] " ), m_msg_func( nullptr )
+	Logger () : BaseStaticSystem ( "Logger", "Verbose - AlwaysFlush" ), singleton_class (), m_msg (), prolog ( "[NoCheatZ " NCZ_VERSION_STR "] " ), m_always_flush(false), m_msg_func( nullptr )
 	{
 		ConnectToServerConsole ();
 	};
@@ -81,6 +82,13 @@ public:
 
 	virtual void Init () override final
 	{};
+
+	virtual bool sys_cmd_fn ( const SourceSdk::CCommand &args ) override final;
+
+	void SetAlwaysFlush (bool v)
+	{
+		m_always_flush = v;
+	}
 
 	void ConnectToServerConsole ();
 

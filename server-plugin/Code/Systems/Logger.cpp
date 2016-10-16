@@ -123,7 +123,7 @@ void Logger::Push ( const char * msg )
 
 	ProcessFilter::HumanAtLeastConnected filter_class;
 
-	if( NczPlayerManager::GetInstance ()->GetPlayerCount ( &filter_class ) == 0 )
+	if( m_always_flush || NczPlayerManager::GetInstance ()->GetPlayerCount ( &filter_class ) == 0 )
 	{
 		// We can flush right now.
 
@@ -279,6 +279,34 @@ void Logger::Flush ()
 
 	m_msg.RemoveAll ();
 	m_msg.EnsureCapacity ( 256 );
+}
+
+bool Logger::sys_cmd_fn ( const SourceSdk::CCommand &args )
+{
+	if( stricmp ( "alwaysflush", args.Arg ( 2 ) ) )
+	{
+		if( stricmp ( "on", args.Arg ( 3 ) ) )
+		{
+			SetAlwaysFlush ( true );
+			Msg<MSG_CMD_REPLY> ( "Logger AlwaysFlush is on" );
+			return true;
+		}
+		else if( stricmp ( "off", args.Arg ( 3 ) ) )
+		{
+			SetAlwaysFlush ( false );
+			Msg<MSG_CMD_REPLY> ( "Logger AlwaysFlush is off" );
+			return true;
+		}
+		else
+		{
+			Msg<MSG_CMD_REPLY> ( "Usage : On / Off" );
+			return false;
+		}
+	}
+	else
+	{
+		return false;
+	}
 }
 
 void Helpers::writeToLogfile ( const basic_string &text )
