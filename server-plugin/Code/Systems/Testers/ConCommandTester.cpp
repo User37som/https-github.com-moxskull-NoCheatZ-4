@@ -454,6 +454,10 @@ bool ConCommandTester::RT_ConCommandCallback ( PlayerHandler::const_iterator ph,
 			return false;
 		}
 	}
+	else if( ph.GetIndex () == 0 ) // server : https://github.com/L-EARN/NoCheatZ-4/issues/98
+	{
+		return false;
+	}
 	else
 	{
 		Logger::GetInstance ()->Msg<MSG_ERROR> ( Helpers::format ( "ConCommandTester::ConCommandCallback : Intercepted a ConCommand because player class is not ready. Command name : %s\n", command_name ) );
