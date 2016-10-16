@@ -157,7 +157,7 @@ void BanRequest::BanInternal ( int ban_time, char const * steam_id, int userid, 
 			}
 			else
 			{
-				SourceSdk::InterfacesProxy::Call_ServerCommand ( Helpers::format ( "sm_ban %d %d \"%s\"\n", userid, ban_time, kick_message ) );
+				SourceSdk::InterfacesProxy::Call_ServerCommand ( Helpers::format ( "sm_ban #%d %d \"%s\"\n", userid, ban_time, kick_message ) );
 			}
 		}
 		/*
