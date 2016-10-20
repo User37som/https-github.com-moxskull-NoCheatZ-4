@@ -1,5 +1,7 @@
 #include "gtest/gtest.h"
 
+#define NO_LOGGER_ASSERT
+
 #include "Misc/temp_basicstring.h"
 #include "Misc/temp_Throwback.h"
 
