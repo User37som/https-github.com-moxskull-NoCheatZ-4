@@ -64,16 +64,12 @@ void SpamConnectTester::ClientConnect ( bool *bAllowConnect, SourceSdk::edict_t 
 
 	ConnectInfo & v ( m_connect_list[ pInfo ] );
 
-	if( v.next_connect_time > Plat_FloatTime () )
+	if( v.next_connect_time > time(nullptr) )
 	{
 		if( ++( v.count ) > 3 )
 		{
 			*bAllowConnect = false;
-			if( strcmp ( "127.0.0.1", pszAddress ) )
-			{
-				SourceSdk::InterfacesProxy::Call_ServerCommand ( Helpers::format ( "addip 20 \"%s\"\n", pszAddress ) );
-			}
-			strncpy ( reject, "You are spam connecting. Please wait 20 minutes.", 48 );
+			strncpy ( reject, "You are spam connecting. Please wait 20 minutes.", 49 );
 			m_connect_list.FindAndRemove ( v );
 			return;
 		}
