@@ -48,7 +48,7 @@ bool SpamConnectTester::GotJob () const
 
 void SpamConnectTester::ClientConnect ( bool *bAllowConnect, SourceSdk::edict_t const * const pEntity, const char *pszName, const char *pszAddress, char *reject, int maxrejectlen )
 {
-	if( !*bAllowConnect ) return;
+	if( !*bAllowConnect || !IsActive() ) return;
 
 	ConnectInfo sInfo ( pszAddress );
 
