@@ -249,9 +249,6 @@ bool CNoCheatZPlugin::Load ( SourceSdk::CreateInterfaceFn _interfaceFactory, Sou
 	BaseSystem::ManageSystems ();
 
 	SourceSdk::InterfacesProxy::ConVar_SetValue<bool> ( nocheatz_instance, true );
-	
-	int * k = nullptr;
-	*k = 1;
 
 	Logger::GetInstance ()->Msg<MSG_CHAT> ( "Loaded" );
 
