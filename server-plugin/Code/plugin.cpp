@@ -41,12 +41,15 @@
 #include "Systems/AutoTVRecord.h"
 #include "Misc/EntityProps.h"
 #include "Misc/MathCache.h"
+#include "Misc/SigHandler.h"
 
 #include "Systems/OnTickListener.h"
 #include "Systems/TimerListener.h"
 
 static void* __CreatePlugin_interface ()
 {
+	static KxStackTrace g_KxStackTrace;
+
 	printf ( "__CreatePlugin_interface - HeapMemoryManager::InitPool()\n" );
 	HeapMemoryManager::InitPool ();
 	CNoCheatZPlugin::CreateInstance ();
