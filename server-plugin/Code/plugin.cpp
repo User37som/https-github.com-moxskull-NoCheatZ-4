@@ -482,7 +482,20 @@ SourceSdk::PLUGIN_RESULT CNoCheatZPlugin::ClientConnect ( bool *bAllowConnect, S
 #define MAX_CHARS_NAME 32
 
 	NczPlayerManager::GetInstance ()->ClientConnect ( pEntity );
-	NczPlayer* player ( *(NczPlayerManager::GetInstance ()->GetPlayerHandlerByEdict ( pEntity )) );
+
+	size_t const reject_time ( BanRequest::GetInstance ()->RejectTime ( pszAddress ) );
+	if( reject_time > 0 )
+	{
+		*bAllowConnect = false;
+
+		char const * reject_msg ( Helpers::format ( "Please wait %u minutes", reject_time / 60 ) );
+		memcpy ( reject, reject_msg, strlen( reject_msg ) + 1);
+
+		NczPlayerManager::GetInstance ()->ClientDisconnect ( pEntity );
+
+		Logger::GetInstance ()->Msg<MSG_LOG> ( Helpers::format ( "CNoCheatZPlugin::ClientConnect : Rejected %s with reason %s", pszAddress, reject ) );
+		return SourceSdk::PLUGIN_STOP;
+	}
 
 	SpamConnectTester::GetInstance ()->ClientConnect ( bAllowConnect, pEntity, pszName, pszAddress, reject, maxrejectlen );
 	SpamChangeNameTester::GetInstance ()->ClientConnect ( bAllowConnect, pEntity, pszName, pszAddress, reject, maxrejectlen );
@@ -495,6 +508,7 @@ SourceSdk::PLUGIN_RESULT CNoCheatZPlugin::ClientConnect ( bool *bAllowConnect, S
 		{
 			NczPlayerManager::GetInstance ()->ClientDisconnect ( pEntity );
 			Logger::GetInstance ()->Msg<MSG_LOG> ( Helpers::format ( "CNoCheatZPlugin::ClientConnect : Rejected %s with reason %s", pszAddress, reject ) );
+			BanRequest::GetInstance ()->AddReject ( 1200, pszAddress );
 			return SourceSdk::PLUGIN_STOP;
 		}
 		else
@@ -503,20 +517,24 @@ SourceSdk::PLUGIN_RESULT CNoCheatZPlugin::ClientConnect ( bool *bAllowConnect, S
 		}
 	}
 
-	JumpTester::GetInstance ()->ResetPlayerDataStruct ( player );
-	EyeAnglesTester::GetInstance ()->ResetPlayerDataStruct ( player );
-	ConVarTester::GetInstance ()->ResetPlayerDataStruct ( player );
-	//ShotTester::GetInstance ()->ResetPlayerDataStruct ( player );
-	AutoAttackTester::GetInstance ()->ResetPlayerDataStruct ( player );
-	SpeedTester::GetInstance ()->ResetPlayerDataStruct ( player );
-	ConCommandTester::GetInstance ()->ResetPlayerDataStruct ( player );
-	AntiFlashbangBlocker::GetInstance ()->ResetPlayerDataStruct ( player );
-	AntiSmokeBlocker::GetInstance ()->ResetPlayerDataStruct ( player );
-	BadUserCmdBlocker::GetInstance ()->ResetPlayerDataStruct ( player );
-	WallhackBlocker::GetInstance ()->ResetPlayerDataStruct ( player );
-	SpamChangeNameTester::GetInstance ()->ResetPlayerDataStruct ( player );
-	RadarHackBlocker::GetInstance ()->ResetPlayerDataStruct ( player );
-	BhopBlocker::GetInstance ()->ResetPlayerDataStruct ( player );
+	{
+		NczPlayer* player ( *( NczPlayerManager::GetInstance ()->GetPlayerHandlerByEdict ( pEntity ) ) );
+
+		JumpTester::GetInstance ()->ResetPlayerDataStruct ( player );
+		EyeAnglesTester::GetInstance ()->ResetPlayerDataStruct ( player );
+		ConVarTester::GetInstance ()->ResetPlayerDataStruct ( player );
+		//ShotTester::GetInstance ()->ResetPlayerDataStruct ( player );
+		AutoAttackTester::GetInstance ()->ResetPlayerDataStruct ( player );
+		SpeedTester::GetInstance ()->ResetPlayerDataStruct ( player );
+		ConCommandTester::GetInstance ()->ResetPlayerDataStruct ( player );
+		AntiFlashbangBlocker::GetInstance ()->ResetPlayerDataStruct ( player );
+		AntiSmokeBlocker::GetInstance ()->ResetPlayerDataStruct ( player );
+		BadUserCmdBlocker::GetInstance ()->ResetPlayerDataStruct ( player );
+		WallhackBlocker::GetInstance ()->ResetPlayerDataStruct ( player );
+		SpamChangeNameTester::GetInstance ()->ResetPlayerDataStruct ( player );
+		RadarHackBlocker::GetInstance ()->ResetPlayerDataStruct ( player );
+		BhopBlocker::GetInstance ()->ResetPlayerDataStruct ( player );
+	}
 
 	return SourceSdk::PLUGIN_CONTINUE;
 }
