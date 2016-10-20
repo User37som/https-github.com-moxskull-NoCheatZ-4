@@ -42,7 +42,7 @@ BASE_CFLAGS =   -msse -D_LINUX -DLINUX -D_alloca=alloca \
 		-Wno-non-virtual-dtor -Wno-overloaded-virtual \
 		-Wall -Werror
 
-OPT_FLAGS = -DNDEBUG -O3 -funroll-loops -s -pipe $(OTHER_PREPROCESSORS)
+OPT_FLAGS = -DNDEBUG -O3 -funroll-loops -pipe $(OTHER_PREPROCESSORS)
 DEBUG_FLAGS = -g -ggdb3 -O0 -D_DEBUG -DDEBUG $(OTHER_PREPROCESSORS)
 
 ###########################################################
@@ -88,6 +88,7 @@ SRC =   $(wildcard Code/*.cpp) \
 	$(wildcard SourceSdk/Interfaces/Protobuf/*.cpp)
 
 SRC := $(filter-out Code/Hooks/RayTraceCache.cpp, $(SRC)) 
+SRC := $(filter-out Code/Misc/StackWalker.cpp, $(SRC)) 
 
 INCLUDE =       -I$(SRC_DIR) \
 		-I$(SDK_DIR) \
@@ -185,7 +186,7 @@ prepare-build:
 	mkdir -p $(BUILD_DIR)/NoCheatZ-autorecords
 	@touch $(BUILD_DIR)/logs/NoCheatZ_4_Logs/.gitignore
 	@touch $(BUILD_DIR)/NoCheatZ-autorecords/.gitignore
-	cp ./Res/nocheatz.vdf $(BUILD_DIR)/addons/
+	cp ./Res/!nocheatz.vdf $(BUILD_DIR)/addons/
 	cp ./Res/config.ini $(BUILD_DIR)/addons/NoCheatZ/
 	cp ./Res/nocheatz.cfg $(BUILD_DIR)/cfg/nocheatz.cfg ;true
 	@sh $(BASE)/scripts/make-protobuf.sh $(d_CXX)

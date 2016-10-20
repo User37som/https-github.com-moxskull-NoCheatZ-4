@@ -11,6 +11,8 @@
 
 #ifdef GNUC
 #	include <unistd.h>
+#	include <execinfo.h> // backtrace
+#	include <dlfcn.h> // dladdr
 #endif
 
 #include "Interfaces/InterfacesProxy.h"
@@ -47,8 +49,6 @@ void StackWalker_OutFile::OnOutput ( LPCSTR szText )
 
 static inline void printStackTrace ( FILE * out )
 {
-	fprintf ( out, "stack trace:\n" );
-
 #ifdef GNUC
 	// storage array for stack trace address data
 	void* addrlist[ 128 + 1 ];
@@ -63,7 +63,7 @@ static inline void printStackTrace ( FILE * out )
 	}
 
 	// create readable strings to each frame.
-	backtrace_symbols_fd ( addrlist + 4, addrlen - 4, out );
+	backtrace_symbols_fd ( addrlist, addrlen, fileno(out) );
 #else
 	StackWalker_OutFile sw(out);
 	sw.ShowCallstack ();
@@ -74,20 +74,21 @@ static FILE * OpenStackFile ()
 {
 	static char filename[ 1024 ];
 	memset ( filename, 0, 1024 );
-	char * it ( filename + 1023 );
+	char * it ( filename );
 #ifdef WIN32
 	static HMODULE module;
 	GetModuleHandleExA ( GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT, reinterpret_cast< LPSTR >( filename ), &module );
 	GetModuleFileNameA ( module, filename, 1023 );
-	while( *it != '\\' && *it != '/' ) --it;
 #else
 	static Dl_info info;
 	dladdr ( reinterpret_cast<void*>( filename ), &info );
 	memcpy ( filename, info.dli_fname, 1023 );
-	while( *--it != '/' );
 #endif
-	++it;
-	memcpy ( it, "!stacktrace.txt", 16 );
+	it += strlen( filename );
+	while( *it != '\\' && *it != '/' ) --it;
+	memcpy ( ++it, "!stacktrace.txt", 16 );
+	
+	printf("Opening %s\n", filename );
 
 	return fopen ( filename, "a" );
 }
@@ -99,7 +100,8 @@ void abortHandler ( int signum )
 	FILE* out;
 	if( outfile == nullptr )
 	{
-		out = stderr;
+		printf( "Unable to open !stacktrace.txt\n" );
+		out = stdout;
 	}
 	else
 	{
@@ -117,7 +119,7 @@ void abortHandler ( int signum )
 #endif
 		case SIGILL:  name = "SIGILL";   break;
 		case SIGFPE:  name = "SIGFPE";   break;
-		default:  name = "Unhandled Exception"; break;
+		default:  name = "Unknown signum"; break;
 	}
 
 	// Notify the user which signal was caught. We use printf, because this is the 
@@ -208,6 +210,9 @@ KxStackTrace::KxStackTrace ()
 	signal ( SIGSEGV, abortHandler );
 	signal ( SIGILL, abortHandler );
 	signal ( SIGFPE, abortHandler );
+#ifdef GNUC
+	signal ( SIGBUS, abortHandler );
+#endif
 	std::set_terminate ( TermFn );
 	std::set_unexpected ( TermFn );
 #ifdef WIN32
