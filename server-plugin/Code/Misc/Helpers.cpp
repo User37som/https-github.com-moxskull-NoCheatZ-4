@@ -16,7 +16,6 @@
 #include <locale> // tolower, locale
 #include <sstream> // stringstream
 #include <cmath> // modf
-#include <ctime> // time_t
 #include <cstdarg> // va
 #include <stdio.h>
 
@@ -32,6 +31,7 @@
 
 extern unsigned int HashString ( char const * );
 extern unsigned int HashStringCaseless ( char const * );
+#include "Systems/Logger.h" // SpewAssert
 
 namespace Helpers
 {
@@ -184,7 +184,7 @@ namespace Helpers
 			}
 			while( ++cur <= max_cur );
 
-			Assert ( "Helpers::edictOfUnknown failed" && 0 );
+			LoggerAssert ( "Helpers::edictOfUnknown failed" && 0 );
 			return nullptr;
 		}
 		else
@@ -198,7 +198,7 @@ namespace Helpers
 			}
 			while( ++cur <= max_cur );
 
-			Assert ( "Helpers::edictOfUnknown failed" && 0 );
+			LoggerAssert ( "Helpers::edictOfUnknown failed" && 0 );
 			return nullptr;
 		}
 	}

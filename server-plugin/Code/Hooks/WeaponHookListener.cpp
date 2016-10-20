@@ -41,7 +41,7 @@ WeaponHookListener::~WeaponHookListener ()
 
 void WeaponHookListener::HookWeapon ( PlayerHandler::const_iterator ph )
 {
-	Assert ( Helpers::isValidEdict ( ph->GetEdict () ) );
+	LoggerAssert ( Helpers::isValidEdict ( ph->GetEdict () ) );
 	void* unk ( ph->GetEdict ()->m_pUnk );
 
 	HookInfo info_equip ( unk, ConfigManager::GetInstance ()->vfid_weaponequip, ( DWORD ) RT_nWeapon_Equip );
@@ -62,7 +62,7 @@ void HOOKFN_INT WeaponHookListener::RT_nWeapon_Equip ( void * const basePlayer, 
 	{
 		SourceSdk::edict_t const * const weapon_ent ( SourceSdk::InterfacesProxy::Call_BaseEntityToEdict ( weapon ) );
 
-		Assert ( Helpers::isValidEdict ( weapon_ent ) );
+		LoggerAssert ( Helpers::isValidEdict ( weapon_ent ) );
 
 		WeaponHookListenersListT::elem_t* it2 ( m_listeners.GetFirst () );
 		while( it2 != nullptr )
@@ -90,7 +90,7 @@ void HOOKFN_INT WeaponHookListener::RT_nWeapon_Drop ( void * const basePlayer, v
 	{
 		SourceSdk::edict_t* const weapon_ent ( SourceSdk::InterfacesProxy::Call_BaseEntityToEdict ( weapon ) );
 
-		Assert ( Helpers::isValidEdict ( weapon_ent ) );
+		LoggerAssert ( Helpers::isValidEdict ( weapon_ent ) );
 
 		WeaponHookListenersListT::elem_t* it2 ( m_listeners.GetFirst () );
 		while( it2 != nullptr )

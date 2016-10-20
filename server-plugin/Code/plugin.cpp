@@ -186,7 +186,7 @@ bool CNoCheatZPlugin::Load ( SourceSdk::CreateInterfaceFn _interfaceFactory, Sou
 			m_bAlreadyLoaded = true;
 			return false;
 		}
-		Assert ( "Error when testing for multiple instances" && 0 );
+		LoggerAssert ( "Error when testing for multiple instances" && 0 );
 	}
 
 	if( !ConfigManager::GetInstance ()->LoadConfig () )

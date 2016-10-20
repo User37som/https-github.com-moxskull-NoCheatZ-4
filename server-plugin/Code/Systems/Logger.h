@@ -21,6 +21,7 @@
 #include "Preprocessors.h"
 #include "Misc/temp_basicstring.h"
 #include "Misc/temp_singleton.h"
+
 #include "Containers/utlvector.h"
 #include "Systems/BaseSystem.h"
 
@@ -94,6 +95,8 @@ public:
 
 	void ConnectToServerConsole ();
 
+	static void SpewAssert ( char const * expr, char const * file, unsigned int line );
+
 	inline bool IsConsoleConnected () const;
 
 	void Push ( const char * msg );
@@ -117,10 +120,13 @@ inline bool Logger::IsConsoleConnected () const
 #define SystemVerbose1(x) if( this->m_verbose >= 1 ) Logger::GetInstance()->Msg<MSG_VERBOSE1>(x, 1)
 #define SystemVerbose2(x) if( this->m_verbose >= 2 ) Logger::GetInstance()->Msg<MSG_VERBOSE2>(x, 2)
 
-#ifdef DEBUG
-#	define DebugMessage(x) Logger::GetInstance()->Msg<MSG_DEBUG>(x, 3)
-#else
-#	define DebugMessage(x)
+#ifndef NO_LOGGER_ASSERT
+#	ifdef DEBUG
+#		define DebugMessage(x) Logger::GetInstance()->Msg<MSG_DEBUG>(x, 3)
+#		define LoggerAssert(expression) if( (! (!!(expression))) ) Logger::SpewAssert(#expression, __FILE__, __LINE__); Assert(expression)
+#	else
+#		define DebugMessage(x)
+#		define LoggerAssert(expression)
+#	endif
 #endif
-
 #endif

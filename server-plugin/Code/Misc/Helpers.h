@@ -17,6 +17,7 @@
 #define HELPERS
 
 #include <limits> // numeric_limits
+#include <ctime> // time_t
 
 #include "Misc/temp_basicstring.h"
 

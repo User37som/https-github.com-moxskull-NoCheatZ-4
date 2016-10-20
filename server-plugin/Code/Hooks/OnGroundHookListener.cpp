@@ -40,7 +40,7 @@ OnGroundHookListener::~OnGroundHookListener ()
 
 void OnGroundHookListener::HookOnGround ( PlayerHandler::const_iterator ph )
 {
-	Assert ( Helpers::isValidEdict ( ph->GetEdict () ) );
+	LoggerAssert ( Helpers::isValidEdict ( ph->GetEdict () ) );
 	void* unk ( ph->GetEdict ()->m_pUnk );
 
 	HookInfo info ( unk, ConfigManager::GetInstance ()->vfid_mhgroundentity, ( DWORD ) RT_nNetworkStateChanged_m_hGroundEntity );

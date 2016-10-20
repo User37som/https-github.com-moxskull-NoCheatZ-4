@@ -247,7 +247,7 @@ public:
 				GetDataOffset<prop_id> ( dt, &offset );
 			}
 		}
-		Assert ( offset > 0 );
+		LoggerAssert ( offset > 0 );
 		return reinterpret_cast< T * >( reinterpret_cast< uint8_t * >( pBase ) + offset );
 	};
 };

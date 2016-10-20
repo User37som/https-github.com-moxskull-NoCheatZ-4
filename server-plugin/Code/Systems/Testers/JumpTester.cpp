@@ -157,12 +157,12 @@ PlayerRunCommandRet JumpTester::RT_PlayerRunCommandCallback ( PlayerHandler::con
 
 	if( !jump_button_changed )
 	{
-		Assert ( last_jump_button_state == cur_jump_button_state );
+		LoggerAssert ( last_jump_button_state == cur_jump_button_state );
 		return drop_cmd;
 	}
 	else
 	{
-		Assert ( last_jump_button_state != cur_jump_button_state );
+		LoggerAssert ( last_jump_button_state != cur_jump_button_state );
 
 		if( cur_jump_button_state )
 		{

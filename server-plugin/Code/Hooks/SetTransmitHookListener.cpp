@@ -42,7 +42,7 @@ SetTransmitHookListener::~SetTransmitHookListener ()
 
 void SetTransmitHookListener::HookSetTransmit ( SourceSdk::edict_t const * const ent )
 {
-	Assert ( Helpers::isValidEdict ( ent ) );
+	LoggerAssert ( Helpers::isValidEdict ( ent ) );
 	void* unk ( ent->m_pUnk );
 
 	HookInfo info ( unk, ConfigManager::GetInstance ()->vfid_settransmit, ( DWORD ) RT_nSetTransmit );
@@ -83,7 +83,7 @@ void HOOKFN_INT SetTransmitHookListener::RT_nSetTransmit ( void * const This, vo
 			SourceSdk::edict_t const * const pEdict_sender ( Helpers::edictOfUnknown ( This ) );
 			TransmitListenersListT::elem_t* it ( m_listeners.GetFirst () );
 
-			Assert ( Helpers::IndexOfEdict ( pEdict_sender ) > inst->GetMaxIndex () );
+			LoggerAssert ( Helpers::IndexOfEdict ( pEdict_sender ) > inst->GetMaxIndex () );
 
 			while( it != nullptr )
 			{

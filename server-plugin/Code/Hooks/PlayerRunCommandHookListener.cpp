@@ -61,7 +61,7 @@ void* PlayerRunCommandHookListener::RT_GetLastUserCmd ( int index )
 
 void PlayerRunCommandHookListener::HookPlayerRunCommand ( PlayerHandler::const_iterator ph )
 {
-	Assert ( Helpers::isValidEdict ( ph->GetEdict () ) );
+	LoggerAssert ( Helpers::isValidEdict ( ph->GetEdict () ) );
 	SourceSdk::IServerUnknown* unk ( ph->GetEdict ()->m_pUnk );
 
 	HookInfo info ( unk, ConfigManager::GetInstance ()->vfid_playerruncommand, ( DWORD ) RT_nPlayerRunCommand );

@@ -133,9 +133,9 @@ void NczPlayerManager::LoadPlayerManager ()
 void NczPlayerManager::ClientConnect ( SourceSdk::edict_t* pEntity )
 {
 	const int index ( Helpers::IndexOfEdict ( pEntity ) );
-	Assert ( index );
+	LoggerAssert ( index );
 	PlayerHandler& ph ( FullHandlersList[ index ] );
-	Assert ( ph.status == SlotStatus::INVALID || ph.status == SlotStatus::PLAYER_CONNECTING );
+	LoggerAssert ( ph.status == SlotStatus::INVALID || ph.status == SlotStatus::PLAYER_CONNECTING );
 	ph.playerClass = new NczPlayer ( index );
 	// Should not be here, but heh ...
 	//*PlayerRunCommandHookListener::GetLastUserCmd(ph.playerClass) = SourceSdk::CUserCmd();
@@ -153,14 +153,14 @@ void NczPlayerManager::ClientConnect ( SourceSdk::edict_t* pEntity )
 void NczPlayerManager::ClientActive ( SourceSdk::edict_t* pEntity )
 {
 	const int index ( Helpers::IndexOfEdict ( pEntity ) );
-	Assert ( index );
+	LoggerAssert ( index );
 	PlayerHandler& ph ( FullHandlersList[ index ] );
 	if( ph.status == SlotStatus::INVALID ) // Bots don't call ClientConnect
 	{
 		ph.playerClass = new NczPlayer ( index );
 		__assume ( ph.playerClass != nullptr );
 		ph.playerClass->m_playerinfo = ( SourceSdk::IPlayerInfo * )SourceSdk::InterfacesProxy::Call_GetPlayerInfo ( ph.playerClass->m_edict );
-		Assert ( ph.playerClass->m_playerinfo );
+		LoggerAssert ( ph.playerClass->m_playerinfo );
 #undef GetClassName
 		if( strcmp ( pEntity->GetClassName (), "player" ) == 0 )
 			ph.status = SlotStatus::TV;
@@ -169,10 +169,10 @@ void NczPlayerManager::ClientActive ( SourceSdk::edict_t* pEntity )
 	}
 	else
 	{
-		Assert ( ph.status == SlotStatus::PLAYER_CONNECTING );
+		LoggerAssert ( ph.status == SlotStatus::PLAYER_CONNECTING );
 		ph.status = SlotStatus::PLAYER_CONNECTED;
 		ph.playerClass->m_playerinfo = ( SourceSdk::IPlayerInfo * )SourceSdk::InterfacesProxy::Call_GetPlayerInfo ( ph.playerClass->m_edict );
-		Assert ( ph.playerClass->m_playerinfo );
+		LoggerAssert ( ph.playerClass->m_playerinfo );
 	}
 
 	if( index > m_max_index ) m_max_index = index;
@@ -186,7 +186,7 @@ void NczPlayerManager::ClientActive ( SourceSdk::edict_t* pEntity )
 void NczPlayerManager::ClientDisconnect ( SourceSdk::edict_t* pEntity )
 {
 	const int index ( Helpers::IndexOfEdict ( pEntity ) );
-	Assert ( index );
+	LoggerAssert ( index );
 	FullHandlersList[ index ].Reset ();
 
 	while( m_max_index > 0 && FullHandlersList[ m_max_index ].status == SlotStatus::INVALID )

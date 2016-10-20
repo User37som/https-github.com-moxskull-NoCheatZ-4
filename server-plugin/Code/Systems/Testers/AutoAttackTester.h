@@ -59,7 +59,7 @@ struct AttackTriggerStats
 
 	AttackTriggerStats& operator=( const AttackTriggerStats& other )
 	{
-		Assert ( this != &other );
+		LoggerAssert ( this != &other );
 
 		memcpy ( this, &other, sizeof ( int ) * 4 );
 		attack1_sustain_stats = other.attack1_sustain_stats;
@@ -136,7 +136,7 @@ struct detection_info
 
 	detection_info& operator= ( detection_info const & other )
 	{
-		Assert ( this != &other );
+		LoggerAssert ( this != &other );
 		memcpy ( this, &other, sizeof ( detection_info ) );
 		return *this;
 	}

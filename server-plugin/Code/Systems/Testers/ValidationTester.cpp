@@ -52,7 +52,7 @@ void ValidationTester::SetValidated ( PlayerHandler::const_iterator ph )
 	GetPlayerDataStructByIndex ( ph.GetIndex () )->b = true;
 	DebugMessage ( Helpers::format ( "%s SteamID validated\n", ph->GetName () ) );
 
-	Assert ( ph->GetPlayerInfo () );
+	LoggerAssert ( ph->GetPlayerInfo () );
 
 	ValidatedIdsT::elem_t const * const it ( m_validated_ids.Find ( ValidatedInfo ( ph->GetSteamID () ) ) );
 
@@ -116,7 +116,7 @@ void ValidationTester::AddPendingValidation ( const char *pszUserName, const cha
 
 bool ValidationTester::WasPreviouslyValidated ( PlayerHandler::const_iterator ph )
 {
-	Assert ( ph->GetPlayerInfo () );
+	LoggerAssert ( ph->GetPlayerInfo () );
 
 	ValidatedIdsT::elem_t const * const it ( m_validated_ids.Find ( ValidatedInfo ( ph->GetSteamID () ) ) );
 

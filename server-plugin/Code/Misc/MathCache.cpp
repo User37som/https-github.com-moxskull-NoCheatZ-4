@@ -33,7 +33,7 @@ MathCache::~MathCache ()
 
 MathInfo& MathCache::RT_GetCachedMaths ( int const player_index, bool const force_update /* = false */ )
 {
-	Assert ( player_index > 0 && player_index <= 66 );
+	LoggerAssert ( player_index > 0 && player_index <= 66 );
 
 	CacheInfo& item ( m_cache[ player_index ] );
 	MathInfo& info ( item.m_info );
@@ -41,7 +41,7 @@ MathInfo& MathCache::RT_GetCachedMaths ( int const player_index, bool const forc
 	{
 		PlayerHandler::const_iterator ph ( player_index );
 
-		Assert ( ph > SlotStatus::INVALID );
+		LoggerAssert ( ph > SlotStatus::INVALID );
 
 		SourceSdk::IPlayerInfo * const playerinfo ( ph->GetPlayerInfo () );
 
