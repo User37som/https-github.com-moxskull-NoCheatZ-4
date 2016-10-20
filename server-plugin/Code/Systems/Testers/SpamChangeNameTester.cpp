@@ -129,7 +129,7 @@ void SpamChangeNameTester::RT_ProcessOnTick ( float const curtime )
 
 void SpamChangeNameTester::ClientConnect ( bool *bAllowConnect, SourceSdk::edict_t const * const pEntity, const char *pszName, const char *pszAddress, char *reject, int maxrejectlen )
 {
-	if( !*bAllowConnect ) return;
+	if( !*bAllowConnect || !IsActive() ) return;
 
 	if( !IsNameValid ( pszName ) )
 	{
