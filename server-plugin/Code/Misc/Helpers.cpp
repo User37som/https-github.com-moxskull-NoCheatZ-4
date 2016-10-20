@@ -28,9 +28,6 @@
 #include "Preprocessors.h"
 #include "Misc/MRecipientFilter.h"
 #include "Misc/UserMsg.h"
-
-extern unsigned int HashString ( char const * );
-extern unsigned int HashStringCaseless ( char const * );
 #include "Systems/Logger.h" // SpewAssert
 
 namespace Helpers

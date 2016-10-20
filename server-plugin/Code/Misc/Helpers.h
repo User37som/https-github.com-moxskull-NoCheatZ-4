@@ -21,6 +21,9 @@
 
 #include "Misc/temp_basicstring.h"
 
+extern unsigned int HashString ( char const * );
+extern unsigned int HashStringCaseless ( char const * );
+
 namespace SourceSdk
 {
 	struct edict_t;
