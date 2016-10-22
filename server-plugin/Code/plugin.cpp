@@ -60,8 +60,17 @@ static void* __CreatePlugin_interface ()
 void* CreateInterfaceInternal ( char const *pName, int *pReturnCode )
 {
 	printf ( "NoCheatZ plugin.cpp : CreateInterfaceInternal - Game engine asking for %s\n", pName );
-	if( pReturnCode ) *pReturnCode = SourceSdk::IFACE_OK;
-	return __CreatePlugin_interface ();
+	if( CNoCheatZPlugin::IsCreated () )
+	{
+		printf ( "NoCheatZ plugin.cpp : CreateInterfaceInternal - ERROR : Plugin already loaded\n" );
+		if( pReturnCode ) *pReturnCode = SourceSdk::IFACE_FAILED;
+		return nullptr;
+	}
+	else
+	{
+		if( pReturnCode ) *pReturnCode = SourceSdk::IFACE_OK;
+		return __CreatePlugin_interface ();
+	}
 }
 
 void* SourceSdk::CreateInterface ( char const * pName, int * pReturnCode )
@@ -180,18 +189,6 @@ bool CNoCheatZPlugin::Load ( SourceSdk::CreateInterfaceFn _interfaceFactory, Sou
 		return false;
 	}
 
-	void* pinstance ( SourceSdk::InterfacesProxy::ICvar_FindVar ( "nocheatz_instance" ) );
-	if( pinstance )
-	{
-		if( SourceSdk::InterfacesProxy::ConVar_GetBool ( pinstance ) )
-		{
-			Logger::GetInstance ()->Msg<MSG_ERROR> ( "CNoCheatZPlugin already loaded" );
-			m_bAlreadyLoaded = true;
-			return false;
-		}
-		LoggerAssert ( "Error when testing for multiple instances" && 0 );
-	}
-
 	if( !ConfigManager::GetInstance ()->LoadConfig () )
 	{
 		Logger::GetInstance ()->Msg<MSG_ERROR> ( "ConfigManager::LoadConfig failed" );
@@ -201,7 +198,6 @@ bool CNoCheatZPlugin::Load ( SourceSdk::CreateInterfaceFn _interfaceFactory, Sou
 	if( SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive )
 	{
 		ncz_cmd_ptr = new SourceSdk::ConCommand_csgo ( "ncz", BaseSystem::ncz_cmd_fn, "NoCheatZ", FCVAR_DONTRECORD | 1 << 18 );
-		nocheatz_instance = new SourceSdk::ConVar_csgo ( "nocheatz_instance", "0", FCVAR_DONTRECORD | 1 << 18 );
 
 		SourceSdk::ConVar_Register_csgo ( 0 );
 	}
@@ -219,7 +215,6 @@ bool CNoCheatZPlugin::Load ( SourceSdk::CreateInterfaceFn _interfaceFactory, Sou
 		while( ++id != max_id );
 
 		ncz_cmd_ptr = new SourceSdk::ConCommand ( "ncz", BaseSystem::ncz_cmd_fn, "NoCheatZ", FCVAR_DONTRECORD );
-		nocheatz_instance = new SourceSdk::ConVar ( "nocheatz_instance", "0", FCVAR_DONTRECORD );
 
 		SourceSdk::ConVar_Register ( 0 );
 	}
@@ -247,8 +242,6 @@ bool CNoCheatZPlugin::Load ( SourceSdk::CreateInterfaceFn _interfaceFactory, Sou
 		}
 	}
 	BaseSystem::ManageSystems ();
-
-	SourceSdk::InterfacesProxy::ConVar_SetValue<bool> ( nocheatz_instance, true );
 
 	Logger::GetInstance ()->Msg<MSG_CHAT> ( "Loaded" );
 

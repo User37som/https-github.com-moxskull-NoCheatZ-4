@@ -73,7 +73,6 @@ private:
 
 public:
 	void * ncz_cmd_ptr;
-	void * nocheatz_instance;
 };
 
 #endif
