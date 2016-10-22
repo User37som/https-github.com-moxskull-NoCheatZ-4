@@ -232,7 +232,7 @@ size_t BanRequest::RejectTime ( char const * ip )
 		else
 		{
 			RejectStored info;
-			info.m_ip_hash = HashString ( ip );
+			info.m_ip_hash = Helpers::HashString ( ip );
 
 			int const index ( m_rejects.Find ( info ) );
 			if( index == -1 )
@@ -253,7 +253,7 @@ void BanRequest::AddReject ( size_t duration_seconds, char const * ip )
 
 	RejectStored info;
 	info.m_reject_until = curtime + duration_seconds;
-	info.m_ip_hash = HashString ( ip );
+	info.m_ip_hash = Helpers::HashString ( ip );
 
 	if( m_rejects.Find ( info ) == -1 )
 	{

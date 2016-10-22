@@ -21,9 +21,6 @@
 
 #include "Misc/temp_basicstring.h"
 
-extern unsigned int HashString ( char const * );
-extern unsigned int HashStringCaseless ( char const * );
-
 namespace SourceSdk
 {
 	struct edict_t;
@@ -44,6 +41,8 @@ namespace Helpers
 	int IndexOfEdict ( const SourceSdk::edict_t * const p_pEdict );
 
 	SourceSdk::edict_t * edictOfUnknown ( void * unk );
+
+	unsigned int HashString ( char const * );
 
 	int GetMaxClients ();
 

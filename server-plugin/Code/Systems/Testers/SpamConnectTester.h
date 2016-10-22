@@ -39,7 +39,7 @@ struct ConnectInfo
 	{
 		count = 0;
 		next_connect_time = 0;
-		ip_addr = HashString(addr);
+		ip_addr = Helpers::HashString(addr);
 	};
 	ConnectInfo ( const ConnectInfo& other )
 	{
