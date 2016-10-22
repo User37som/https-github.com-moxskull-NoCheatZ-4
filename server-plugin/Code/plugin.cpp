@@ -150,9 +150,7 @@ CNoCheatZPlugin::CNoCheatZPlugin () :
 	SourceSdk::IServerPluginCallbacks (),
 	singleton_class (),
 	m_iClientCommandIndex ( 0 ),
-	m_bAlreadyLoaded ( false ),
-	ncz_cmd_ptr ( nullptr ),
-	nocheatz_instance ( nullptr )
+	ncz_cmd_ptr ( nullptr )
 {
 	CreateSingletons ();
 }
@@ -255,12 +253,6 @@ void CNoCheatZPlugin::Unload ( void )
 {
 	BanRequest::GetInstance ()->WriteBansIfNeeded ();
 
-	if( m_bAlreadyLoaded && SourceSdk::InterfacesProxy::GetCvar () )
-	{
-		void* inst ( SourceSdk::InterfacesProxy::ICvar_FindVar ( "nocheatz_instance" ) );
-		if( inst ) SourceSdk::InterfacesProxy::ConVar_SetValue ( inst, false );
-	}
-
 	/*PlayerRunCommandHookListener::UnhookPlayerRunCommand();
 	OnGroundHookListener::UnhookOnGround();
 	//TeleportHookListener::UnhookTeleport();
@@ -274,12 +266,10 @@ void CNoCheatZPlugin::Unload ( void )
 
 	if( SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive )
 	{
-		if( nocheatz_instance ) delete static_cast< SourceSdk::ConVar_csgo* >( nocheatz_instance );
 		if( ncz_cmd_ptr ) delete static_cast< SourceSdk::ConCommand_csgo* >( ncz_cmd_ptr );
 	}
 	else
 	{
-		if( nocheatz_instance ) delete static_cast< SourceSdk::ConVar* >( nocheatz_instance );
 		if( ncz_cmd_ptr ) delete static_cast< SourceSdk::ConCommand* >( ncz_cmd_ptr );
 	}
 

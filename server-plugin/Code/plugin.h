@@ -69,7 +69,6 @@ public:
 
 private:
 	int m_iClientCommandIndex;
-	bool m_bAlreadyLoaded;
 
 public:
 	void * ncz_cmd_ptr;
