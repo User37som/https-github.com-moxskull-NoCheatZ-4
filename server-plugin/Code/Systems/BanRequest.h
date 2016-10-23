@@ -139,7 +139,7 @@ public:
 
 	void AddReject ( size_t duration_seconds, char const * ip );
 
-	size_t RejectTime ( char const * ip );
+	bool IsRejected ( char const * ip );
 
 	void AddAsyncBan ( NczPlayer * const player, int ban_time, const char * kick_message );
 

@@ -469,18 +469,15 @@ SourceSdk::PLUGIN_RESULT CNoCheatZPlugin::ClientConnect ( bool *bAllowConnect, S
 
 	NczPlayerManager::GetInstance ()->ClientConnect ( pEntity );
 
-	size_t const reject_time ( BanRequest::GetInstance ()->RejectTime ( pszAddress ) );
-	if( reject_time > 0 )
+	*bAllowConnect = ! BanRequest::GetInstance ()->IsRejected ( pszAddress );
+	if( ! bAllowConnect )
 	{
-		*bAllowConnect = false;
-
-		char const * reject_msg ( Helpers::format ( "Please wait %u minutes", reject_time / 60 ) );
-		memcpy ( reject, reject_msg, strlen( reject_msg ) + 1);
+		memcpy ( reject, "Please wait 20 minutes", 23 );
 
 		NczPlayerManager::GetInstance ()->ClientDisconnect ( pEntity );
 
 		Logger::GetInstance ()->Msg<MSG_LOG> ( Helpers::format ( "CNoCheatZPlugin::ClientConnect : Rejected %s with reason %s", pszAddress, reject ) );
-		return SourceSdk::PLUGIN_STOP;
+		return SourceSdk::PLUGIN_OVERRIDE;
 	}
 
 	SpamConnectTester::GetInstance ()->ClientConnect ( bAllowConnect, pEntity, pszName, pszAddress, reject, maxrejectlen );
@@ -495,7 +492,7 @@ SourceSdk::PLUGIN_RESULT CNoCheatZPlugin::ClientConnect ( bool *bAllowConnect, S
 			NczPlayerManager::GetInstance ()->ClientDisconnect ( pEntity );
 			Logger::GetInstance ()->Msg<MSG_LOG> ( Helpers::format ( "CNoCheatZPlugin::ClientConnect : Rejected %s with reason %s", pszAddress, reject ) );
 			BanRequest::GetInstance ()->AddReject ( 1200, pszAddress );
-			return SourceSdk::PLUGIN_STOP;
+			return SourceSdk::PLUGIN_OVERRIDE;
 		}
 		else
 		{

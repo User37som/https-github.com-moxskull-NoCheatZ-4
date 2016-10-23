@@ -202,11 +202,11 @@ void BanRequest::KickNow (int userid, const char * kick_message ) const
 	}
 }
 
-size_t BanRequest::RejectTime ( char const * ip )
+bool BanRequest::IsRejected ( char const * ip )
 {
 	if( m_rejects.IsEmpty () )
 	{
-		return 0;
+		return false;
 	}
 	else
 	{
@@ -227,7 +227,7 @@ size_t BanRequest::RejectTime ( char const * ip )
 
 		if( m_rejects.IsEmpty () )
 		{
-			return 0;
+			return false;
 		}
 		else
 		{
@@ -237,11 +237,11 @@ size_t BanRequest::RejectTime ( char const * ip )
 			int const index ( m_rejects.Find ( info ) );
 			if( index == -1 )
 			{
-				return 0;
+				return false;
 			}
 			else
 			{
-				return curtime - m_rejects[index].m_reject_until;
+				return true;
 			}
 		}
 	}
