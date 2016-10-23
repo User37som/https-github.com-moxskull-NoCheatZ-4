@@ -51,6 +51,7 @@ file(GLOB server-plugin_SRC
   "SourceSdk/SourceSdk.cpp" "SourceSdk/SourceSdk.h"
   "SourceSdk/Interfaces/Protobuf/*.cpp" "SourceSdk/Interfaces/Protobuf/*.h"
 )
+list(REMOVE_ITEM server-plugin_SRC "${PROJECT_SOURCE_DIR}/Code/Misc/StackWalker.cpp")
 ADD_LIBRARY(nocheatzX SHARED ${server-plugin_SRC})
 set_target_properties(nocheatzX PROPERTIES
   PREFIX ""

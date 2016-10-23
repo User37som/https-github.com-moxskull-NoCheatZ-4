@@ -123,6 +123,7 @@
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <FloatingPointExceptions>true</FloatingPointExceptions>
       <ForcedIncludeFiles>version.h</ForcedIncludeFiles>
+      <EnablePREfast>false</EnablePREfast>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>_DEBUG;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -378,13 +379,15 @@ copy "$(TargetPath)" ..\..\..\game\bin\"$(TargetName)".pdb
     <None Include="SourceSdk\Interfaces\Protobuf\netmessages.proto" />
     <None Include="Makefile" />
     <None Include="Res\nocheatz-CSGO.cfg" />
-    <None Include="Res\nocheatz.vdf" />
+    <None Include="Res\!nocheatz.vdf" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Code\Hooks\ThinkPostHookListener.cpp" />
     <ClCompile Include="Code\Hooks\UserMessageHookListener.cpp" />
     <ClCompile Include="Code\Misc\HeapMemoryManager.cpp" />
     <ClCompile Include="Code\Misc\MathCache.cpp" />
+    <ClCompile Include="Code\Misc\SigHandler.cpp" />
+    <ClCompile Include="Code\Misc\StackWalker.cpp" />
     <ClCompile Include="Code\Systems\AutoTVRecord.cpp" />
     <ClCompile Include="Code\Systems\Blockers\BhopBlocker.cpp" />
     <ClCompile Include="Code\Systems\Blockers\RadarHackBlocker.cpp" />
@@ -447,6 +450,8 @@ copy "$(TargetPath)" ..\..\..\game\bin\"$(TargetName)".pdb
     <ClInclude Include="Code\Misc\ClassSpecifications.h" />
     <ClInclude Include="Code\Misc\HeapMemoryManager.h" />
     <ClInclude Include="Code\Misc\MathCache.h" />
+    <ClInclude Include="Code\Misc\SigHandler.h" />
+    <ClInclude Include="Code\Misc\StackWalker.h" />
     <ClInclude Include="Code\Misc\temp_basiclist.h" />
     <ClInclude Include="Code\Misc\temp_basicstring.h" />
     <ClInclude Include="Code\Misc\temp_singleton.h" />

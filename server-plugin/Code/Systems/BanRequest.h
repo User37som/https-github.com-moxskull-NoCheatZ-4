@@ -85,6 +85,21 @@ typedef struct PlayerBanRequest
 	};
 } PlayerBanRequestT;
 
+struct RejectStored
+{
+	time_t m_reject_until;
+	unsigned int m_ip_hash;
+
+	bool operator==( RejectStored const &other ) const
+	{
+		if( m_ip_hash != other.m_ip_hash )
+			return false;
+		return true;
+	}
+};
+
+typedef CUtlVector<RejectStored> RejectListT;
+
 typedef basic_slist<PlayerBanRequestT> BanRequestListT;
 
 class BanRequest :
@@ -104,6 +119,7 @@ private:
 	void * cmd_sm_ban;
 
 	BanRequestListT m_requests;
+	RejectListT m_rejects;
 
 	void BanInternal ( int ban_time, char const * steam_id, int userid, char const * kick_message, char const * ip );
 
@@ -120,6 +136,10 @@ public:
 	void WriteBansIfNeeded ();
 
 	void SetWaitTime ( float wait_time );
+
+	void AddReject ( size_t duration_seconds, char const * ip );
+
+	bool IsRejected ( char const * ip );
 
 	void AddAsyncBan ( NczPlayer * const player, int ban_time, const char * kick_message );
 

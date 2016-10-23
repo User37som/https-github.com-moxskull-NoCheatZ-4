@@ -145,15 +145,8 @@ void BanRequest::BanInternal ( int ban_time, char const * steam_id, int userid, 
 			if( userid == -1 )
 			{
 				Logger::GetInstance ()->Msg<MSG_WARNING> ( "BanRequest::BanInternal : Bad userid -> Cannot forward to sm_ban command." );
-				if( SteamGameServer_BSecure () )
-				{
-					Logger::GetInstance ()->Msg<MSG_HINT> ( "BanRequest::BanInternal : Using sm_addban ..." );
-					SourceSdk::InterfacesProxy::Call_ServerCommand ( Helpers::format ( "sm_addban %d \"%s\" \"%s\"\n", ban_time, steam_id, kick_message ) );
-				}
-				else
-				{
-					Logger::GetInstance ()->Msg<MSG_WARNING> ( "BanRequest::BanInternal : Server not steam-secured -> Cannot forward to sm_addban command." );
-				}
+				Logger::GetInstance ()->Msg<MSG_HINT> ( "BanRequest::BanInternal : Using sm_addban ..." );
+				SourceSdk::InterfacesProxy::Call_ServerCommand ( Helpers::format ( "sm_addban %d \"%s\" \"%s\"\n", ban_time, steam_id, kick_message ) );
 			}
 			else
 			{
@@ -177,7 +170,7 @@ void BanRequest::BanInternal ( int ban_time, char const * steam_id, int userid, 
 		basic_string ip_stripped ( ip );
 		ip_stripped.replace ( ':', '\0' );
 
-		if( ip_stripped != "0" && ip_stripped != "127.0.0.1" && ip_stripped != "localhost" )
+		if( ip_stripped != "0" && ip_stripped != "127.0.0.1" && ip_stripped != "localhost" && ip_stripped[0] != '=' )
 		{
 			SourceSdk::InterfacesProxy::Call_ServerCommand ( Helpers::format ( "addip 1440 \"%s\"\n", ip_stripped.c_str() ) );
 		}
@@ -205,6 +198,78 @@ void BanRequest::KickNow (int userid, const char * kick_message ) const
 			NczPlayerManager * const inst ( NczPlayerManager::GetInstance () );
 			inst->DeclareKickedPlayer ( inst->GetPlayerHandlerByUserId( userid ).GetIndex() );
 			SourceSdk::InterfacesProxy::Call_ServerCommand ( Helpers::format ( "kickid %d [NoCheatZ 4] %s\n", userid, kick_message ) );
+		}
+	}
+}
+
+bool BanRequest::IsRejected ( char const * ip )
+{
+	if( m_rejects.IsEmpty () )
+	{
+		return false;
+	}
+	else
+	{
+		time_t const curtime ( time ( nullptr ) );
+
+		// purge old rejects
+		for( RejectListT::iterator it = m_rejects.begin (); it != m_rejects.end (); )
+		{
+			if( it->m_reject_until <= curtime )
+			{
+				m_rejects.FindAndRemove ( *it );
+			}
+			else
+			{
+				++it;
+			}
+		}
+
+		if( m_rejects.IsEmpty () )
+		{
+			return false;
+		}
+		else
+		{
+			RejectStored info;
+			info.m_ip_hash = Helpers::HashString ( ip );
+
+			int const index ( m_rejects.Find ( info ) );
+			if( index == -1 )
+			{
+				return false;
+			}
+			else
+			{
+				return true;
+			}
+		}
+	}
+}
+
+void BanRequest::AddReject ( size_t duration_seconds, char const * ip )
+{
+	time_t const curtime ( time ( nullptr ) );
+
+	RejectStored info;
+	info.m_reject_until = curtime + duration_seconds;
+	info.m_ip_hash = Helpers::HashString ( ip );
+
+	if( m_rejects.Find ( info ) == -1 )
+	{
+		m_rejects.AddToHead ( info );
+	}
+
+	// purge old rejects
+	for( RejectListT::iterator it = m_rejects.begin (); it != m_rejects.end (); )
+	{
+		if( it->m_reject_until <= curtime )
+		{
+			m_rejects.FindAndRemove ( *it );
+		}
+		else
+		{
+			++it;
 		}
 	}
 }

@@ -69,7 +69,7 @@ void HOOKFN_INT UserMessageHookListener::RT_nSendUserMessage ( SourceSdk::IVEngi
 void HOOKFN_INT UserMessageHookListener::RT_nSendUserMessage ( SourceSdk::IVEngineServer023csgo const * const thisptr, void*, SourceSdk::IRecipientFilter const & filter, int const message_id, google::protobuf::Message const & buffer )
 #endif
 {
-	Assert ( bypass == false );
+	LoggerAssert ( bypass == false );
 	bypass = false;
 
 	ListenersList_t::elem_t* it ( m_listeners.GetFirst () );
@@ -92,7 +92,7 @@ SourceSdk::bf_write* HOOKFN_INT UserMessageHookListener::RT_nUserMessageBegin ( 
 SourceSdk::bf_write* HOOKFN_INT UserMessageHookListener::RT_nUserMessageBegin ( SourceSdk::IVEngineServer023 const * const thisptr, void * const, SourceSdk::IRecipientFilter const * const filter, int const message_id )
 #endif
 {
-	Assert ( bypass == false );
+	LoggerAssert ( bypass == false );
 	bypass = false;
 
 	ListenersList_t::elem_t* it ( m_listeners.GetFirst () );

@@ -27,6 +27,7 @@
 #ifdef GNUC
 
 #include <dlfcn.h>
+#include <execinfo.h>
 
 void * GetModuleHandle ( const char *name )
 {
@@ -156,7 +157,6 @@ void Logger::Msg<MSG_CONSOLE> ( const char * msg, int verbose /*= 0*/ )
 		OutputDebugStringA ( "\n" );
 #endif
 	}
-
 }
 
 template <>
@@ -314,6 +314,20 @@ bool Logger::sys_cmd_fn ( const SourceSdk::CCommand &args )
 	else
 	{
 		return false;
+	}
+}
+
+void Logger::SpewAssert ( char const * expr, char const * file, unsigned int line )
+{
+	char const * msg ( Helpers::format ( "ASSERTION FAILED in %s:%u : %s", file, line, expr ) );
+	if( Logger::IsCreated () )
+	{
+		Logger::GetInstance()->Msg<MSG_ERROR> ( msg, 3 );
+		Logger::GetInstance ()->Flush ();
+	}
+	else
+	{
+		SourceSdk::InterfacesProxy::Call_LogPrint ( msg );
 	}
 }
 

@@ -130,9 +130,9 @@ bool WallhackBlocker::RT_SetTransmitCallback ( PlayerHandler::const_iterator sen
 	}
 
 	SourceSdk::IPlayerInfo * const pinfo_receiver = receiver_player->GetPlayerInfo ();
-	Assert ( pinfo_receiver );
+	LoggerAssert ( pinfo_receiver );
 	SourceSdk::IPlayerInfo * const pinfo_sender = sender_player->GetPlayerInfo ();
-	Assert ( pinfo_sender );
+	LoggerAssert ( pinfo_sender );
 
 	if ( !pinfo_receiver->IsDead () )
 	{

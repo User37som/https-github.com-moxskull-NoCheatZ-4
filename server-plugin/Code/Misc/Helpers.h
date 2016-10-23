@@ -17,6 +17,7 @@
 #define HELPERS
 
 #include <limits> // numeric_limits
+#include <ctime> // time_t
 
 #include "Misc/temp_basicstring.h"
 
@@ -40,6 +41,8 @@ namespace Helpers
 	int IndexOfEdict ( const SourceSdk::edict_t * const p_pEdict );
 
 	SourceSdk::edict_t * edictOfUnknown ( void * unk );
+
+	unsigned int HashString ( char const * );
 
 	int GetMaxClients ();
 

@@ -41,12 +41,15 @@
 #include "Systems/AutoTVRecord.h"
 #include "Misc/EntityProps.h"
 #include "Misc/MathCache.h"
+#include "Misc/SigHandler.h"
 
 #include "Systems/OnTickListener.h"
 #include "Systems/TimerListener.h"
 
 static void* __CreatePlugin_interface ()
 {
+	static KxStackTrace g_KxStackTrace;
+
 	printf ( "__CreatePlugin_interface - HeapMemoryManager::InitPool()\n" );
 	HeapMemoryManager::InitPool ();
 	CNoCheatZPlugin::CreateInstance ();
@@ -57,8 +60,17 @@ static void* __CreatePlugin_interface ()
 void* CreateInterfaceInternal ( char const *pName, int *pReturnCode )
 {
 	printf ( "NoCheatZ plugin.cpp : CreateInterfaceInternal - Game engine asking for %s\n", pName );
-	if( pReturnCode ) *pReturnCode = SourceSdk::IFACE_OK;
-	return __CreatePlugin_interface ();
+	if( CNoCheatZPlugin::IsCreated () )
+	{
+		printf ( "NoCheatZ plugin.cpp : CreateInterfaceInternal - ERROR : Plugin already loaded\n" );
+		if( pReturnCode ) *pReturnCode = SourceSdk::IFACE_FAILED;
+		return nullptr;
+	}
+	else
+	{
+		if( pReturnCode ) *pReturnCode = SourceSdk::IFACE_OK;
+		return __CreatePlugin_interface ();
+	}
 }
 
 void* SourceSdk::CreateInterface ( char const * pName, int * pReturnCode )
@@ -138,9 +150,7 @@ CNoCheatZPlugin::CNoCheatZPlugin () :
 	SourceSdk::IServerPluginCallbacks (),
 	singleton_class (),
 	m_iClientCommandIndex ( 0 ),
-	m_bAlreadyLoaded ( false ),
-	ncz_cmd_ptr ( nullptr ),
-	nocheatz_instance ( nullptr )
+	ncz_cmd_ptr ( nullptr )
 {
 	CreateSingletons ();
 }
@@ -177,18 +187,6 @@ bool CNoCheatZPlugin::Load ( SourceSdk::CreateInterfaceFn _interfaceFactory, Sou
 		return false;
 	}
 
-	void* pinstance ( SourceSdk::InterfacesProxy::ICvar_FindVar ( "nocheatz_instance" ) );
-	if( pinstance )
-	{
-		if( SourceSdk::InterfacesProxy::ConVar_GetBool ( pinstance ) )
-		{
-			Logger::GetInstance ()->Msg<MSG_ERROR> ( "CNoCheatZPlugin already loaded" );
-			m_bAlreadyLoaded = true;
-			return false;
-		}
-		Assert ( "Error when testing for multiple instances" && 0 );
-	}
-
 	if( !ConfigManager::GetInstance ()->LoadConfig () )
 	{
 		Logger::GetInstance ()->Msg<MSG_ERROR> ( "ConfigManager::LoadConfig failed" );
@@ -198,7 +196,6 @@ bool CNoCheatZPlugin::Load ( SourceSdk::CreateInterfaceFn _interfaceFactory, Sou
 	if( SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive )
 	{
 		ncz_cmd_ptr = new SourceSdk::ConCommand_csgo ( "ncz", BaseSystem::ncz_cmd_fn, "NoCheatZ", FCVAR_DONTRECORD | 1 << 18 );
-		nocheatz_instance = new SourceSdk::ConVar_csgo ( "nocheatz_instance", "0", FCVAR_DONTRECORD | 1 << 18 );
 
 		SourceSdk::ConVar_Register_csgo ( 0 );
 	}
@@ -216,7 +213,6 @@ bool CNoCheatZPlugin::Load ( SourceSdk::CreateInterfaceFn _interfaceFactory, Sou
 		while( ++id != max_id );
 
 		ncz_cmd_ptr = new SourceSdk::ConCommand ( "ncz", BaseSystem::ncz_cmd_fn, "NoCheatZ", FCVAR_DONTRECORD );
-		nocheatz_instance = new SourceSdk::ConVar ( "nocheatz_instance", "0", FCVAR_DONTRECORD );
 
 		SourceSdk::ConVar_Register ( 0 );
 	}
@@ -245,8 +241,6 @@ bool CNoCheatZPlugin::Load ( SourceSdk::CreateInterfaceFn _interfaceFactory, Sou
 	}
 	BaseSystem::ManageSystems ();
 
-	SourceSdk::InterfacesProxy::ConVar_SetValue<bool> ( nocheatz_instance, true );
-
 	Logger::GetInstance ()->Msg<MSG_CHAT> ( "Loaded" );
 
 	return true;
@@ -258,12 +252,6 @@ bool CNoCheatZPlugin::Load ( SourceSdk::CreateInterfaceFn _interfaceFactory, Sou
 void CNoCheatZPlugin::Unload ( void )
 {
 	BanRequest::GetInstance ()->WriteBansIfNeeded ();
-
-	if( m_bAlreadyLoaded && SourceSdk::InterfacesProxy::GetCvar () )
-	{
-		void* inst ( SourceSdk::InterfacesProxy::ICvar_FindVar ( "nocheatz_instance" ) );
-		if( inst ) SourceSdk::InterfacesProxy::ConVar_SetValue ( inst, false );
-	}
 
 	/*PlayerRunCommandHookListener::UnhookPlayerRunCommand();
 	OnGroundHookListener::UnhookOnGround();
@@ -278,12 +266,10 @@ void CNoCheatZPlugin::Unload ( void )
 
 	if( SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive )
 	{
-		if( nocheatz_instance ) delete static_cast< SourceSdk::ConVar_csgo* >( nocheatz_instance );
 		if( ncz_cmd_ptr ) delete static_cast< SourceSdk::ConCommand_csgo* >( ncz_cmd_ptr );
 	}
 	else
 	{
-		if( nocheatz_instance ) delete static_cast< SourceSdk::ConVar* >( nocheatz_instance );
 		if( ncz_cmd_ptr ) delete static_cast< SourceSdk::ConCommand* >( ncz_cmd_ptr );
 	}
 
@@ -482,7 +468,17 @@ SourceSdk::PLUGIN_RESULT CNoCheatZPlugin::ClientConnect ( bool *bAllowConnect, S
 #define MAX_CHARS_NAME 32
 
 	NczPlayerManager::GetInstance ()->ClientConnect ( pEntity );
-	NczPlayer* player ( *(NczPlayerManager::GetInstance ()->GetPlayerHandlerByEdict ( pEntity )) );
+
+	*bAllowConnect = ! BanRequest::GetInstance ()->IsRejected ( pszAddress );
+	if( ! bAllowConnect )
+	{
+		memcpy ( reject, "Please wait 20 minutes", 23 );
+
+		NczPlayerManager::GetInstance ()->ClientDisconnect ( pEntity );
+
+		Logger::GetInstance ()->Msg<MSG_LOG> ( Helpers::format ( "CNoCheatZPlugin::ClientConnect : Rejected %s with reason %s", pszAddress, reject ) );
+		return SourceSdk::PLUGIN_OVERRIDE;
+	}
 
 	SpamConnectTester::GetInstance ()->ClientConnect ( bAllowConnect, pEntity, pszName, pszAddress, reject, maxrejectlen );
 	SpamChangeNameTester::GetInstance ()->ClientConnect ( bAllowConnect, pEntity, pszName, pszAddress, reject, maxrejectlen );
@@ -495,7 +491,8 @@ SourceSdk::PLUGIN_RESULT CNoCheatZPlugin::ClientConnect ( bool *bAllowConnect, S
 		{
 			NczPlayerManager::GetInstance ()->ClientDisconnect ( pEntity );
 			Logger::GetInstance ()->Msg<MSG_LOG> ( Helpers::format ( "CNoCheatZPlugin::ClientConnect : Rejected %s with reason %s", pszAddress, reject ) );
-			return SourceSdk::PLUGIN_STOP;
+			BanRequest::GetInstance ()->AddReject ( 1200, pszAddress );
+			return SourceSdk::PLUGIN_OVERRIDE;
 		}
 		else
 		{
@@ -503,20 +500,24 @@ SourceSdk::PLUGIN_RESULT CNoCheatZPlugin::ClientConnect ( bool *bAllowConnect, S
 		}
 	}
 
-	JumpTester::GetInstance ()->ResetPlayerDataStruct ( player );
-	EyeAnglesTester::GetInstance ()->ResetPlayerDataStruct ( player );
-	ConVarTester::GetInstance ()->ResetPlayerDataStruct ( player );
-	//ShotTester::GetInstance ()->ResetPlayerDataStruct ( player );
-	AutoAttackTester::GetInstance ()->ResetPlayerDataStruct ( player );
-	SpeedTester::GetInstance ()->ResetPlayerDataStruct ( player );
-	ConCommandTester::GetInstance ()->ResetPlayerDataStruct ( player );
-	AntiFlashbangBlocker::GetInstance ()->ResetPlayerDataStruct ( player );
-	AntiSmokeBlocker::GetInstance ()->ResetPlayerDataStruct ( player );
-	BadUserCmdBlocker::GetInstance ()->ResetPlayerDataStruct ( player );
-	WallhackBlocker::GetInstance ()->ResetPlayerDataStruct ( player );
-	SpamChangeNameTester::GetInstance ()->ResetPlayerDataStruct ( player );
-	RadarHackBlocker::GetInstance ()->ResetPlayerDataStruct ( player );
-	BhopBlocker::GetInstance ()->ResetPlayerDataStruct ( player );
+	{
+		NczPlayer* player ( *( NczPlayerManager::GetInstance ()->GetPlayerHandlerByEdict ( pEntity ) ) );
+
+		JumpTester::GetInstance ()->ResetPlayerDataStruct ( player );
+		EyeAnglesTester::GetInstance ()->ResetPlayerDataStruct ( player );
+		ConVarTester::GetInstance ()->ResetPlayerDataStruct ( player );
+		//ShotTester::GetInstance ()->ResetPlayerDataStruct ( player );
+		AutoAttackTester::GetInstance ()->ResetPlayerDataStruct ( player );
+		SpeedTester::GetInstance ()->ResetPlayerDataStruct ( player );
+		ConCommandTester::GetInstance ()->ResetPlayerDataStruct ( player );
+		AntiFlashbangBlocker::GetInstance ()->ResetPlayerDataStruct ( player );
+		AntiSmokeBlocker::GetInstance ()->ResetPlayerDataStruct ( player );
+		BadUserCmdBlocker::GetInstance ()->ResetPlayerDataStruct ( player );
+		WallhackBlocker::GetInstance ()->ResetPlayerDataStruct ( player );
+		SpamChangeNameTester::GetInstance ()->ResetPlayerDataStruct ( player );
+		RadarHackBlocker::GetInstance ()->ResetPlayerDataStruct ( player );
+		BhopBlocker::GetInstance ()->ResetPlayerDataStruct ( player );
+	}
 
 	return SourceSdk::PLUGIN_CONTINUE;
 }

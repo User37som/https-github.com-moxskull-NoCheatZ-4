@@ -42,7 +42,7 @@ BASE_CFLAGS =   -msse -D_LINUX -DLINUX -D_alloca=alloca \
 		-Wno-non-virtual-dtor -Wno-overloaded-virtual \
 		-Wall -Werror
 
-OPT_FLAGS = -DNDEBUG -O3 -funroll-loops -s -pipe $(OTHER_PREPROCESSORS)
+OPT_FLAGS = -DNDEBUG -O3 -funroll-loops -pipe $(OTHER_PREPROCESSORS)
 DEBUG_FLAGS = -g -ggdb3 -O0 -D_DEBUG -DDEBUG $(OTHER_PREPROCESSORS)
 
 ###########################################################
@@ -88,6 +88,7 @@ SRC =   $(wildcard Code/*.cpp) \
 	$(wildcard SourceSdk/Interfaces/Protobuf/*.cpp)
 
 SRC := $(filter-out Code/Hooks/RayTraceCache.cpp, $(SRC)) 
+SRC := $(filter-out Code/Misc/StackWalker.cpp, $(SRC)) 
 
 INCLUDE =       -I$(SRC_DIR) \
 		-I$(SDK_DIR) \

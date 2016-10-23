@@ -17,7 +17,7 @@
 
 bool GetIniAttributeValue ( std::ifstream & file, basic_string const & root, basic_string const & attrib, basic_string & value )
 {
-	Assert ( file.is_open () );
+	LoggerAssert ( file.is_open () );
 
 	file.clear ( std::ios::goodbit );
 	file.seekg ( 0, std::ios::beg );

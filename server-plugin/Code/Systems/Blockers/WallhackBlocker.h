@@ -99,22 +99,22 @@ public:
 
 	inline bool IsValid ( int pa, int pb ) const
 	{
-		Assert ( pa && pb );
-		Assert ( pa != pb );
+		LoggerAssert ( pa && pb );
+		LoggerAssert ( pa != pb );
 		return m_cache[ pa ][ pb ].m_valid;
 	};
 
 	inline bool IsVisible ( int pa, int pb ) const
 	{
-		Assert ( pa && pb );
-		Assert ( pa != pb );
+		LoggerAssert ( pa && pb );
+		LoggerAssert ( pa != pb );
 		return m_cache[ pa][ pb ].m_visible;
 	};
 
 	inline void SetVisibility ( int pa, int pb, bool const visibility )
 	{
-		Assert ( pa && pb );
-		Assert ( pa != pb );
+		LoggerAssert ( pa && pb );
+		LoggerAssert ( pa != pb );
 		m_cache[ pa][ pb ] = VisInfo ( visibility );
 	};
 };

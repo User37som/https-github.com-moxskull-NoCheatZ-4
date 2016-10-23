@@ -235,7 +235,7 @@ void ConVarTester::RT_OnQueryCvarValueFinished ( PlayerHandler::const_iterator p
 
 	if( req->cookie == cookie )
 	{
-		Assert ( req->status == ConVarRequestStatus::SENT );
+		LoggerAssert ( req->status == ConVarRequestStatus::SENT );
 
 		if( SourceSdk::InterfacesProxy::ConVar_GetBool ( var_sv_cheats ) )
 		{
@@ -249,7 +249,7 @@ void ConVarTester::RT_OnQueryCvarValueFinished ( PlayerHandler::const_iterator p
 		}
 
 		ConVarInfoT* ruleset ( RT_FindConvarRuleset ( pCvarName ) );
-		Assert ( ruleset );
+		LoggerAssert ( ruleset );
 		req->status = ConVarRequestStatus::REPLYED;
 		req->answer = pCvarValue;
 

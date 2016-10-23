@@ -26,20 +26,20 @@
 
 struct ConnectInfo
 {
-	basic_string ip_addr;
-	float next_connect_time;
+	unsigned int ip_addr;
+	time_t next_connect_time;
 	int count;
 
 	ConnectInfo ()
 	{
 		count = 0;
-		next_connect_time = Plat_FloatTime ();
+		next_connect_time = time(nullptr);
 	};
 	ConnectInfo ( const char* addr )
 	{
 		count = 0;
 		next_connect_time = 0;
-		ip_addr = addr;
+		ip_addr = Helpers::HashString(addr);
 	};
 	ConnectInfo ( const ConnectInfo& other )
 	{
@@ -49,12 +49,12 @@ struct ConnectInfo
 	};
 	void OnConnect ()
 	{
-		next_connect_time = Plat_FloatTime () + 10.0f;
+		next_connect_time = time ( nullptr ) + 30;
 	};
 
 	bool operator== ( const ConnectInfo& other ) const
 	{
-		return ( strcmp ( ip_addr.c_str (), other.ip_addr.c_str () ) == 0 );
+		return ip_addr == other.ip_addr;
 	};
 };
 

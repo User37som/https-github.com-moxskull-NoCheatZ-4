@@ -51,7 +51,7 @@ public:
 
 	static void CreateInstance()
 	{
-		Assert( !IsCreated () );
+		Assert ( !IsCreated () );
 		void* ptr = HeapMemoryManager::AllocateMemory ( sizeof ( C ), hClass::memory_used, 16 );
 		hClass::instance = new(ptr) C();
 	}
@@ -84,7 +84,7 @@ size_t Singleton<C>::memory_used(0);
 template <class C>
 inline C * const Singleton<C>::GetInstance()
 {
-	Assert( IsCreated () );
+	Assert ( IsCreated () );
 	return hClass::instance;
 }
 

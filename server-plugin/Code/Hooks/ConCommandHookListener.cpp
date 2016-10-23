@@ -109,7 +109,7 @@ void HOOKFN_INT ConCommandHookListener::RT_nDispatch ( void* cmd, void*, SourceS
 
 void ConCommandHookListener::RegisterConCommandHookListener ( ConCommandHookListener const * const listener )
 {
-	Assert ( !listener->m_mycommands.IsEmpty () );
+	LoggerAssert ( !listener->m_mycommands.IsEmpty () );
 
 	ConCommandListenersListT::elem_t* it ( m_listeners.FindByListener ( listener ) );
 	if( it == nullptr )
