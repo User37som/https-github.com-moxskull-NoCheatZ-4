@@ -95,8 +95,8 @@ void AutoTVRecord::StartRecord ()
 		SourceSdk::InterfacesProxy::Call_ServerExecute ();
 
 		m_expectedtvconfigchange = true;
-
-		m_demofile = Helpers::format ( "%s%s-%s", m_prefix.c_str (), mapname.c_str (), basic_string ( Helpers::getStrDateTime ( "%x_%X" ) ).replace ( "/\\:?\"<>|", '-' ).c_str () );
+		
+		m_demofile = Helpers::format ( "%s%s-%s", "", mapname.c_str (), basic_string ( Helpers::getStrDateTime ( "%x_%X" ) ).replace ( "/\\:?\"<>|", '-' ).c_str () );
 		Logger::GetInstance ()->Msg<MSG_LOG> ( Helpers::format ( "Starting to record the game in %s.dem", m_demofile.c_str () ) );
 
 		SourceSdk::InterfacesProxy::Call_ServerCommand ( basic_string ( "tv_record " ).append ( m_demofile ).append ( '\n' ).c_str () );
