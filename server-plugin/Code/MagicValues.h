@@ -16,8 +16,14 @@
 #ifndef MAGICVALUES_H
 #define MAGICVALUES_H
 
-#ifndef NCZ_PREPROCESSORS
-#	include "Preprocessors.h"
+#ifndef MUTE_INCLUDES_IN_HEADERS
+
+#	include <stdint.h>
+
+#	ifndef NCZ_PREPROCESSORS
+#		include "Preprocessors.h"
+#	endif
+
 #endif
 
 #define PLAYERCLASS_PROP "CCSPlayer"
@@ -57,6 +63,13 @@ namespace SystemPriority
 {
 	namespace UserCmdHookListener
 	{
+		/*
+			Some HookListener classes can sort listeners by priority.
+			This is useful here for instance when we want BadUserCmdBlocker to sanitize data before testers can actually test data.
+			We also basically want to block after doing tests otherwise tests would be bypassed if the blocker decides to inert.
+
+			Now you understand that lower priority values are run before higher priority values.
+		*/
 		size_t const constexpr BadUserCmdBlocker ( 0 );
 		size_t const constexpr SpeedTester ( BadUserCmdBlocker + 1 );
 		size_t const constexpr EyeAnglesTester ( SpeedTester + 1 );
@@ -66,5 +79,26 @@ namespace SystemPriority
 		size_t const constexpr BhopBlocker ( JumpTester + 1 );
 	}
 }
+
+namespace UniqueDetectionID
+{
+	/*
+		We attribute a unique detection id for each childs of BaseDetection ( LogDetection ) just for faster sorting and memory compression of detections at runtime.
+		See the comments in temp_BaseDetection.h
+	*/
+	uint32_t const constexpr AUTOATTACK ( 0 );
+	uint32_t const constexpr CMD_FLOOD ( 1 );
+	uint32_t const constexpr CMD_VIOLATION ( 2 );
+	uint32_t const constexpr CONVAR_TIMEOUT (4 );
+	uint32_t const constexpr CONVAR_WRONGVALUE ( 8 );
+	uint32_t const constexpr CONVAR_ILLEGAL ( 16 );
+	uint32_t const constexpr EYEANGLE_X ( 32 );
+	uint32_t const constexpr EYEANGLE_Y ( 64 );
+	uint32_t const constexpr EYEANGLE_Z ( 128 );
+	uint32_t const constexpr BUNNYHOP_JUMPMACRO ( 256 );
+	uint32_t const constexpr BUNNYHOP_PERFECT ( 512 );
+	uint32_t const constexpr SPEEDHACK ( 1024 );
+}
+
 
 #endif // MAGICVALUES_H

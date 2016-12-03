@@ -16,8 +16,8 @@ limitations under the License.
 #include "ThinkPostHookListener.h"
 
 #include "Systems/ConfigManager.h"
-#include "Misc/Helpers.h"
-#include "Interfaces/InterfacesProxy.h"
+#include "Players/NczPlayerManager.h"
+#include "Hooks/temp_HookGuard.h"
 
 ThinkPostHookListener::ListenersList_t ThinkPostHookListener::m_listeners;
 

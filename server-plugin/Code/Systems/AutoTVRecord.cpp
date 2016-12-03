@@ -15,11 +15,6 @@ limitations under the License.
 
 #include "AutoTVRecord.h"
 
-#include "Interfaces/InterfacesProxy.h"
-
-#include "Players/NczPlayerManager.h"
-#include "Logger.h"
-
 AutoTVRecord::AutoTVRecord () :
 	BaseDynamicSystem ( "AutoTVRecord", "Enable - Disable - Verbose" ),
 	ConCommandHookListener (),
@@ -31,7 +26,8 @@ AutoTVRecord::AutoTVRecord () :
 	m_minplayers ( 1 ),
 	m_recording ( false ),
 	m_expectedtvconfigchange ( false ),
-	m_spawn_once ( true )
+	m_spawn_once ( true ),
+	m_started_current_record ( false )
 {}
 
 AutoTVRecord::~AutoTVRecord ()
@@ -49,6 +45,7 @@ void AutoTVRecord::Load ()
 
 	m_mycommands.AddToTail ( SourceSdk::InterfacesProxy::ICvar_FindCommand ( "tv_record" ) );
 	m_mycommands.AddToTail ( SourceSdk::InterfacesProxy::ICvar_FindCommand ( "tv_stoprecord" ) );
+	m_mycommands.AddToTail ( SourceSdk::InterfacesProxy::ICvar_FindCommand ( "tv_stop" ) );
 	//m_mycommands.AddToTail(SourceSdk::InterfacesProxy::ICvar_FindCommand("tv_delay"));
 	ConCommandHookListener::RegisterConCommandHookListener ( this );
 
@@ -73,6 +70,7 @@ bool AutoTVRecord::GotJob () const
 void AutoTVRecord::StartRecord ()
 {
 	if( m_recording ) return;
+	if( !IsActive () ) return;
 
 	if( IsTVPresent () )
 	{
@@ -92,24 +90,42 @@ void AutoTVRecord::StartRecord ()
 
 		mapname.replace ( ":?\"<>|", '-' );
 
-		SourceSdk::InterfacesProxy::Call_ServerExecute ();
-
 		m_expectedtvconfigchange = true;
-		
-		m_demofile = Helpers::format ( "%s%s-%s", "", mapname.c_str (), basic_string ( Helpers::getStrDateTime ( "%x_%X" ) ).replace ( "/\\:?\"<>|", '-' ).c_str () );
-		Logger::GetInstance ()->Msg<MSG_LOG> ( Helpers::format ( "Starting to record the game in %s.dem", m_demofile.c_str () ) );
 
 		SourceSdk::InterfacesProxy::Call_ServerCommand ( basic_string ( "tv_record " ).append ( m_demofile ).append ( '\n' ).c_str () );
-		SourceSdk::InterfacesProxy::Call_ServerExecute ();
-		m_recording = true;
+	}
+}
 
-		m_expectedtvconfigchange = false;
+void AutoTVRecord::OnStartRecord ( char const * filename )
+{
+	if( !m_recording )
+	{
+		m_demofile = filename;
+		m_recording = true;
+		m_recordtickcount = 0;
+
+		if( m_expectedtvconfigchange )
+		{
+			m_started_current_record = true;
+			m_expectedtvconfigchange = false;
+			Logger::GetInstance ()->Msg<MSG_LOG> ( Helpers::format ( "Sent tv_record : Starting to record the game in %s.dem", filename ) );
+		}
+		else
+		{
+			m_started_current_record = false;
+			Logger::GetInstance ()->Msg<MSG_LOG> ( Helpers::format ( "Caught tv_record : Starting to record the game in %s.dem", filename ) );
+		}
+	}
+	else
+	{
+		DebugMessage ( "Caught tv_record, but already recording" );
 	}
 }
 
 void AutoTVRecord::StopRecord ()
 {
 	if( !m_recording ) return;
+	if( !m_started_current_record || !IsActive() ) return;
 
 	SourceSdk::InterfacesProxy::Call_ServerExecute ();
 
@@ -117,10 +133,21 @@ void AutoTVRecord::StopRecord ()
 
 	SourceSdk::InterfacesProxy::Call_ServerCommand ( "tv_stoprecord\n" );
 	SourceSdk::InterfacesProxy::Call_ServerExecute ();
-	m_recording = false;
-	Logger::GetInstance ()->Msg<MSG_LOG> ( Helpers::format ( "TV record ended in %s.dem with %u ticks (%f seconds)", m_demofile.c_str (), m_recordtickcount, m_recordtickcount * SourceSdk::InterfacesProxy::Call_GetTickInterval () ) );
+}
 
-	m_expectedtvconfigchange = false;
+void AutoTVRecord::OnStopRecord ()
+{
+	if( m_recording )
+	{
+		m_recording = false;
+		m_expectedtvconfigchange = false;
+		m_started_current_record = false;
+		Logger::GetInstance ()->Msg<MSG_LOG> ( Helpers::format ( "TV record ended in %s.dem with %u ticks (%f seconds)", m_demofile.c_str (), m_recordtickcount, m_recordtickcount * SourceSdk::InterfacesProxy::Call_GetTickInterval () ) );
+	}
+	else
+	{
+		DebugMessage ( "Caught tv_stoprecord or tv_stop, but not currently recording" );
+	}
 }
 
 void AutoTVRecord::RT_OnTick ()
@@ -210,10 +237,29 @@ void AutoTVRecord::SendTVChatMessage ( basic_string const & msg )
 
 bool AutoTVRecord::RT_ConCommandCallback ( PlayerHandler::const_iterator ph, void * cmd, const SourceSdk::CCommand & args )
 {
-	if( !m_expectedtvconfigchange || ph != PlayerHandler::end () )
+	/*if( !m_expectedtvconfigchange || ph != PlayerHandler::end () )
 	{
 		Logger::GetInstance ()->Msg<MSG_LOG> ( "Intercepted unexpected TV configuration change." );
 		return true;
+	}*/
+
+	char const * command_name ( SourceSdk::InterfacesProxy::ConCommand_GetName ( cmd ) + 3);
+
+	if( *command_name == 'r' ) // tv_record
+	{
+		Assert ( strcmp ( command_name - 3, "tv_record" ) == 0 );
+
+		if( args.ArgC >= 2 )
+		{
+			OnStartRecord ( args.Arg ( 1 ) );
+		}
 	}
+	else
+	{
+		Assert ( strcmp ( command_name - 3, "tv_stoprecord" ) == 0 || strcmp ( command_name - 3, "tv_stop" ) == 0 );
+
+		OnStopRecord ();
+	}
+
 	return false;
 }

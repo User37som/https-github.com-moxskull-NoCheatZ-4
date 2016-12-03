@@ -15,12 +15,7 @@
 
 #include "BanRequest.h"
 
-#include "Interfaces/InterfacesProxy.h"
-
-#include "Misc/Helpers.h"
-#include "Misc/temp_Metrics.h"
 #include "Players/NczPlayerManager.h"
-
 
 BanRequest::BanRequest () :
 	BaseStaticSystem ( "BanRequest", "Verbose - CanKick - CanBan" ),
@@ -136,6 +131,8 @@ void BanRequest::BanInternal ( int ban_time, char const * steam_id, int userid, 
 {
 	if( CanBan () )
 	{
+		bool process_ban ( true );
+
 		if( cmd_gb_ban )
 		{
 		//	SourceSdk::InterfacesProxy::Call_ServerCommand(Helpers::format("gb_externalBanUser \"%s\" \"%s\" \"%s\" %d minutes \"%s\"\n", gb_admin_id.c_str(), SteamID, gb_reason_id.c_str(), minutes, this->getName()));
@@ -151,32 +148,31 @@ void BanRequest::BanInternal ( int ban_time, char const * steam_id, int userid, 
 			else
 			{
 				SourceSdk::InterfacesProxy::Call_ServerCommand ( Helpers::format ( "sm_ban #%d %d \"%s\"\n", userid, ban_time, kick_message ) );
+				process_ban = false;
 			}
 		}
-		/*
-			Commenting because https://github.com/L-EARN/NoCheatZ-4/issues/64 :
-				This code do sm_ban by userid but userid can be not ready sometimes.
-				So I enforce my code to be sure the player is kicked if ever sourcemod fails.
-		*/
-		//else // 
-		//{
+		
+
 
 		KickNow ( userid, kick_message );
-		if( SteamGameServer_BSecure () && steam_id != nullptr )
+
+		if( process_ban )
 		{
-			SourceSdk::InterfacesProxy::Call_ServerCommand ( Helpers::format ( "banid %d %s\n", ban_time, steam_id ) );
+			if( steam_id != nullptr )
+			{
+				SourceSdk::InterfacesProxy::Call_ServerCommand ( Helpers::format ( "banid %d %s\n", ban_time, steam_id ) );
+			}
+
+			basic_string ip_stripped ( ip );
+			ip_stripped.replace ( ':', '\0' );
+
+			if( ip_stripped != "0" && ip_stripped != "127.0.0.1" && ip_stripped != "localhost" && ip_stripped[ 0 ] != '=' )
+			{
+				SourceSdk::InterfacesProxy::Call_ServerCommand ( Helpers::format ( "addip 1440 \"%s\"\n", ip_stripped.c_str () ) );
+			}
+
+			m_do_writeid = true;
 		}
-
-		basic_string ip_stripped ( ip );
-		ip_stripped.replace ( ':', '\0' );
-
-		if( ip_stripped != "0" && ip_stripped != "127.0.0.1" && ip_stripped != "localhost" && ip_stripped[0] != '=' )
-		{
-			SourceSdk::InterfacesProxy::Call_ServerCommand ( Helpers::format ( "addip 1440 \"%s\"\n", ip_stripped.c_str() ) );
-		}
-
-		m_do_writeid = true;
-	//}
 	}
 	else if( CanKick () )
 	{

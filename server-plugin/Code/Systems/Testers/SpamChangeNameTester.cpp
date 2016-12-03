@@ -15,14 +15,6 @@
 
 #include "SpamChangeNameTester.h"
 
-#include <stdio.h>
-
-#include "Interfaces/InterfacesProxy.h"
-
-#include "Players/NczPlayerManager.h"
-#include "Misc/Helpers.h"
-#include "Systems/BanRequest.h"
-
 SpamChangeNameTester::SpamChangeNameTester () :
 	BaseDynamicSystem ( "SpamChangeNameTester" ),
 	SourceSdk::IGameEventListener002 (),

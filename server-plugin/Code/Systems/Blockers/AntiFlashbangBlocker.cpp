@@ -15,14 +15,7 @@
 
 #include "AntiFlashbangBlocker.h"
 
-#include <cmath>
-
-#include "Interfaces/InterfacesProxy.h"
-
 #include "Misc/EntityProps.h"
-#include "Players/NczPlayerManager.h"
-#include "Systems/Logger.h"
-#include "Misc/Helpers.h"
 
 AntiFlashbangBlocker::AntiFlashbangBlocker () :
 	BaseDynamicSystem ( "AntiFlashbangBlocker" ),

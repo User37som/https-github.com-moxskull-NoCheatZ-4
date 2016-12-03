@@ -19,7 +19,6 @@
 #include "Systems/BaseSystem.h"
 #include "Players/temp_PlayerDataStruct.h"
 #include "Hooks/PlayerRunCommandHookListener.h"
-#include "Misc/temp_singleton.h"
 
 enum TickStatus
 {

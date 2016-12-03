@@ -15,10 +15,6 @@
 
 #include "ConCommandTester.h"
 
-#include "Misc/Helpers.h"
-#include "Systems/BanRequest.h"
-#include "Systems/Logger.h"
-
 ConCommandTester::ConCommandTester () :
 	BaseDynamicSystem ( "ConCommandTester" ),
 	ConCommandHookListener (),
@@ -140,12 +136,7 @@ void ConCommandTester::RT_AddPlayerCommand ( PlayerHandler::const_iterator ph, c
 
 	if( cmd_count > 32 )
 	{
-		Detection_CmdFlood pDetection;
-		pDetection.PrepareDetectionData ( playerData );
-		pDetection.PrepareDetectionLog ( *ph, this );
-		pDetection.Log ();
-
-		ph->Kick ( "ConCommand flood" );
+		TriggerDetection ( Detection_CmdFlood, ph, playerData );
 	}
 }
 
@@ -195,14 +186,8 @@ bool ConCommandTester::RT_TestPlayerCommand ( PlayerHandler::const_iterator ph, 
 						// Ignored cmds are always at the end of the set
 						if( cmd_test->ignore ) return false;
 
-						RT_AddPlayerCommand ( ph, command );
-						Detection_CmdViolation pDetection;
-						pDetection.PrepareDetectionData ( GetPlayerDataStructByIndex ( ph.GetIndex () ) );
-						pDetection.PrepareDetectionLog ( *ph, this );
-						pDetection.Log ();
+						TriggerDetection ( Detection_CmdViolation, ph, GetPlayerDataStructByIndex ( ph.GetIndex () ) );
 
-						if( cmd_test->ban ) ph->Ban ( "ConCommand exploit" );
-						else ph->Kick ( "ConCommand exploit" );
 						return true;
 					}
 				}
@@ -272,14 +257,12 @@ bool ConCommandTester::RT_HookEntCallback ( PlayerHandler::const_iterator ph, co
 	const size_t cmd_len ( strlen ( cmd_str ) );
 	char const * command_name ( SourceSdk::InterfacesProxy::ConCommand_GetName ( command ) );
 
+	ConCommandTester * const sys ( ConCommandTester::GetInstance () );
+
 	if( cmd_len > 500 )
 	{
-		ConCommandTester::GetInstance ()->RT_AddPlayerCommand ( ph, command_name );
-		Detection_CmdViolation pDetection;
-		pDetection.PrepareDetectionData ( ConCommandTester::GetInstance ()->GetPlayerDataStructByIndex ( ph.GetIndex () ) );
-		pDetection.PrepareDetectionLog ( *ph, ConCommandTester::GetInstance () );
-		pDetection.Log ();
-		ph->Kick ( "ConCommand exploit" );
+		sys->RT_AddPlayerCommand ( ph, command_name );
+		TriggerDetectionExt ( Detection_CmdViolation, ph, sys->GetPlayerDataStructByIndex ( ph.GetIndex () ), sys );
 		return true;
 	}
 
@@ -287,97 +270,61 @@ bool ConCommandTester::RT_HookEntCallback ( PlayerHandler::const_iterator ph, co
 	{
 		if( StriCmpOffset ( cmd_str, "point_", x ) )
 		{
-			ConCommandTester::GetInstance ()->RT_AddPlayerCommand ( ph, command_name );
-			Detection_CmdViolation pDetection;
-			pDetection.PrepareDetectionData ( ConCommandTester::GetInstance ()->GetPlayerDataStructByIndex ( ph.GetIndex () ) );
-			pDetection.PrepareDetectionLog ( *ph, ConCommandTester::GetInstance () );
-			pDetection.Log ();
-			ph->Kick ( "ConCommand exploit" );
+			sys->RT_AddPlayerCommand ( ph, command_name );
+			TriggerDetectionExt ( Detection_CmdViolation, ph, sys->GetPlayerDataStructByIndex ( ph.GetIndex () ), sys );
 			return true;
 		}
 		if( StriCmpOffset ( cmd_str, "quit", x ) )
 		{
-			ConCommandTester::GetInstance ()->RT_AddPlayerCommand ( ph, command_name );
-			Detection_CmdViolation pDetection;
-			pDetection.PrepareDetectionData ( ConCommandTester::GetInstance ()->GetPlayerDataStructByIndex ( ph.GetIndex () ) );
-			pDetection.PrepareDetectionLog ( *ph, ConCommandTester::GetInstance () );
-			pDetection.Log ();
-			ph->Kick ( "ConCommand exploit" );
+			sys->RT_AddPlayerCommand ( ph, command_name );
+			TriggerDetectionExt ( Detection_CmdViolation, ph, sys->GetPlayerDataStructByIndex ( ph.GetIndex () ), sys );
 			return true;
 		}
 		if( StriCmpOffset ( cmd_str, "exit", x ) )
 		{
-			ConCommandTester::GetInstance ()->RT_AddPlayerCommand ( ph, command_name );
-			Detection_CmdViolation pDetection;
-			pDetection.PrepareDetectionData ( ConCommandTester::GetInstance ()->GetPlayerDataStructByIndex ( ph.GetIndex () ) );
-			pDetection.PrepareDetectionLog ( *ph, ConCommandTester::GetInstance () );
-			pDetection.Log ();
-			ph->Kick ( "ConCommand exploit" );
+			sys->RT_AddPlayerCommand ( ph, command_name );
+			TriggerDetectionExt ( Detection_CmdViolation, ph, sys->GetPlayerDataStructByIndex ( ph.GetIndex () ), sys );
 			return true;
 		}
 		if( StriCmpOffset ( cmd_str, "restart", x ) )
 		{
-			ConCommandTester::GetInstance ()->RT_AddPlayerCommand ( ph, command_name );
-			Detection_CmdViolation pDetection;
-			pDetection.PrepareDetectionData ( ConCommandTester::GetInstance ()->GetPlayerDataStructByIndex ( ph.GetIndex () ) );
-			pDetection.PrepareDetectionLog ( *ph, ConCommandTester::GetInstance () );
-			pDetection.Log ();
-			ph->Kick ( "ConCommand exploit" );
+			sys->RT_AddPlayerCommand ( ph, command_name );
+			TriggerDetectionExt ( Detection_CmdViolation, ph, sys->GetPlayerDataStructByIndex ( ph.GetIndex () ), sys );
 			return true;
 		}
 		if( StriCmpOffset ( cmd_str, "rcon", x ) )
 		{
-			ConCommandTester::GetInstance ()->RT_AddPlayerCommand ( ph, command_name );
-			Detection_CmdViolation pDetection;
-			pDetection.PrepareDetectionData ( ConCommandTester::GetInstance ()->GetPlayerDataStructByIndex ( ph.GetIndex () ) );
-			pDetection.PrepareDetectionLog ( *ph, ConCommandTester::GetInstance () );
-			pDetection.Log ();
-			ph->Kick ();
+			sys->RT_AddPlayerCommand ( ph, command_name );
+			TriggerDetectionExt ( Detection_CmdViolation, ph, sys->GetPlayerDataStructByIndex ( ph.GetIndex () ), sys );
 			return true;
 		}
 		if( StriCmpOffset ( cmd_str, "mp_", x ) )
 		{
-			ConCommandTester::GetInstance ()->RT_AddPlayerCommand ( ph, command_name );
-			Detection_CmdViolation pDetection;
-			pDetection.PrepareDetectionData ( ConCommandTester::GetInstance ()->GetPlayerDataStructByIndex ( ph.GetIndex () ) );
-			pDetection.PrepareDetectionLog ( *ph, ConCommandTester::GetInstance () );
-			pDetection.Log ();
-			ph->Kick ( "ConCommand exploit" );
+			sys->RT_AddPlayerCommand ( ph, command_name );
+			TriggerDetectionExt ( Detection_CmdViolation, ph, sys->GetPlayerDataStructByIndex ( ph.GetIndex () ), sys );
 			return true;
 		}
 		if( StriCmpOffset ( cmd_str, "taketimer", x ) )
 		{
-			ConCommandTester::GetInstance ()->RT_AddPlayerCommand ( ph, command_name );
-			Detection_CmdViolation pDetection;
-			pDetection.PrepareDetectionData ( ConCommandTester::GetInstance ()->GetPlayerDataStructByIndex ( ph.GetIndex () ) );
-			pDetection.PrepareDetectionLog ( *ph, ConCommandTester::GetInstance () );
-			pDetection.Log ();
-			ph->Kick ( "ConCommand exploit" );
+			sys->RT_AddPlayerCommand ( ph, command_name );
+			TriggerDetectionExt ( Detection_CmdViolation, ph, sys->GetPlayerDataStructByIndex ( ph.GetIndex () ), sys );
 			return true;
 		}
 		if( StriCmpOffset ( cmd_str, "logic_", x ) )
 		{
-			ConCommandTester::GetInstance ()->RT_AddPlayerCommand ( ph, command_name );
-			Detection_CmdViolation pDetection;
-			pDetection.PrepareDetectionData ( ConCommandTester::GetInstance ()->GetPlayerDataStructByIndex ( ph.GetIndex () ) );
-			pDetection.PrepareDetectionLog ( *ph, ConCommandTester::GetInstance () );
-			pDetection.Log ();
-			ph->Kick ( "ConCommand exploit" );
+			sys->RT_AddPlayerCommand ( ph, command_name );
+			TriggerDetectionExt ( Detection_CmdViolation, ph, sys->GetPlayerDataStructByIndex ( ph.GetIndex () ), sys );
 			return true;
 		}
 		if( StriCmpOffset ( cmd_str, "sv_", x ) )
 		{
-			ConCommandTester::GetInstance ()->RT_AddPlayerCommand ( ph, command_name );
-			Detection_CmdViolation pDetection;
-			pDetection.PrepareDetectionData ( ConCommandTester::GetInstance ()->GetPlayerDataStructByIndex ( ph.GetIndex () ) );
-			pDetection.PrepareDetectionLog ( *ph, ConCommandTester::GetInstance () );
-			pDetection.Log ();
-			ph->Kick ( "ConCommand exploit" );
+			sys->RT_AddPlayerCommand ( ph, command_name );
+			TriggerDetectionExt ( Detection_CmdViolation, ph, sys->GetPlayerDataStructByIndex ( ph.GetIndex () ), sys );
 			return true;
 		}
 	}
 
-	ConCommandTester::GetInstance ()->RT_AddPlayerCommand ( ph, cmd_str );
+	sys->RT_AddPlayerCommand ( ph, cmd_str );
 	return false;
 }
 
@@ -389,14 +336,12 @@ bool ConCommandTester::RT_HookSayCallback ( PlayerHandler::const_iterator ph, co
 	const size_t cmd_len ( strlen ( cmd_str ) );
 	char const * command_name ( SourceSdk::InterfacesProxy::ConCommand_GetName ( command ) );
 
+	ConCommandTester * const sys ( ConCommandTester::GetInstance () );
+
 	if( cmd_len > 250 )
 	{
-		ConCommandTester::GetInstance ()->RT_AddPlayerCommand ( ph, command_name );
-		Detection_CmdViolation pDetection;
-		pDetection.PrepareDetectionData ( ConCommandTester::GetInstance ()->GetPlayerDataStructByIndex ( ph.GetIndex () ) );
-		pDetection.PrepareDetectionLog ( *ph, ConCommandTester::GetInstance () );
-		pDetection.Log ();
-		ph->Kick ( "ConCommand exploit" );
+		sys->RT_AddPlayerCommand ( ph, command_name );
+		TriggerDetectionExt ( Detection_CmdViolation, ph, sys->GetPlayerDataStructByIndex ( ph.GetIndex () ), sys );
 		return true;
 	}
 
@@ -410,28 +355,20 @@ bool ConCommandTester::RT_HookSayCallback ( PlayerHandler::const_iterator ph, co
 		{
 			if( ++spacenum > 64 )
 			{
-				ConCommandTester::GetInstance ()->RT_AddPlayerCommand ( ph, command_name );
-				Detection_CmdViolation pDetection;
-				pDetection.PrepareDetectionData ( ConCommandTester::GetInstance ()->GetPlayerDataStructByIndex ( ph.GetIndex () ) );
-				pDetection.PrepareDetectionLog ( *ph, ConCommandTester::GetInstance () );
-				pDetection.Log ();
-				ph->Kick ( "ConCommand exploit" );
+				sys->RT_AddPlayerCommand ( ph, command_name );
+				TriggerDetectionExt ( Detection_CmdViolation, ph, sys->GetPlayerDataStructByIndex ( ph.GetIndex () ), sys );
 				return true;
 			}
 		}
 		if( k < 0x20 && !( Helpers::GetUTF8Bytes ( &k ) > 1 ) )
 		{
-			ConCommandTester::GetInstance ()->RT_AddPlayerCommand ( ph, command_name );
-			Detection_CmdViolation pDetection;
-			pDetection.PrepareDetectionData ( ConCommandTester::GetInstance ()->GetPlayerDataStructByIndex ( ph.GetIndex () ) );
-			pDetection.PrepareDetectionLog ( *ph, ConCommandTester::GetInstance () );
-			pDetection.Log ();
-			ph->Kick ( "ConCommand exploit" );
+			sys->RT_AddPlayerCommand ( ph, command_name );
+			TriggerDetectionExt ( Detection_CmdViolation, ph, sys->GetPlayerDataStructByIndex ( ph.GetIndex () ), sys );
 			return true;
 		}
 	}
 
-	ConCommandTester::GetInstance ()->RT_AddPlayerCommand ( ph, cmd_str );
+	sys->RT_AddPlayerCommand ( ph, cmd_str );
 	return false;
 }
 
@@ -465,15 +402,70 @@ bool ConCommandTester::RT_ConCommandCallback ( PlayerHandler::const_iterator ph,
 	}
 }
 
-basic_string Detection_CmdFlood::GetDataDump ()
+void Detection_CmdFlood::TakeAction ()
 {
-	basic_string ret ( ":::: List of commands entered last second {" );
+	this->m_player->Kick ();
+}
+
+void Detection_CmdFlood::WriteXMLOutput(FILE* out) const
+{
+	Assert ( out );
+
+	fprintf ( out,
+			  "<detection_cmdflood>\n\t\t\t"
+			  "<array name=\"commands\" desc=\"List of commands entered last second\">"
+	);
+
 	size_t id ( 0 );
 	size_t const max ( GetDataStruct ()->commands.Size () );
-	for( PlayerConCommandS* it ( &( GetDataStruct ()->commands[ id ] ) ); id != max; it = &( GetDataStruct ()->commands[ ++id ] ) )
+	for( PlayerConCommandS const * it ( &( GetDataStruct ()->commands[ id ] ) ); id != max; it = &( GetDataStruct ()->commands[ ++id ] ) )
 	{
-		ret.append ( Helpers::format ( "\n:::::::: PlayerConCommandS {\n:::::::::::: ConCommand String : %s,\n:::::::::::: Is ConCommand Spam Ignored : %s,\n:::::::::::: Insertion Time %f\n::::::::}", it->cmd.c_str (), Helpers::boolToString ( it->isSpamIgnored ), it->time ) );
+		fprintf ( out,
+				  "\n\t\t\t\t<struct name=\"PlayerConCommandS\" desc=\"Informations about a command\">\n\t\t\t\t\t"
+				  "<value name=\"cmd\" desc=\"Command string\" unit=\"text\">%s</value>\n\t\t\t\t\t"
+				  "<value name=\"isSpamIgnored\" desc=\"Is it ignored from flood detection\" unit=\"boolean\">%d</value>\n\t\t\t\t\t"
+				  "<value name=\"time\" desc=\"Time the command is entered\" unit=\"seconds\">%f</value>\n\t\t\t\t\t"
+				  "</struct>",
+				  it->cmd.c_str (),
+				  it->isSpamIgnored,
+				  it->time
+		);
 	}
-	ret.append ( "\n:::: }" );
-	return ret;
+	fprintf ( out,
+			  "\n\t\t\t</array>\n\t\t</<detection_cmdflood>"
+	);
+}
+
+void Detection_CmdViolation::TakeAction ()
+{
+	this->m_player->Ban ();
+}
+
+void Detection_CmdViolation::WriteXMLOutput ( FILE* out ) const
+{
+	Assert ( out );
+
+	fprintf ( out,
+			  "<detection_cmdviolation>\n\t\t\t"
+			  "<array name=\"commands\" desc=\"List of commands entered last second\">"
+	);
+
+	size_t id ( 0 );
+	size_t const max ( GetDataStruct ()->commands.Size () );
+	for( PlayerConCommandS const * it ( &( GetDataStruct ()->commands[ id ] ) ); id != max; it = &( GetDataStruct ()->commands[ ++id ] ) )
+	{
+		fprintf ( out,
+				  "\n\t\t\t\t<struct name=\"PlayerConCommandS\" desc=\"Informations about a command\">\n\t\t\t\t\t"
+				  "<value name=\"cmd\" desc=\"Command string\" unit=\"text\">%s</value>\n\t\t\t\t\t"
+				  "<value name=\"isSpamIgnored\" desc=\"Is it ignored from flood detection\" unit=\"boolean\">%d</value>\n\t\t\t\t\t"
+				  "<value name=\"time\" desc=\"Time the command is entered\" unit=\"seconds\">%f</value>\n\t\t\t\t\t"
+				  "</struct>",
+				  it->cmd.c_str (),
+				  it->isSpamIgnored,
+				  it->time
+		);
+	}
+	fprintf ( out,
+			  "\n\t\t\t</array>\n\t\t</<detection_cmdviolation>"
+	);
 }

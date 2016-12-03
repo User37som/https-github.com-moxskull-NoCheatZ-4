@@ -15,11 +15,12 @@
 
 #include "ConCommandHookListener.h"
 
-#include "Interfaces/InterfacesProxy.h"
-
-#include "Misc/Helpers.h"
-#include "plugin.h"
-#include "Systems/ConfigManager.h"
+#include "plugin.h" // For below
+#include "MagicValues.h" // GET_PLUGIN_COMMAND_INDEX
+#include "Systems/ConfigManager.h" // ConfigManager
+#include "Systems/Logger.h" // DebugMessage
+#include "Players/NczPlayerManager.h"
+#include "Hooks/temp_HookGuard.h"
 
 ConCommandHookListener::ConCommandListenersListT ConCommandHookListener::m_listeners;
 
@@ -49,6 +50,8 @@ void HOOKFN_INT ConCommandHookListener::RT_nDispatch ( void* cmd, SourceSdk::CCo
 void HOOKFN_INT ConCommandHookListener::RT_nDispatch ( void* cmd, void*, SourceSdk::CCommand const &args )
 #endif
 {
+	DebugMessage ( Helpers::format ( "RT_nDispatch : %s\n", SourceSdk::InterfacesProxy::ConCommand_GetName ( cmd ) ) );
+
 	const int index ( GET_PLUGIN_COMMAND_INDEX () );
 	bool bypass ( false );
 	if( index >= PLUGIN_MIN_COMMAND_INDEX && index <= PLUGIN_MAX_COMMAND_INDEX )
@@ -59,7 +62,6 @@ void HOOKFN_INT ConCommandHookListener::RT_nDispatch ( void* cmd, void*, SourceS
 
 			if( ph > SlotStatus::INVALID )
 			{
-
 				DebugMessage( Helpers::format ( "Testing ConCommand %s of %s\n", SourceSdk::InterfacesProxy::ConCommand_GetName ( cmd ), ph->GetName () ) );
 
 				ConCommandListenersListT::elem_t* it ( m_listeners.GetFirst () );
@@ -72,15 +74,19 @@ void HOOKFN_INT ConCommandHookListener::RT_nDispatch ( void* cmd, void*, SourceS
 					}
 					it = it->m_next;
 				}
-
-				DebugMessage ( Helpers::format ( "Bypassed ConCommand %s of %s\n", SourceSdk::InterfacesProxy::ConCommand_GetName ( cmd ), ph->GetName () ) );
 			}
+			else
+			{
+				bypass = true;
+			}
+		}
+		else
+		{
+			bypass = true;
 		}
 	}
 	else if( index == 0 )
 	{
-		bypass = false;
-
 		ConCommandListenersListT::elem_t* it = m_listeners.GetFirst ();
 		while( it != nullptr )
 		{
@@ -91,6 +97,10 @@ void HOOKFN_INT ConCommandHookListener::RT_nDispatch ( void* cmd, void*, SourceS
 			}
 			it = it->m_next;
 		}
+	}
+	else
+	{
+		bypass = true;
 	}
 
 	if( !bypass )

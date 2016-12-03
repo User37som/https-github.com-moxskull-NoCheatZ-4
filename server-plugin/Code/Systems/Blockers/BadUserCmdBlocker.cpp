@@ -15,10 +15,6 @@
 
 #include "BadUserCmdBlocker.h"
 
-#include "Interfaces/InterfacesProxy.h"
-
-#include "Systems/Logger.h"
-
 BadUserCmdBlocker::BadUserCmdBlocker () :
 	BaseDynamicSystem ( "BadUserCmdBlocker" ),
 	playerdatahandler_class (),

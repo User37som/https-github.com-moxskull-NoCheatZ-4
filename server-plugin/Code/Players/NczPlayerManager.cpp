@@ -15,14 +15,6 @@ limitations under the License.
 
 #include "NczPlayerManager.h"
 
-#include "Interfaces/usercmd.h"
-#include "Interfaces/InterfacesProxy.h"
-
-#include "Misc/Helpers.h" // helpers, ifaces
-#include "Hooks/PlayerRunCommandHookListener.h"
-#include "Systems/Logger.h"
-#include "plugin.h"
-#include "Systems/BaseSystem.h"
 #include "Systems/AutoTVRecord.h"
 
 PlayerHandler NczPlayerManager::FullHandlersList[ MAX_PLAYERS + 1 ];

@@ -13,12 +13,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include <stdio.h>
-
-#include "Preprocessors.h"
-
 #include "AutoAttackTester.h"
-#include "Systems/Logger.h"
+
 #include "Systems/BanRequest.h"
 
 AutoAttackTester::AutoAttackTester ( void ) :
@@ -228,12 +224,7 @@ void AutoAttackTester::FindDetection ( PlayerHandler::const_iterator ph, tb_int*
 
 				// push detection
 
-				Detection_AutoAttack pDetection;
-				pDetection.PrepareDetectionData ( &info );
-				pDetection.PrepareDetectionLog ( *ph, this );
-				pDetection.Log ();
-
-				BanRequest::GetInstance ()->AddAsyncBan ( *ph, 0, "Banned by NoCheatZ 4" );
+				TriggerDetection ( Detection_AutoAttack, ph, &info );
 
 				// reset the graph ( let others detections be incoming without adding error or flooding )
 
@@ -243,55 +234,54 @@ void AutoAttackTester::FindDetection ( PlayerHandler::const_iterator ph, tb_int*
 	}
 }
 
-basic_string Detection_AutoAttack::GetDataDump ()
+void Detection_AutoAttack::TakeAction ()
 {
+	BanRequest::GetInstance ()->AddAsyncBan ( *(this->m_player), 0, nullptr );
+}
+
+void Detection_AutoAttack::WriteXMLOutput ( FILE * const out ) const
+{
+	Assert ( out );
+
 	float const ti_s ( SourceSdk::InterfacesProxy::Call_GetTickInterval () );
-	float const ti_ms ( ti_s * 1000.0f );
 	int const short_time_ticks = ( int ) ( ( SHORT_TIME / ( ti_s ) ) - 0.5f );
 
-	basic_string m ( Helpers::format (
-		":::: Important Server-Related Informations {\n"
-		":::::::: Tick Interval : %f seconds -> %f ms,\n"
-		":::::::: Ticks per second : %f,\n"
-		":::::::: Short Attack Detection Threshold : %f seconds -> %d ticks\n"
-		":::: }\n"
-		":::: detection_info {\n"
-		":::::::: Average Attack Button Sustain : %f ticks -> %f ms,\n"
-		":::::::: Min Attack Button Sustain : %d ticks -> %f ms,\n"
-		":::::::: Max Attack Button Sustain : %d ticks -> %f ms,\n"
-		":::::::: Attack-Sustain Too Short Detected Count : %d ( %f %% of history ),\n"
-		":::::::: Attacks History {\n",
-		ti_s, ti_ms,
-		1.0f / ti_s,
-		short_time_ticks * ti_s, short_time_ticks,
-		m_dataStruct.average, m_dataStruct.average * ti_ms,
-		m_dataStruct.min, m_dataStruct.min * ti_ms,
-		m_dataStruct.max, m_dataStruct.max * ti_ms,
-		m_dataStruct.detection_count, m_dataStruct.detection_percent ));
+	fprintf ( out,
+			  "<detection_autoattack>\n\t\t\t"
+			  "<value name=\"short_time_ticks\" desc=\"Detection Threshold\" unit=\"tick_count\">%d</value>\n\t\t\t"
+			  "<value name=\"average\" desc=\"Average Attack Button Sustain\" unit=\"tick_count\">%f</value>\n\t\t\t"
+			  "<value name=\"min\" desc=\"Min Attack Button Sustain\" unit=\"tick_count\">%d</value>\n\t\t\t"
+			  "<value name=\"max\" desc=\"Max Attack Button Sustain\" unit=\"tick_count\">%d</value>\n\t\t\t"
+			  "<value name=\"detection_percent\" desc=\"Detection Percent\" unit=\"percent\">%f</value>\n\t\t\t"
+			  "<array name=\"history\" desc=\"Shot History\">",
+			  short_time_ticks,
+			  m_dataStruct.average,
+			  m_dataStruct.min,
+			  m_dataStruct.max,
+			  m_dataStruct.detection_percent
+	);
 
-	tb_int::inner_type const * it ( m_dataStruct.history );
-	tb_int::inner_type const * const it_end ( m_dataStruct.history + TB_MAX_HISTORY );
+	tb_int::inner_type const * it ( m_dataStruct.history + TB_MAX_HISTORY - 1 );
+	tb_int::inner_type const * const it_end ( m_dataStruct.history - 1);
 	size_t shot_id ( 0 );
 
 	do
 	{
-		m.append( Helpers::format ( 
-			":::::::::::: Attack %u {\n"
-			":::::::::::::::: Start Tick : %d\n"
-			":::::::::::::::: Sustain Time (ticks) : %d ( Ends at tick # %d )\n"
-			":::::::::::::::: Sustain Time (ms) : %f\n"
-			":::::::::::::::: Is detected ? : %s\n"
-			":::::::::::: }\n",
-			++shot_id,
-			it->t,
-			it->v, it->t + it->v,
-			it->v * ti_ms,
-			Helpers::boolToString( it->v < short_time_ticks )
-			));
+		fprintf ( out,
+				  "\n\t\t\t\t<attack id=%d>\n\t\t\t\t\t"
+				  "<value name=\"t\" desc=\"Attack Start\" unit=\"tick_count\">%d</value>\n\t\t\t\t\t"
+				  "<value name=\"v\" desc=\"Attack Sustain\" unit=\"tick_count\">%d</value>\n\t\t\t\t\t"
+				  "<value desc=\"Attack End\" unit=\"tick_count\">%d</value>\n\t\t\t\t\t"
+				  "<value desc=\"Is Detected\" unit=\"boolean\">%d</value>\n\t\t\t\t"
+				  "</attack>",
+				  ++shot_id,
+				  it->t,
+				  it->v,
+				  it->t + it->v,
+				  ( it->v < short_time_ticks )
+		 );
 	}
-	while( ++it != it_end );
+	while( --it != it_end );
 
-	m.append ( ":::::::: }\n:::: }\n" );
-
-	return m;
+	fprintf ( out, "\n\t\t\t</array>\n\t\t</detection_autoattack>" );
 }

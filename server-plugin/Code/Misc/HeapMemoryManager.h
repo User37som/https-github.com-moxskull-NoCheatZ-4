@@ -16,12 +16,7 @@ limitations under the License.
 #ifndef HEAPMEMORYMANAGER_H
 #define HEAPMEMORYMANAGER_H
 
-#include <array>
-#include <algorithm>
-#include <new>
-
-#include "ClassSpecifications.h"
-#include "Containers/utlvector.h"
+#include <new> // Other headers including this will usually need it
 
 /*
 	The purpose of this file is to simply reduce the amount of re-allocations of any type

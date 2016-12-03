@@ -16,10 +16,14 @@
 #ifndef PLAYERDATASTRUCT
 #define PLAYERDATASTRUCT
 
-#include "Preprocessors.h"
-#include "Misc/temp_BaseDataStruct.h"
-#include "NczPlayer.h"
-#include "Misc/Helpers.h"
+#ifndef MUTE_INCLUDES_IN_HEADERS
+
+#	include "Preprocessors.h"
+#	include "Misc/temp_BaseDataStruct.h"
+#	include "NczPlayer.h"
+#	include "Misc/Helpers.h"
+
+#endif
 
 template <typename DataT>
 class ALIGN16 PlayerDataStructHandler :

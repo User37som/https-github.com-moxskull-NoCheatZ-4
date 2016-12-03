@@ -18,9 +18,9 @@ limitations under the License.
 #ifdef GNUC
 #	include <mm_malloc.h>
 #endif
-#include <algorithm>
+#include <algorithm> // qsort
 
-#include "SdkPreprocessors.h"
+#include "SdkPreprocessors.h" // Assert
 
 namespace HeapMemoryManager
 {

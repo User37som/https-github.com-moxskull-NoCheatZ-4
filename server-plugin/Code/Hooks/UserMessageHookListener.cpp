@@ -17,6 +17,9 @@ limitations under the License.
 
 #include "Interfaces/InterfacesProxy.h"
 
+#include "Systems/ConfigManager.h"
+#include "Hooks/temp_HookGuard.h"
+
 UserMessageHookListener::ListenersList_t UserMessageHookListener::m_listeners;
 bool UserMessageHookListener::bypass ( false );
 SourceSdk::bf_write* UserMessageHookListener::m_buffer ( nullptr );

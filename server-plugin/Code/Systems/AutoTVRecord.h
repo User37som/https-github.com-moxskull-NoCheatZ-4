@@ -16,11 +16,8 @@ limitations under the License.
 #ifndef AUTOTVRECORD_H
 #define AUTOTVRECORD_H
 
-#include "BaseSystem.h"
-#include "OnTickListener.h"
+#include "Systems/Logger.h"
 #include "Hooks/ConCommandHookListener.h"
-#include "Misc/temp_basicstring.h"
-#include "Misc/temp_singleton.h"
 
 /*
 	This system will :
@@ -44,6 +41,7 @@ private:
 	bool m_recording;
 	bool m_expectedtvconfigchange;
 	bool m_spawn_once;
+	bool m_started_current_record;
 
 public:
 	AutoTVRecord ();
@@ -63,7 +61,11 @@ private:
 public:
 	void StartRecord ();
 
+	void OnStartRecord ( char const * filename );
+
 	void StopRecord ();
+
+	void OnStopRecord ();
 
 	void RT_OnTick ();
 

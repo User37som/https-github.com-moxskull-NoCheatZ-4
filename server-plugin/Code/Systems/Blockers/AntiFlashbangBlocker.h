@@ -16,12 +16,10 @@
 #ifndef ANTIFLASHBANGBLOCKER_H
 #define ANTIFLASHBANGBLOCKER_H
 
-#include "Interfaces/IGameEventManager/IGameEventManager.h"
+#include "Systems/BaseSystem.h"
+#include "Systems/OnTickListener.h"
 #include "Players/temp_PlayerDataStruct.h"
 #include "Hooks/SetTransmitHookListener.h"
-#include "Systems/BaseSystem.h"
-#include "Misc/temp_singleton.h"
-#include "Systems/OnTickListener.h"
 
 typedef struct FlashInfoS
 {

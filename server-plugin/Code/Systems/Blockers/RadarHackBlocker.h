@@ -16,17 +16,12 @@ limitations under the License.
 #ifndef RADARHACKBLOCKER_H
 #define RADARHACKBLOCKER_H
 
-#include "Interfaces/IGameEventManager/IGameEventManager.h"
-#include "Containers/utlvector.h"
-#include "Maths/Vector.h"
-
-#include "Players/temp_PlayerDataStruct.h"
 #include "Systems/BaseSystem.h"
 #include "Systems/OnTickListener.h"
-#include "Misc/temp_singleton.h"
+#include "Players/temp_PlayerDataStruct.h"
 #include "Hooks/ThinkPostHookListener.h"
-#include "Misc/MRecipientFilter.h"
 #include "Hooks/UserMessageHookListener.h"
+#include "Misc/MRecipientFilter.h"
 
 enum
 {

@@ -16,11 +16,15 @@ limitations under the License.
 #ifndef ShotTester_H
 #define ShotTester_H
 
-#include "Systems/BaseSystem.h"
-#include "Hooks/PlayerRunCommandHookListener.h"
-#include "Players/temp_PlayerDataStruct.h"
-#include "Systems/Testers/Detections/temp_BaseDetection.h"
-#include "Misc/temp_singleton.h"
+#ifndef MUTE_INCLUDES_IN_HEADERS
+
+#	include "Systems/BaseSystem.h"
+#	include "Hooks/PlayerRunCommandHookListener.h"
+#	include "Players/temp_PlayerDataStruct.h"
+#	include "Systems/Testers/Detections/temp_BaseDetection.h"
+#	include "Misc/temp_singleton.h"
+
+#endif
 
 #define SHORT_TIME 0.04 // sec
 

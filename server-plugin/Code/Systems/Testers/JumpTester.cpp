@@ -13,12 +13,9 @@
    limitations under the License.
 */
 
-#include <stdio.h>
-
 #include "JumpTester.h"
 
-#include "Preprocessors.h"
-#include "Systems/Logger.h"
+#include "Systems/BanRequest.h"
 
 /*
 	Test each player to see if they use any script to help BunnyHop.
@@ -195,22 +192,13 @@ void JumpTester::OnPlayerTouchGround ( PlayerHandler::const_iterator ph, int gam
 
 		if( avg_jmp_per_second > 10.0f && playerData->total_bhopCount > 1 )
 		{
-			Detection_BunnyHopScript pDetection;
-			pDetection.PrepareDetectionData ( playerData );
-			pDetection.PrepareDetectionLog ( *ph, this );
-			pDetection.Log ();
-			ph->Kick ( "You have to turn off your BunnyHop Script to play on this server." );
+			TriggerDetection ( Detection_BunnyHopJumpMacro, ph, playerData );
 		}
 	}
 
 	if( playerData->jumpCmdHolder.outsideJumpCmdCount == 0 && playerData->perfectBhopsCount > 5 && playerData->perfectBhopsPercent >= std::max (0, ( 100 - std::min ( 95, playerData->perfectBhopsCount * 2 ) ) ) )
 	{
-		Detection_BunnyHopProgram pDetection;
-		pDetection.PrepareDetectionData ( playerData );
-		pDetection.PrepareDetectionLog ( *ph, this );
-		pDetection.Log ();
-
-		ph->Ban ( "[NoCheatZ 4] You have been banned for using BunnyHop on this server." );
+		TriggerDetection ( Detection_BunnyHopPerfect, ph, playerData );
 	}
 
 	playerData->jumpCmdHolder.outsideJumpCmdCount = 0;
@@ -238,11 +226,7 @@ void JumpTester::OnPlayerJumpButtonDown ( PlayerHandler::const_iterator ph, int 
 
 	if( cmd_diff > 0 && cmd_diff <= 3 )
 	{
-		Detection_BunnyHopScript pDetection;
-		pDetection.PrepareDetectionData ( playerData );
-		pDetection.PrepareDetectionLog ( *ph, this );
-		pDetection.Log ();
-		ph->Kick ( "You have to turn off your BunnyHop Script to play on this server." );
+		TriggerDetection ( Detection_BunnyHopJumpMacro, ph, playerData );
 	}
 
 	if( playerData->isOnGround )
@@ -290,29 +274,48 @@ const char * ConvertButton ( bool v )
 	else return "Button Up";
 }
 
-basic_string Detection_BunnyHopScript::GetDataDump ()
+void Base_Detection_BunnyHop::WriteXMLOutput ( FILE * const out ) const
 {
-	return Helpers::format ( ":::: BunnyHopInfoT {\n"
-							 ":::::::: OnGroundHolderT {\n"
-							 ":::::::::::: On Ground At (Tick #) : %d,\n"
-							 ":::::::::::: Leave Ground At (Tick #) : %d,\n"
-							 ":::::::::::: Jump Count : %d\n"
-							 ":::::::: },\n"
-							 ":::::::: JumpCmdHolderT {\n"
-							 ":::::::::::: Last Jump Command : %s s,\n"
-							 ":::::::::::: Jump Button Down At (Tick #) : %d,\n"
-							 ":::::::::::: Jump Button Up At (Tick #) : %d,\n"
-							 ":::::::::::: Jump Commands Done While Flying : %d\n"
-							 ":::::::: },\n"
-							 ":::::::: Total Bunny Hop Count : %d,\n"
-							 ":::::::: Good Bunny Hop Count : %d,\n"
-							 ":::::::: Perfect Bunny Hop Ratio : %d %%,\n"
-							 ":::::::: Perfect Bunny Hop Count : %d\n"
-							 ":::: }",
-							 GetDataStruct ()->onGroundHolder.onGround_Tick, GetDataStruct ()->onGroundHolder.notOnGround_Tick, GetDataStruct ()->onGroundHolder.jumpCount,
-							 ConvertButton ( GetDataStruct ()->jumpCmdHolder.lastJumpCmdState ), GetDataStruct ()->jumpCmdHolder.JumpDown_Tick, GetDataStruct ()->jumpCmdHolder.JumpUp_Tick, GetDataStruct ()->jumpCmdHolder.outsideJumpCmdCount,
-							 GetDataStruct ()->total_bhopCount,
-							 GetDataStruct ()->goodBhopsCount,
-							 GetDataStruct ()->perfectBhopsPercent,
-							 GetDataStruct ()->perfectBhopsCount );
+	Assert ( out );
+
+	fprintf ( out,
+			  "<base_detection_bunnyhop>\n\t\t\t"
+			  "<struct name=\"OnGroundHolderT\">\n\t\t\t\t"
+			  "<value name=\"onGround_Tick\" desc=\"Tick count the player landed on ground\" unit=\"tick\">%d</value>\n\t\t\t\t\t"
+			  "<value name=\"notOnGround_Tick\" desc=\"Tick count the player started flying\" unit=\"tick\">%d</value>\n\t\t\t\t\t"
+			  "<value name=\"jumpCount\" desc=\"Number of times the player landed on ground\" unit=\"count\">%d</value>\n\t\t\t\t"
+			  "</struct>\n\t\t\t"
+			  "<struct name=\"JumpCmdHolderT\">\n\t\t\t\t"
+			  "<value name=\"lastJumpCmdState\" desc=\"Latest received jump command\" unit=\"text\">%s</value>\n\t\t\t\t\t"
+			  "<value name=\"JumpDown_Tick\" desc=\"Latest tick the server was aware the player hit the jump button\" unit=\"tick\">%d</value>\n\t\t\t\t\t"
+			  "<value name=\"JumpUp_Tick\" desc=\"Latest tick the server was aware the player released the jump button\" unit=\"tick\">%d</value>\n\t\t\t\t\t"
+			  "<value name=\"outsideJumpCmdCount\" desc=\"Number of times the jump command was received while the player was flying\" unit=\"count\">%d</value>\n\t\t\t\t\t"
+			  "</struct>\n\t\t\t"
+			  "<value name=\"total_bhopCount\" desc=\"Number of jumps near BunnyHopping\" unit=\"count\">%d</value>\n\t\t\t\t"
+			  "<value name=\"goodBhopsCount\" desc=\"Number of jumps closer to BunnyHopping\" unit=\"count\">%d</value>\n\t\t\t\t"
+			  "<value name=\"perfectBhopsPercent\" desc=\"Percent of perfect bunny hops\" unit=\"percent\">%d</value>\n\t\t\t\t"
+			  "<value name=\"perfectBhopsCount\" desc=\"Number of perfect bunny hops\" unit=\"count\">%d</value>\n\t\t\t"
+			  "</base_detection_bunnyhop>",
+			GetDataStruct ()->onGroundHolder.onGround_Tick,
+			GetDataStruct ()->onGroundHolder.notOnGround_Tick,
+			GetDataStruct ()->onGroundHolder.jumpCount,
+			ConvertButton ( GetDataStruct ()->jumpCmdHolder.lastJumpCmdState ),
+			GetDataStruct ()->jumpCmdHolder.JumpDown_Tick,
+			GetDataStruct ()->jumpCmdHolder.JumpUp_Tick,
+			GetDataStruct ()->jumpCmdHolder.outsideJumpCmdCount,
+			GetDataStruct ()->total_bhopCount,
+			GetDataStruct ()->goodBhopsCount,
+			GetDataStruct ()->perfectBhopsPercent,
+			GetDataStruct ()->perfectBhopsCount
+	);
+}
+
+void Detection_BunnyHopJumpMacro::TakeAction ()
+{
+	m_player->Kick ();
+}
+
+void Detection_BunnyHopPerfect::TakeAction ()
+{
+	BanRequest::GetInstance ()->AddAsyncBan ( *m_player, 0, nullptr );
 }

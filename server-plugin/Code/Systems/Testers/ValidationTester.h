@@ -16,12 +16,9 @@
 #ifndef VALIDATIONTESTER_H
 #define VALIDATIONTESTER_H
 
-#include "Misc/temp_basiclist.h"
-#include "Systems/BaseSystem.h"
+#include "Systems/Logger.h"
 #include "Systems/OnTickListener.h"
 #include "Players/temp_PlayerDataStruct.h"
-#include "Misc/temp_singleton.h"
-#include "Interfaces/IGameEventManager/IGameEventManager.h"
 
 /////////////////////////////////////////////////////////////////////////
 // ValidationTester

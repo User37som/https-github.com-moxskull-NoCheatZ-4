@@ -16,10 +16,14 @@
 #ifndef SETTRANSMITHOOKLISTENER
 #define SETTRANSMITHOOKLISTENER
 
-#include "Interfaces/edict.h"
+namespace SourceSdk
+{
+	struct edict_t;
+	typedef edict_t* CCheckTransmitInfo;
+}
 
-#include "Preprocessors.h"
-#include "Hook.h"
+#include "temp_HookListenersList.h"
+#include "Players/PlayerHandler_impl.h"
 
 /////////////////////////////////////////////////////////////////////////
 // CBaseCombatCharacter::SetTransmit(CCheckTransmitInfo*, bool)
