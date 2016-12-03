@@ -71,7 +71,7 @@ Currently [CS:S](http://store.steampowered.com/app/240) is the base of this proj
 # Current Project Status
 ___
 
-* **Status** : [Enhancing](https://github.com/L-EARN/NoCheatZ-4/issues)
+* **Status** : [Dev aborted](https://github.com/L-EARN/NoCheatZ-4/tree/dev)
 
 <a name="Features"></a> 
 # Features
