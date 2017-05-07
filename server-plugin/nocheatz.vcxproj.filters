@@ -252,6 +252,9 @@
     <ClCompile Include="Code\Misc\StackWalker.cpp">
       <Filter>Code\Misc</Filter>
     </ClCompile>
+    <ClCompile Include="Code\version.cpp">
+      <Filter>Code</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Code\plugin.h">
@@ -565,6 +568,9 @@
     </ClInclude>
     <ClInclude Include="Code\Misc\StackWalker.h">
       <Filter>Code\Misc</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\version.h">
+      <Filter>Code</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
