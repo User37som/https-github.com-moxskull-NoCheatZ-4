@@ -19,3 +19,4 @@ server-plugin/version.h
 server-plugin/Code/version.h
 *.iobj
 *.ipdb
+.vs/
