@@ -27,25 +27,12 @@
 #	include <cstdlib>
 #endif
 
-#ifdef NCZ_VERSION_GIT
-#	ifdef DEBUG
-#		define NCZ_VERSION_STR NCZ_VERSION_GIT "-debug"
-#	elif defined(PROFILER)
-#		define NCZ_VERSION_STR NCZ_VERSION_GIT "-profiler"
-#	else
-#		define NCZ_VERSION_STR NCZ_VERSION_GIT
-#	endif
-#else
-#	define NCZ_VERSION_STR	"4 Beta r1"
-#endif
-
 #ifdef GNUC
 #	define __assume(cond) if (!(cond)) __builtin_unreachable()
 #	define __unreachable() __builtin_unreachable()
 #else
 #	define __unreachable() __assume(0)
 #endif
-
 
 #define NCZ_PLUGIN_NAME			"NoCheatZ" // Name of the plugin
 

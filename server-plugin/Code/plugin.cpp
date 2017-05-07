@@ -325,7 +325,7 @@ void CNoCheatZPlugin::UnPause ( void )
 //---------------------------------------------------------------------------------
 const char *CNoCheatZPlugin::GetPluginDescription ( void )
 {
-	return NCZ_PLUGIN_NAME " " NCZ_VERSION_STR;
+	return basic_string(NCZ_PLUGIN_NAME).append(" ").append(NCZ_VERSION_GIT).c_str();
 }
 
 //---------------------------------------------------------------------------------
