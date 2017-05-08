@@ -108,7 +108,7 @@ else
 	CFLAGS = $(DEBUG_FLAGS)
 endif
 
-CFLAGS += $(USER_CFLAGS) $(BASE_CFLAGS) $(ARCH_CFLAGS) -DNCZ_VERSION_GIT=$(VERSION_GIT) -DNCZ_VERSION_GIT_SHORT=$(VERSION_GIT_SHORT)
+CFLAGS += $(USER_CFLAGS) $(BASE_CFLAGS) $(ARCH_CFLAGS)
 
 CPP_MAJOR := $(shell $(d_CXX) -dumpversion >&1 | cut -b1)
 CPP_MINOR := $(shell $(d_CXX) -dumpversion >&1 | cut -b3)
@@ -144,10 +144,12 @@ all: $(OBJECTS)
 	@$(d_CXX) $(INCLUDE) $(CFLAGS) $(OBJECTS) $(LINK) -m32 -o $(BINARY_DIR)/$(BINARY_NAME)  2>&1 | tee "error_link.txt"
 
 release:
+	@echo "char const * const NCZ_VERSION_GIT = \"$(VERSION_GIT)\";\nchar const * const NCZ_VERSION_GIT_SHORT = \"$(VERSION_GIT_SHORT)\""; > Code/version.cpp
 	@$(MAKE) unit-tests DEBUG=false COVERAGE=false
 	@$(MAKE) -j6 all DEBUG=false COVERAGE=false
 
 debug:
+	@echo "char const * const NCZ_VERSION_GIT = \"$(VERSION_GIT)-debug\";\nchar const * const NCZ_VERSION_GIT_SHORT = \"$(VERSION_GIT_SHORT)\""; > Code/version.cpp
 	@$(MAKE) unit-tests DEBUG=true COVERAGE=false
 	@$(MAKE) -j6 all DEBUG=true COVERAGE=false
 
