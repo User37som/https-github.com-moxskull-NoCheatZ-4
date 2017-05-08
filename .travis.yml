@@ -12,11 +12,10 @@ branches:
     - master
 
 before_install:
-  - sudo pip install codecov
   - sudo rm /etc/apt/sources.list.d/google-chrome.list
   - sudo dpkg --add-architecture i386
   - sudo apt-get -qq update
-  - sudo apt-get -qq install -y curl build-essential lib32z1 lib32ncurses5 lib32bz2-1.0 gcc-multilib g++-multilib lib32gcc1 libc6-i386 libc6-dev-i386 autotools-dev autoconf libtool cppcheck cmake
+  - sudo apt-get -qq install -y curl build-essential lib32z1 lib32ncurses5 lib32bz2-1.0 gcc-multilib g++-multilib lib32gcc1 libc6-i386 libc6-dev-i386 autotools-dev autoconf libtool cppcheck
 
 before_script:
   - cd server-plugin
@@ -26,11 +25,4 @@ script:
   - cppcheck --force --quiet --inline-suppr --enable=all -DGNUC -UWIN32 -UNCZ_USE_METRICS --std=c++11 -j6 --platform=unix32 -i SourceSdk -i SourceSdk/Interfaces/Protobuf -i SourceSdk/Interfaces/Protobuf/protobuf-2.5.0/src Code
   - make debug
   - make release
-  - make superclean
-  - mkdir testbuild
-  - cd testbuild
-  - cmake ..
-  - make
-  - make clean
-after_success:
-  - codecov
+
