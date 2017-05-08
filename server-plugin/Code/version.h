@@ -5,4 +5,4 @@
 extern char const * const NCZ_VERSION_GIT;
 extern char const * const NCZ_VERSION_GIT_SHORT;
 
-#endif VERSION_H
+#endif // VERSION_H
