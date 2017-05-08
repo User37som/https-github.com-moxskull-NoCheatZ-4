@@ -20,3 +20,4 @@ server-plugin/Code/version.cpp
 *.iobj
 *.ipdb
 .vs/
+server-plugin/Code/version.cpp

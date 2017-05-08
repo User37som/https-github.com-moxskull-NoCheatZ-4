@@ -85,7 +85,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <PreBuildEvent>
-      <Command>..\scripts\prepare-build.bat Debug -debug</Command>
+      <Command>..\scripts\prepare-build.bat Debug</Command>
     </PreBuildEvent>
     <CustomBuildStep>
       <Command>
