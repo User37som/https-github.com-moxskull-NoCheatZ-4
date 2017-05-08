@@ -23,6 +23,8 @@
 #ifndef NCZ_PREPROCESSORS
 #define NCZ_PREPROCESSORS
 
+#include "version.h"
+
 #ifdef GNUC
 #	include <cstdlib>
 #endif

@@ -141,7 +141,7 @@ $(BIN_DIR)/%.o: %.cpp
 	$(call compile_object, $<, $(@D), $@)
 
 Code/version.cpp: ../.git/HEAD ../.git/index
-	@echo "char const * const NCZ_VERSION_GIT = \"$(VERSION_GIT)\";char const * const NCZ_VERSION_GIT_SHORT = \"$(VERSION_GIT_SHORT)\""; > Code/version.cpp
+	@echo "char const * const NCZ_VERSION_GIT = $(VERSION_GIT);char const * const NCZ_VERSION_GIT_SHORT = $(VERSION_GIT_SHORT);" > Code/version.cpp
 	cat Code/version.cpp
 
 all: $(OBJECTS)
