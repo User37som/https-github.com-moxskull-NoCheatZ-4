@@ -14,6 +14,7 @@ git describe --tags --abbrev=0 > gitvshorttmp.txt
 set /p gitvout=<gitvtmp.txt
 set /p gitvshortout=<gitvshorttmp.txt
 (
+echo #include ^"version.h^"
 echo char const * const NCZ_VERSION_GIT = ^"%gitvout%^";
 echo char const * const NCZ_VERSION_GIT_SHORT = ^"%gitvshortout%^";
 ) > Code\version.cpp
