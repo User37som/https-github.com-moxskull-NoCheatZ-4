@@ -108,7 +108,7 @@ else
 	CFLAGS = $(DEBUG_FLAGS)
 endif
 
-CFLAGS += $(USER_CFLAGS) $(BASE_CFLAGS) $(ARCH_CFLAGS) -DNCZ_VERSION_GIT=$(VERSION_GIT) -DNCZ_VERSION_GIT_SHORT=$(VERSION_GIT_SHORT)
+CFLAGS += $(USER_CFLAGS) $(BASE_CFLAGS) $(ARCH_CFLAGS)
 
 CPP_MAJOR := $(shell $(d_CXX) -dumpversion >&1 | cut -b1)
 CPP_MINOR := $(shell $(d_CXX) -dumpversion >&1 | cut -b3)
@@ -190,3 +190,6 @@ prepare-build:
 	cp ./Res/config.ini $(BUILD_DIR)/addons/NoCheatZ/
 	cp ./Res/nocheatz.cfg $(BUILD_DIR)/cfg/nocheatz.cfg ;true
 	@sh $(BASE)/scripts/make-protobuf.sh $(d_CXX)
+	@echo "#include \"version.h\"" > ./Code/version.cpp
+	@echo "char const * const NCZ_VERSION_GIT = $(VERSION_GIT);char const * const NCZ_VERSION_GIT_SHORT = $(VERSION_GIT_SHORT);" >> ./Code/version.cpp
+	cat ./Code/version.cpp
