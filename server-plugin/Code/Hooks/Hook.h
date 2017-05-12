@@ -133,7 +133,7 @@ public:
 		DWORD dwOld;
 		if( !VirtualProtect ( info.vf_entry, 2 * sizeof ( DWORD* ), PAGE_EXECUTE_READWRITE, &dwOld ) )
 		{
-			Logger::GetInstance ()->Msg<MSG_ERROR> ( Helpers::format( "VirtualTableHook %s: VirtualProtect error -> Cannot hook function in %s", debugname, GetModuleNameFromMemoryAddress( SafePtrDeref(info.vf_entry) ).c_str() ) );
+			Logger::GetInstance ()->Msg<MSG_ERROR> ( Helpers::format( "VirtualTableHook %s: VirtualProtect error -> Cannot hook function", debugname ) );
 			if (m_list.HasElement(info))
 				m_list.FindAndRemove(info);
 			return;
@@ -143,7 +143,7 @@ public:
 		void *p ( ( void * ) ( ( DWORD ) ( info.vf_entry ) & ~( psize - 1 ) ) );
 		if( mprotect ( p, ( ( 2 * sizeof ( void * ) ) + ( ( DWORD ) ( info.vf_entry ) & ( psize - 1 ) ) ), PROT_READ | PROT_WRITE | PROT_EXEC ) < 0 )
 		{
-			Logger::GetInstance ()->Msg<MSG_ERROR> ( Helpers::format( "VirtualTableHook %s: mprotect error -> Cannot hook function in %s", debugname, GetModuleNameFromMemoryAddress (SafePtrDeref(info.vf_entry) ).c_str () ) );
+			Logger::GetInstance ()->Msg<MSG_ERROR> ( Helpers::format( "VirtualTableHook %s: mprotect error -> Cannot hook function", debugname ) );
 			if (m_list.HasElement(info))
 				m_list.FindAndRemove(info);
 			return;
@@ -155,7 +155,7 @@ public:
 		if( info.oldFn && info.oldFn != SafePtrDeref(info.vf_entry) )
 		{
 			Logger::GetInstance ()->Msg<MSG_WARNING> ( Helpers::format ( "VirtualTableHook %s: Unexpected virtual table value in VirtualTableHook. Module %s might be in conflict.", debugname, GetModuleNameFromMemoryAddress (SafePtrDeref(info.vf_entry) ).c_str () ) );
-			can_hook = false;
+			can_hook = force;
 		}
 		else if( info.newFn == *info.vf_entry )
 		{
@@ -278,6 +278,10 @@ public:
 			if (it->ishooked)
 			{
 				std::swap(it->newFn, it->oldFn);
+
+				// The target function might have changed.
+				it->oldFn = 0;
+
 				VirtualTableHook(*it, "Invert", true);
 			}
 		}
@@ -292,8 +296,7 @@ public:
 				std::swap(it->newFn, it->oldFn);
 
 				// The target function might have changed.
-				Assert(SafePtrDeref(it->vf_entry));
-				it->oldFn = SafePtrDeref(it->vf_entry);
+				it->oldFn = 0;
 
 				VirtualTableHook(*it, "Rehook", true);
 			}
