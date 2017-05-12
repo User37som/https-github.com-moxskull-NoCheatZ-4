@@ -206,17 +206,22 @@ LONG WINAPI VFilter ( LPEXCEPTION_POINTERS info )
 
 KxStackTrace::KxStackTrace ()
 {
-	signal ( SIGABRT, abortHandler );
-	signal ( SIGSEGV, abortHandler );
-	signal ( SIGILL, abortHandler );
-	signal ( SIGFPE, abortHandler );
-#ifdef GNUC
-	signal ( SIGBUS, abortHandler );
-#endif
-	std::set_terminate ( TermFn );
-	std::set_unexpected ( TermFn );
 #ifdef WIN32
-	old_filter = SetUnhandledExceptionFilter ( UFilter );
-	AddVectoredExceptionHandler ( 0, VFilter );
+	if (!IsDebuggerPresent())
 #endif
+	{
+		signal(SIGABRT, abortHandler);
+		signal(SIGSEGV, abortHandler);
+		signal(SIGILL, abortHandler);
+		signal(SIGFPE, abortHandler);
+#ifdef GNUC
+		signal(SIGBUS, abortHandler);
+#endif
+		std::set_terminate(TermFn);
+		std::set_unexpected(TermFn);
+#ifdef WIN32
+		old_filter = SetUnhandledExceptionFilter(UFilter);
+		AddVectoredExceptionHandler(0, VFilter);
+#endif
+	}
 }
