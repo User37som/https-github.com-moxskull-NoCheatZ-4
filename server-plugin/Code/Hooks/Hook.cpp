@@ -14,12 +14,16 @@
 */
 
 #include "Hook.h"
+#include "Interfaces/InterfacesProxy.h"
 
 /*
 	This function will help in debugging error messages, and also helps finding what the plugin is doing in debug mode.
 */
 basic_string GetModuleNameFromMemoryAddress ( DWORD mem_address )
 {
+	if (!mem_address)
+		return "<unknown module>";
+
 #ifdef WIN32
 	HMODULE module;
 	if( GetModuleHandleExA ( GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT, reinterpret_cast<LPSTR>(mem_address), &module ) )
