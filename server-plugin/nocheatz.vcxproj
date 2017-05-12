@@ -382,6 +382,7 @@ copy "$(TargetPath)" ..\..\..\game\bin\"$(TargetName)".pdb
     <None Include="Res\!nocheatz.vdf" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Code\Hooks\SigScan.cpp" />
     <ClCompile Include="Code\Hooks\ThinkPostHookListener.cpp" />
     <ClCompile Include="Code\Hooks\UserMessageHookListener.cpp" />
     <ClCompile Include="Code\Misc\HeapMemoryManager.cpp" />
@@ -446,6 +447,7 @@ copy "$(TargetPath)" ..\..\..\game\bin\"$(TargetName)".pdb
     <ClCompile Include="Code\Systems\TimerListener.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Code\Hooks\SigScan.h" />
     <ClInclude Include="Code\Hooks\ThinkPostHookListener.h" />
     <ClInclude Include="Code\Hooks\UserMessageHookListener.h" />
     <ClInclude Include="Code\Misc\ClassSpecifications.h" />

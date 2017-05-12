@@ -255,6 +255,9 @@
     <ClCompile Include="Code\version.cpp">
       <Filter>Code</Filter>
     </ClCompile>
+    <ClCompile Include="Code\Hooks\SigScan.cpp">
+      <Filter>Code\Hooks</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Code\plugin.h">
@@ -571,6 +574,9 @@
     </ClInclude>
     <ClInclude Include="Code\version.h">
       <Filter>Code</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Hooks\SigScan.h">
+      <Filter>Code\Hooks</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
