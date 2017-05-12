@@ -42,6 +42,7 @@
 #include "Misc/EntityProps.h"
 #include "Misc/MathCache.h"
 #include "Misc/SigHandler.h"
+#include "Hooks/DearMetamodSource.h"
 
 #include "Systems/OnTickListener.h"
 #include "Systems/TimerListener.h"
@@ -85,6 +86,7 @@ float Plat_FloatTime ()
 
 void CNoCheatZPlugin::CreateSingletons ()
 {
+	SourceHookSafety::CreateInstance();
 	MathCache::CreateInstance ();
 	GlobalTimer::CreateInstance ();
 	Logger::CreateInstance ();
@@ -135,6 +137,7 @@ void CNoCheatZPlugin::DestroySingletons ()
 	EntityProps::DestroyInstance ();
 	BanRequest::DestroyInstance ();
 	NczPlayerManager::DestroyInstance ();
+	SourceHookSafety::DestroyInstance();
 	ConfigManager::DestroyInstance ();
 	Logger::DestroyInstance ();
 	GlobalTimer::DestroyInstance ();
@@ -192,6 +195,8 @@ bool CNoCheatZPlugin::Load ( SourceSdk::CreateInterfaceFn _interfaceFactory, Sou
 		Logger::GetInstance ()->Msg<MSG_ERROR> ( "ConfigManager::LoadConfig failed" );
 		return false;
 	}
+
+	SourceHookSafety::GetInstance()->TryHookMMSourceHook();
 
 	if( SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive )
 	{
@@ -356,6 +361,8 @@ void CNoCheatZPlugin::ServerActivate ( SourceSdk::edict_t *pEdictList, int edict
 	//Helpers::m_EdictList_csgo = pEdictList;
 	//Helpers::m_edictCount = edictCount;
 	//Helpers::m_clientMax = clientMax;
+
+	SourceHookSafety::GetInstance()->TryHookMMSourceHook();
 
 	NczPlayerManager::GetInstance ()->LoadPlayerManager ();
 

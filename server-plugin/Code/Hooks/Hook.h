@@ -63,6 +63,8 @@ struct HookInfo
 	DWORD* pInterface; // Virtual table base
 	DWORD* vf_entry; // Pointer to the entry in the virtual table
 	DWORD newFn; // New function address that will be at *vf_entry after hook
+	char const * debugname;
+	bool ishooked; // Is used to tell us if the function is actually hooked or not. This is used when we try to revert the changes and rehook.
 
 	HookInfo ()
 	{
@@ -82,12 +84,16 @@ struct HookInfo
 		origEnt( class_ptr ),
 		pInterface ( ( DWORD* )*( DWORD* ) origEnt ),
 		vf_entry ( &( pInterface[ vfid ] ) ),
-		newFn ( new_fn )
+		newFn ( new_fn ),
+		debugname( nullptr ),
+		ishooked( false )
 	{}
 	HookInfo ( void* class_ptr, int vfid ) :
 		origEnt ( class_ptr ),
 		pInterface ( ( DWORD* )*( DWORD* ) origEnt ),
-		vf_entry ( &( pInterface[ vfid ] ) )
+		vf_entry ( &( pInterface[ vfid ] ) ),
+		debugname( nullptr ),
+		ishooked( false )
 	{}
 
 	bool operator== ( const HookInfo& other ) const
@@ -115,16 +121,21 @@ public:
 	virtual ~HookGuard () final
 	{};
 
-	void VirtualTableHook ( HookInfo& info, bool force = false )
+	void VirtualTableHook ( HookInfo& info, char const * debugname = "", bool force = false )
 	{
 		if( m_list.HasElement ( info ) && !force ) return;
+
+		if (info.debugname)
+			debugname = info.debugname;
 
 		//info.oldFn = 0;
 #ifdef WIN32
 		DWORD dwOld;
 		if( !VirtualProtect ( info.vf_entry, 2 * sizeof ( DWORD* ), PAGE_EXECUTE_READWRITE, &dwOld ) )
 		{
-			Logger::GetInstance ()->Msg<MSG_ERROR> ( Helpers::format( "VirtualTableHook : VirtualProtect error -> Cannot hook function in %s", GetModuleNameFromMemoryAddress( *info.vf_entry ).c_str() ) );
+			Logger::GetInstance ()->Msg<MSG_ERROR> ( Helpers::format( "VirtualTableHook %s: VirtualProtect error -> Cannot hook function", debugname ) );
+			if (m_list.HasElement(info))
+				m_list.FindAndRemove(info);
 			return;
 		}
 #else // LINUX
@@ -132,23 +143,27 @@ public:
 		void *p ( ( void * ) ( ( DWORD ) ( info.vf_entry ) & ~( psize - 1 ) ) );
 		if( mprotect ( p, ( ( 2 * sizeof ( void * ) ) + ( ( DWORD ) ( info.vf_entry ) & ( psize - 1 ) ) ), PROT_READ | PROT_WRITE | PROT_EXEC ) < 0 )
 		{
-			Logger::GetInstance ()->Msg<MSG_ERROR> ( Helpers::format( "VirtualTableHook : mprotect error -> Cannot hook function in %s", GetModuleNameFromMemoryAddress ( *info.vf_entry ).c_str () ) );
+			Logger::GetInstance ()->Msg<MSG_ERROR> ( Helpers::format( "VirtualTableHook %s: mprotect error -> Cannot hook function", debugname ) );
+			if (m_list.HasElement(info))
+				m_list.FindAndRemove(info);
 			return;
 		}
 #endif // WIN32
 
 		bool can_hook = true;
 
-		if( info.oldFn && info.oldFn != *info.vf_entry )
+		if( info.oldFn && info.oldFn != SafePtrDeref(info.vf_entry) )
 		{
-			Logger::GetInstance ()->Msg<MSG_WARNING> ( Helpers::format ( "VirtualTableHook : Unexpected virtual table value in VirtualTableHook. Module %s might be in conflict.", GetModuleNameFromMemoryAddress ( *info.vf_entry ).c_str () ) );
-			can_hook = false;
+			Logger::GetInstance ()->Msg<MSG_WARNING> ( Helpers::format ( "VirtualTableHook %s: Unexpected virtual table value in VirtualTableHook. Module %s might be in conflict.", debugname, GetModuleNameFromMemoryAddress (SafePtrDeref(info.vf_entry) ).c_str () ) );
+			can_hook = force;
 		}
 		else if( info.newFn == *info.vf_entry )
 		{
 			if( !m_list.HasElement ( info ) )
 			{
-				Logger::GetInstance ()->Msg<MSG_WARNING> ( "VirtualTableHook : Virtual function pointer was the same but not registered as hooked ..." );
+				Logger::GetInstance ()->Msg<MSG_WARNING> (Helpers::format("VirtualTableHook %s: Virtual function pointer 0x%X was the same but not registered as hooked ...", debugname, info.newFn ));
+				info.ishooked = true;
+				info.debugname = debugname;
 				m_list.AddToTail ( info );
 				m_list.Sort ( HookCompare );
 				can_hook = false;
@@ -159,12 +174,18 @@ public:
 		{
 			info.oldFn = *info.vf_entry;
 			*info.vf_entry = info.newFn;
-			DebugMessage ( Helpers::format ( "VirtualTableHook : function 0x%X at 0x%X in %s replaced by 0x%X from %s.", info.oldFn, info.vf_entry, GetModuleNameFromMemoryAddress ( info.oldFn ).c_str (), info.newFn, GetModuleNameFromMemoryAddress ( info.newFn ).c_str () ) );
+			DebugMessage ( Helpers::format ( "VirtualTableHook %s: function 0x%X at 0x%X in %s replaced by 0x%X from %s.", debugname, info.oldFn, info.vf_entry, GetModuleNameFromMemoryAddress ( info.oldFn ).c_str (), info.newFn, GetModuleNameFromMemoryAddress ( info.newFn ).c_str () ) );
 
 			if( !m_list.HasElement ( info ) )
 			{
+				info.ishooked = true;
+				info.debugname = debugname;
 				m_list.AddToTail ( info );
 				m_list.Sort ( HookCompare );
+			}
+			else
+			{
+				info.ishooked = !info.ishooked;
 			}
 		}
 
@@ -193,6 +214,7 @@ public:
 	// Only find by virtual table base (Remove need to call ConfigManager), class_ptr is converted to virtual table base
 	DWORD RT_GetOldFunctionByVirtualTable ( void* class_ptr ) const
 	{
+#ifndef DEBUG
 		DWORD* vt ( ( ( DWORD* )*( DWORD* ) class_ptr ) );
 		for( hooked_list_t::const_iterator it ( m_list.begin () ); it != m_list.end (); ++it )
 		{
@@ -202,11 +224,28 @@ public:
 			}
 		}
 		return 0;
+#else
+		DWORD* vt(((DWORD*)*(DWORD*)class_ptr));
+		DWORD oldfn ( 0 );
+		bool found ( false );
+		for (hooked_list_t::const_iterator it(m_list.begin()); it != m_list.end(); ++it)
+		{
+			if (it->pInterface == vt)
+			{
+				// Do not find another one with a different function, please ...
+				Assert(found == false || oldfn == it->oldFn);
+				oldfn = it->oldFn;
+				found = true;
+			}
+		}
+		return oldfn;
+#endif
 	}
 
 	// Only find by virtual table base (Remove need to call ConfigManager), class_ptr is the original instance
 	DWORD RT_GetOldFunctionByInstance ( void* class_ptr ) const
 	{
+#ifndef DEBUG
 		for( hooked_list_t::const_iterator it ( m_list.begin () ); it != m_list.end (); ++it )
 		{
 			if( it->origEnt == class_ptr )
@@ -215,15 +254,58 @@ public:
 			}
 		}
 		return 0;
+#else
+		DWORD oldfn ( 0 );
+		bool found ( false );
+		for (hooked_list_t::const_iterator it(m_list.begin()); it != m_list.end(); ++it)
+		{
+			if (it->origEnt == class_ptr)
+			{
+				// Do not find another one with a different function, please ...
+				Assert(found == false || oldfn == it->oldFn);
+				oldfn = it->oldFn;
+				found = true;
+			}
+		}
+		return oldfn;
+#endif
+	}
+
+	void RevertAll()
+	{
+		for (hooked_list_t::iterator it(m_list.begin()); it != m_list.end(); ++it)
+		{
+			if (it->ishooked)
+			{
+				std::swap(it->newFn, it->oldFn);
+
+				// The target function might have changed.
+				it->oldFn = 0;
+
+				VirtualTableHook(*it, "Invert", true);
+			}
+		}
+	}
+
+	void RehookAll()
+	{
+		for (hooked_list_t::iterator it(m_list.begin()); it != m_list.end(); ++it)
+		{
+			if (!it->ishooked)
+			{
+				std::swap(it->newFn, it->oldFn);
+
+				// The target function might have changed.
+				it->oldFn = 0;
+
+				VirtualTableHook(*it, "Rehook", true);
+			}
+		}
 	}
 
 	void UnhookAll ()
 	{
-		for( hooked_list_t::iterator it ( m_list.begin () ); it != m_list.end (); ++it )
-		{
-			std::swap ( it->newFn, it->oldFn );
-			VirtualTableHook ( *it, true ); // unhook
-		}
+		RevertAll();
 		m_list.RemoveAll ();
 	}
 };

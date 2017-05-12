@@ -46,7 +46,7 @@ void SetTransmitHookListener::HookSetTransmit ( SourceSdk::edict_t const * const
 	void* unk ( ent->m_pUnk );
 
 	HookInfo info ( unk, ConfigManager::GetInstance ()->vfid_settransmit, ( DWORD ) RT_nSetTransmit );
-	HookGuard<SetTransmitHookListener>::GetInstance ()->VirtualTableHook ( info );
+	HookGuard<SetTransmitHookListener>::GetInstance ()->VirtualTableHook ( info, "CBaseEntity::SetTransmit" );
 }
 
 #ifdef GNUC

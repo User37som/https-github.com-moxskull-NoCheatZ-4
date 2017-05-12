@@ -36,6 +36,8 @@
 #	define __unreachable() __assume(0)
 #endif
 
+#define SafePtrDeref(x) (x != 0 ? *x : 0)
+
 #define NCZ_PLUGIN_NAME			"NoCheatZ" // Name of the plugin
 
 #define IN_ATTACK (1 << 0)
