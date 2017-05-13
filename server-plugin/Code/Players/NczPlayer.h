@@ -16,14 +16,12 @@
 #ifndef NCZPCLASS
 #define NCZPCLASS
 
-#include "Interfaces/InterfacesProxy.h" // edict_t, INetChannelInfo, IPlayerInfo
+#include "Interfaces/InterfacesProxy.h"
 
-#include "Misc/ClassSpecifications.h" // NoCopy
-#include "Misc/HeapMemoryManager.h" // OverrideNew
-#include "Misc/Helpers.h" // IsValidEdict
-#include "Systems/Testers/Detections/PlayerDetections.h"
-
-extern float Plat_FloatTime ();
+#include "Misc/temp_Metrics.h"
+#include "Misc/Helpers.h"
+#include "Misc/temp_singleton.h"
+#include "Misc/temp_basicstring.h"
 
 enum WpnShotType
 {
@@ -46,7 +44,6 @@ private:
 	SourceSdk::INetChannelInfo* m_channelinfo;
 	SourceSdk::IPlayerInfo * m_playerinfo;
 	float m_time_connected;
-	PlayerDetections m_detections;
 
 public:
 	NczPlayer ( int const index );
@@ -71,16 +68,16 @@ public:
 
 	void GetEyeAngles ( SourceSdk::QAngle & out ) const;
 
+	inline basic_string const GetReadableIdentity ();
+
 	inline float const GetTimeConnected () const;
 
 	inline bool const isValidEdict () const;
 
-	inline PlayerDetections* GetDetectionInfos ();
-
 	void OnConnect ();
 
-	void Kick ( const char * msg = nullptr );
-	void Ban ( const char * msg = nullptr, int minutes = 0 );
+	void Kick ( const char * msg = "NoCheatZ 4" );
+	void Ban ( const char * msg = "NoCheatZ 4", int minutes = 0 );
 };
 
 inline int NczPlayer::GetIndex () const
@@ -101,11 +98,6 @@ inline SourceSdk::IPlayerInfo * const NczPlayer::GetPlayerInfo () const
 inline SourceSdk::INetChannelInfo * const NczPlayer::GetChannelInfo () const
 {
 	return m_channelinfo;
-}
-
-inline PlayerDetections* NczPlayer::GetDetectionInfos ()
-{
-	return &m_detections;
 }
 
 inline bool const NczPlayer::isValidEdict () const
@@ -138,6 +130,18 @@ inline const char * NczPlayer::GetIPAddress () const
 inline float const NczPlayer::GetTimeConnected () const
 {
 	return Plat_FloatTime () - m_time_connected;
+}
+
+inline basic_string const NczPlayer::GetReadableIdentity ()
+{
+	if( SteamGameServer_BSecure () )
+	{
+		return Helpers::format ( "%s [%s - %s]", this->GetName (), this->GetSteamID (), this->GetIPAddress () );
+	}
+	else
+	{
+		return Helpers::format ( "%s [%s]", this->GetName (), this->GetIPAddress () );
+	}
 }
 
 #endif

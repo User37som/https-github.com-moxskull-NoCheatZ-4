@@ -112,6 +112,9 @@
     <None Include="Res\nocheatz.cfg">
       <Filter>Resources\Config Files</Filter>
     </None>
+    <None Include="Res\!nocheatz.vdf">
+      <Filter>Resources</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Code\plugin.cpp">
@@ -257,11 +260,6 @@
     </ClCompile>
     <ClCompile Include="Code\Hooks\DearMetamodSource.cpp">
       <Filter>Code\Hooks</Filter>
-    <ClCompile Include="Code\Systems\Testers\Detections\temp_BaseDetection.cpp">
-      <Filter>Code\Systems</Filter>
-    </ClCompile>
-    <ClCompile Include="Code\Systems\Testers\Detections\PlayerDetections.cpp">
-      <Filter>Code\Systems</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -584,19 +582,6 @@
       <Filter>Code\Hooks</Filter>
     </ClInclude>
     <ClInclude Include="Code\Hooks\DearMetamodSource.h">
-    <ClInclude Include="Code\Misc\ForwardedCommonDefinitions.h">
-      <Filter>Code\Misc</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\Systems\Testers\Detections\PlayerDetections.h">
-      <Filter>Code\Systems</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\Players\PlayerHandler_impl.h">
-      <Filter>Code\Players</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\Hooks\temp_HookListenersList.h">
-      <Filter>Code\Hooks</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\Hooks\temp_HookGuard.h">
       <Filter>Code\Hooks</Filter>
     </ClInclude>
   </ItemGroup>

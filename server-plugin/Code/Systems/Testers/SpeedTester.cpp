@@ -15,6 +15,8 @@
 
 #include "SpeedTester.h"
 
+#include "Systems/Logger.h"
+
 SpeedTester::SpeedTester () :
 	BaseDynamicSystem ( "SpeedTester" ),
 	OnTickListener (),
@@ -82,9 +84,14 @@ void SpeedTester::RT_ProcessOnTick ( float const curtime )
 
 			if( pInfo->detections >= 30 && curtime > pInfo->lastDetectionTime + 30.0f )
 			{
-				TriggerDetection ( Detection_SpeedHack, ph, pInfo );
+				Detection_SpeedHack pDetection;
+				pDetection.PrepareDetectionData ( pInfo );
+				pDetection.PrepareDetectionLog ( *ph, this );
+				pDetection.Log ();
 
 				pInfo->lastDetectionTime = curtime;
+
+				ph->Ban ();
 			}
 		}
 		else if( pInfo->detections )
@@ -114,22 +121,18 @@ PlayerRunCommandRet SpeedTester::RT_PlayerRunCommandCallback ( PlayerHandler::co
 	return PlayerRunCommandRet::CONTINUE;
 }
 
-void Detection_SpeedHack::WriteXMLOutput ( FILE * const out ) const
+basic_string Detection_SpeedHack::GetDataDump ()
 {
-	Assert ( out );
-
-	fprintf ( out,
-			  "<detection_speedhack>\n\t\t\t"
-			  "<value name=\"ticksLeft\" desc=\"Rest number of commands the player can send\" unit=\"count\">%f</value>\n\t\t\t\t"
-			  "<value name=\"detections\" desc=\"Number of spikes accounted as detections\" unit=\"count\">%lu</value>\n\t\t\t\t"
-			  "<value name=\"lastDetectionTime\" desc=\"Last maptime a detection a spike was detected\" unit=\"seconds\">%f</value>\n\t\t\t\t"
-			  "<value name=\"previousLatency\" desc=\"Latency of the player\" unit=\"seconds\">%f</value>\n\t\t\t\t"
-			  "<value name=\"lastTest\" desc=\"Last test maptime\" unit=\"seconds\">%f</value>\n\t\t\t\t"
-			  "</detection_speedhack>",
-			GetDataStruct ()->ticksLeft,
-			GetDataStruct ()->detections,
-			GetDataStruct ()->lastDetectionTime,
-			GetDataStruct ()->previousLatency,
-			GetDataStruct ()->lastTest
-	);
+	return Helpers::format ( ":::: SpeedHolderT {\n"
+							 ":::::::: Ticks Left : %lu,\n"
+							 ":::::::: Detections Count : %lu,\n"
+							 ":::::::: Last Detection Time %f,\n"
+							 ":::::::: Last Latency : %f,\n"
+							 ":::::::: Last Test Time : %f\n"
+							 ":::: }",
+							 GetDataStruct ()->ticksLeft,
+							 GetDataStruct ()->detections,
+							 GetDataStruct ()->lastDetectionTime,
+							 GetDataStruct ()->previousLatency,
+							 GetDataStruct ()->lastTest );
 }

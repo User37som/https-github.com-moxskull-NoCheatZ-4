@@ -16,8 +16,8 @@
 #ifndef ONGROUNDHOOKLISTENER
 #define ONGROUNDHOOKLISTENER
 
-#include "temp_HookListenersList.h"
-#include "Players/PlayerHandler_impl.h"
+#include "Preprocessors.h"
+#include "Hook.h"
 
 /////////////////////////////////////////////////////////////////////////
 // CBasePlayer::NetworkStateChanged_m_hGroundEntity(void*)
@@ -46,7 +46,7 @@ public:
 	virtual ~OnGroundHookListener();
 
 protected:
-	virtual void RT_m_hGroundEntityStateChangedCallback( PlayerHandler::const_iterator ph, bool const new_isOnGround) = 0;
+	virtual void RT_m_hGroundEntityStateChangedCallback(PlayerHandler::const_iterator ph, bool const new_isOnGround) = 0;
 
 public:
 
@@ -61,7 +61,7 @@ public:
 
 		This is a single instance hook. The plugin calls this when there is at least one player in game.
 	*/
-	static void HookOnGround( PlayerHandler::const_iterator ph);
+	static void HookOnGround(PlayerHandler::const_iterator ph);
 
 protected:
 	static void RegisterOnGroundHookListener(OnGroundHookListener const * const listener);

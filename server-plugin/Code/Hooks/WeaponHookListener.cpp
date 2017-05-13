@@ -15,12 +15,13 @@
 
 #include "WeaponHookListener.h"
 
+#include "Console/convar.h"
 #include "Interfaces/InterfacesProxy.h"
 #include "Interfaces/iserverunknown.h"
 
+#include "Misc/Helpers.h"
+#include "plugin.h"
 #include "Systems/ConfigManager.h"
-#include "Players/NczPlayerManager.h"
-#include "Hooks/temp_HookGuard.h"
 
 WeaponHookListener::WeaponHookListenersListT WeaponHookListener::m_listeners;
 

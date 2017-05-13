@@ -379,6 +379,7 @@ copy "$(TargetPath)" ..\..\..\game\bin\"$(TargetName)".pdb
     <None Include="SourceSdk\Interfaces\Protobuf\netmessages.proto" />
     <None Include="Makefile" />
     <None Include="Res\nocheatz-CSGO.cfg" />
+    <None Include="Res\!nocheatz.vdf" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Code\Hooks\DearMetamodSource.cpp" />
@@ -399,8 +400,6 @@ copy "$(TargetPath)" ..\..\..\game\bin\"$(TargetName)".pdb
     </ClCompile>
     <ClCompile Include="Code\Systems\Testers\AutoAttackTester.cpp" />
     <ClCompile Include="Code\version.cpp" />
-    <ClCompile Include="Code\Systems\Testers\Detections\PlayerDetections.cpp" />
-    <ClCompile Include="Code\Systems\Testers\Detections\temp_BaseDetection.cpp" />
     <ClCompile Include="SourceSdk\Interfaces\Protobuf\cstrike15_usermessages.pb.cc">
       <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">TurnOffAllWarnings</WarningLevel>
       <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">TurnOffAllWarnings</WarningLevel>
@@ -438,9 +437,7 @@ copy "$(TargetPath)" ..\..\..\game\bin\"$(TargetName)".pdb
     <ClCompile Include="Code\Systems\Logger.cpp" />
     <ClCompile Include="Code\Systems\OnTickListener.cpp" />
     <ClCompile Include="Code\Systems\Testers\ConCommandTester.cpp" />
-    <ClCompile Include="Code\Systems\Testers\ShotTester.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
+    <ClCompile Include="Code\Systems\Testers\ShotTester.cpp" />
     <ClCompile Include="Code\Systems\Testers\JumpTester.cpp" />
     <ClCompile Include="Code\Systems\Testers\ConVarTester.cpp" />
     <ClCompile Include="Code\Systems\Testers\EyeAnglesTester.cpp" />
@@ -453,12 +450,9 @@ copy "$(TargetPath)" ..\..\..\game\bin\"$(TargetName)".pdb
   <ItemGroup>
     <ClInclude Include="Code\Hooks\DearMetamodSource.h" />
     <ClInclude Include="Code\Hooks\SigScan.h" />
-    <ClInclude Include="Code\Hooks\temp_HookGuard.h" />
-    <ClInclude Include="Code\Hooks\temp_HookListenersList.h" />
     <ClInclude Include="Code\Hooks\ThinkPostHookListener.h" />
     <ClInclude Include="Code\Hooks\UserMessageHookListener.h" />
     <ClInclude Include="Code\Misc\ClassSpecifications.h" />
-    <ClInclude Include="Code\Misc\ForwardedCommonDefinitions.h" />
     <ClInclude Include="Code\Misc\HeapMemoryManager.h" />
     <ClInclude Include="Code\Misc\MathCache.h" />
     <ClInclude Include="Code\Misc\SigHandler.h" />
@@ -467,7 +461,6 @@ copy "$(TargetPath)" ..\..\..\game\bin\"$(TargetName)".pdb
     <ClInclude Include="Code\Misc\temp_basicstring.h" />
     <ClInclude Include="Code\Misc\temp_singleton.h" />
     <ClInclude Include="Code\Misc\temp_Throwback.h" />
-    <ClInclude Include="Code\Players\PlayerHandler_impl.h" />
     <ClInclude Include="Code\Players\ProcessFilter.h" />
     <ClInclude Include="Code\Systems\AutoTVRecord.h" />
     <ClInclude Include="Code\Systems\Blockers\BhopBlocker.h" />
@@ -476,7 +469,6 @@ copy "$(TargetPath)" ..\..\..\game\bin\"$(TargetName)".pdb
     <ClInclude Include="Code\Systems\i18nManager.h" />
     <ClInclude Include="Code\Systems\Testers\AutoAttackTester.h" />
     <ClInclude Include="Code\version.h" />
-    <ClInclude Include="Code\Systems\Testers\Detections\PlayerDetections.h" />
     <ClInclude Include="SourceSdk\Console\color.h" />
     <ClInclude Include="SourceSdk\Console\convar.h" />
     <ClInclude Include="SourceSdk\Console\iconvar.h" />

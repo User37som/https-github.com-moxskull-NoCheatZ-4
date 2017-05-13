@@ -16,16 +16,12 @@
 #ifndef TIMERLISTENER_H
 #define TIMERLISTENER_H
 
-#ifndef MUTE_INCLUDES_IN_HEADERS
+#include "Misc/temp_basiclist.h"
+#include <cstring> // memcpy
 
-#	include "Misc/temp_basiclist.h"
-#	include <cstring> // memcpy
-
-#	include "../Preprocessors.h"
-#	include "../Misc/Helpers.h"
-#	include "Misc/temp_Metrics.h"
-
-#endif
+#include "../Preprocessors.h"
+#include "../Misc/Helpers.h"
+#include "Misc/temp_Metrics.h"
 
 #define TIMERINFO_CHARCOUNT 55
 

@@ -184,15 +184,15 @@ bool CNoCheatZPlugin::Load ( SourceSdk::CreateInterfaceFn _interfaceFactory, Sou
 
 	Logger::GetInstance ()->Msg<MSG_CONSOLE> ( "Loading ..." );
 
-	if( !ConfigManager::GetInstance ()->LoadConfig () )
+	if( !SourceSdk::InterfacesProxy::Load ( gameServerFactory, _interfaceFactory ) )
 	{
-		Logger::GetInstance ()->Msg<MSG_ERROR> ( "ConfigManager::LoadConfig failed" );
+		Logger::GetInstance ()->Msg<MSG_ERROR> ( "SourceSdk::InterfacesProxy::Load failed" );
 		return false;
 	}
 
-	if( !SourceSdk::InterfacesProxy::Load ( gameServerFactory, _interfaceFactory, ConfigManager::GetInstance ()->m_game_name.c_str () ) );
+	if( !ConfigManager::GetInstance ()->LoadConfig () )
 	{
-		Logger::GetInstance ()->Msg<MSG_ERROR> ( "SourceSdk::InterfacesProxy::Load failed" );
+		Logger::GetInstance ()->Msg<MSG_ERROR> ( "ConfigManager::LoadConfig failed" );
 		return false;
 	}
 
@@ -227,7 +227,7 @@ bool CNoCheatZPlugin::Load ( SourceSdk::CreateInterfaceFn _interfaceFactory, Sou
 	BaseSystem::InitSystems ();
 	BanRequest::GetInstance ()->Init ();
 
-	NczPlayerManager::GetInstance ()->LoadPlayerManager (); // Flag any present player as PLAYER_CONNECTED
+	NczPlayerManager::GetInstance ()->LoadPlayerManager (); // Mark any present player as PLAYER_CONNECTED
 
 	SourceSdk::InterfacesProxy::Call_ServerExecute ();
 	SourceSdk::InterfacesProxy::Call_ServerCommand ( "exec nocheatz.cfg\n" );
@@ -402,7 +402,6 @@ void CNoCheatZPlugin::LevelShutdown ( void ) // !!!!this can get called multiple
 	DebugMessage ( "CNoCheatZPlugin::LevelShutdown" );
 
 	BanRequest::GetInstance ()->WriteBansIfNeeded ();
-	AutoTVRecord::GetInstance ()->OnStopRecord ();
 	BaseSystem::UnloadAllSystems ();
 	Logger::GetInstance ()->Flush ();
 }

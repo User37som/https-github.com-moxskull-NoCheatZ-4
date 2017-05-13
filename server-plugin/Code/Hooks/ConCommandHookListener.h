@@ -16,13 +16,13 @@ limitations under the License.
 #ifndef CONCOMMANDHOOKLISTENER
 #define CONCOMMANDHOOKLISTENER
 
-#include "Containers/utlvector.h"
-
-#include "Players/PlayerHandler_impl.h"
-#include "temp_HookListenersList.h"
+#include "Preprocessors.h"
+#include "Hook.h"
 
 // The function declaration we will call
 typedef void ( HOOKFN_EXT *Dispatch_t )( void * const cmd, SourceSdk::CCommand const & args );
+
+class NczPlayer;
 
 /*
 	The base class used by a listener to hook some ConCommands.

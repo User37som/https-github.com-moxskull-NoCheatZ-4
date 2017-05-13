@@ -16,10 +16,12 @@
 #ifndef JUMPTESTER_H
 #define JUMPTESTER_H
 
-#include "Systems/Testers/Detections/temp_BaseDetection.h" // + basic_string + memset/cpy + logger + basesystem + singleton + helpers + cutlvector
+#include "Systems/Testers/Detections/temp_BaseDetection.h"
+#include "Systems/BaseSystem.h"
 #include "Hooks/OnGroundHookListener.h"
 #include "Hooks/PlayerRunCommandHookListener.h"
 #include "Players/temp_PlayerDataStruct.h"
+#include "Misc/temp_singleton.h"
 
 /////////////////////////////////////////////////////////////////////////
 // JumpTester
@@ -61,8 +63,7 @@ typedef struct JumpCmdHolder
 	};
 } JumpCmdHolderT;
 
-typedef struct JumpInfo : 
-	public Helpers::CRC32_Specialize
+typedef struct JumpInfo
 {
 	OnGroundHolderT onGroundHolder;
 	JumpCmdHolderT jumpCmdHolder;
@@ -82,67 +83,35 @@ typedef struct JumpInfo :
 	{
 		memcpy ( this, &other, sizeof ( JumpInfo ) );
 	};
-
-	virtual uint32_t Hash_CRC32 () const
-	{
-		return 0; // No way to differentiate 
-	}
 } JumpInfoT;
 
-class Base_Detection_BunnyHop : public LogDetection<JumpInfoT>
+class Detection_BunnyHopScript : public LogDetection<JumpInfoT>
 {
-protected:
 	typedef LogDetection<JumpInfoT> hClass;
 public:
-	Base_Detection_BunnyHop ( PlayerHandler::const_iterator player, BaseDynamicSystem * tester, uint32_t udid, hClass::data_t const * data ) :
-		hClass ( player, tester, udid, data )
+	Detection_BunnyHopScript () : hClass ()
 	{};
-	virtual ~Base_Detection_BunnyHop ()
+	virtual ~Detection_BunnyHopScript () override
 	{};
 
-	virtual void TakeAction () = 0;
-
-	virtual void WriteXMLOutput ( FILE * const ) const final;
-
-	virtual bool CloneWhenEqual () const final
+	virtual basic_string GetDataDump () final;
+	virtual basic_string GetDetectionLogMessage ()
 	{
-		return false; // Hash always returns 0
-	}
-
-	virtual basic_string GetDetectionLogMessage () const = 0;
-};
-
-class Detection_BunnyHopJumpMacro : public Base_Detection_BunnyHop
-{
-public:
-	Detection_BunnyHopJumpMacro ( PlayerHandler::const_iterator player, BaseDynamicSystem * tester, hClass::data_t const * data ) :
-		Base_Detection_BunnyHop ( player, tester, UniqueDetectionID::BUNNYHOP_JUMPMACRO, data )
-	{};
-	virtual ~Detection_BunnyHopJumpMacro () override final
-	{};
-
-	virtual void TakeAction () override final;
-
-	virtual basic_string GetDetectionLogMessage () const override final
-	{
-		return "BunnyHop Jump Macro";
+		return "BunnyHop Script";
 	};
 };
 
-class Detection_BunnyHopPerfect : public Base_Detection_BunnyHop
+class Detection_BunnyHopProgram : public Detection_BunnyHopScript
 {
 public:
-	Detection_BunnyHopPerfect ( PlayerHandler::const_iterator player, BaseDynamicSystem * tester, hClass::data_t const * data ) :
-		Base_Detection_BunnyHop ( player, tester, UniqueDetectionID::BUNNYHOP_PERFECT, data )
+	Detection_BunnyHopProgram () : Detection_BunnyHopScript ()
 	{};
-	virtual ~Detection_BunnyHopPerfect () override final
+	virtual ~Detection_BunnyHopProgram () override final
 	{};
 
-	virtual void TakeAction () override final;
-
-	virtual basic_string GetDetectionLogMessage () const override final
+	virtual basic_string GetDetectionLogMessage () override final
 	{
-		return "BunnyHop Cheat";
+		return "BunnyHop Program";
 	};
 };
 

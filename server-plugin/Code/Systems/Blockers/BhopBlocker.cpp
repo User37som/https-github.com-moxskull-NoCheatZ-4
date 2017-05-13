@@ -17,6 +17,8 @@ limitations under the License.
 
 #include <cmath>
 
+#include "Interfaces/InterfacesProxy.h"
+
 #include "Systems/Logger.h"
 
 BhopBlocker::BhopBlocker () :
@@ -130,7 +132,7 @@ PlayerRunCommandRet BhopBlocker::RT_PlayerRunCommandCallback ( PlayerHandler::co
 	float const tick_interval ( SourceSdk::InterfacesProxy::Call_GetTickInterval () );
 	__assume ( tick_interval > 0.0f && tick_interval < 1.0f );
 
-	int const blocking_delay_ticks ( ( int )( floorf ( blocking_delay_seconds / tick_interval ) ) );
+	int const blocking_delay_ticks ( floorf ( blocking_delay_seconds / tick_interval ) );
 
 	int const gtick ( Helpers::GetGameTickCount () );
 

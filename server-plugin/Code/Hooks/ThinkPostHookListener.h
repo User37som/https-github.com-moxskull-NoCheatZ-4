@@ -16,12 +16,8 @@ limitations under the License.
 #ifndef THINKPOSTHOOKLISTENER_H
 #define THINKPOSTHOOKLISTENER_H
 
-namespace SourceSdk
-{
-	struct edict_t;
-}
-
-#include "temp_HookListenersList.h"
+#include "Preprocessors.h"
+#include "Hook.h"
 
 // The function declaration we will call
 typedef void ( HOOKFN_EXT *PostThink_t )( void * const );

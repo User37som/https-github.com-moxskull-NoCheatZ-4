@@ -13,17 +13,18 @@
    limitations under the License.
 */
 
-#include "PlayerRunCommandHookListener.h"
-
 #include <cstdlib> // rand
 #include <ctime>
 
+#include "PlayerRunCommandHookListener.h"
+
 #include "Interfaces/InterfacesProxy.h"
 #include "Interfaces/iserverunknown.h"
+#include "Console/convar.h"
 
+#include "plugin.h"
 #include "Systems/ConfigManager.h"
-#include "Players/NczPlayerManager.h"
-#include "Hooks/temp_HookGuard.h"
+#include "Systems/Logger.h"
 
 /////////////////////////////////////////////////////////////////////////
 // PlayerRunCommandHookListener

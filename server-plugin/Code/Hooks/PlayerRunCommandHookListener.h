@@ -18,8 +18,8 @@
 
 #include "Interfaces/usercmd.h"
 
-#include "temp_HookListenersList.h"
-#include "Players/PlayerHandler_impl.h"
+#include "Preprocessors.h"
+#include "Hook.h"
 
 inline void InertCmd ( void * const pcmd );
 

@@ -16,9 +16,12 @@
 #ifndef SPAMCHANGENAMETESTER_H
 #define SPAMCHANGENAMETESTER_H
 
-#include "Systems/BaseSystem.h"
-#include "Systems/OnTickListener.h"
+#include "Preprocessors.h"
 #include "Players/temp_PlayerDataStruct.h"
+#include "Systems/BaseSystem.h"
+#include "Interfaces/IGameEventManager/IGameEventManager.h"
+#include "Systems/OnTickListener.h"
+#include "Misc/temp_singleton.h"
 
 struct ChangeNameInfo
 {

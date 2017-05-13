@@ -16,17 +16,22 @@
 #ifndef SPEEDTESTER_H
 #define SPEEDTESTER_H
 
+#include <cmath>
+
+#include "Interfaces/InterfacesProxy.h"
+
 #include "Systems/Testers/Detections/temp_BaseDetection.h"
+#include "Systems/BaseSystem.h"
 #include "Systems/OnTickListener.h"
 #include "Hooks/PlayerRunCommandHookListener.h"
 #include "Players/temp_PlayerDataStruct.h"
+#include "Misc/temp_singleton.h"
 
 /////////////////////////////////////////////////////////////////////////
 // SpeedTester
 /////////////////////////////////////////////////////////////////////////
 
-typedef struct SpeedHolder : 
-	public Helpers::CRC32_Specialize
+typedef struct SpeedHolder
 {
 	float ticksLeft;
 	size_t detections;
@@ -47,36 +52,19 @@ typedef struct SpeedHolder :
 	{
 		memset ( this, 0, sizeof ( SpeedHolder ) );
 	};
-
-	virtual uint32_t Hash_CRC32 () const
-	{
-		return 0;
-	}
 } SpeedHolderT;
 
 class Detection_SpeedHack : public LogDetection<SpeedHolderT>
 {
 	typedef LogDetection<SpeedHolderT> hClass;
 public:
-	Detection_SpeedHack ( PlayerHandler::const_iterator player, BaseDynamicSystem * tester, hClass::data_t const * data ) :
-		hClass ( player, tester, UniqueDetectionID::SPEEDHACK, data )
+	Detection_SpeedHack () : hClass ()
 	{};
-	virtual ~Detection_SpeedHack ()
+	virtual ~Detection_SpeedHack () final
 	{};
 
-	virtual void TakeAction () override final
-	{
-		m_player->Ban ();
-	}
-
-	virtual void WriteXMLOutput ( FILE * const ) const final;
-
-	virtual bool CloneWhenEqual () const final
-	{
-		return false;
-	}
-
-	virtual basic_string GetDetectionLogMessage () const final
+	virtual basic_string GetDataDump () final;
+	virtual basic_string GetDetectionLogMessage () final
 	{
 		return "SpeedHack";
 	};

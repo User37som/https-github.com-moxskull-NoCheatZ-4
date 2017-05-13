@@ -15,9 +15,13 @@ limitations under the License.
 
 #include "RadarHackBlocker.h"
 
+#include "Interfaces/InterfacesProxy.h"
+
 #include "Misc/EntityProps.h"
 #include "Misc/UserMsg.h"
+#include "Hooks/PlayerRunCommandHookListener.h"
 #include "Misc/MathCache.h"
+#include "Systems/AutoTVRecord.h"
 
 RadarHackBlocker::RadarHackBlocker () :
 	BaseDynamicSystem ( "RadarHackBlocker" ),

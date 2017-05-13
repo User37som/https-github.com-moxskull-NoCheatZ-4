@@ -16,15 +16,11 @@ limitations under the License.
 #ifndef MATHCACHE_H
 #define MATHCACHE_H
 
-#ifndef MUTE_INCLUDES_IN_HEADERS
+#include <cstdint>
 
-#	include <cstdint>
+#include "Maths/Vector.h"
 
-#	include "Maths/Vector.h"
-
-#	include "temp_singleton.h"
-
-#endif
+#include "temp_singleton.h"
 
 struct MathInfo
 {

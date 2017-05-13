@@ -16,12 +16,15 @@
 #ifndef ANTISMOKEBLOCKER_H
 #define ANTISMOKEBLOCKER_H
 
+#include "Interfaces/IGameEventManager/IGameEventManager.h"
 #include "Maths/Vector.h"
 
-#include "Systems/BaseSystem.h"
-#include "Systems/OnTickListener.h"
+#include "Misc/temp_basiclist.h"
 #include "Players/temp_PlayerDataStruct.h"
 #include "Hooks/SetTransmitHookListener.h"
+#include "Systems/BaseSystem.h"
+#include "Systems/OnTickListener.h"
+#include "Misc/temp_singleton.h"
 
 typedef struct SmokeEntityS
 {
@@ -52,7 +55,7 @@ typedef struct SmokeEntityS
 
 typedef basic_slist<SmokeEntityT> SmokeListT;
 
-typedef struct alignas(8) SmokeInfoS
+typedef struct ALIGN8 SmokeInfoS
 {
 	bool is_in_smoke;
 	bool can_not_see_this_player[ MAX_PLAYERS ];
@@ -65,7 +68,7 @@ typedef struct alignas(8) SmokeInfoS
 	{
 		memcpy ( this, &other, sizeof ( SmokeInfoS ) );
 	};
-} SmokeInfoT;
+} ALIGN8_POST SmokeInfoT;
 
 class AntiSmokeBlocker :
 	private BaseDynamicSystem,

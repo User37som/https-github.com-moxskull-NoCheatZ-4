@@ -15,8 +15,14 @@
 
 #include "AntiSmokeBlocker.h"
 
-#include "Systems/ConfigManager.h"
+#include <cmath>
+
+#include "Interfaces/InterfacesProxy.h"
+
 #include "Misc/MathCache.h"
+#include "Misc/EntityProps.h"
+#include "Players/NczPlayerManager.h"
+#include "Systems/ConfigManager.h"
 
 AntiSmokeBlocker::AntiSmokeBlocker () :
 	BaseDynamicSystem ( "AntiSmokeBlocker" ),

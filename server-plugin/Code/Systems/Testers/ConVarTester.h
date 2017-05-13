@@ -16,10 +16,14 @@
 #ifndef CONVARTESTER_H
 #define CONVARTESTER_H
 
-#include "Systems/OnTickListener.h"
-#include "Systems/Testers/Detections/temp_BaseDetection.h" // + basic_string + memset/cpy + logger + basesystem + singleton + helpers + cutlvector
+#include "Misc/temp_basicstring.h"
+
+#include "Misc/temp_basiclist.h"
+#include "Systems/BaseSystem.h"
+#include "Systems/Testers/Detections/temp_BaseDetection.h" // + helpers, ifaces, preprocessors, playermanager
 #include "Players/temp_PlayerDataStruct.h"
-#include "Players/PlayerHandler_impl.h"
+#include "Systems/OnTickListener.h"
+#include "Misc/temp_singleton.h"
 
 /////////////////////////////////////////////////////////////////////////
 // ConVarTester
@@ -125,69 +129,18 @@ typedef struct CurrentConVarRequest
 
 class ConVarTester;
 
-class Base_Detection_ConVar : public LogDetection<CurrentConVarRequestT>
+class Detection_ConVar : public LogDetection<CurrentConVarRequestT>
 {
 	friend ConVarTester;
-protected:
 	typedef LogDetection<CurrentConVarRequestT> hClass;
 public:
-	Base_Detection_ConVar ( PlayerHandler::const_iterator player, BaseDynamicSystem * tester, uint32_t udid, hClass::data_t const * data ) :
-		hClass ( player, tester, udid, data )
-	{}
-	virtual  ~Base_Detection_ConVar ()
-	{}
+	Detection_ConVar () : hClass ()
+	{};
+	~Detection_ConVar ()
+	{};
 
-	virtual void TakeAction () = 0;
-
-	virtual void WriteXMLOutput ( FILE * const ) const final;
-
-	virtual bool CloneWhenEqual () const final
-	{
-		return true;
-	}
-
-	virtual basic_string GetDetectionLogMessage () const final;
-};
-
-class Detection_ConVarTimeout : public Base_Detection_ConVar
-{
-public:
-	Detection_ConVarTimeout ( PlayerHandler::const_iterator player, BaseDynamicSystem * tester, hClass::data_t const * data ) :
-		Base_Detection_ConVar ( player, tester, UniqueDetectionID::CONVAR_TIMEOUT, data )
-	{
-	}
-
-	virtual ~Detection_ConVarTimeout ()
-	{
-	}
-
-	virtual void TakeAction () override final;
-};
-
-class Detection_ConVarWrongValue : public Base_Detection_ConVar
-{
-public:
-	Detection_ConVarWrongValue ( PlayerHandler::const_iterator player, BaseDynamicSystem * tester, hClass::data_t const * data ) :
-		Base_Detection_ConVar ( player, tester, UniqueDetectionID::CONVAR_WRONGVALUE, data )
-	{}
-
-	virtual ~Detection_ConVarWrongValue ()
-	{}
-
-	virtual void TakeAction () override final;
-};
-
-class Detection_ConVarIllegal : public Base_Detection_ConVar
-{
-public:
-	Detection_ConVarIllegal ( PlayerHandler::const_iterator player, BaseDynamicSystem * tester, hClass::data_t const * data ) :
-		Base_Detection_ConVar ( player, tester, UniqueDetectionID::CONVAR_ILLEGAL, data )
-	{}
-
-	virtual ~Detection_ConVarIllegal ()
-	{}
-
-	virtual void TakeAction () override final;
+	virtual basic_string GetDataDump ();
+	virtual basic_string GetDetectionLogMessage ();
 };
 
 class ConVarTester :
@@ -198,7 +151,9 @@ class ConVarTester :
 {
 	typedef Singleton<ConVarTester> singleton_class;
 	typedef PlayerDataStructHandler<CurrentConVarRequestT> playerdata_class;
-	friend Base_Detection_ConVar;
+
+	friend Detection_ConVar;
+
 private:
 	ConVarRulesListT m_convars_rules;
 

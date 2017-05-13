@@ -16,12 +16,8 @@
 #ifndef _MRECIPIENT_FILTER_H
 #define _MRECIPIENT_FILTER_H
 
-#ifndef MUTE_INCLUDES_IN_HEADERS
-
-#	include "Interfaces/irecipientfilter.h"
-#	include "Containers/utlvector.h"
-
-#endif
+#include "Interfaces/irecipientfilter.h"
+#include "Containers/utlvector.h"
 
 class MRecipientFilter : public SourceSdk::IRecipientFilter
 {

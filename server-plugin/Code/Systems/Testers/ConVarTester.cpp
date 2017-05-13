@@ -13,9 +13,12 @@
    limitations under the License.
 */
 
+#include <stdio.h>
+
 #include "ConVarTester.h"
 
 #include "Systems/BanRequest.h"
+#include "Systems/Logger.h"
 
 /////////////////////////////////////////////////////////////////////////
 // ConVarTester
@@ -94,7 +97,11 @@ void ConVarTester::RT_ProcessPlayerTest ( PlayerHandler::const_iterator ph, floa
 				{
 					if( req->attempts >= 2 )
 					{
-						TriggerDetection ( Detection_ConVarTimeout, ph, req );
+						Detection_ConVar pDetection;
+						pDetection.PrepareDetectionData ( req );
+						pDetection.PrepareDetectionLog ( *ph, this );
+						pDetection.Log ();
+						ph->Kick ( "ConVar request timed out" );
 					}
 					else
 					{
@@ -253,20 +260,32 @@ void ConVarTester::RT_OnQueryCvarValueFinished ( PlayerHandler::const_iterator p
 					req->answer_status = "ValueIntact";
 					if( ruleset->rule == ConVarRule::NO_VALUE )
 					{
-						TriggerDetection ( Detection_ConVarIllegal, ph, req );
+						Detection_ConVar pDetection;
+						pDetection.PrepareDetectionData ( req );
+						pDetection.PrepareDetectionLog ( *ph, this );
+						pDetection.Log ();
+						BanRequest::GetInstance ()->AddAsyncBan ( *ph, 0, "Banned by NoCheatZ 4" );
 					}
 					else if( ruleset->rule == ConVarRule::SAME )
 					{
 						if( strcmp ( ruleset->value, pCvarValue ) )
 						{
-							TriggerDetection ( Detection_ConVarWrongValue, ph, req );
+							Detection_ConVar pDetection;
+							pDetection.PrepareDetectionData ( req );
+							pDetection.PrepareDetectionLog ( *ph, this );
+							pDetection.Log ();
+							BanRequest::GetInstance ()->AddAsyncBan ( *ph, 0, "Banned by NoCheatZ 4" );
 						}
 					}
 					else if( ruleset->rule == ConVarRule::SAME_AS_SERVER )
 					{
 						if( strcmp ( SourceSdk::InterfacesProxy::ConVar_GetString ( ruleset->sv_var ), pCvarValue ) )
 						{
-							TriggerDetection ( Detection_ConVarWrongValue, ph, req );
+							Detection_ConVar pDetection;
+							pDetection.PrepareDetectionData ( req );
+							pDetection.PrepareDetectionLog ( *ph, this );
+							pDetection.Log ();
+							BanRequest::GetInstance ()->AddAsyncBan ( *ph, 0, "Banned by NoCheatZ 4" );
 						}
 					}
 					else if( ruleset->rule == ConVarRule::SAME_FLOAT )
@@ -275,7 +294,11 @@ void ConVarTester::RT_OnQueryCvarValueFinished ( PlayerHandler::const_iterator p
 						float fsval = ( float ) atof ( ruleset->value );
 						if( fcval != fsval )
 						{
-							TriggerDetection ( Detection_ConVarWrongValue, ph, req );
+							Detection_ConVar pDetection;
+							pDetection.PrepareDetectionData ( req );
+							pDetection.PrepareDetectionLog ( *ph, this );
+							pDetection.Log ();
+							BanRequest::GetInstance ()->AddAsyncBan ( *ph, 0, "Banned by NoCheatZ 4" );
 						}
 					}
 					else if( ruleset->rule == ConVarRule::SAME_FLOAT_AS_SERVER )
@@ -284,7 +307,11 @@ void ConVarTester::RT_OnQueryCvarValueFinished ( PlayerHandler::const_iterator p
 						float fsval = ( float ) atof ( SourceSdk::InterfacesProxy::ConVar_GetString ( ruleset->sv_var ) );
 						if( fcval != fsval )
 						{
-							TriggerDetection ( Detection_ConVarWrongValue, ph, req );
+							Detection_ConVar pDetection;
+							pDetection.PrepareDetectionData ( req );
+							pDetection.PrepareDetectionLog ( *ph, this );
+							pDetection.Log ();
+							BanRequest::GetInstance ()->AddAsyncBan ( *ph, 0, "Banned by NoCheatZ 4" );
 						}
 					}
 					break;
@@ -296,7 +323,11 @@ void ConVarTester::RT_OnQueryCvarValueFinished ( PlayerHandler::const_iterator p
 					req->answer = "NO VALUE";
 					if( ruleset->rule != ConVarRule::NO_VALUE )
 					{
-						TriggerDetection ( Detection_ConVarIllegal, ph, req );
+						Detection_ConVar pDetection;
+						pDetection.PrepareDetectionData ( req );
+						pDetection.PrepareDetectionLog ( *ph, this );
+						pDetection.Log ();
+						BanRequest::GetInstance ()->AddAsyncBan ( *ph, 0, "Banned by NoCheatZ 4" );
 					}
 					break;
 				}
@@ -325,7 +356,11 @@ void ConVarTester::RT_OnQueryCvarValueFinished ( PlayerHandler::const_iterator p
 
 		return;
 unexpected2:
-		TriggerDetection ( Detection_ConVarIllegal, ph, req );
+		Detection_ConVar pDetection;
+		pDetection.PrepareDetectionData ( req );
+		pDetection.PrepareDetectionLog ( *ph, this );
+		pDetection.Log ();
+		BanRequest::GetInstance ()->AddAsyncBan ( *ph, 0, "Banned by NoCheatZ 4" );
 	}
 }
 
@@ -459,49 +494,20 @@ const char* ConvertRequestStatus ( ConVarRequestStatus status )
 	};
 }
 
-void Base_Detection_ConVar::WriteXMLOutput ( FILE * const out ) const
+basic_string Detection_ConVar::GetDataDump ()
 {
-	Assert ( out );
-
-	fprintf ( out,
-			  "<base_detection_convar>\n\t\t\t"
-			  "<struct name=\"CurrentConVarRequest\">\n\t\t\t\t"
-			  "<value name=\"status\" desc=\"Reply status\" unit=\"ConVarRequestStatus\">%s</value>\n\t\t\t\t\t"
-			  "<value name=\"timeStart\" desc=\"Time the request was sent relative to maptime\" unit=\"seconds\">%f</value>\n\t\t\t\t\t"
-			  "<value name=\"name\" desc=\"Name of the ConVar\" unit=\"text\">%s</value>\n\t\t\t\t\t"
-			  "<value name=\"value\" desc=\"Expected value of the ConVar\" unit=\"text\">%s</value>\n\t\t\t\t\t"
-			  "<value name=\"answer\" desc=\"Value of the ConVar on the client\" unit=\"text\">%s</value>\n\t\t\t\t\t"
-			  "<value name=\"answer_status\" desc=\"Response code from the engine\" unit=\"eQueryCvarValueStatus\">%s</value>\n\t\t\t\t\t"
-			  "<value name=\"rule\" desc=\"Method used by the plugin to compare the value\" unit=\"ConVarRule\">%s</value>\n\t\t\t\t"
-			  "</struct>\n\t\t\t"
-			  "</base_detection_convar>",
-			  ConvertRequestStatus ( GetDataStruct ()->status ),
-			  GetDataStruct ()->timeStart,
-			  ConVarTester::GetInstance ()->m_convars_rules[ GetDataStruct ()->ruleset ].name,
-			  ConVarTester::GetInstance ()->m_convars_rules[ GetDataStruct ()->ruleset ].value,
-			  GetDataStruct ()->answer.c_str (),
-			  GetDataStruct ()->answer_status.c_str (),
-			  ConvertRule ( ConVarTester::GetInstance ()->m_convars_rules[ GetDataStruct ()->ruleset ].rule )
-	);
+	return Helpers::format ( ":::: CurrentConVarRequest {\n:::::::: Request Status : %s,\n:::::::: Request Sent At : %f,\n:::::::: ConVarInfo {\n:::::::::::: ConVar Name : %s,\n:::::::::::: Expected Value : %s,\n:::::::::::: Got Value : %s,\n:::::::::::: Answer Status : %s,\n:::::::::::: Comparison Rule : %s\n::::::::}\n::::}",
+							 ConvertRequestStatus ( GetDataStruct ()->status ),
+							 GetDataStruct ()->timeStart,
+							 ConVarTester::GetInstance ()->m_convars_rules[ GetDataStruct ()->ruleset ].name,
+							 ConVarTester::GetInstance ()->m_convars_rules[ GetDataStruct ()->ruleset ].value,
+							 GetDataStruct ()->answer.c_str (),
+							 GetDataStruct ()->answer_status.c_str (),
+							 ConvertRule ( ConVarTester::GetInstance ()->m_convars_rules[ GetDataStruct ()->ruleset ].rule ) );
 }
 
-basic_string Base_Detection_ConVar::GetDetectionLogMessage () const
+basic_string Detection_ConVar::GetDetectionLogMessage ()
 {
 	return Helpers::format ( "%s ConVar Bypasser", ConVarTester::GetInstance ()->m_convars_rules[ GetDataStruct ()->ruleset ].name );
-}
-
-void Detection_ConVarTimeout::TakeAction ()
-{
-	m_player->Kick ( "ConVar request timed out" );
-}
-
-void Detection_ConVarWrongValue::TakeAction ()
-{
-	BanRequest::GetInstance ()->AddAsyncBan ( *m_player, 0, nullptr );
-}
-
-void Detection_ConVarIllegal::TakeAction ()
-{
-	m_player->Ban ();
 }
 

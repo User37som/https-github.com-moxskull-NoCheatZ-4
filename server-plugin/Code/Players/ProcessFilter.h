@@ -233,7 +233,7 @@ inline const char * const SlotStatusToString ( SlotStatus_t status )
 		case SlotStatus::PLAYER_IN_TESTS_TAKEOVER:
 			return "PLAYER_IN_TESTS_TAKEOVER";
 		default:
-			//Assert ( 0 && "Undefined SloStatus in SlotStatusToString" );
+			Assert ( 0 && "Undefined SloStatus in SlotStatusToString" );
 			return "ERROR";
 	}
 }

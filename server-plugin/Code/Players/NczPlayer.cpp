@@ -36,8 +36,7 @@ NczPlayer::NczPlayer ( const int index ) :
 	m_edict ( Helpers::PEntityOfEntIndex ( index ) ),
 	m_channelinfo ( SourceSdk::InterfacesProxy::Call_GetPlayerNetInfo ( index ) ),
 	m_playerinfo ( nullptr ),
-	m_time_connected ( 0.0 ),
-	m_detections ( m_index )
+	m_time_connected ( 0.0 )
 {}
 
 WpnShotType const NczPlayer::GetWpnShotType () const
@@ -390,16 +389,10 @@ void NczPlayer::OnConnect ()
 
 void NczPlayer::Kick ( const char * msg )
 {
-	if( msg == nullptr )
-	{
-		basic_string kick_msg ( "Kicked " );
-		kick_msg.append ( m_detections.GetActionMessage () );
-		msg = kick_msg.c_str ();
-	}
 	if( BanRequest::GetInstance ()->CanKick () )
 	{
 		Helpers::writeToLogfile ( Helpers::format (
-			"Kicked %s %s with reason : [NoCheatZ 4] %s\n", this->GetName(), this->GetSteamID(), msg ) );
+			"Kicked %s with reason : %s\n", this->GetReadableIdentity ().c_str (), msg ) );
 
 		BanRequest::GetInstance ()->KickNow ( this, msg );
 	}
@@ -409,21 +402,13 @@ void NczPlayer::Ban ( const char * msg, int minutes )
 {
 	if( BanRequest::GetInstance ()->CanBan () )
 	{
-		if( msg == nullptr )
-		{
-			basic_string ban_msg ( "Banned " );
-			ban_msg.append ( m_detections.GetActionMessage () );
-			msg = ban_msg.c_str ();
-		}
-
-		Helpers::writeToLogfile ( Helpers::format (
-			"Banned %s %s with reason : [NoCheatZ 4] %s\n", this->GetName (), this->GetSteamID (), msg ) );
+		Helpers::writeToLogfile ( Helpers::format (	"Banned %s with reason : %s\n", this->GetReadableIdentity ().c_str (), msg ) );
 
 		BanRequest::GetInstance ()->BanNow ( this, minutes, msg );
 	}
 	else if( BanRequest::GetInstance ()->CanKick () )
 	{
-		Kick ( nullptr );
+		Kick ( msg );
 	}
 }
 

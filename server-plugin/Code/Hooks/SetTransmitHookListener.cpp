@@ -15,11 +15,13 @@
 
 #include "SetTransmitHookListener.h"
 
+#include "Console/convar.h"
 #include "Interfaces/InterfacesProxy.h"
 
+#include "Misc/Helpers.h"
+#include "plugin.h"
+#include "Systems/Logger.h"
 #include "Systems/ConfigManager.h"
-#include "Players/NczPlayerManager.h"
-#include "Hooks/temp_HookGuard.h"
 #include "Systems/AutoTVRecord.h"
 
 SetTransmitHookListener::TransmitListenersListT SetTransmitHookListener::m_listeners;

@@ -16,9 +16,11 @@ limitations under the License.
 #ifndef AUTOATTACKTESTER_H
 #define AUTOATTACKTESTER_H
 
-#include "Systems/Testers/Detections/temp_BaseDetection.h" // + basic_string + memset/cpy + logger + basesystem + singleton
-#include "Players/temp_PlayerDataStruct.h"
+#include "Systems/BaseSystem.h"
 #include "Hooks/PlayerRunCommandHookListener.h"
+#include "Players/temp_PlayerDataStruct.h"
+#include "Systems/Testers/Detections/temp_BaseDetection.h"
+#include "Misc/temp_singleton.h"
 #include "Misc/temp_Throwback.h"
 
 #define SHORT_TIME (float)(0.055) // sec
@@ -144,22 +146,13 @@ class Detection_AutoAttack : public LogDetection<detection_info>
 {
 	typedef LogDetection<detection_info> hClass;
 public:
-	Detection_AutoAttack ( PlayerHandler::const_iterator player, BaseDynamicSystem * tester, detection_info const * data ) :
-		hClass (player, tester, UniqueDetectionID::AUTOATTACK, data )
+	Detection_AutoAttack () : hClass ()
 	{};
-	virtual ~Detection_AutoAttack ()
+	virtual ~Detection_AutoAttack () override final
 	{};
 
-	virtual void TakeAction () override final;
-
-	virtual void WriteXMLOutput ( FILE * const ) const final;
-
-	virtual bool CloneWhenEqual () const final
-	{
-		return true;
-	}
-
-	virtual basic_string GetDetectionLogMessage () const final
+	virtual basic_string GetDataDump () override final;
+	virtual basic_string GetDetectionLogMessage () final
 	{
 		return "AutoAttack";
 	};

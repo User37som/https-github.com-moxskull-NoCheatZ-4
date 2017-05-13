@@ -1,18 +1,3 @@
-/*
-	Copyright 2012 - Le Padellec Sylvain
-
-	Licensed under the Apache License, Version 2.0 (the "License");
-	you may not use this file except in compliance with the License.
-	You may obtain a copy of the License at
-	http://www.apache.org/licenses/LICENSE-2.0
-
-	Unless required by applicable law or agreed to in writing, software
-	distributed under the License is distributed on an "AS IS" BASIS,
-	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-	See the License for the specific language governing permissions and
-	limitations under the License.
-*/
-
 #include "ConfigManager.h"
 
 #include <fstream>
@@ -21,7 +6,6 @@
 
 #include "BaseSystem.h"
 #include "Systems/Logger.h"
-#include "Hooks/Hook.h" // GetModuleDirectoryFromMemoryAddress
 
 #define FILE_LINE_BUFFER 1024
 
@@ -125,79 +109,63 @@ ConfigManager::~ConfigManager ()
 
 bool ConfigManager::LoadConfig ()
 {
-	basic_string path ( GetModuleDirectoryFromMemoryAddress ( reinterpret_cast<DWORD>(&vfid_getdatadescmap) ) );
-	m_root_server_path = path;
-	m_root_server_path.replace ( "addons/NoCheatZ/", "" );
-	m_game_name = m_root_server_path;
-	m_game_name.remove ( 0, m_game_name.find_last_of ( "/\\" ) );
-	
-	//SourceSdk::InterfacesProxy::GetGameDir ( path );
-	//basic_string gamename ( path );
-	
-	path.append ( "config.ini" );
+	basic_string path;
+	SourceSdk::InterfacesProxy::GetGameDir ( path );
+	basic_string gamename ( path );
+	path.append ( "/addons/NoCheatZ/config.ini" );
 	std::ifstream file ( path.c_str (), std::ios::in );
 	if( file )
 	{
 		basic_string value;
 		if( !GetIniAttributeValue ( file, "CONFIG", "config_version", value ) ) return false;
-		if( atoi ( value.c_str () ) >= content_version )
+		if( atoi ( value.c_str () ) == content_version )
 		{
-			if( GetIniAttributeValue ( file, "CONFIG", "override_game", value ) )
-			{
-				if( value != "" )
-				{
-					value.upper ();
-					Logger::GetInstance ()->Msg<MSG_LOG> ( Helpers::format ( "ConfigManager::LoadConfig : Replaced game name %s by %s according to override_game value in config.ini", m_game_name.c_str (), value.c_str () ) );
-					m_game_name = value ;
-				}
-			}
-
 			// load virtual functions id
-			if( !GetIniAttributeValue ( file, m_game_name, "getdatadescmap" ATTRIB_POST, value ) ) return false;
+			if( !GetIniAttributeValue ( file, gamename, "getdatadescmap" ATTRIB_POST, value ) ) return false;
 			vfid_getdatadescmap = atoi ( value.c_str () );
 
-			if( !GetIniAttributeValue ( file, m_game_name, "settransmit" ATTRIB_POST, value ) ) return false;
+			if( !GetIniAttributeValue ( file, gamename, "settransmit" ATTRIB_POST, value ) ) return false;
 			vfid_settransmit = atoi ( value.c_str () );
 
-			if( !GetIniAttributeValue ( file, m_game_name, "mhgroundentity" ATTRIB_POST, value ) ) return false;
+			if( !GetIniAttributeValue ( file, gamename, "mhgroundentity" ATTRIB_POST, value ) ) return false;
 			vfid_mhgroundentity = atoi ( value.c_str () );
 
-			if( !GetIniAttributeValue ( file, m_game_name, "weaponequip" ATTRIB_POST, value ) ) return false;
+			if( !GetIniAttributeValue ( file, gamename, "weaponequip" ATTRIB_POST, value ) ) return false;
 			vfid_weaponequip = atoi ( value.c_str () );
 
-			if( !GetIniAttributeValue ( file, m_game_name, "weapondrop" ATTRIB_POST, value ) ) return false;
+			if( !GetIniAttributeValue ( file, gamename, "weapondrop" ATTRIB_POST, value ) ) return false;
 			vfid_weapondrop = atoi ( value.c_str () );
 
-			if( !GetIniAttributeValue ( file, m_game_name, "playerruncommand" ATTRIB_POST, value ) ) return false;
+			if( !GetIniAttributeValue ( file, gamename, "playerruncommand" ATTRIB_POST, value ) ) return false;
 			vfid_playerruncommand = atoi ( value.c_str () );
 
-			if( !GetIniAttributeValue ( file, m_game_name, "dispatch" ATTRIB_POST, value ) ) return false;
+			if( !GetIniAttributeValue ( file, gamename, "dispatch" ATTRIB_POST, value ) ) return false;
 			vfid_dispatch = atoi ( value.c_str () );
 
-			if( !GetIniAttributeValue ( file, m_game_name, "thinkpost" ATTRIB_POST, value ) ) return false;
+			if( !GetIniAttributeValue ( file, gamename, "thinkpost" ATTRIB_POST, value ) ) return false;
 			vfid_thinkpost = atoi ( value.c_str () );
 
 			// load some strings
 
-			if( !GetIniAttributeValue ( file, m_game_name, "playerdataclass", m_playerdataclass ) ) return false;
+			if( !GetIniAttributeValue ( file, gamename, "playerdataclass", m_playerdataclass ) ) return false;
 
 			// load some values
 
-			if( !GetIniAttributeValue ( file, m_game_name, "f_smoketime", value ) ) return false;
+			if( !GetIniAttributeValue ( file, gamename, "f_smoketime", value ) ) return false;
 			m_smoke_time = ( float ) atof ( value.c_str () );
 
-			if( !GetIniAttributeValue ( file, m_game_name, "f_smoke_time_to_bang", value ) ) return false;
+			if( !GetIniAttributeValue ( file, gamename, "f_smoke_time_to_bang", value ) ) return false;
 			m_smoke_timetobang = ( float ) atof ( value.c_str () );
 
-			if( !GetIniAttributeValue ( file, m_game_name, "f_inner_smoke_radius_sqr", value ) ) return false;
+			if( !GetIniAttributeValue ( file, gamename, "f_inner_smoke_radius_sqr", value ) ) return false;
 			m_innersmoke_radius_sqr = ( float ) atof ( value.c_str () );
 
-			if( !GetIniAttributeValue ( file, m_game_name, "f_smoke_radius", value ) ) return false;
+			if( !GetIniAttributeValue ( file, gamename, "f_smoke_radius", value ) ) return false;
 			m_smoke_radius = ( float ) atof ( value.c_str () );
 
 			// disable systems
 
-			if( !GetIniAttributeValue ( file, m_game_name, "disable_systems", value ) ) return false;
+			if( !GetIniAttributeValue ( file, gamename, "disable_systems", value ) ) return false;
 
 			CUtlVector<basic_string> systems;
 			SplitString<char> ( value, ';', systems );
@@ -221,7 +189,7 @@ bool ConfigManager::LoadConfig ()
 		}
 		else
 		{
-			Logger::GetInstance ()->Msg<MSG_ERROR> (  "ConfigManager::LoadConfig : content_version too old"  );
+			Logger::GetInstance ()->Msg<MSG_ERROR> (  "ConfigManager::LoadConfig : content_version mismatch"  );
 		}
 	}
 	else

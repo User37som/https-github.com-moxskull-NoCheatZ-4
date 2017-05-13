@@ -1,18 +1,3 @@
-/*
-	Copyright 2012 - Le Padellec Sylvain
-
-	Licensed under the Apache License, Version 2.0 (the "License");
-	you may not use this file except in compliance with the License.
-	You may obtain a copy of the License at
-	http://www.apache.org/licenses/LICENSE-2.0
-
-	Unless required by applicable law or agreed to in writing, software
-	distributed under the License is distributed on an "AS IS" BASIS,
-	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-	See the License for the specific language governing permissions and
-	limitations under the License.
-*/
-
 #ifndef CONFIGMANAGER_H
 #define CONFIGMANAGER_H
 
@@ -32,10 +17,6 @@ private:
 
 public:
 	basic_string m_playerdataclass;
-	// absolute path to server as : /var/steamcmd/CSGO/csgo/   meaning if you the cfg dir it is : /var/steamcmd/CSGO/csgo/cfg/
-	basic_string m_root_server_path;
-	// game name like cstrike or csgo
-	basic_string m_game_name;
 
 	// values
 	float m_smoke_radius;

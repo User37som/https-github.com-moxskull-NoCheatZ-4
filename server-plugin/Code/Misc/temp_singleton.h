@@ -16,7 +16,9 @@ limitations under the License.
 #ifndef SINGLETON_H
 #define SINGLETON_H
 
-#include "SdkPreprocessors.h" // Assert
+#include <new>
+
+#include "SdkPreprocessors.h"
 
 #include "ClassSpecifications.h"
 #include "HeapMemoryManager.h"
