@@ -45,8 +45,8 @@ void WeaponHookListener::HookWeapon ( PlayerHandler::const_iterator ph )
 
 	HookInfo info_equip ( unk, ConfigManager::GetInstance ()->vfid_weaponequip, ( DWORD ) RT_nWeapon_Equip );
 	HookInfo info_drop ( unk, ConfigManager::GetInstance ()->vfid_weapondrop, ( DWORD ) RT_nWeapon_Drop );
-	HookGuard<WeaponHookListener>::GetInstance ()->VirtualTableHook ( info_equip );
-	HookGuard<WeaponHookListener>::GetInstance ()->VirtualTableHook ( info_drop );
+	HookGuard<WeaponHookListener>::GetInstance ()->VirtualTableHook ( info_equip, "CBaseCombatPlayer::WeaponEquip" );
+	HookGuard<WeaponHookListener>::GetInstance ()->VirtualTableHook ( info_drop, "CBaseCombatPlayer::WeaponDrop");
 }
 
 #ifdef GNUC

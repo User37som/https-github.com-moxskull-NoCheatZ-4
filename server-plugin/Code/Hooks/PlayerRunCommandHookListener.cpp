@@ -64,7 +64,7 @@ void PlayerRunCommandHookListener::HookPlayerRunCommand ( PlayerHandler::const_i
 	SourceSdk::IServerUnknown* unk ( ph->GetEdict ()->m_pUnk );
 
 	HookInfo info ( unk, ConfigManager::GetInstance ()->vfid_playerruncommand, ( DWORD ) RT_nPlayerRunCommand );
-	HookGuard<PlayerRunCommandHookListener>::GetInstance ()->VirtualTableHook ( info );
+	HookGuard<PlayerRunCommandHookListener>::GetInstance ()->VirtualTableHook ( info, "CBasePlayer::PlayerRunCommand" );
 }
 
 /*void PlayerRunCommandHookListener::UnhookPlayerRunCommand()

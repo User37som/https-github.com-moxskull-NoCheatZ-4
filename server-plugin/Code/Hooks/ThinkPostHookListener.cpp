@@ -38,7 +38,7 @@ ThinkPostHookListener::~ThinkPostHookListener ()
 void ThinkPostHookListener::HookThinkPost ( SourceSdk::edict_t const * const entity )
 {
 	HookInfo info ( entity->m_pUnk, ConfigManager::GetInstance ()->vfid_thinkpost, ( DWORD ) RT_nThinkPost );
-	HookGuard<ThinkPostHookListener>::GetInstance ()->VirtualTableHook ( info, true );
+	HookGuard<ThinkPostHookListener>::GetInstance ()->VirtualTableHook ( info, "CBaseEntity::Think", true );
 }
 
 void ThinkPostHookListener::RegisterThinkPostHookListener ( ThinkPostHookListener const * const listener )

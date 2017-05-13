@@ -48,12 +48,10 @@ void UserMessageHookListener::HookUserMessage ()
 	else
 	{
 		HookInfo usermessagebegin_info ( SourceSdk::InterfacesProxy::m_engineserver, 43, ( DWORD ) RT_nUserMessageBegin );
-		HookGuard<UserMessageHookListener>::GetInstance ()->VirtualTableHook ( usermessagebegin_info );
+		HookGuard<UserMessageHookListener>::GetInstance ()->VirtualTableHook ( usermessagebegin_info, "IVEngineserver::UserMessageBegin" );
 		HookInfo messageend_info ( SourceSdk::InterfacesProxy::m_engineserver, 44, ( DWORD ) RT_nMessageEnd );
-		HookGuard<UserMessageHookListener>::GetInstance ()->VirtualTableHook ( messageend_info );
+		HookGuard<UserMessageHookListener>::GetInstance ()->VirtualTableHook ( messageend_info, "IVEngineserver::MessageEnd" );
 	}
-
-
 }
 
 void UserMessageHookListener::RegisterUserMessageHookListener ( UserMessageHookListener const * const listener )

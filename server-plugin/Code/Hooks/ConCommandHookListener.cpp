@@ -41,7 +41,7 @@ ConCommandHookListener::~ConCommandHookListener ()
 void ConCommandHookListener::HookDispatch ( void* cmd )
 {
 	HookInfo info ( cmd, ConfigManager::GetInstance ()->vfid_dispatch, ( DWORD ) RT_nDispatch );
-	HookGuard<ConCommandHookListener>::GetInstance ()->VirtualTableHook ( info );
+	HookGuard<ConCommandHookListener>::GetInstance ()->VirtualTableHook ( info, "ConCommand::Dispatch" );
 }
 
 #ifdef GNUC

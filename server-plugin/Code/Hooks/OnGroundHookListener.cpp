@@ -41,7 +41,7 @@ void OnGroundHookListener::HookOnGround ( PlayerHandler::const_iterator ph )
 	void* unk ( ph->GetEdict ()->m_pUnk );
 
 	HookInfo info ( unk, ConfigManager::GetInstance ()->vfid_mhgroundentity, ( DWORD ) RT_nNetworkStateChanged_m_hGroundEntity );
-	HookGuard<OnGroundHookListener>::GetInstance ()->VirtualTableHook ( info );
+	HookGuard<OnGroundHookListener>::GetInstance ()->VirtualTableHook ( info, "CBasePlayer::NetworkStateChanged_m_hGroundEntity" );
 }
 
 /*void OnGroundHookListener::UnhookOnGround()

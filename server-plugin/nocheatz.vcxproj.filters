@@ -249,6 +249,14 @@
     <ClCompile Include="Code\Misc\StackWalker.cpp">
       <Filter>Code\Misc</Filter>
     </ClCompile>
+    <ClCompile Include="Code\version.cpp">
+      <Filter>Code</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Hooks\SigScan.cpp">
+      <Filter>Code\Hooks</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Hooks\DearMetamodSource.cpp">
+      <Filter>Code\Hooks</Filter>
     <ClCompile Include="Code\Systems\Testers\Detections\temp_BaseDetection.cpp">
       <Filter>Code\Systems</Filter>
     </ClCompile>
@@ -569,6 +577,13 @@
     <ClInclude Include="Code\Misc\StackWalker.h">
       <Filter>Code\Misc</Filter>
     </ClInclude>
+    <ClInclude Include="Code\version.h">
+      <Filter>Code</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Hooks\SigScan.h">
+      <Filter>Code\Hooks</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Hooks\DearMetamodSource.h">
     <ClInclude Include="Code\Misc\ForwardedCommonDefinitions.h">
       <Filter>Code\Misc</Filter>
     </ClInclude>

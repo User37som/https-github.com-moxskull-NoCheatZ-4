@@ -88,7 +88,7 @@ private:
 	detection_chat_filter m_dcfilter;
 
 public:
-	Logger () : BaseStaticSystem ( "Logger", "Verbose - AlwaysFlush - DetectionChatFilter" ), singleton_class (), m_msg (), prolog ( "[NoCheatZ " NCZ_VERSION_STR "] " ), m_always_flush(false), m_msg_func( nullptr ), m_current_memory_used ( 0 ), m_dcfilter(DEFAULT)
+	Logger () : BaseStaticSystem ( "Logger", "Verbose - AlwaysFlush - DetectionChatFilter" ), singleton_class (), m_msg (), prolog ( basic_string("[NoCheatZ ").append(NCZ_VERSION_GIT_SHORT).append("] ") ), m_always_flush(false), m_msg_func( nullptr ), m_current_memory_used ( 0 ), m_dcfilter(DEFAULT)
 	{
 		ConnectToServerConsole ();
 	};
