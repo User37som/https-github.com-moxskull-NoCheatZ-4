@@ -16,8 +16,12 @@ limitations under the License.
 #ifndef I18NMANAGER_H
 #define I18NMANAGER_H
 
-#include "Misc/temp_singleton.h"
-#include "Misc/temp_basicstring.h"
+#ifndef MUTE_INCLUDES_IN_HEADERS
+
+#	include "Misc/temp_singleton.h"
+#	include "Misc/temp_basicstring.h"
+
+#endif
 
 namespace i18n
 {

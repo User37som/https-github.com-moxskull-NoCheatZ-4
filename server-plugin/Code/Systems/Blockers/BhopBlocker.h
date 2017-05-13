@@ -17,11 +17,10 @@ limitations under the License.
 #define BHOPBLOCKER_H
 
 #include "Systems/BaseSystem.h"
+#include "Systems/OnTickListener.h"
 #include "Players/temp_PlayerDataStruct.h"
 #include "Hooks/PlayerRunCommandHookListener.h"
 #include "Hooks/OnGroundHookListener.h"
-#include "Systems/OnTickListener.h"
-#include "Misc/temp_singleton.h"
 
 struct JmpInfo
 {

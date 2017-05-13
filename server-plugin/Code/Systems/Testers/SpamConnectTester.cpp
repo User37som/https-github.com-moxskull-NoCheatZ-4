@@ -15,11 +15,6 @@
 
 #include "SpamConnectTester.h"
 
-#include "Interfaces/InterfacesProxy.h"
-
-#include "Misc/Helpers.h"
-#include "Systems/BanRequest.h"
-
 SpamConnectTester::SpamConnectTester () :
 	BaseDynamicSystem ( "SpamConnectTester" ),
 	singleton_class ()

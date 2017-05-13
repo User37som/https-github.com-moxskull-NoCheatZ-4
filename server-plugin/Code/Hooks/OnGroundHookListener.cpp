@@ -15,12 +15,9 @@
 
 #include "OnGroundHookListener.h"
 
-#include "Interfaces/iserverunknown.h"
-#include "Interfaces/edict.h"
-#include "Console/convar.h"
-
-#include "plugin.h"
 #include "Systems/ConfigManager.h"
+#include "Players/NczPlayerManager.h"
+#include "Hooks/temp_HookGuard.h"
 
 OnGroundHookListener::OnGroundListenersListT OnGroundHookListener::m_listeners;
 

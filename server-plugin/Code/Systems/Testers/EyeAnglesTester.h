@@ -16,20 +16,15 @@
 #ifndef EYEANGLESTESTER
 #define EYEANGLESTESTER
 
-#include "Systems/BaseSystem.h"
-#include "Hooks/PlayerRunCommandHookListener.h"
+#include "Systems/Testers/Detections/temp_BaseDetection.h" // + basic_string + memset/cpy + logger + basesystem + singleton + helpers + cutlvector
 #include "Players/temp_PlayerDataStruct.h"
-#include "Interfaces/IGameEventManager/IGameEventManager.h"
-#include "Systems/Testers/Detections/temp_BaseDetection.h"
-#include "Misc/temp_singleton.h"
+#include "Hooks/PlayerRunCommandHookListener.h"
 
 typedef struct EyeAngle
 {
 	float value; // Raw value of the angle
 	float abs_value; // Abs value so it's easier to test
-
 	float lastDetectionPrintTime;
-	unsigned int detectionsCount;
 
 	EyeAngle ()
 	{
@@ -41,13 +36,16 @@ typedef struct EyeAngle
 	};
 } EyeAngleT;
 
-typedef struct EyeAngleInfo
+typedef struct EyeAngleInfo : 
+	public Helpers::CRC32_Specialize
 {
 	unsigned int ignore_last; // Ignore values potentially not initialized by the engine
 
 	EyeAngleT x;
 	EyeAngleT y;
 	EyeAngleT z;
+
+	unsigned int detectionsCount;
 
 	EyeAngleInfo ()
 	{
@@ -57,51 +55,74 @@ typedef struct EyeAngleInfo
 	{
 		memcpy ( this, &other, sizeof ( EyeAngleInfo ) );
 	};
+
+	virtual uint32_t Hash_CRC32 () const
+	{
+		Helpers::CRC32_Digestive ctx;
+		ctx.Digest ( &( x.abs_value ), sizeof ( float ) );
+		ctx.Digest ( &( y.abs_value ), sizeof ( float ) );
+		ctx.Digest ( &( z.abs_value ), sizeof ( float ) );
+		return ctx.Final ();
+	}
 } EyeAngleInfoT;
 
-class Detection_EyeAngle : public LogDetection<EyeAngleInfoT>
+class Base_Detection_EyeAngle : public LogDetection<EyeAngleInfoT>
 {
+protected:
 	typedef LogDetection<EyeAngleInfoT> hClass;
 public:
-	Detection_EyeAngle () : hClass ()
+	Base_Detection_EyeAngle ( PlayerHandler::const_iterator player, BaseDynamicSystem * tester, uint32_t udid, hClass::data_t const * data ) :
+							  hClass ( player, tester, udid, data )
 	{};
-	virtual ~Detection_EyeAngle ()
+	virtual ~Base_Detection_EyeAngle ()
 	{};
 
-	virtual basic_string GetDataDump () final;
+	virtual void TakeAction () override final;
+
+	virtual void WriteXMLOutput ( FILE * const ) const final;
+
+	virtual bool CloneWhenEqual () const final
+	{
+		return true;
+	}
+
+	virtual basic_string GetDetectionLogMessage () const = 0;
 };
 
-class Detection_EyeAngleX : public Detection_EyeAngle
+class Detection_EyeAngleX : public Base_Detection_EyeAngle
 {
 public:
-	Detection_EyeAngleX ()
+	Detection_EyeAngleX ( PlayerHandler::const_iterator player, BaseDynamicSystem * tester, hClass::data_t const * data ) :
+		Base_Detection_EyeAngle ( player, tester, UniqueDetectionID::EYEANGLE_X, data )
 	{};
 	virtual ~Detection_EyeAngleX () final
 	{};
 
-	virtual basic_string GetDetectionLogMessage () final;
+	virtual basic_string GetDetectionLogMessage () const final;
 };
 
-class Detection_EyeAngleY : public Detection_EyeAngle
+class Detection_EyeAngleY : public Base_Detection_EyeAngle
 {
 public:
-	Detection_EyeAngleY ()
+	Detection_EyeAngleY ( PlayerHandler::const_iterator player, BaseDynamicSystem * tester, hClass::data_t const * data ) :
+		Base_Detection_EyeAngle ( player, tester, UniqueDetectionID::EYEANGLE_Y, data )
 	{};
 	virtual ~Detection_EyeAngleY () final
 	{};
 
-	virtual basic_string GetDetectionLogMessage () final;
+	virtual basic_string GetDetectionLogMessage () const final;
 };
 
-class Detection_EyeAngleZ : public Detection_EyeAngle
+class Detection_EyeAngleZ : public Base_Detection_EyeAngle
 {
 public:
-	Detection_EyeAngleZ ()
+	Detection_EyeAngleZ ( PlayerHandler::const_iterator player, BaseDynamicSystem * tester, hClass::data_t const * data ) :
+		Base_Detection_EyeAngle ( player, tester, UniqueDetectionID::EYEANGLE_Z, data )
 	{};
 	virtual ~Detection_EyeAngleZ () final
 	{};
 
-	virtual basic_string GetDetectionLogMessage () final;
+	virtual basic_string GetDetectionLogMessage () const final;
 };
 
 class EyeAnglesTester :

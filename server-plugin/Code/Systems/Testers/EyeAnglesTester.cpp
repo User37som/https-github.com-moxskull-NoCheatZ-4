@@ -13,9 +13,6 @@
    limitations under the License.
 */
 
-#include <stdio.h>
-#include <cmath>
-
 #include "EyeAnglesTester.h"
 
 #include "Misc/EntityProps.h"
@@ -93,45 +90,34 @@ PlayerRunCommandRet EyeAnglesTester::RT_PlayerRunCommandCallback ( PlayerHandler
 	{
 		if( playerData->x.abs_value > 89.0f )
 		{
-			++playerData->x.detectionsCount;
+			++playerData->detectionsCount;
 			if( playerData->x.lastDetectionPrintTime + ANTIFLOOD_LOGGING_TIME < Plat_FloatTime () )
 			{
 				playerData->x.lastDetectionPrintTime = Plat_FloatTime ();
 
-				Detection_EyeAngleX pDetection;
-				pDetection.PrepareDetectionData ( playerData );
-				pDetection.PrepareDetectionLog ( *ph, this );
-				pDetection.Log ();
+				TriggerDetection ( Detection_EyeAngleX, ph, playerData );
 			}
 		}
 		if( playerData->y.abs_value > 180.0f )
 		{
-			++playerData->y.detectionsCount;
+			++playerData->detectionsCount;
 			if( playerData->y.lastDetectionPrintTime + ANTIFLOOD_LOGGING_TIME < Plat_FloatTime () )
 			{
 				playerData->y.lastDetectionPrintTime = Plat_FloatTime ();
 
-				Detection_EyeAngleY pDetection;
-				pDetection.PrepareDetectionData ( playerData );
-				pDetection.PrepareDetectionLog ( *ph, this );
-				pDetection.Log ();
+				TriggerDetection ( Detection_EyeAngleY, ph, playerData );
 			}
 		}
-		if( playerData->z.abs_value > 1.0f )
+		if( playerData->z.abs_value > 0.0f )
 		{
-			++playerData->z.detectionsCount;
+			++playerData->detectionsCount;
 			if( playerData->z.lastDetectionPrintTime + ANTIFLOOD_LOGGING_TIME < Plat_FloatTime () )
 			{
 				playerData->z.lastDetectionPrintTime = Plat_FloatTime ();
 
-				Detection_EyeAngleZ pDetection;
-				pDetection.PrepareDetectionData ( playerData );
-				pDetection.PrepareDetectionLog ( *ph, this );
-				pDetection.Log ();
+				TriggerDetection ( Detection_EyeAngleZ, ph, playerData );
 			}
 		}
-
-		BanRequest::GetInstance ()->AddAsyncBan ( *ph, 0, "Banned by NoCheatZ 4" );
 	}
 	return drop_cmd;
 }
@@ -145,15 +131,34 @@ void EyeAnglesTester::FireGameEvent ( SourceSdk::IGameEvent *ev ) // round_end
 	}
 }
 
-basic_string Detection_EyeAngle::GetDataDump ()
+void Base_Detection_EyeAngle::TakeAction ()
 {
-	return Helpers::format ( ":::: EyeAngleInfo {\n:::::::: EyeAngleX {\n:::::::::::: Angle : %f,\n:::::::::::: Detections Count : %ud\n:::::::: },\n:::::::: EyeAngleY {\n:::::::::::: Angle : %f,\n:::::::::::: Detections Count : %ud\n:::::::: },\n:::::::: EyeAngleZ {\n:::::::::::: Angle : %f,\n:::::::::::: Detections Count : %ud\n:::::::: }\n:::: }",
-							 GetDataStruct ()->x.value, GetDataStruct ()->x.detectionsCount,
-							 GetDataStruct ()->y.value, GetDataStruct ()->y.detectionsCount,
-							 GetDataStruct ()->z.value, GetDataStruct ()->z.detectionsCount );
+	BanRequest::GetInstance ()->AddAsyncBan ( *m_player, 0, nullptr );
 }
 
-basic_string Detection_EyeAngleX::GetDetectionLogMessage ()
+void Base_Detection_EyeAngle::WriteXMLOutput ( FILE * const out ) const
+{
+	Assert ( out );
+
+	fprintf ( out,
+			  "<base_detection_eyeangle>\n\t\t\t"
+			  "<struct name=\"EyeAngleInfo\">\n\t\t\t\t"
+			  "<value name=\"x.value\" desc=\"EyeAngle X value\" unit=\"deg\">%f</value>\n\t\t\t\t\t"
+			  "<value name=\"y.value\" desc=\"EyeAngle Y value\" unit=\"deg\">%f</value>\n\t\t\t\t\t"
+			  "<value name=\"z.value\" desc=\"EyeAngle Z value\" unit=\"deg\">%f</value>\n\t\t\t\t\t"
+			  "<value name=\"detectionsCount\" desc=\"Number of times one value exceeded range\" unit=\"count\">%u</value>\n\t\t\t\t\t"
+			  "</struct>\n\t\t\t"
+			  "</base_detection_eyeangle>",
+			GetDataStruct ()->x.value,
+			 GetDataStruct ()->x.detectionsCount,
+			GetDataStruct ()->y.value,
+			 GetDataStruct ()->y.detectionsCount,
+			GetDataStruct ()->z.value,
+			  GetDataStruct ()->z.detectionsCount
+	);
+}
+
+basic_string Detection_EyeAngleX::GetDetectionLogMessage () const
 {
 	if( Helpers::IsInt ( GetDataStruct ()->x.value ) )
 	{
@@ -165,7 +170,7 @@ basic_string Detection_EyeAngleX::GetDetectionLogMessage ()
 	}
 }
 
-basic_string Detection_EyeAngleY::GetDetectionLogMessage ()
+basic_string Detection_EyeAngleY::GetDetectionLogMessage () const
 {
 	if( Helpers::IsInt ( GetDataStruct ()->y.value ) )
 	{
@@ -177,7 +182,7 @@ basic_string Detection_EyeAngleY::GetDetectionLogMessage ()
 	}
 }
 
-basic_string Detection_EyeAngleZ::GetDetectionLogMessage ()
+basic_string Detection_EyeAngleZ::GetDetectionLogMessage () const
 {
 	if( Helpers::IsInt ( GetDataStruct ()->z.value ) )
 	{

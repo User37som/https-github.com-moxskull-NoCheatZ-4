@@ -16,14 +16,18 @@
 #ifndef LOGGER_H
 #define LOGGER_H
 
-#include "Interfaces/InterfacesProxy.h"
+#ifndef MUTE_INCLUDES_IN_HEADERS
 
-#include "Preprocessors.h"
-#include "Misc/temp_basicstring.h"
-#include "Misc/temp_singleton.h"
+#	include "Interfaces/InterfacesProxy.h"
 
-#include "Containers/utlvector.h"
-#include "Systems/BaseSystem.h"
+#	include "Preprocessors.h"
+#	include "Misc/temp_basicstring.h"
+#	include "Misc/temp_singleton.h"
+
+#	include "Containers/utlvector.h"
+#	include "Systems/BaseSystem.h"
+
+#endif
 
 /*
 	Messages to be written on the plugin's logfile.
@@ -56,6 +60,14 @@ enum msg_type
 	MSG_CMD_REPLY
 };
 
+enum detection_chat_filter
+{
+	ALL = -1,
+	DEFAULT = 0,
+	TVONLY,
+	LOGONLY
+};
+
 class Logger :
 	public BaseStaticSystem,
 	public Singleton<Logger>
@@ -73,8 +85,10 @@ private:
 
 	size_t m_current_memory_used;
 
+	detection_chat_filter m_dcfilter;
+
 public:
-	Logger () : BaseStaticSystem ( "Logger", "Verbose - AlwaysFlush" ), singleton_class (), m_msg (), prolog ( basic_string("[NoCheatZ ").append(NCZ_VERSION_GIT_SHORT).append("] ") ), m_always_flush(false), m_msg_func( nullptr ), m_current_memory_used ( 0 )
+	Logger () : BaseStaticSystem ( "Logger", "Verbose - AlwaysFlush - DetectionChatFilter" ), singleton_class (), m_msg (), prolog ( basic_string("[NoCheatZ ").append(NCZ_VERSION_GIT_SHORT).append("] ") ), m_always_flush(false), m_msg_func( nullptr ), m_current_memory_used ( 0 ), m_dcfilter(DEFAULT)
 	{
 		ConnectToServerConsole ();
 	};
@@ -87,6 +101,11 @@ public:
 	{};
 
 	virtual bool sys_cmd_fn ( const SourceSdk::CCommand &args ) override final;
+
+	detection_chat_filter GetDCFilter () const
+	{
+		return m_dcfilter;
+	}
 
 	void SetAlwaysFlush (bool v)
 	{

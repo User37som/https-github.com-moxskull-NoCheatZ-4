@@ -13,17 +13,11 @@
    limitations under the License.
 */
 
-#include <cmath>
-
 #include "WallhackBlocker.h"
 
-#include "Interfaces/InterfacesProxy.h"
-#include "Interfaces/bspflags.h"
-#include "Interfaces/iserverunknown.h"
-
 #include "Misc/EntityProps.h"
-#include "Hooks/PlayerRunCommandHookListener.h"
 #include "Misc/MathCache.h"
+#include "Hooks/PlayerRunCommandHookListener.h"
 
 WallhackBlocker::WallhackBlocker () :
 	BaseDynamicSystem ( "WallhackBlocker" ),

@@ -16,12 +16,9 @@
 #ifndef BANREQUEST_H
 #define BANREQUEST_H
 
-#include "Misc/temp_basiclist.h"
-#include "Misc/temp_singleton.h"
-#include "Preprocessors.h"
+#include "Logger.h"
+#include "TimerListener.h"
 #include "Players/NczPlayer.h"
-#include "Systems/TimerListener.h"
-#include "Systems/BaseSystem.h"
 
 typedef struct PlayerBanRequest
 {

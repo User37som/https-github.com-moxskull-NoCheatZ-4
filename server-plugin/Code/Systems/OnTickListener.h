@@ -16,8 +16,12 @@
 #ifndef ONTICKLISTENER
 #define ONTICKLISTENER
 
-#include "Misc/temp_basiclist.h"
-#include "Players/NczPlayerManager.h"
+#ifndef MUTE_INCLUDES_IN_HEADERS
+
+#	include "Misc/temp_basiclist.h"
+#	include "Players/NczPlayerManager.h"
+
+#endif
 
 /////////////////////////////////////////////////////////////////////////
 // BaseFramedTester

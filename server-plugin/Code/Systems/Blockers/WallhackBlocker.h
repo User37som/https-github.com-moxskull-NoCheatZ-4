@@ -16,15 +16,11 @@
 #ifndef WALLHACKBLOCKER_H
 #define WALLHACKBLOCKER_H
 
-#include "Interfaces/IGameEventManager/IGameEventManager.h"
-#include "Maths/Vector.h"
-
+#include "Systems/Logger.h" // LoggerAssert + BaseSystem
+#include "Systems/OnTickListener.h"
 #include "Players/temp_PlayerDataStruct.h"
 #include "Hooks/SetTransmitHookListener.h"
 #include "Hooks/WeaponHookListener.h"
-#include "Systems/BaseSystem.h"
-#include "Systems/OnTickListener.h"
-#include "Misc/temp_singleton.h"
 
 enum SpectatorMode
 {
@@ -54,7 +50,7 @@ struct ClientDataS
 	};
 };
 
-struct ALIGN4 VisInfo
+struct alignas(4) VisInfo
 {
 	bool m_visible;
 	bool m_valid;
@@ -73,7 +69,7 @@ struct ALIGN4 VisInfo
 		m_valid = true;
 		m_visible = visibility;
 	};
-} ALIGN4_POST;
+};
 
 class VisCache :
 	protected NoCopy,

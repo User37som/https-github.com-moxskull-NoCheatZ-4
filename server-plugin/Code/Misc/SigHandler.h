@@ -7,12 +7,18 @@
 #ifndef SIGHANDLER_H
 #define SIGHANDLER_H
 
-#include <stdio.h>
-#include <signal.h>
+#ifndef MUTE_INCLUDES_IN_HEADERS
+
+#	include <stdio.h>
+#	include <signal.h>
+
+#endif
 
 #ifdef WIN32
 
 #include "StackWalker.h"
+
+
 
 class StackWalker_OutFile : public StackWalker
 {

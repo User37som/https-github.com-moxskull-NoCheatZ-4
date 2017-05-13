@@ -16,23 +16,8 @@
 #ifndef ENTPROPS_H
 #define ENTPROPS_H
 
-#undef GetClassName
-#include "SdkPreprocessors.h"
-#include "Interfaces/InterfacesProxy.h"
-#include "Interfaces/edict.h"
-#include "Interfaces/server_class.h"
-#include "Interfaces/datamap.h"
-
-#include "temp_basiclist.h"
-#include "temp_basicstring.h"
-#include "temp_singleton.h"
-#include "Helpers.h"
-#include "Systems/Logger.h"
-#include "Systems/ConfigManager.h"
-
-typedef int offset_t;
-
-class CBaseEntity;
+#include "Misc/ForwardedCommonDefinitions.h"
+#include "Systems/Logger.h" // LoggerAssert + Singleton
 
 enum UsedProps
 {

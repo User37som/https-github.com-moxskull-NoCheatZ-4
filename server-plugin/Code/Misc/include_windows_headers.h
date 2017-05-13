@@ -19,6 +19,9 @@
 #pragma once
 
 #ifdef WIN32
+#	ifdef DWORD
+#		undef DWORD
+#	endif
 #	include <Windows.h>
 #endif
 

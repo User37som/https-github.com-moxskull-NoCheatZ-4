@@ -16,9 +16,6 @@ limitations under the License.
 #ifndef USERMESSAGEHOOKLISTENER_H
 #define USERMESSAGEHOOKLISTENER_H
 
-#include "Preprocessors.h"
-#include "Hook.h"
-
 namespace SourceSdk
 {
 	class IVEngineServer023csgo;
@@ -26,6 +23,8 @@ namespace SourceSdk
 	class IRecipientFilter;
 	struct bf_write;
 }
+
+#include "temp_HookListenersList.h"
 
 namespace google
 {

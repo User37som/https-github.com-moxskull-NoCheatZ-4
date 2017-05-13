@@ -17,12 +17,7 @@
 #ifndef SPAMCONNECTTESTER_H
 #define SPAMCONNECTTESTER_H
 
-#include "Misc/temp_basicstring.h"
-
-#include "Misc/temp_basiclist.h"
-#include "Preprocessors.h"
-#include "Systems/BaseSystem.h"
-#include "Misc/temp_singleton.h"
+#include "Systems/Logger.h" // Logger is not needed but it includes everything we need
 
 struct ConnectInfo
 {

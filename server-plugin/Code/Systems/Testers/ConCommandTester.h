@@ -16,15 +16,9 @@
 #ifndef CONCOMMANDTESTER_H
 #define CONCOMMANDTESTER_H
 
-#include <cmath>
-
-#include "Misc/temp_basiclist.h"
+#include "Systems/Testers/Detections/temp_BaseDetection.h" // + basic_string + memset/cpy + logger + basesystem + singleton + helpers + cutlvector
 #include "Hooks/ConCommandHookListener.h"
-#include "Systems/BaseSystem.h"
 #include "Players/temp_PlayerDataStruct.h"
-#include "Systems/Testers/Detections/temp_BaseDetection.h"
-#include "Misc/temp_singleton.h"
-#include "Misc/temp_basicstring.h"
 
 typedef struct PlayerConCommandS
 {
@@ -32,7 +26,8 @@ typedef struct PlayerConCommandS
 	bool isSpamIgnored;
 	float time;
 
-	PlayerConCommandS () : cmd ()
+	PlayerConCommandS () : 
+		cmd ()
 	{
 		isSpamIgnored = false;
 		time = 0.0;
@@ -58,16 +53,33 @@ typedef struct PlayerConCommandS
 	};
 } PlayerConCommandT;
 
-typedef struct LastPlayerCommandsS
+typedef struct LastPlayerCommandsS :
+	public Helpers::CRC32_Specialize
 {
-	CUtlVector<PlayerConCommandT> commands;
+	typedef CUtlVector<PlayerConCommandT> cmd_list_t;
+	cmd_list_t commands;
 
-	LastPlayerCommandsS () : commands ()
+	LastPlayerCommandsS () : 
+		CRC32_Specialize (),
+		commands ()
 	{};
+
 	LastPlayerCommandsS ( const LastPlayerCommandsS& other ) : commands ()
 	{
 		commands = commands;
 	};
+
+	virtual uint32_t Hash_CRC32 ()
+	{
+		Helpers::CRC32_Digestive ctx;
+		for( cmd_list_t::iterator it ( commands.begin () ); it != commands.end (); ++it )
+		{
+			ctx.Digest ( it->cmd.c_str (), it->cmd.size () );
+			//ctx.Digest ( &(it->isSpamIgnored), sizeof(bool) );
+			//ctx.Digest ( &(it->time), sizeof ( float ) );
+		}
+		return ctx.Final ();
+	}
 
 	// Remove commands that are older than 1 second from now
 	void Clean ()
@@ -180,30 +192,50 @@ class Detection_CmdFlood : public LogDetection<LastPlayerCommandsT>
 {
 	typedef LogDetection<LastPlayerCommandsT> hClass;
 public:
-	Detection_CmdFlood () : hClass ()
-	{};
+	Detection_CmdFlood ( PlayerHandler::const_iterator player, BaseDynamicSystem * tester, LastPlayerCommandsT const * data ) :
+		hClass ( player, tester, UniqueDetectionID::CMD_FLOOD, data )
+	{}
 	virtual ~Detection_CmdFlood ()
-	{};
+	{}
 
-	virtual basic_string GetDataDump () final;
-	virtual basic_string GetDetectionLogMessage ()
+	virtual void TakeAction () override final;
+
+	virtual void WriteXMLOutput ( FILE * const ) const final;
+
+	virtual bool CloneWhenEqual () const final
+	{
+		return true;
+	}
+
+	virtual basic_string GetDetectionLogMessage () const final
 	{
 		return "ConCommand Flood";
-	};
+	}
 };
 
-class Detection_CmdViolation : public Detection_CmdFlood // Use the same GetDataDump
+class Detection_CmdViolation : public LogDetection<LastPlayerCommandsT>
 {
+	typedef LogDetection<LastPlayerCommandsT> hClass;
 public:
-	Detection_CmdViolation () : Detection_CmdFlood ()
+	Detection_CmdViolation ( PlayerHandler::const_iterator player, BaseDynamicSystem * tester, LastPlayerCommandsT const * data ) :
+		hClass ( player, tester, UniqueDetectionID::CMD_VIOLATION, data )
 	{};
-	virtual  ~Detection_CmdViolation () override final
-	{};
+	virtual  ~Detection_CmdViolation ()
+	{}
 
-	virtual basic_string GetDetectionLogMessage () override final
+	virtual void TakeAction () override final;
+
+	virtual void WriteXMLOutput ( FILE * const ) const final;
+
+	virtual bool CloneWhenEqual () const final
+	{
+		return true;
+	}
+
+	virtual basic_string GetDetectionLogMessage () const final
 	{
 		return "ConCommand Violation";
-	};
+	}
 };
 
 #endif

@@ -16,12 +16,16 @@
 #ifndef BASESYSTEM
 #define BASESYSTEM
 
-#include <stdint.h>
+#ifndef MUTE_INCLUDES_IN_HEADERS
 
-#include "Console/convar.h"
+#	include <stdint.h>
 
-#include "Misc/temp_basiclist.h"
-#include "Misc/temp_Metrics.h"
+#	include "Console/convar.h"
+
+#	include "Misc/temp_basiclist.h"
+#	include "Misc/temp_Metrics.h"
+
+#endif
 
 /////////////////////////////////////////////////////////////////////////
 // BaseSystem

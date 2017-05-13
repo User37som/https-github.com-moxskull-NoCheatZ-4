@@ -1,15 +1,11 @@
 #ifndef TEMP_BASICSTRING
 #define TEMP_BASICSTRING
 
-#include <new>
 #include <string.h>
 #include <limits>
 #include <cwctype>
-#include <clocale>
 
-#include "Preprocessors.h"
 #include "Containers/utlvector.h"
-#include "Misc/temp_singleton.h"
 #include "HeapMemoryManager.h"
 
 #define AVERAGE_STRING_SIZE 64 // must be a power of 2
@@ -614,7 +610,7 @@ public:
 template <>
 inline void String<wchar_t>::upper ()
 {
-	std::setlocale ( LC_ALL, "en_US.utf8" );
+	//std::setlocale ( LC_ALL, "en_US.utf8" );
 	if( !m_alloc )
 		return;
 	for( size_t i ( 0 ); i != m_size; ++i )
@@ -626,7 +622,7 @@ inline void String<wchar_t>::upper ()
 template <>
 inline void String<wchar_t>::lower ()
 {
-	std::setlocale ( LC_ALL, "en_US.utf8" );
+	//std::setlocale ( LC_ALL, "en_US.utf8" );
 	if( !m_alloc )
 		return;
 	for( size_t i ( 0 ); i != m_size; ++i )

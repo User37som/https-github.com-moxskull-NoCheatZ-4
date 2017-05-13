@@ -16,22 +16,22 @@
 #ifndef WEAPONHOOKLISTENER
 #define WEAPONHOOKLISTENER
 
-#include "Preprocessors.h"
-#include "Hook.h"
+class CBasePlayer;
+
+namespace SourceSdk
+{
+	struct Vector;
+	struct edict_t;
+	class CBaseEntity;
+}
+
+#include "temp_HookListenersList.h"
+#include "Players/PlayerHandler_impl.h"
 
 /////////////////////////////////////////////////////////////////////////
 // CCSPlayer::Weapon_Equip(CBaseCombatWeapon*)
 // CBasePlayer::Weapon_Drop(CBaseCombatWeapon*, Vector const*, Vector const*)
 /////////////////////////////////////////////////////////////////////////
-
-class CBasePlayer;
-class NczPlayer;
-
-namespace SourceSdk
-{
-	struct Vector;
-	class CBaseEntity;
-}
 
 typedef void ( HOOKFN_EXT *WeaponEquip_t )( void * const, void * const );
 typedef void ( HOOKFN_EXT *WeaponDrop_t )( void * const, void * const, SourceSdk::Vector const * const, SourceSdk::Vector const * const );

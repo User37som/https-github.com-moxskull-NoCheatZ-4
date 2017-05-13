@@ -23,6 +23,7 @@
 #include "Misc/temp_Metrics.h"
 #include "Players/NczPlayerManager.h"
 #include "Systems/AutoTVRecord.h"
+#include "Systems/ConfigManager.h"
 
 #ifdef GNUC
 
@@ -254,8 +255,7 @@ void Logger::Flush ()
 {
 	if( m_msg.IsEmpty () ) return;
 
-	basic_string path;
-	SourceSdk::InterfacesProxy::GetGameDir ( path );
+	basic_string path ( ConfigManager::GetInstance ()->m_root_server_path );
 
 	path.append ( Helpers::getStrDateTime ( "/logs/NoCheatZ_4_Logs/NoCheatZ-%d-%b-%Y.log" ) );
 	std::ofstream fichier ( path.c_str (), std::ios::out | std::ios::app );
@@ -308,6 +308,38 @@ bool Logger::sys_cmd_fn ( const SourceSdk::CCommand &args )
 		else
 		{
 			Msg<MSG_CMD_REPLY> ( "Usage : On / Off" );
+			return false;
+		}
+	}
+	else if( stricmp ( "DetectionChatFilter", args.Arg ( 2 ) ) )
+	{
+		if( stricmp ( "All", args.Arg ( 3 ) ) )
+		{
+			m_dcfilter = ALL;
+			Msg<MSG_CMD_REPLY> ( "Detections will be printed to all players" );
+			return true;
+		}
+		else if( stricmp ( "Default", args.Arg ( 3 ) ) )
+		{
+			m_dcfilter = DEFAULT;
+			Msg<MSG_CMD_REPLY> ( "Detections will be printed to all players except the incrimined player" );
+			return true;
+		}
+		else if( stricmp ( "TVOnly", args.Arg ( 3 ) ) )
+		{
+			m_dcfilter = TVONLY;
+			Msg<MSG_CMD_REPLY> ( "Detections will be printed to TV only" );
+			return true;
+		}
+		else if( stricmp ( "LogOnly", args.Arg ( 3 ) ) )
+		{
+			m_dcfilter = LOGONLY;
+			Msg<MSG_CMD_REPLY> ( "Detections will be printed only in logs" );
+			return true;
+		}
+		else
+		{
+			Msg<MSG_CMD_REPLY> ( "Usage : All / Default / TVOnly / LogOnly" );
 			return false;
 		}
 	}
