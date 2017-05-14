@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26403.7
+VisualStudioVersion = 15.0.26430.4
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "nocheatzX", "server-plugin\nocheatz.vcxproj", "{B6572CBE-7C7F-4FFF-94DE-AFBBBAB11C64}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -10,11 +10,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "nocheatzX", "server-plugin\
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libprotobuf", "server-plugin\SourceSdk\Interfaces\Protobuf\protobuf-2.5.0\vsprojects\libprotobuf.vcxproj", "{3E283F37-A4ED-41B7-A3E6-A2D89D131A30}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{B72A5FE7-C33C-4A02-9204-16B0C755FD03}"
-	ProjectSection(SolutionItems) = preProject
-		Performance3.psess = Performance3.psess
-	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "unit-tests", "server-plugin\unit-tests\unit-tests.vcxproj", "{4440A41E-4236-4A75-9A7D-8AA1C01E5309}"
 EndProject
