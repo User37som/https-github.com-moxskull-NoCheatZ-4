@@ -65,13 +65,13 @@ The goal is to make an anti-cheat that can be used with any type of gameservers.
 
 Supported games will be [CS:S](http://store.steampowered.com/app/240), [CS:GO](http://store.steampowered.com/app/730), [CS:P](http://cspromod.com/), [Black Mesa](http://store.steampowered.com/app/362890) and maybe more.
 
-Currently [CS:S](http://store.steampowered.com/app/240) is the base of this project.
+Currently [CS:GO](http://store.steampowered.com/app/730) is the base of this project.
 
 <a name="Status"></a> 
 # Current Project Status
 ___
 
-* **Status** : [Dev aborted](https://github.com/L-EARN/NoCheatZ-4/tree/dev)
+* **Status** : [Slowly fighting, but hope is lost](https://github.com/L-EARN/NoCheatZ-4/tree/master)
 
 <a name="Features"></a> 
 # Features
@@ -93,7 +93,6 @@ ___
 * SpamChangeNameTester : Detects when a players changes his name too often (_Is now fixed internally by the Source Engine_)
 * SpamConnectTester : Detects when a client is flooding the connection (Trying to connect and disconnect too much)
 * SpeedTester : Detects SpeedHacks using CUserCmd and tickrate ratio.
-* ValidationTester : Forces a client to be validated by Steam before being able to join the game.
 
 <a name="blocking-systems"></a> 
 ### Blocking Systems
@@ -101,7 +100,6 @@ ___
 
 * AntiFlashbangBlocker : Send a extra white screen and stop transmit to fully blind players.
 * AntiSmokeBlocker : Players inside a smoke cannot see others. **Players can't see thru smokes even when r_drawparticles is 0**.
-* BadUserCmdBlocker : Reject malformed or cheated CUserCmds.
 * WallhackBlocker : Player visibility is tested against the walls.
 * RadarHackBlocker : Block aimbots and ESPs that use the radar positions.
 * BhopBlocker : Rejects jumps that are sent when the player lands on world for a short period of time.
@@ -149,23 +147,24 @@ ___
 ___
 
 * Even though you're not forced to install a local game-server to build the project, it's more convenient to test your build directly.
-However, running the game-server and the client game on the same computer will introduce a lot of lags.
+However, running the game-server and the client game on the same computer will introduce a lot of lags if not using a very performant computer.
+It is recommended to host the server on another computer (Either LAN or remote). A remote is preferred because it matches "production" context.
 
 See https://developer.valvesoftware.com/wiki/SteamCMD
 
 * It is recommanded, with Windows, to install your server into his own directory.
-The Visual Studio project launches a commandfile (to auto-update the server before running the debugger) that expects steamcmd to be installed at C:\steamcmd\steamcmd.exe
-You can disable this script in the post-build event options of the project.
+The Visual Studio project launches a commandfile (to auto-update the server before running the debugger) expecting steamcmd to be installed at E:\steamcmd\steamcmd.exe
+You can disable this script in the post-build event options of the project. You can also edit it for your own configuration.
 
 ```bash
 login anonymous
-force_install_dir C:\steamcmd\CSS
+force_install_dir E:\steamcmd\CSS
 app_update 232330 validate
 ```
 
 ```bash
 login anonymous
-force_install_dir C:\steamcmd\CSGO
+force_install_dir E:\steamcmd\CSGO
 app_update 740 validate
 ```
 
@@ -199,7 +198,7 @@ apt-get update
 apt-get install git g++ g++-multilib build-essential ia32-libs lib32gcc1 libc6-i386 libc6-dev-i386 autotools-dev autoconf libtool gdb screen
 ```
 
-If your version of g++ is higher than g++ 4.8.4, then you must install g++-4.8 instead :
+If your version of g++ is higher than g++ 4.8.5, then you must install g++-4.8 instead :
 
 ```sh
 apt-get install g++-4.8 g++-4.8-multilib
@@ -220,14 +219,16 @@ You can copy-paste the entire content of the `Builds` directory into the root di
 #!/bin/sh
 
 export LD_LIBRARY_PATH=".:bin:$LD_LIBRARY_PATH"
-gdb --args ./srcds_linux -console -game cstrike -steam_dir ../ -steamcmd_script ../steamcmd.sh -insecure +map de_dust2 +rcon_password cderfv
+gdb --args ./srcds_linux -console -condebug -condump -usercon -game csgo -steam_dir ../ -steamcmd_script ../steamcmd.sh -insecure +net_public_adr xxx.xxx.xxx.xxx +ip xxx.xxx.xxx.xxx +game_type 0 +game_mode 1 +map de_inferno +rcon_password cderfv
 ```
+
+For availables game-modes : https://developer.valvesoftware.com/wiki/Counter-Strike:_Global_Offensive_Dedicated_Servers#Starting_the_Server
 
 <a name="Windows"></a> 
 ### With Windows
 ___
 
-1. Make sure you installed steamcmd at `C:\steamcmd\steamcmd.exe` if you want a local game-server
+1. Make sure you installed steamcmd at `E:\steamcmd\steamcmd.exe` if you want a localhost game-server
 
 2. Download and extract [libprotobuf src 2.5.0](https://github.com/google/protobuf/archive/v2.5.0.zip) in server-plugin\SourceSdk\Interfaces\Protobuf\
 
@@ -235,7 +236,7 @@ ___
 
 4. Rename the extracted folder of googletest into `gtest`
 
-3. Open the solution with Visual Studio 2015
+3. Open the solution with [Visual Studio 2017](https://www.visualstudio.com/downloads/)  (Visual Studio Community 2017 is free and just requires to setup a Microsoft Account)
 
 4. Choose your configuration.
 

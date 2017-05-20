@@ -21,7 +21,6 @@
 
 #include "Systems/Testers/EyeAnglesTester.h"
 #include "Systems/Testers/JumpTester.h"
-#include "Systems/Testers/ValidationTester.h"
 #include "Systems/Testers/ConVarTester.h"
 //#include "Systems/Testers/ShotTester.h"
 #include "Systems/Testers/AutoAttackTester.h"
@@ -31,7 +30,6 @@
 #include "Systems/Testers/SpamChangeNameTester.h"
 #include "Systems/Blockers/AntiFlashbangBlocker.h"
 #include "Systems/Blockers/AntiSmokeBlocker.h"
-#include "Systems/Blockers/BadUserCmdBlocker.h"
 #include "Systems/Blockers/WallhackBlocker.h"
 #include "Systems/Blockers/RadarHackBlocker.h"
 #include "Systems/Blockers/BhopBlocker.h"
@@ -97,7 +95,6 @@ void CNoCheatZPlugin::CreateSingletons ()
 
 	AntiFlashbangBlocker::CreateInstance ();
 	AntiSmokeBlocker::CreateInstance ();
-	BadUserCmdBlocker::CreateInstance ();
 	BhopBlocker::CreateInstance ();
 	WallhackBlocker::CreateInstance ();
 	ConCommandTester::CreateInstance ();
@@ -109,7 +106,6 @@ void CNoCheatZPlugin::CreateSingletons ()
 	SpamChangeNameTester::CreateInstance ();
 	SpamConnectTester::CreateInstance ();
 	SpeedTester::CreateInstance ();
-	ValidationTester::CreateInstance ();
 	AutoTVRecord::CreateInstance ();
 	RadarHackBlocker::CreateInstance ();
 }
@@ -118,7 +114,6 @@ void CNoCheatZPlugin::DestroySingletons ()
 {
 	RadarHackBlocker::DestroyInstance ();
 	AutoTVRecord::DestroyInstance ();
-	ValidationTester::DestroyInstance ();
 	SpeedTester::DestroyInstance ();
 	SpamConnectTester::DestroyInstance ();
 	SpamChangeNameTester::DestroyInstance ();
@@ -130,7 +125,6 @@ void CNoCheatZPlugin::DestroySingletons ()
 	ConCommandTester::DestroyInstance ();
 	WallhackBlocker::DestroyInstance ();
 	BhopBlocker::DestroyInstance ();
-	BadUserCmdBlocker::DestroyInstance ();
 	AntiSmokeBlocker::DestroyInstance ();
 	AntiFlashbangBlocker::DestroyInstance ();
 
@@ -444,13 +438,11 @@ void CNoCheatZPlugin::ClientDisconnect ( SourceSdk::edict_t *pEntity )
 //---------------------------------------------------------------------------------
 void CNoCheatZPlugin::ClientPutInServer ( SourceSdk::edict_t *pEntity, char const *playername )
 {
+	/*
 	SlotStatus stat ( NczPlayerManager::GetInstance ()->GetPlayerHandlerByEdict ( pEntity ) );
-	if( stat == SlotStatus::INVALID )
-	{
-		ValidationTester::GetInstance ()->ResetPlayerDataStruct ( pEntity );
-	}
+	*/
+	DebugMessage ( Helpers::format ( "CNoCheatZPlugin::ClientPutInServer (pEntity:%p -> pEntity->classname:%s, playername:%s)", pEntity, pEntity->GetClassName (), playername ) );
 
-	DebugMessage ( Helpers::format ( "CNoCheatZPlugin::ClientPutInServer (pEntity:%p -> pEntity->classname:%s, playername:%s) (Was already connected: %s)", pEntity, pEntity->GetClassName (), playername, Helpers::boolToString ( stat != SlotStatus::INVALID ) ) );
 }
 
 //---------------------------------------------------------------------------------
@@ -519,7 +511,6 @@ SourceSdk::PLUGIN_RESULT CNoCheatZPlugin::ClientConnect ( bool *bAllowConnect, S
 		ConCommandTester::GetInstance ()->ResetPlayerDataStruct ( player );
 		AntiFlashbangBlocker::GetInstance ()->ResetPlayerDataStruct ( player );
 		AntiSmokeBlocker::GetInstance ()->ResetPlayerDataStruct ( player );
-		BadUserCmdBlocker::GetInstance ()->ResetPlayerDataStruct ( player );
 		WallhackBlocker::GetInstance ()->ResetPlayerDataStruct ( player );
 		SpamChangeNameTester::GetInstance ()->ResetPlayerDataStruct ( player );
 		RadarHackBlocker::GetInstance ()->ResetPlayerDataStruct ( player );
@@ -541,11 +532,9 @@ SourceSdk::PLUGIN_RESULT CNoCheatZPlugin::RT_ClientCommand ( SourceSdk::edict_t 
 
 	PlayerHandler::const_iterator ph ( NczPlayerManager::GetInstance ()->GetPlayerHandlerByEdict ( pEntity ) );
 
-	if( stricmp ( args[ 0 ], "joingame" ) == 0 || stricmp ( args[ 0 ], "jointeam" ) == 0 || stricmp ( args[ 0 ], "joinclass" ) == 0 )
+	/*if( stricmp ( args[ 0 ], "joingame" ) == 0 || stricmp ( args[ 0 ], "jointeam" ) == 0 || stricmp ( args[ 0 ], "joinclass" ) == 0 )
 	{
-		if( ValidationTester::GetInstance ()->JoinCallback ( ph ) )
-			return SourceSdk::PLUGIN_STOP;
-	}
+	}*/
 	
 	if( ph >= SlotStatus::PLAYER_CONNECTED )
 	{
@@ -570,8 +559,6 @@ SourceSdk::PLUGIN_RESULT CNoCheatZPlugin::NetworkIDValidated ( const char *pszUs
 {
 	DebugMessage ( Helpers::format ( "CNoCheatZPlugin::NetworkIDValidated (pszUserName:%s, pszNetworkID:%s)", pszUserName, pszNetworkID ) );
 	if( !SteamGameServer_BSecure () ) return SourceSdk::PLUGIN_CONTINUE;
-
-	ValidationTester::GetInstance ()->AddPendingValidation ( pszUserName, pszNetworkID );
 
 	return SourceSdk::PLUGIN_CONTINUE;
 }

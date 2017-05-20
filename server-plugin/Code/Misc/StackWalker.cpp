@@ -353,7 +353,7 @@ typedef struct IMAGEHLP_MODULE64_V2 {
     CHAR     ModuleName[32];         // module name
     CHAR     ImageName[256];         // image name
     CHAR     LoadedImageName[256];   // symbol file name
-};
+} IMAGEHLP_MODULE64_V2_t;
 
 
   // SymCleanup()
@@ -976,7 +976,12 @@ BOOL StackWalker::ShowCallstack(HANDLE hThread, const CONTEXT *context, PReadPro
   if( !pSym )
   {
 	  OnOutput ( "malloc failed" );
-	  goto cleanup;  // not enough memory...
+	  // not enough memory...
+
+	  if (context == NULL)
+		  ResumeThread(hThread);
+
+	  return TRUE;
   }
   memset(pSym, 0, sizeof(IMAGEHLP_SYMBOL64) + STACKWALK_MAX_NAMELEN);
   pSym->SizeOfStruct = sizeof(IMAGEHLP_SYMBOL64);
@@ -1111,8 +1116,6 @@ BOOL StackWalker::ShowCallstack(HANDLE hThread, const CONTEXT *context, PReadPro
       break;
     }
   } // for ( frameNum )
-
-  cleanup:
     if (pSym) free( pSym );
 
   if (context == NULL)

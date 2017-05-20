@@ -432,7 +432,6 @@ copy "$(TargetPath)" ..\..\..\game\bin\"$(TargetName)".pdb
     <ClCompile Include="Code\Systems\BaseSystem.cpp" />
     <ClCompile Include="Code\Systems\Blockers\AntiFlashbangBlocker.cpp" />
     <ClCompile Include="Code\Systems\Blockers\AntiSmokeBlocker.cpp" />
-    <ClCompile Include="Code\Systems\Blockers\BadUserCmdBlocker.cpp" />
     <ClCompile Include="Code\Systems\Blockers\WallhackBlocker.cpp" />
     <ClCompile Include="Code\Systems\Logger.cpp" />
     <ClCompile Include="Code\Systems\OnTickListener.cpp" />
@@ -444,7 +443,6 @@ copy "$(TargetPath)" ..\..\..\game\bin\"$(TargetName)".pdb
     <ClCompile Include="Code\Systems\Testers\SpamChangeNameTester.cpp" />
     <ClCompile Include="Code\Systems\Testers\SpamConnectTester.cpp" />
     <ClCompile Include="Code\Systems\Testers\SpeedTester.cpp" />
-    <ClCompile Include="Code\Systems\Testers\ValidationTester.cpp" />
     <ClCompile Include="Code\Systems\TimerListener.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -540,7 +538,6 @@ copy "$(TargetPath)" ..\..\..\game\bin\"$(TargetName)".pdb
     <ClInclude Include="Code\Systems\BaseSystem.h" />
     <ClInclude Include="Code\Systems\Blockers\AntiFlashbangBlocker.h" />
     <ClInclude Include="Code\Systems\Blockers\AntiSmokeBlocker.h" />
-    <ClInclude Include="Code\Systems\Blockers\BadUserCmdBlocker.h" />
     <ClInclude Include="Code\Systems\Blockers\WallhackBlocker.h" />
     <ClInclude Include="Code\Systems\Logger.h" />
     <ClInclude Include="Code\Systems\OnTickListener.h" />
@@ -553,7 +550,6 @@ copy "$(TargetPath)" ..\..\..\game\bin\"$(TargetName)".pdb
     <ClInclude Include="Code\Systems\Testers\SpamChangeNameTester.h" />
     <ClInclude Include="Code\Systems\Testers\SpamConnectTester.h" />
     <ClInclude Include="Code\Systems\Testers\SpeedTester.h" />
-    <ClInclude Include="Code\Systems\Testers\ValidationTester.h" />
     <ClInclude Include="Code\Systems\TimerListener.h" />
   </ItemGroup>
   <ItemGroup>
