@@ -170,7 +170,7 @@ void BaseFilter ( LPEXCEPTION_POINTERS info )
 	fprintf ( out, "Caught Unhandled Exception code %X :\nFlags : %X\nAddress : %X\n", 
 			  info->ExceptionRecord->ExceptionCode,
 			  info->ExceptionRecord->ExceptionFlags,
-			  info->ExceptionRecord->ExceptionAddress );
+			  (DWORD)info->ExceptionRecord->ExceptionAddress );
 
 	StackWalker_OutFile sw ( out );
 	sw.ShowCallstack (GetCurrentThread(), info->ContextRecord);

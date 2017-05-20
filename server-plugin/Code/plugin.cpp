@@ -438,9 +438,11 @@ void CNoCheatZPlugin::ClientDisconnect ( SourceSdk::edict_t *pEntity )
 //---------------------------------------------------------------------------------
 void CNoCheatZPlugin::ClientPutInServer ( SourceSdk::edict_t *pEntity, char const *playername )
 {
+	/*
 	SlotStatus stat ( NczPlayerManager::GetInstance ()->GetPlayerHandlerByEdict ( pEntity ) );
+	*/
+	DebugMessage ( Helpers::format ( "CNoCheatZPlugin::ClientPutInServer (pEntity:%p -> pEntity->classname:%s, playername:%s)", pEntity, pEntity->GetClassName (), playername ) );
 
-	DebugMessage ( Helpers::format ( "CNoCheatZPlugin::ClientPutInServer (pEntity:%p -> pEntity->classname:%s, playername:%s) (Was already connected: %s)", pEntity, pEntity->GetClassName (), playername, Helpers::boolToString ( stat != SlotStatus::INVALID ) ) );
 }
 
 //---------------------------------------------------------------------------------
