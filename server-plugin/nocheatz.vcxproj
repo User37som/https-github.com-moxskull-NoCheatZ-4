@@ -444,7 +444,6 @@ copy "$(TargetPath)" ..\..\..\game\bin\"$(TargetName)".pdb
     <ClCompile Include="Code\Systems\Testers\SpamChangeNameTester.cpp" />
     <ClCompile Include="Code\Systems\Testers\SpamConnectTester.cpp" />
     <ClCompile Include="Code\Systems\Testers\SpeedTester.cpp" />
-    <ClCompile Include="Code\Systems\Testers\ValidationTester.cpp" />
     <ClCompile Include="Code\Systems\TimerListener.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -553,7 +552,6 @@ copy "$(TargetPath)" ..\..\..\game\bin\"$(TargetName)".pdb
     <ClInclude Include="Code\Systems\Testers\SpamChangeNameTester.h" />
     <ClInclude Include="Code\Systems\Testers\SpamConnectTester.h" />
     <ClInclude Include="Code\Systems\Testers\SpeedTester.h" />
-    <ClInclude Include="Code\Systems\Testers\ValidationTester.h" />
     <ClInclude Include="Code\Systems\TimerListener.h" />
   </ItemGroup>
   <ItemGroup>
