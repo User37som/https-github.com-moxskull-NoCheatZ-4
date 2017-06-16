@@ -81,17 +81,24 @@ void HOOKFN_INT SetTransmitHookListener::RT_nSetTransmit ( void * const This, vo
 		else // is not a player
 		{
 			SourceSdk::edict_t const * const pEdict_sender ( Helpers::edictOfUnknown ( This ) );
-			TransmitListenersListT::elem_t* it ( m_listeners.GetFirst () );
-
-			LoggerAssert ( Helpers::IndexOfEdict ( pEdict_sender ) > inst->GetMaxIndex () );
-
-			while( it != nullptr )
+			if (pEdict_sender) // https://github.com/L-EARN/NoCheatZ-4/issues/131#issuecomment-306068870
 			{
-				if( it->m_value.listener->RT_SetTransmitWeaponCallback ( pEdict_sender, receiver_assumed_player ) )
+				TransmitListenersListT::elem_t* it(m_listeners.GetFirst());
+
+				LoggerAssert(Helpers::IndexOfEdict(pEdict_sender) > inst->GetMaxIndex());
+
+				while (it != nullptr)
 				{
-					return;
+					if (it->m_value.listener->RT_SetTransmitWeaponCallback(pEdict_sender, receiver_assumed_player))
+					{
+						return;
+					}
+					it = it->m_next;
 				}
-				it = it->m_next;
+			}
+			else
+			{
+				DebugMessage("SetTransmitHookListener::RT_nSetTransmit : null pEdict_sender");
 			}
 		}
 	}

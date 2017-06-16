@@ -220,7 +220,7 @@ namespace Helpers
 			}
 			while( ++cur <= max_cur );
 
-			LoggerAssert ( "Helpers::edictOfUnknown failed" && 0 );
+			//LoggerAssert ( "Helpers::edictOfUnknown failed" && 0 ); // https://github.com/L-EARN/NoCheatZ-4/issues/131#issuecomment-306068870
 			return nullptr;
 		}
 		else
@@ -234,7 +234,7 @@ namespace Helpers
 			}
 			while( ++cur <= max_cur );
 
-			LoggerAssert ( "Helpers::edictOfUnknown failed" && 0 );
+			//LoggerAssert ( "Helpers::edictOfUnknown failed" && 0 );
 			return nullptr;
 		}
 	}
