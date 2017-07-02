@@ -152,6 +152,19 @@ bool ConVarTester::sys_cmd_fn ( const SourceSdk::CCommand &args )
 			else if( stricmp ( "SAME_FLOAT", args.Arg ( 5 ) ) == 0 ) rule = ConVarRule::SAME_FLOAT;
 			else if( stricmp ( "SAME_AS_SERVER", args.Arg ( 5 ) ) == 0 ) rule = ConVarRule::SAME_AS_SERVER;
 			else if( stricmp ( "SAME_FLOAT_AS_SERVER", args.Arg ( 5 ) ) == 0 ) rule = ConVarRule::SAME_FLOAT_AS_SERVER;
+			else if( stricmp ( "LOWER", args.Arg( 5 ) ) == 0 ) rule = ConVarRule::LOWER;
+			else if( stricmp ( "HIGHER", args.Arg( 5 ) ) == 0) rule = ConVarRule::HIGHER;
+			/*else if( stricmp ( "INRANGE", args.Arg(5)) == 0) // Need to re-order AddRule arguments ...
+			{
+				if (args.ArgC() == 7)
+				{
+					rule = ConVarRule::RANGE;
+				}
+				else
+				{
+					Logger::GetInstance()->Msg<MSG_CMD_REPLY>("INRANGE expects 2 values");
+				}
+			}*/ 
 			else
 			{
 				Logger::GetInstance()->Msg<MSG_CMD_REPLY> ( Helpers::format ( "Arg %s not found.", args.Arg ( 5 ) ) );
@@ -180,7 +193,7 @@ bool ConVarTester::sys_cmd_fn ( const SourceSdk::CCommand &args )
 		}
 		else
 		{
-			Logger::GetInstance ()->Msg<MSG_CMD_REPLY> ( "ncz ConVarTester AddRule [ConVar] [value] [TestType]\nTestType : NO_VALUE - SAME - SAME_FLOAT - SAME_AS_SERVER - SAME_FLOAT_AS_SERVER" );
+			Logger::GetInstance ()->Msg<MSG_CMD_REPLY> ( "ncz ConVarTester AddRule [ConVar] [value] [TestType]\nTestType : NO_VALUE - SAME - SAME_FLOAT - SAME_AS_SERVER - SAME_FLOAT_AS_SERVER - LOWER - HIGHER" );
 			return true;
 		}
 	}
@@ -258,61 +271,77 @@ void ConVarTester::RT_OnQueryCvarValueFinished ( PlayerHandler::const_iterator p
 			case SourceSdk::eQueryCvarValueStatus_ValueIntact:
 				{
 					req->answer_status = "ValueIntact";
-					if( ruleset->rule == ConVarRule::NO_VALUE )
+
+					float fcval ((float)atof(pCvarValue));
+					float fsval ((float)atof(ruleset->value));
+
+					switch (ruleset->rule)
 					{
-						Detection_ConVar pDetection;
-						pDetection.PrepareDetectionData ( req );
-						pDetection.PrepareDetectionLog ( *ph, this );
-						pDetection.Log ();
-						BanRequest::GetInstance ()->AddAsyncBan ( *ph, 0, "Banned by NoCheatZ 4" );
-					}
-					else if( ruleset->rule == ConVarRule::SAME )
-					{
-						if( strcmp ( ruleset->value, pCvarValue ) )
+						case ConVarRule::SAME:
+							{
+								if (strcmp(ruleset->value, pCvarValue))
+								{
+									goto novalue;
+								}
+
+								break;
+							}
+
+						case ConVarRule::SAME_AS_SERVER:
+							{
+								if (strcmp(SourceSdk::InterfacesProxy::ConVar_GetString(ruleset->sv_var), pCvarValue))
+								{
+									goto novalue;
+								}
+
+								break;
+							}
+
+						case ConVarRule::SAME_FLOAT_AS_SERVER:
+							fsval = (float)atof(SourceSdk::InterfacesProxy::ConVar_GetString(ruleset->sv_var));
+
+						case ConVarRule::SAME_FLOAT:
+							if (fcval != fsval)
+							{
+								goto novalue;
+							}
+
+							break;
+
+						case ConVarRule::LOWER:
+							if (fcval >= fsval)
+							{
+								goto novalue;
+							}
+
+							break;
+
+						case ConVarRule::HIGHER:
+							if (fcval <= fsval)
+							{
+								goto novalue;
+							}
+
+							break;
+
+						case ConVarRule::NO_VALUE:
 						{
-							Detection_ConVar pDetection;
-							pDetection.PrepareDetectionData ( req );
-							pDetection.PrepareDetectionLog ( *ph, this );
-							pDetection.Log ();
-							BanRequest::GetInstance ()->AddAsyncBan ( *ph, 0, "Banned by NoCheatZ 4" );
+novalue:
+							{
+								Detection_ConVar pDetection;
+								pDetection.PrepareDetectionData(req);
+								pDetection.PrepareDetectionLog(*ph, this);
+								pDetection.Log();
+								BanRequest::GetInstance()->AddAsyncBan(*ph, 0, "Banned by NoCheatZ 4");
+
+								break;
+							}
 						}
-					}
-					else if( ruleset->rule == ConVarRule::SAME_AS_SERVER )
-					{
-						if( strcmp ( SourceSdk::InterfacesProxy::ConVar_GetString ( ruleset->sv_var ), pCvarValue ) )
-						{
-							Detection_ConVar pDetection;
-							pDetection.PrepareDetectionData ( req );
-							pDetection.PrepareDetectionLog ( *ph, this );
-							pDetection.Log ();
-							BanRequest::GetInstance ()->AddAsyncBan ( *ph, 0, "Banned by NoCheatZ 4" );
-						}
-					}
-					else if( ruleset->rule == ConVarRule::SAME_FLOAT )
-					{
-						float fcval = ( float ) atof ( pCvarValue );
-						float fsval = ( float ) atof ( ruleset->value );
-						if( fcval != fsval )
-						{
-							Detection_ConVar pDetection;
-							pDetection.PrepareDetectionData ( req );
-							pDetection.PrepareDetectionLog ( *ph, this );
-							pDetection.Log ();
-							BanRequest::GetInstance ()->AddAsyncBan ( *ph, 0, "Banned by NoCheatZ 4" );
-						}
-					}
-					else if( ruleset->rule == ConVarRule::SAME_FLOAT_AS_SERVER )
-					{
-						float fcval = ( float ) atof ( pCvarValue );
-						float fsval = ( float ) atof ( SourceSdk::InterfacesProxy::ConVar_GetString ( ruleset->sv_var ) );
-						if( fcval != fsval )
-						{
-							Detection_ConVar pDetection;
-							pDetection.PrepareDetectionData ( req );
-							pDetection.PrepareDetectionLog ( *ph, this );
-							pDetection.Log ();
-							BanRequest::GetInstance ()->AddAsyncBan ( *ph, 0, "Banned by NoCheatZ 4" );
-						}
+
+						default:
+							Logger::GetInstance()->Msg<MSG_ERROR>(Helpers::format("ConVarTester : Unknown code, server memory is crashed.", ph->GetName()));
+							break;
+						
 					}
 					break;
 				}
@@ -348,6 +377,7 @@ void ConVarTester::RT_OnQueryCvarValueFinished ( PlayerHandler::const_iterator p
 
 			default:
 				{
+					Logger::GetInstance()->Msg<MSG_LOG>("ConVarTester : The following player is banned because of an unknown ConVar Request Answer code.");
 					req->answer_status = "NO STATUS";
 					req->answer = "NO VALUE";
 					goto unexpected2;
@@ -406,6 +436,7 @@ void ConVarTester::LoadDefaultRules ()
 	AddConvarRuleset ( "fog_enable", "1", ConVarRule::SAME );
 	AddConvarRuleset ( "cl_pitchup", "89", ConVarRule::SAME );
 	AddConvarRuleset ( "cl_pitchdown", "89", ConVarRule::SAME );
+	AddConvarRuleset ( "net_graph", "3", ConVarRule::LOWER);
 	if( SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive )
 	{
 		AddConvarRuleset ( "cl_bobcycle", "0.98", ConVarRule::SAME_FLOAT );

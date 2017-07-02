@@ -35,6 +35,9 @@ typedef enum class ConVarRule : unsigned int
 	SAME_FLOAT,
 	SAME_AS_SERVER,
 	SAME_FLOAT_AS_SERVER,
+	LOWER,
+	HIGHER,
+	//RANGE,
 	NO_VALUE
 } ConVarRuleT;
 

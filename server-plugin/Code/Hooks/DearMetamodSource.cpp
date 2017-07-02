@@ -38,7 +38,15 @@ void SourceHookSafety::TryHookMMSourceHook()
 	SourceSdk::InterfacesProxy::GetGameDir(gamedir);
 
 	basic_string modulename("metamod.2.");
-	modulename.append(gamedir);
+	
+	if (SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive)
+	{
+		modulename.append("csgo");
+	}
+	else
+	{
+		modulename.append("css");
+	}
 
 #ifdef WIN32
 	modulename.append(".dll");
