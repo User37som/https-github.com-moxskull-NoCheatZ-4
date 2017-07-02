@@ -417,7 +417,7 @@ bot_takeover
 			ph->StopBotTakeover (); // release link from bot to player
 		}*/
 	}
-	if( ph </*=*/ SlotStatus::PLAYER_CONNECTED ) /// fixed :  https://github.com/L-EARN/NoCheatZ-4/issues/79#issuecomment-240174457
+	if( ph < SlotStatus::PLAYER_CONNECTED ) /// fixed : https://github.com/L-EARN/NoCheatZ-4/issues/79#issuecomment-240174457	
 		return;
 	DebugMessage(Helpers::format("Players %s : Status forced to PLAYER_CONNECTED", ph->GetName()));
 	ph.GetHandler ()->status = SlotStatus::PLAYER_CONNECTED;

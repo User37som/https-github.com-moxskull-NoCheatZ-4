@@ -211,8 +211,8 @@ namespace Helpers
 	{
 		if( SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive )
 		{
-			SourceSdk::edict_t_csgo * cur ( PEntityOfEntIndex ( 65 ) );
-			SourceSdk::edict_t_csgo * const max_cur ( cur + MAX_EDICTS - 65 );
+			SourceSdk::edict_t_csgo * cur ( PEntityOfEntIndex ( 0 ) );
+			SourceSdk::edict_t_csgo * const max_cur ( cur + MAX_EDICTS );
 			do
 			{
 				if( cur->m_pUnk == unk )
@@ -225,8 +225,8 @@ namespace Helpers
 		}
 		else
 		{
-			SourceSdk::edict_t * cur ( PEntityOfEntIndex ( 65 ) );
-			SourceSdk::edict_t * const max_cur ( cur + MAX_EDICTS - 65 );
+			SourceSdk::edict_t * cur ( PEntityOfEntIndex ( 0 ) );
+			SourceSdk::edict_t * const max_cur ( cur + MAX_EDICTS );
 			do
 			{
 				if( cur->m_pUnk == unk )
