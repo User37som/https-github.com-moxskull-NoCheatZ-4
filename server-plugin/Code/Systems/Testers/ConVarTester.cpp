@@ -436,6 +436,7 @@ void ConVarTester::LoadDefaultRules ()
 	AddConvarRuleset ( "fog_enable", "1", ConVarRule::SAME );
 	AddConvarRuleset ( "cl_pitchup", "89", ConVarRule::SAME );
 	AddConvarRuleset ( "cl_pitchdown", "89", ConVarRule::SAME );
+	AddConvarRuleset ( "net_graph", "3", ConVarRule::LOWER);
 	if( SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive )
 	{
 		AddConvarRuleset ( "cl_bobcycle", "0.98", ConVarRule::SAME_FLOAT );
