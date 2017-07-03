@@ -114,6 +114,7 @@ private:
 	bool m_do_writeid;
 	bool m_can_kick;
 	bool m_can_ban;
+	bool m_can_write_ids;
 
 	void * cmd_gb_ban;
 	void * cmd_sm_ban;

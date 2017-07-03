@@ -23,13 +23,14 @@
 
 
 BanRequest::BanRequest () :
-	BaseStaticSystem ( "BanRequest", "Verbose - CanKick - CanBan" ),
+	BaseStaticSystem ( "BanRequest", "Verbose - CanKick - CanBan - AllowWriteBans" ),
 	singleton_class (),
 	TimerListener (),
 	m_wait_time ( 10.0 ),
 	m_do_writeid ( false ),
 	m_can_kick ( true ),
 	m_can_ban ( true ),
+	m_can_write_ids (true),
 	cmd_gb_ban ( nullptr ),
 	cmd_sm_ban ( nullptr ),
 	m_requests ()
@@ -77,6 +78,25 @@ bool BanRequest::sys_cmd_fn ( const SourceSdk::CCommand &args )
 		else
 		{
 			Logger::GetInstance ()->Msg<MSG_CMD_REPLY> ( "Available arguments for \"ncz BanRequest CanBan\" : Yes - No" );
+		}
+	}
+	else if (stricmp("AllowWriteBans", args.Arg(2)) == 0)
+	{
+		if (stricmp("Yes", args.Arg(3)) == 0)
+		{
+			m_can_write_ids = true;
+			Logger::GetInstance()->Msg<MSG_CMD_REPLY>("AllowWriteBans is Yes");
+			return true;
+		}
+		else if (stricmp("No", args.Arg(3)) == 0)
+		{
+			m_can_write_ids = false;
+			Logger::GetInstance()->Msg<MSG_CMD_REPLY>("AllowWriteBans is No");
+			return true;
+		}
+		else
+		{
+			Logger::GetInstance()->Msg<MSG_CMD_REPLY>("Available arguments for \"ncz BanRequest AllowWriteBans\" : Yes - No");
 		}
 	}
 
@@ -327,7 +347,7 @@ void BanRequest::RT_TimerCallback ( char const * const timer_name )
 
 void BanRequest::WriteBansIfNeeded ()
 {
-	if( m_do_writeid )
+	if( m_do_writeid && m_can_write_ids)
 	{
 		if( SteamGameServer_BSecure () )
 		{
