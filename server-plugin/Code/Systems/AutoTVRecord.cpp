@@ -51,7 +51,12 @@ void AutoTVRecord::Unload ()
 
 bool AutoTVRecord::GotJob () const
 {
-	return true;
+	// Create a filter
+	ProcessFilter::HumanAtLeastConnected const filter_class;
+	// Initiate the iterator at the first match in the filter
+	PlayerHandler::const_iterator it(&filter_class);
+	// Return if we have job to do or not ...
+	return it != PlayerHandler::end();
 }
 
 void AutoTVRecord::StartRecord ()
