@@ -400,6 +400,7 @@ void CNoCheatZPlugin::LevelShutdown ( void ) // !!!!this can get called multiple
 	BanRequest::GetInstance ()->WriteBansIfNeeded ();
 	BaseSystem::UnloadAllSystems ();
 	Logger::GetInstance ()->Flush ();
+	TVWatcher::GetInstance()->RecordEnded();
 }
 
 //---------------------------------------------------------------------------------

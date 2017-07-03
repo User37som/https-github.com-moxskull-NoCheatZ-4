@@ -174,10 +174,10 @@ bool TVWatcher::RT_ConCommandCallback(PlayerHandler::const_iterator ph, void * c
 		{
 			RecordStarted(args);
 		}
-		else
-		{
-			RecordEnded();
-		}
+	}
+	else if (stricmp(args.Arg(0), "tv_stoprecord") == 0)
+	{
+		RecordEnded();
 	}
 
 	return false;
