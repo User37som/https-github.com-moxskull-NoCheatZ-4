@@ -75,7 +75,7 @@ private:
 	size_t m_current_memory_used;
 
 public:
-	Logger () : BaseStaticSystem ( "Logger", "Verbose - AlwaysFlush - AllowChat" ), singleton_class (), m_msg (), prolog ( basic_string("[NoCheatZ ").append(NCZ_VERSION_GIT_SHORT).append("] ") ), m_always_flush(false), m_msg_func( nullptr ), m_current_memory_used ( 0 )
+	Logger () : BaseStaticSystem ( "Logger", "Verbose - AlwaysFlush - AllowChat" ), singleton_class (), m_msg (), prolog ( basic_string("[NoCheatZ ").append(NCZ_VERSION_GIT_SHORT).append("] ") ), m_always_flush(false), m_allow_chat(true), m_msg_func( nullptr ), m_current_memory_used ( 0 )
 	{
 		ConnectToServerConsole ();
 	};
