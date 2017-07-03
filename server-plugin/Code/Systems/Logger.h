@@ -68,13 +68,14 @@ private:
 	CUtlVector<basic_string> m_msg;
 	basic_string const prolog;
 	bool m_always_flush;
+	bool m_allow_chat;
 
 	MsgFunc_t m_msg_func;
 
 	size_t m_current_memory_used;
 
 public:
-	Logger () : BaseStaticSystem ( "Logger", "Verbose - AlwaysFlush" ), singleton_class (), m_msg (), prolog ( basic_string("[NoCheatZ ").append(NCZ_VERSION_GIT_SHORT).append("] ") ), m_always_flush(false), m_msg_func( nullptr ), m_current_memory_used ( 0 )
+	Logger () : BaseStaticSystem ( "Logger", "Verbose - AlwaysFlush - AllowChat" ), singleton_class (), m_msg (), prolog ( basic_string("[NoCheatZ ").append(NCZ_VERSION_GIT_SHORT).append("] ") ), m_always_flush(false), m_msg_func( nullptr ), m_current_memory_used ( 0 )
 	{
 		ConnectToServerConsole ();
 	};
