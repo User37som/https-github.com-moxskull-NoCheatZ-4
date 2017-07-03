@@ -155,12 +155,15 @@ TVWatcher::TVWatcher() :
 
 TVWatcher::~TVWatcher()
 {
+	ConCommandHookListener::RemoveConCommandHookListener(this);
 }
 
 void TVWatcher::Init()
 {
 	m_mycommands.AddToTail(SourceSdk::InterfacesProxy::ICvar_FindCommand("tv_record"));
 	m_mycommands.AddToTail(SourceSdk::InterfacesProxy::ICvar_FindCommand("tv_stoprecord"));
+
+	ConCommandHookListener::RegisterConCommandHookListener(this);
 }
 
 bool TVWatcher::RT_ConCommandCallback(PlayerHandler::const_iterator ph, void * const cmd, SourceSdk::CCommand const & args)
