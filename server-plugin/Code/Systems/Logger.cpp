@@ -103,12 +103,12 @@ void Logger::Push ( const char * msg )
 		server_tick = static_cast< SourceSdk::CGlobalVars* >( SourceSdk::InterfacesProxy::Call_GetGlobalVars () )->tickcount;
 	}
 
-	if( AutoTVRecord::IsCreated() && AutoTVRecord::GetInstance ()->IsRecording () )
+	if( TVWatcher::IsCreated() && TVWatcher::GetInstance ()->IsRecording () )
 	{
 		basic_string move_msg;
 		move_msg.reserve ( 255 );
 		move_msg.append ( Helpers::getStrDateTime ( "%x %X " ) );
-		move_msg.append ( Helpers::format ( "[ Server Tick #%d, SourceTV:%s.dem : Tick #%d ] ", server_tick, AutoTVRecord::GetInstance ()->GetRecordFilename ().c_str (), AutoTVRecord::GetInstance ()->GetRecordTick () ) );
+		move_msg.append ( Helpers::format ( "[ Server Tick #%d, SourceTV:%s.dem : Tick #%d ] ", server_tick, TVWatcher::GetInstance ()->GetRecordFilename ().c_str (), TVWatcher::GetInstance ()->GetRecordTick () ) );
 		move_msg.append ( copy_msg );
 		m_current_memory_used += move_msg.capacity ();
 		m_msg.AddToTail ( std::move( move_msg ) );
