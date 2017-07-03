@@ -51,7 +51,12 @@ void AutoTVRecord::Unload ()
 
 bool AutoTVRecord::GotJob () const
 {
-	return true;
+	// Create a filter
+	ProcessFilter::HumanAtLeastConnected const filter_class;
+	// Initiate the iterator at the first match in the filter
+	PlayerHandler::const_iterator it(&filter_class);
+	// Return if we have job to do or not ...
+	return it != PlayerHandler::end();
 }
 
 void AutoTVRecord::StartRecord ()
@@ -155,12 +160,15 @@ TVWatcher::TVWatcher() :
 
 TVWatcher::~TVWatcher()
 {
+	ConCommandHookListener::RemoveConCommandHookListener(this);
 }
 
 void TVWatcher::Init()
 {
 	m_mycommands.AddToTail(SourceSdk::InterfacesProxy::ICvar_FindCommand("tv_record"));
 	m_mycommands.AddToTail(SourceSdk::InterfacesProxy::ICvar_FindCommand("tv_stoprecord"));
+
+	ConCommandHookListener::RegisterConCommandHookListener(this);
 }
 
 bool TVWatcher::RT_ConCommandCallback(PlayerHandler::const_iterator ph, void * const cmd, SourceSdk::CCommand const & args)
@@ -171,10 +179,10 @@ bool TVWatcher::RT_ConCommandCallback(PlayerHandler::const_iterator ph, void * c
 		{
 			RecordStarted(args);
 		}
-		else
-		{
-			RecordEnded();
-		}
+	}
+	else if (stricmp(args.Arg(0), "tv_stoprecord") == 0)
+	{
+		RecordEnded();
 	}
 
 	return false;
