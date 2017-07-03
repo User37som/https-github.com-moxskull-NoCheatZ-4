@@ -103,12 +103,12 @@ void Logger::Push ( const char * msg )
 		server_tick = static_cast< SourceSdk::CGlobalVars* >( SourceSdk::InterfacesProxy::Call_GetGlobalVars () )->tickcount;
 	}
 
-	if( AutoTVRecord::IsCreated() && AutoTVRecord::GetInstance ()->IsRecording () )
+	if( TVWatcher::IsCreated() && TVWatcher::GetInstance ()->IsRecording () )
 	{
 		basic_string move_msg;
 		move_msg.reserve ( 255 );
 		move_msg.append ( Helpers::getStrDateTime ( "%x %X " ) );
-		move_msg.append ( Helpers::format ( "[ Server Tick #%d, SourceTV:%s.dem : Tick #%d ] ", server_tick, AutoTVRecord::GetInstance ()->GetRecordFilename ().c_str (), AutoTVRecord::GetInstance ()->GetRecordTick () ) );
+		move_msg.append ( Helpers::format ( "[ Server Tick #%d, SourceTV:%s.dem : Tick #%d ] ", server_tick, TVWatcher::GetInstance ()->GetRecordFilename ().c_str (), TVWatcher::GetInstance ()->GetRecordTick () ) );
 		move_msg.append ( copy_msg );
 		m_current_memory_used += move_msg.capacity ();
 		m_msg.AddToTail ( std::move( move_msg ) );
@@ -180,8 +180,11 @@ template <>
 void Logger::Msg<MSG_CHAT> ( const char * msg, int verbose /*= 0*/ )
 {
 	Msg<MSG_CONSOLE> ( msg );
-	basic_string m ( prolog );
-	Helpers::chatprintf ( m.append ( msg ).c_str () );
+	if (m_allow_chat)
+	{
+		basic_string m(prolog);
+		Helpers::chatprintf(m.append(msg).c_str());
+	}
 }
 
 template <>
@@ -195,8 +198,11 @@ template <>
 void Logger::Msg<MSG_LOG_CHAT> ( const char * msg, int verbose /*= 0*/ )
 {
 	Msg<MSG_LOG> ( msg );
-	basic_string m ( prolog );
-	Helpers::chatprintf ( m.append ( msg ).c_str () );
+	if (m_allow_chat)
+	{
+		basic_string m(prolog);
+		Helpers::chatprintf(m.append(msg).c_str());
+	}
 }
 
 template <>
@@ -311,7 +317,27 @@ bool Logger::sys_cmd_fn ( const SourceSdk::CCommand &args )
 			return false;
 		}
 	}
-	else
+	else if (stricmp("allowchat", args.Arg(2)))
+	{
+		if (stricmp("on", args.Arg(3)))
+		{
+			m_allow_chat = true;
+			Msg<MSG_CMD_REPLY>("Logger AllowChat is on");
+			return true;
+		}
+		else if (stricmp("off", args.Arg(3)))
+		{
+			m_allow_chat = false;
+			Msg<MSG_CMD_REPLY>("Logger AllowChat is off");
+			return true;
+		}
+		else
+		{
+			Msg<MSG_CMD_REPLY>("Usage : On / Off");
+			return false;
+		}
+	}
+	else 
 	{
 		return false;
 	}

@@ -106,6 +106,7 @@ void CNoCheatZPlugin::CreateSingletons ()
 	SpamChangeNameTester::CreateInstance ();
 	SpamConnectTester::CreateInstance ();
 	SpeedTester::CreateInstance ();
+	TVWatcher::CreateInstance();
 	AutoTVRecord::CreateInstance ();
 	RadarHackBlocker::CreateInstance ();
 }
@@ -114,6 +115,7 @@ void CNoCheatZPlugin::DestroySingletons ()
 {
 	RadarHackBlocker::DestroyInstance ();
 	AutoTVRecord::DestroyInstance ();
+	TVWatcher::DestroyInstance();
 	SpeedTester::DestroyInstance ();
 	SpamConnectTester::DestroyInstance ();
 	SpamChangeNameTester::DestroyInstance ();
@@ -384,7 +386,7 @@ void CNoCheatZPlugin::RT_GameFrame ( bool simulating )
 
 		TimerListener::RT_OnTick ( curtime );
 
-		AutoTVRecord::GetInstance ()->RT_OnTick ();
+		TVWatcher::GetInstance ()->RT_OnTick ();
 	}
 }
 

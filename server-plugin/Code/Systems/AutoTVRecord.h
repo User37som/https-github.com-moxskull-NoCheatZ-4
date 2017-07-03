@@ -30,19 +30,14 @@ limitations under the License.
 
 class AutoTVRecord :
 	private BaseDynamicSystem,
-	private ConCommandHookListener,
 	public Singleton<AutoTVRecord>
 {
 	typedef Singleton<AutoTVRecord> singleton_class;
 
 private:
-	basic_string m_demofile;
 	basic_string m_prefix;
-	size_t m_recordtickcount;
 	float m_waitfortv_time;
 	int m_minplayers;
-	bool m_recording;
-	bool m_expectedtvconfigchange;
 	bool m_spawn_once;
 
 public:
@@ -58,14 +53,10 @@ private:
 
 	virtual bool GotJob () const override final;
 
-	virtual bool RT_ConCommandCallback ( PlayerHandler::const_iterator ph, void * const cmd, SourceSdk::CCommand const & args ) override final;
-
 public:
 	void StartRecord ();
 
 	void StopRecord ();
-
-	void RT_OnTick ();
 
 	// How much human players must be in the game before we start recording. 1 or 2 are great values.
 	void SetMinPlayers ( int min );
@@ -73,22 +64,49 @@ public:
 	// Prefix in the filename of records
 	void SetRecordPrefix ( basic_string const & prefix );
 
-	// What is the current record tick (The tick will be notified in detection logs, so it will be easier to seek detections in demos)
-	size_t GetRecordTick () const;
-
-	bool IsRecording () const;
-
-	// Tell if TV is present
-	bool IsTVPresent () const;
-
 	//	Will try to spawn the TV once and once a client connects (ClientActive)
 	void SpawnTV ();
+};
 
-	// The current filename, only the filename.
-	basic_string const & GetRecordFilename () const;
+class TVWatcher :
+	private BaseStaticSystem,
+	private ConCommandHookListener,
+	public Singleton<TVWatcher>
+{
+	typedef Singleton<TVWatcher> singleton_class;
+
+private:
+	basic_string m_demofile;
+	size_t m_recordtickcount;
+	bool m_recording;
+
+public:
+	TVWatcher();
+	virtual ~TVWatcher() final;
+
+	virtual void Init() override final;
+
+	virtual bool RT_ConCommandCallback(PlayerHandler::const_iterator ph, void * const cmd, SourceSdk::CCommand const & args) override final;
+
+	void RecordStarted(SourceSdk::CCommand const & args);
+
+	void RecordEnded();
+
+	void RT_OnTick();
+
+	// What is the current record tick (The tick will be notified in detection logs, so it will be easier to seek detections in demos)
+	size_t GetRecordTick() const;
+
+	bool IsRecording() const;
+
+	// Tell if TV is present
+	bool IsTVPresent() const;
+
+	// The current filename
+	basic_string const & GetRecordFilename() const;
 
 	// Send a chat message to the TV and to all viewers.
-	void SendTVChatMessage ( basic_string const & msg );
+	void SendTVChatMessage(basic_string const & msg);
 };
 
 #endif
