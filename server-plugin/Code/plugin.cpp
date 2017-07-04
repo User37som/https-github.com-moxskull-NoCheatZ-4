@@ -248,6 +248,7 @@ bool CNoCheatZPlugin::Load ( SourceSdk::CreateInterfaceFn _interfaceFactory, Sou
 
 	SourceSdk::InterfacesProxy::Call_ServerExecute ();
 	SourceSdk::InterfacesProxy::Call_ServerCommand ( "exec nocheatz.cfg\n" );
+	SourceSdk::InterfacesProxy::Call_ServerCommand (Helpers::format("sv_mincmdrate %d\n", ConfigManager::GetInstance()->tickrate_override));
 	SourceSdk::InterfacesProxy::Call_ServerExecute ();
 
 	ProcessFilter::HumanAtLeastConnectedOrBot filter_class;
