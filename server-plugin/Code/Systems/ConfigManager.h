@@ -23,6 +23,8 @@ public:
 	float m_innersmoke_radius_sqr;
 	float m_smoke_timetobang;
 	float m_smoke_time;
+	static float tickinterval;
+	int tickrate_override;
 
 	// virtual functions
 	int vfid_getdatadescmap;
