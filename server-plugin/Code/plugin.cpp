@@ -199,7 +199,7 @@ bool CNoCheatZPlugin::Load ( SourceSdk::CreateInterfaceFn _interfaceFactory, Sou
 
 	// replace tickinterval
 
-	/*switch (SourceSdk::InterfacesProxy::m_servergamedll_version)
+	switch (SourceSdk::InterfacesProxy::m_servergamedll_version)
 	{
 	case 5:
 	case 6:
@@ -211,7 +211,7 @@ bool CNoCheatZPlugin::Load ( SourceSdk::CreateInterfaceFn _interfaceFactory, Sou
 		break;
 	default:
 		break;
-	};*/
+	};
 
 	SourceHookSafety::GetInstance()->TryHookMMSourceHook();
 
