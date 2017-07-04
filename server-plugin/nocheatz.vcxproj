@@ -465,6 +465,7 @@ copy "$(TargetPath)" ..\..\..\game\bin\"$(TargetName)".pdb
     <ClInclude Include="Code\Systems\Blockers\RadarHackBlocker.h" />
     <ClInclude Include="Code\Systems\ConfigManager.h" />
     <ClInclude Include="Code\Systems\i18nManager.h" />
+    <ClInclude Include="Code\Systems\Testers\AimTester.h" />
     <ClInclude Include="Code\Systems\Testers\AutoAttackTester.h" />
     <ClInclude Include="Code\version.h" />
     <ClInclude Include="SourceSdk\Console\color.h" />

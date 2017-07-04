@@ -572,6 +572,9 @@
     <ClInclude Include="Code\Hooks\DearMetamodSource.h">
       <Filter>Code\Hooks</Filter>
     </ClInclude>
+    <ClInclude Include="Code\Systems\Testers\AimTester.h">
+      <Filter>Code\Systems\Testers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Library Include="SourceSdk\Interfaces\Protobuf\protobuf-2.5.0\vsprojects\Debug\libprotobuf.lib">
