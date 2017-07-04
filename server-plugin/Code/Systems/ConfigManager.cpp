@@ -84,7 +84,7 @@ bool GetIniAttributeValue ( std::ifstream & file, basic_string const & root, bas
 
 ConfigManager::ConfigManager () :
 	singleton_class (),
-	content_version ( 1 ),
+	content_version ( 2 ),
 	m_playerdataclass ( "" ),
 	m_smoke_radius ( 0.0f ),
 	m_innersmoke_radius_sqr ( 0.0f ),
@@ -121,66 +121,106 @@ bool ConfigManager::LoadConfig ()
 		if( atoi ( value.c_str () ) == content_version )
 		{
 			// load virtual functions id
-			if( !GetIniAttributeValue ( file, gamename, "getdatadescmap" ATTRIB_POST, value ) ) return false;
+			if (!GetIniAttributeValue(file, "CONFIG", "getdatadescmap" ATTRIB_POST, value))
+				if( !GetIniAttributeValue ( file, gamename, "getdatadescmap" ATTRIB_POST, value ) ) return false;
 			vfid_getdatadescmap = atoi ( value.c_str () );
 
-			if( !GetIniAttributeValue ( file, gamename, "settransmit" ATTRIB_POST, value ) ) return false;
+			if (!GetIniAttributeValue(file, "CONFIG", "settransmit" ATTRIB_POST, value))
+				if( !GetIniAttributeValue ( file, gamename, "settransmit" ATTRIB_POST, value ) ) return false;
 			vfid_settransmit = atoi ( value.c_str () );
 
-			if( !GetIniAttributeValue ( file, gamename, "mhgroundentity" ATTRIB_POST, value ) ) return false;
+			if (!GetIniAttributeValue(file, "CONFIG", "mhgroundentity" ATTRIB_POST, value))
+				if( !GetIniAttributeValue ( file, gamename, "mhgroundentity" ATTRIB_POST, value ) ) return false;
 			vfid_mhgroundentity = atoi ( value.c_str () );
 
-			if( !GetIniAttributeValue ( file, gamename, "weaponequip" ATTRIB_POST, value ) ) return false;
+			if (!GetIniAttributeValue(file, "CONFIG", "weaponequip" ATTRIB_POST, value))
+				if( !GetIniAttributeValue ( file, gamename, "weaponequip" ATTRIB_POST, value ) ) return false;
 			vfid_weaponequip = atoi ( value.c_str () );
 
-			if( !GetIniAttributeValue ( file, gamename, "weapondrop" ATTRIB_POST, value ) ) return false;
+			if (!GetIniAttributeValue(file, "CONFIG", "weapondrop" ATTRIB_POST, value))
+				if( !GetIniAttributeValue ( file, gamename, "weapondrop" ATTRIB_POST, value ) ) return false;
 			vfid_weapondrop = atoi ( value.c_str () );
 
-			if( !GetIniAttributeValue ( file, gamename, "playerruncommand" ATTRIB_POST, value ) ) return false;
+			if (!GetIniAttributeValue(file, "CONFIG", "playerruncommand" ATTRIB_POST, value))
+				if( !GetIniAttributeValue ( file, gamename, "playerruncommand" ATTRIB_POST, value ) ) return false;
 			vfid_playerruncommand = atoi ( value.c_str () );
 
-			if( !GetIniAttributeValue ( file, gamename, "dispatch" ATTRIB_POST, value ) ) return false;
+			if (!GetIniAttributeValue(file, "CONFIG", "dispatch" ATTRIB_POST, value))
+				if( !GetIniAttributeValue ( file, gamename, "dispatch" ATTRIB_POST, value ) ) return false;
 			vfid_dispatch = atoi ( value.c_str () );
 
-			if( !GetIniAttributeValue ( file, gamename, "thinkpost" ATTRIB_POST, value ) ) return false;
+			if (!GetIniAttributeValue(file, "CONFIG", "thinkpost" ATTRIB_POST, value))
+				if( !GetIniAttributeValue ( file, gamename, "thinkpost" ATTRIB_POST, value ) ) return false;
 			vfid_thinkpost = atoi ( value.c_str () );
 
 			// load some strings
 
-			if( !GetIniAttributeValue ( file, gamename, "playerdataclass", m_playerdataclass ) ) return false;
+			if (!GetIniAttributeValue(file, "CONFIG", "playerdataclass", m_playerdataclass))
+				if( !GetIniAttributeValue ( file, gamename, "playerdataclass", m_playerdataclass ) ) return false;
 
 			// load some values
 
-			if( !GetIniAttributeValue ( file, gamename, "f_smoketime", value ) ) return false;
+			if (!GetIniAttributeValue(file, "CONFIG", "f_smoketime", value))
+				if( !GetIniAttributeValue ( file, gamename, "f_smoketime", value ) ) return false;
 			m_smoke_time = ( float ) atof ( value.c_str () );
 
-			if( !GetIniAttributeValue ( file, gamename, "f_smoke_time_to_bang", value ) ) return false;
+			if (!GetIniAttributeValue(file, "CONFIG", "f_smoke_time_to_bang", value))
+				if( !GetIniAttributeValue ( file, gamename, "f_smoke_time_to_bang", value ) ) return false;
 			m_smoke_timetobang = ( float ) atof ( value.c_str () );
 
-			if( !GetIniAttributeValue ( file, gamename, "f_inner_smoke_radius_sqr", value ) ) return false;
+			if (!GetIniAttributeValue(file, "CONFIG", "f_inner_smoke_radius_sqr", value))
+				if( !GetIniAttributeValue ( file, gamename, "f_inner_smoke_radius_sqr", value ) ) return false;
 			m_innersmoke_radius_sqr = ( float ) atof ( value.c_str () );
 
-			if( !GetIniAttributeValue ( file, gamename, "f_smoke_radius", value ) ) return false;
+			if (!GetIniAttributeValue(file, "CONFIG", "f_smoke_radius", value))
+				if( !GetIniAttributeValue ( file, gamename, "f_smoke_radius", value ) ) return false;
 			m_smoke_radius = ( float ) atof ( value.c_str () );
 
 			// disable systems
 
-			if( !GetIniAttributeValue ( file, gamename, "disable_systems", value ) ) return false;
-
-			CUtlVector<basic_string> systems;
-			SplitString<char> ( value, ';', systems );
-
-			for( CUtlVector<basic_string>::iterator it ( systems.begin () ); it != systems.end (); ++it )
+			if (GetIniAttributeValue(file, "CONFIG", "disable_systems", value))
 			{
-				BaseSystem* system ( BaseSystem::FindSystemByName ( it->c_str () ) );
-				if( system )
+				CUtlVector<basic_string> systems;
+				SplitString<char>(value, ';', systems);
+
+				for (CUtlVector<basic_string>::iterator it(systems.begin()); it != systems.end(); ++it)
 				{
-					system->SetDisabledByConfigIni ();
-					Logger::GetInstance ()->Msg<MSG_CONSOLE> ( Helpers::format ( "ConfigManager : Disabled system %s", it->c_str () ) );
+					if (!it->isempty())
+					{
+						BaseSystem* system(BaseSystem::FindSystemByName(it->c_str()));
+						if (system)
+						{
+							system->SetDisabledByConfigIni();
+							Logger::GetInstance()->Msg<MSG_CONSOLE>(Helpers::format("ConfigManager : Disabled system %s", it->c_str()));
+						}
+						else
+						{
+							Logger::GetInstance()->Msg<MSG_ERROR>(Helpers::format("ConfigManager : Unable to disable system %s -> system not known", it->c_str()));
+						}
+					}
 				}
-				else
+			}
+
+			if (GetIniAttributeValue(file, gamename, "disable_systems", value))
+			{
+				CUtlVector<basic_string> systems;
+				SplitString<char>(value, ';', systems);
+
+				for (CUtlVector<basic_string>::iterator it(systems.begin()); it != systems.end(); ++it)
 				{
-					Logger::GetInstance ()->Msg<MSG_ERROR> ( Helpers::format ( "ConfigManager : Unable to disable system %s -> system not known", it->c_str () ) );
+					if (!it->isempty())
+					{
+						BaseSystem* system(BaseSystem::FindSystemByName(it->c_str()));
+						if (system)
+						{
+							system->SetDisabledByConfigIni();
+							Logger::GetInstance()->Msg<MSG_CONSOLE>(Helpers::format("ConfigManager : Disabled system %s", it->c_str()));
+						}
+						else
+						{
+							Logger::GetInstance()->Msg<MSG_ERROR>(Helpers::format("ConfigManager : Unable to disable system %s -> system not known", it->c_str()));
+						}
+					}
 				}
 			}
 
