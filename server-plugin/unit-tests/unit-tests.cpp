@@ -231,42 +231,6 @@ TEST ( Sring_Class, Size_Consistency )
 	ASSERT_EQ ( 0, g.length () );
 }
 
-TEST(Sring_Class, EmptyMemoryString)
-{
-	size_t pstart(HeapMemoryManager::GetPooledCount());
-
-	basic_string g("aaaaaaaaab");
-	g.remove(9);
-	ASSERT_STREQ("aaaaaaaaa", g.c_str());
-	ASSERT_EQ(++pstart, HeapMemoryManager::GetPooledCount());
-
-	g.remove(0, 8);
-	ASSERT_EQ(0, g.capacity());
-	ASSERT_EQ(--pstart, HeapMemoryManager::GetPooledCount());
-
-	g.append("abcdef");
-	g.replace(basic_string("abcdef"), "");
-	ASSERT_EQ(0, g.capacity());
-	ASSERT_EQ(pstart, HeapMemoryManager::GetPooledCount());
-
-	g = "\0";
-	ASSERT_EQ(0, g.capacity());
-	ASSERT_EQ(pstart, HeapMemoryManager::GetPooledCount());
-
-	g = basic_string("a").remove(0);
-	ASSERT_EQ(0, g.capacity());
-	ASSERT_EQ(pstart, HeapMemoryManager::GetPooledCount());
-
-	ASSERT_TRUE(g == "");
-	ASSERT_TRUE(g == basic_string(""));
-	ASSERT_TRUE(g == basic_string());
-	ASSERT_TRUE(g == "\0\0");
-	ASSERT_TRUE(g.operator==(nullptr));
-	ASSERT_FALSE(g == "x");
-
-	ASSERT_EQ(pstart, HeapMemoryManager::GetPooledCount());
-}
-
 // main
 
 int main ( int argc, char **argv )
