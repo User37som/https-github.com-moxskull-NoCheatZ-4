@@ -82,6 +82,8 @@ bool GetIniAttributeValue ( std::ifstream & file, basic_string const & root, bas
 	return false;
 }
 
+float ConfigManager::tickinterval(0.0f);
+
 ConfigManager::ConfigManager () :
 	singleton_class (),
 	content_version ( 2 ),
@@ -90,6 +92,7 @@ ConfigManager::ConfigManager () :
 	m_innersmoke_radius_sqr ( 0.0f ),
 	m_smoke_timetobang ( 0.0f ),
 	m_smoke_time ( 0.0f ),
+	tickrate_override(0),
 	vfid_getdatadescmap ( 0 ),
 	vfid_settransmit ( 0 ),
 	vfid_mhgroundentity ( 0 ),
@@ -152,6 +155,12 @@ bool ConfigManager::LoadConfig ()
 			if (!GetIniAttributeValue(file, "CONFIG", "thinkpost" ATTRIB_POST, value))
 				if( !GetIniAttributeValue ( file, gamename, "thinkpost" ATTRIB_POST, value ) ) return false;
 			vfid_thinkpost = atoi ( value.c_str () );
+
+			if (!GetIniAttributeValue(file, "CONFIG", "tickrate_override", value))
+				if (!GetIniAttributeValue(file, gamename, "tickrate_override", value)) return false;
+			tickrate_override = atoi(value.c_str());
+			if (tickrate_override == 0) return false;
+			tickinterval = 1.0f / tickrate_override;
 
 			// load some strings
 

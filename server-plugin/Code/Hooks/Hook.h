@@ -48,6 +48,7 @@
 basic_string GetModuleNameFromMemoryAddress ( DWORD ptr );
 
 void MoveVirtualFunction ( DWORD const * const from, DWORD * const to );
+void ReplaceVirtualFunctionByFakeVirtual(DWORD const replace_by, DWORD * const replace_here);
 
 class CBaseEntity;
 

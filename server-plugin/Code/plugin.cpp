@@ -82,6 +82,11 @@ float Plat_FloatTime ()
 	return ( GlobalTimer::GetInstance ()->GetCurrent () * 0.001f );
 }
 
+float HOOKFN_INT GetTickInterval(void)
+{
+	return ConfigManager::tickinterval;
+}
+
 void CNoCheatZPlugin::CreateSingletons ()
 {
 	SourceHookSafety::CreateInstance();
@@ -191,6 +196,22 @@ bool CNoCheatZPlugin::Load ( SourceSdk::CreateInterfaceFn _interfaceFactory, Sou
 		Logger::GetInstance ()->Msg<MSG_ERROR> ( "ConfigManager::LoadConfig failed" );
 		return false;
 	}
+
+	// replace tickinterval
+
+	switch (SourceSdk::InterfacesProxy::m_servergamedll_version)
+	{
+	case 5:
+	case 6:
+		ReplaceVirtualFunctionByFakeVirtual((DWORD)GetTickInterval, &(IFACE_PTR(SourceSdk::InterfacesProxy::m_servergamedll)[9]));
+		break;
+	case 9:
+	case 10:
+		ReplaceVirtualFunctionByFakeVirtual((DWORD)GetTickInterval, &(IFACE_PTR(SourceSdk::InterfacesProxy::m_servergamedll)[10]));
+		break;
+	default:
+		break;
+	};
 
 	SourceHookSafety::GetInstance()->TryHookMMSourceHook();
 
@@ -399,8 +420,8 @@ void CNoCheatZPlugin::LevelShutdown ( void ) // !!!!this can get called multiple
 
 	BanRequest::GetInstance ()->WriteBansIfNeeded ();
 	BaseSystem::UnloadAllSystems ();
-	Logger::GetInstance ()->Flush ();
 	TVWatcher::GetInstance()->RecordEnded();
+	Logger::GetInstance ()->Flush ();
 }
 
 //---------------------------------------------------------------------------------
