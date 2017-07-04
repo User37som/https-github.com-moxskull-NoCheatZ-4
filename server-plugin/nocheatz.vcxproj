@@ -400,6 +400,7 @@ copy "$(TargetPath)" ..\..\..\game\bin\"$(TargetName)".pdb
     </ClCompile>
     <ClCompile Include="Code\Systems\Testers\AutoAttackTester.cpp" />
     <ClCompile Include="Code\version.cpp" />
+    <ClCompile Include="Code\vtabledumphelper.cpp" />
     <ClCompile Include="SourceSdk\Interfaces\Protobuf\cstrike15_usermessages.pb.cc">
       <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">TurnOffAllWarnings</WarningLevel>
       <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">TurnOffAllWarnings</WarningLevel>
@@ -468,6 +469,7 @@ copy "$(TargetPath)" ..\..\..\game\bin\"$(TargetName)".pdb
     <ClInclude Include="Code\Systems\Testers\AimTester.h" />
     <ClInclude Include="Code\Systems\Testers\AutoAttackTester.h" />
     <ClInclude Include="Code\version.h" />
+    <ClInclude Include="Code\vtabledumphelper.h" />
     <ClInclude Include="SourceSdk\Console\color.h" />
     <ClInclude Include="SourceSdk\Console\convar.h" />
     <ClInclude Include="SourceSdk\Console\iconvar.h" />

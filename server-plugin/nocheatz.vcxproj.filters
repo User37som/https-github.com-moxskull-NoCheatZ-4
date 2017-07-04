@@ -255,6 +255,9 @@
     <ClCompile Include="Code\Hooks\DearMetamodSource.cpp">
       <Filter>Code\Hooks</Filter>
     </ClCompile>
+    <ClCompile Include="Code\vtabledumphelper.cpp">
+      <Filter>Code</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Code\plugin.h">
@@ -574,6 +577,9 @@
     </ClInclude>
     <ClInclude Include="Code\Systems\Testers\AimTester.h">
       <Filter>Code\Systems\Testers</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\vtabledumphelper.h">
+      <Filter>Code</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -1,0 +1,6 @@
+#ifndef VTABLEDUMPHELPER_H
+#define VTABLEDUMPHELPER_H
+
+void HelpMeeee();
+
+#endif // VTABLEDUMPHELPER_H

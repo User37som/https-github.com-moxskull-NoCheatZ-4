@@ -27,9 +27,11 @@
 			- Properly detect all visibles targets (move visibility data struct from antiwallhackblocker to a persistent system)
 			- Detect the current target and sray transfers
 				- Have a relative reference 3dpoint to that target (like a bone)
+					- Capture body impact
 				- Have a distance to that target
 				- Have the velocity of that target
 				- Have the number of shots fired
+					
 	- Detect inconsistent aim speed towards a target
 		- That happens when the crosshair enters the aimbot radio of a target.
 		- Also very fast and multiple aim direction changes within a short period.

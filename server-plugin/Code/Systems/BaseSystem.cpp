@@ -20,6 +20,8 @@
 #include "Players/NczPlayerManager.h"
 #include "Logger.h"
 
+#include "vtabledumphelper.h"
+
 
 /////////////////////////////////////////////////////////////////////////
 // BaseSystem
@@ -98,6 +100,14 @@ BaseSystem * BaseSystem::FindSystemByName ( const char * name )
 
 void BaseSystem::ncz_cmd_fn ( const SourceSdk::CCommand &args )
 {
+#ifdef DEBUG
+	if (stricmp(args.Arg(1), "vtbl") == 0)
+	{
+		HelpMeeee();
+
+		return;
+	}
+#endif
 	if( args.ArgC () > 1 )
 	{
 		BaseSystem* it = GetFirst ();
