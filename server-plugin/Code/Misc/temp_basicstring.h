@@ -43,6 +43,8 @@ private:
 		{
 			HeapMemoryManager::FreeMemory ( m_alloc, m_capacity );
 			m_alloc = nullptr;
+			m_capacity = 0;
+			m_size = 0;
 		}
 	}
 
@@ -65,8 +67,17 @@ private:
 
 		if( m_alloc )
 		{
-			if( copy ) memcpy ( n, m_alloc, ( m_size + 1 ) * sizeof ( pod ) );
-			Dealloc ();
+			if (copy)
+			{
+				memcpy(n, m_alloc, (m_size + 1) * sizeof(pod));
+				size_t qsize ( m_size );
+				Dealloc();
+				m_size = qsize;
+			}
+			else
+			{
+				Dealloc();
+			}			
 		}
 		else
 		{
@@ -120,14 +131,15 @@ public:
 
 	void clear ()
 	{
-		if( m_alloc )
+		/*if( m_alloc )
 			m_alloc[ 0 ] = 0;
-		m_size = 0;
+		m_size = 0;*/
+		Dealloc();
 	}
 
 	void assign ( pod const *d )
 	{
-		if( !d )
+		if( !d || d[0] == (pod)0 )
 		{
 			clear ();
 		}
@@ -142,7 +154,7 @@ public:
 
 	void assign ( pod const *d, size_t count )
 	{
-		if( !d )
+		if( !d || d[0] == (pod)0 )
 		{
 			clear ();
 		}
@@ -208,16 +220,20 @@ public:
 	bool operator ==( const String<pod> &other ) const
 	{
 		if( m_size != other.m_size ) return false;
-		__assume( m_alloc > 0 );
-		__assume( other.m_alloc > 0 );
-		pod const * me ( m_alloc );
-		pod const * other_c ( other.m_alloc );
-		do
+		if (m_alloc && other.m_alloc)
 		{
-			if( *me != *other_c ) return false;
-			++other_c;
+			pod const * me(m_alloc);
+			pod const * other_c(other.m_alloc);
+			do
+			{
+				if (*me != *other_c) return false;
+				++other_c;
+			} while (*me++ != 0);
 		}
-		while( *me++ != 0 );
+		else if ( m_alloc || other.m_alloc )
+		{
+			return false;
+		}
 
 		return true;
 	}
@@ -235,14 +251,19 @@ public:
 	bool operator ==( pod const * other ) const
 	{
 		if( m_size != autolen ( other ) ) return false;
-		__assume( m_alloc > 0 );
-		pod const * me ( m_alloc );
-		do
+		if ( m_alloc && other )
 		{
-			if( *me != *other ) return false;
-			++other;
+			pod const * me(m_alloc);
+			do
+			{
+				if (*me != *other) return false;
+				++other;
+			} while (*me++ != 0);
 		}
-		while( *me++ != 0 );
+		else if ( m_alloc || other )
+		{
+			return false;
+		}
 
 		return true;
 	}
@@ -254,7 +275,7 @@ public:
 
 	String<pod>& append ( pod const * t )
 	{
-		if( *t != 0 )
+		if( t && *t != 0 )
 		{
 			size_t const len ( autolen ( t ) + 1 );
 			Grow ( m_size + len );
@@ -306,17 +327,17 @@ public:
 
 	String<pod>& replace ( pod const replace_this, pod const replace_by )
 	{
-		__assume( m_alloc > 0 );
 		if( m_size > 0 )
 		{
+			__assume(m_alloc > 0);
 			pod * me ( m_alloc );
 			do
 			{
 				if( *me == replace_this ) *me = replace_by;
 			}
 			while( *++me != 0 );
+			FixSilentRemovals();
 		}
-		FixSilentRemovals ();
 
 		return *this;
 	}
@@ -331,86 +352,93 @@ public:
 				++replace_list;
 			}
 		}
-		FixSilentRemovals ();
 
 		return *this;
 	}
 
 	String<pod>& remove ( size_t pos )
 	{
-		__assume( m_alloc > 0 );
-		if( pos < m_size )
+		if (m_alloc)
 		{
-			do
+			if (pos < m_size)
 			{
-				m_alloc[ pos ] = m_alloc[ pos + 1 ];
+				do
+				{
+					m_alloc[pos] = m_alloc[pos + 1];
+				} while (m_alloc[++pos] != 0);
+				--m_size;
 			}
-			while( m_alloc[ ++pos ] != 0 );
-			--m_size;
 		}
+
 		return *this;
 	}
 
 	String<pod>& remove ( size_t const start, size_t end )
 	{
-		if( start > end ) return remove ( end, start );
-		if( end < m_size )
+		if (m_alloc)
 		{
-			do
+			if (start > end) return remove(end, start);
+			if (end < m_size)
 			{
-				remove ( end );
+				do
+				{
+					remove(end);
+				} while (end-- - start != 0);
 			}
-			while( end-- - start != 0 );
 		}
+
 		return *this;
 	}
 
 	String<pod>& replace ( String<pod> const & replace_this, String<pod> const & replace_by )
 	{
-		__assume( m_alloc > 0 );
-		int const diff ( replace_by.m_size - replace_this.m_size );
-		size_t pos ( find ( replace_this ) );
-		while( pos != npos )
+		if (m_alloc)
 		{
-			if( diff <= 0 )
+			int const diff(replace_by.m_size - replace_this.m_size);
+			size_t pos(find(replace_this));
+			while (pos != npos)
 			{
-				memcpy ( m_alloc + pos, replace_by.m_alloc, sizeof ( pod ) * replace_by.m_size );
-				if( diff < 0 ) remove ( pos + replace_by.m_size, pos + replace_this.m_size - 1 );
-			}
-			else if( diff > 0 )
-			{
-				memcpy ( m_alloc + pos, replace_by.m_alloc, sizeof ( pod ) * replace_this.m_size );
-				Grow ( m_size + diff + 1 );
-				size_t move_from_here ( m_size + diff );
-				size_t const move_until_here ( pos + replace_this.m_size - 1 );
-				do
+				if (diff <= 0)
 				{
-					m_alloc[ move_from_here ] = m_alloc[ move_from_here - diff ];
+					memcpy(m_alloc + pos, replace_by.m_alloc, sizeof(pod) * replace_by.m_size);
+					if (diff < 0) remove(pos + replace_by.m_size, pos + replace_this.m_size - 1);
 				}
-				while( --move_from_here != move_until_here );
-				memcpy ( m_alloc + pos + replace_this.m_size, replace_by.m_alloc + replace_this.m_size, sizeof ( pod ) * diff );
-				m_size += diff;
+				else if (diff > 0)
+				{
+					memcpy(m_alloc + pos, replace_by.m_alloc, sizeof(pod) * replace_this.m_size);
+					Grow(m_size + diff + 1);
+					size_t move_from_here(m_size + diff);
+					size_t const move_until_here(pos + replace_this.m_size - 1);
+					do
+					{
+						m_alloc[move_from_here] = m_alloc[move_from_here - diff];
+					} while (--move_from_here != move_until_here);
+					memcpy(m_alloc + pos + replace_this.m_size, replace_by.m_alloc + replace_this.m_size, sizeof(pod) * diff);
+					m_size += diff;
+				}
+				pos = find(replace_this, pos);
 			}
-			pos = find ( replace_this, pos );
+			FixSilentRemovals();
 		}
-		FixSilentRemovals ();
+
 		return *this;
 	}
 
 	size_t find ( pod const c, size_t start = 0 ) const
 	{
-		__assume( m_alloc > 0 );
-		size_t a ( m_size );
-		if( a == 0 ) return npos;
-		if( start >= a ) return npos;
-		a = start;
-		pod const * me ( m_alloc + start );
-		do
+		if (m_alloc)
 		{
-			if( *me == c ) return a;
-			++a;
+			size_t a(m_size);
+			if (a == 0) return npos;
+			if (start >= a) return npos;
+			a = start;
+			pod const * me(m_alloc + start);
+			do
+			{
+				if (*me == c) return a;
+				++a;
+			} while (*(++me) != 0);
 		}
-		while( *( ++me ) != 0 );
 
 		return npos;
 	}
@@ -454,45 +482,46 @@ public:
 
 	size_t find_last_of ( pod const * const c, size_t start = npos ) const
 	{
-		__assume( m_size > 0 );
-		size_t a ( m_size );
-		if( a == 0 ) return npos;
-		if( start == 0 ) return npos;
-		if( *c == 0 ) return npos;
-
-		--a;
-		pod const * me ( m_alloc + a );
-		pod const * temp_c ( c );
-		do
+		if (m_size > 0)
 		{
+			size_t a(m_size);
+			if (a == 0) return npos;
+			if (start == 0) return npos;
+			if (*c == 0) return npos;
+
+			--a;
+			pod const * me(m_alloc + a);
+			pod const * temp_c(c);
 			do
 			{
-				if( *me == *temp_c++ ) return a;
-			}
-			while( *temp_c != 0 );
-			temp_c = c;
-			--a;
+				do
+				{
+					if (*me == *temp_c++) return a;
+				} while (*temp_c != 0);
+				temp_c = c;
+				--a;
+			} while (me-- != m_alloc);
 		}
-		while( me-- != m_alloc );
 
 		return npos;
 	}
 
 	size_t find_last_of ( pod const c, size_t start = npos ) const
 	{
-		__assume( m_size > 0 );
-		size_t a ( m_size );
-		if( a == 0 ) return npos;
-		if( start == 0 ) return npos;
-
-		--a;
-		pod const * me ( m_alloc + a );
-		do
+		if (m_size > 0)
 		{
-			if( *me == c ) return a;
+			size_t a(m_size);
+			if (a == 0) return npos;
+			if (start == 0) return npos;
+
 			--a;
+			pod const * me(m_alloc + a);
+			do
+			{
+				if (*me == c) return a;
+				--a;
+			} while (me-- != m_alloc);
 		}
-		while( me-- != m_alloc );
 
 		return npos;
 	}
@@ -533,6 +562,7 @@ public:
 
 	pod& operator[] ( size_t const index ) const
 	{
+		Assert ( m_alloc );
 		Assert ( index <= m_capacity / sizeof ( pod ) );
 		Assert ( index <= m_size );
 		return m_alloc[ index ];
