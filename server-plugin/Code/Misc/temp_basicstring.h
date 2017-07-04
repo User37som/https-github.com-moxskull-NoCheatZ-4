@@ -91,7 +91,7 @@ private:
 
 	inline size_t autolen ( pod const * string ) const
 	{
-		return strlen ( string );
+		return string ? strlen ( string ) : 0;
 	}
 
 	inline size_t autonlen ( pod const * string, size_t max ) const
@@ -108,15 +108,12 @@ public:
 
 	String ()
 	{
-		memset ( this, 0, sizeof ( String ) );
+		memset ( this, 0, sizeof ( String<pod> ) );
 	}
 
 	~String ()
 	{
 		Dealloc ();
-#ifdef DEBUG
-		memset ( this, 0xCCCCCCCC, sizeof ( String ) );
-#endif
 	}
 
 	const pod *c_str () const
@@ -260,7 +257,7 @@ public:
 				++other;
 			} while (*me++ != 0);
 		}
-		else if ( m_alloc || other )
+		else if ( m_alloc || (other && *other) )
 		{
 			return false;
 		}
@@ -385,6 +382,10 @@ public:
 					remove(end);
 				} while (end-- - start != 0);
 			}
+			if (m_size == 0)
+			{
+				Dealloc();
+			}
 		}
 
 		return *this;
@@ -396,7 +397,7 @@ public:
 		{
 			int const diff(replace_by.m_size - replace_this.m_size);
 			size_t pos(find(replace_this));
-			while (pos != npos)
+			while (pos != npos && m_alloc)
 			{
 				if (diff <= 0)
 				{
