@@ -48,6 +48,7 @@ namespace HeapMemoryManager
 	void FreeMemory ( void * ptr, size_t capacity);
 
 	void InitPool ();
+	size_t GetPooledCount();
 	void FreePool ();
 
 	template <size_t align>

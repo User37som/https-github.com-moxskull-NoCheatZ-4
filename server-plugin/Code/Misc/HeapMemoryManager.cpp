@@ -109,6 +109,29 @@ namespace HeapMemoryManager
 		m_memory_init = true;
 	}
 
+	size_t GetPooledCount()
+	{
+		if (!m_memory_init) return 0;
+
+		size_t c(HMM_MAX_FREE_OBJECTS);
+
+		FreeMemoryHolder * it(m_free_memory);
+		FreeMemoryHolder const * const it_end(&(m_free_memory[HMM_MAX_FREE_OBJECTS]));
+		do
+		{
+			if (it->m_ptr != nullptr)
+			{
+				--c;
+			}
+			else
+			{
+				break;
+			}
+		} while (++it != it_end);
+
+		return c;
+	}
+
 	void FreePool ()
 	{
 		if( !m_memory_init ) return;
