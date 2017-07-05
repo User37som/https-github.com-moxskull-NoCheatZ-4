@@ -71,7 +71,7 @@ void NczPlayerManager::LoadPlayerManager ()
 	SourceSdk::InterfacesProxy::GetGameEventManager ()->AddListener ( this, "player_disconnect", true );
 	SourceSdk::InterfacesProxy::GetGameEventManager ()->AddListener ( this, "round_end", true );
 	SourceSdk::InterfacesProxy::GetGameEventManager ()->AddListener ( this, "round_freeze_end", true );
-	SourceSdk::InterfacesProxy::GetGameEventManager ()->AddListener ( this, "bot_takeover", true );
+	//SourceSdk::InterfacesProxy::GetGameEventManager ()->AddListener ( this, "bot_takeover", true );
 
 	//Helpers::FastScan_EntList();
 	Helpers::m_EdictList = Helpers::PEntityOfEntIndex ( 0 );
@@ -242,10 +242,13 @@ bot_takeover
 			}*/
 		}
 
-		ProcessFilter::HumanAtLeastConnected filter_class;
-		if( GetPlayerCount ( &filter_class ) == 0 ) AutoTVRecord::GetInstance ()->StopRecord ();
+		//ProcessFilter::HumanAtLeastConnected filter_class;
+		//if( GetPlayerCount ( &filter_class ) == 0 ) AutoTVRecord::GetInstance ()->StopRecord ();
 
 		BaseSystem::ManageSystems ();
+
+		AutoTVRecord::GetInstance()->OnRoundStart();
+
 		Logger::GetInstance ()->Flush ();
 
 		return;
@@ -474,7 +477,7 @@ void NczPlayerManager::RT_Think ( float const curtime )
 			++in_tests_count;
 		}
 	}
-	if( in_tests_count >= 1 ) AutoTVRecord::GetInstance ()->StartRecord ();
+	if( in_tests_count >= AutoTVRecord::GetInstance()->GetMinPlayers()) AutoTVRecord::GetInstance ()->StartRecord ();
 }
 
 PlayerHandler::const_iterator NczPlayerManager::GetPlayerHandlerByBasePlayer ( void * const BasePlayer ) const
