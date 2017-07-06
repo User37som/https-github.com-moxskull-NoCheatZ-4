@@ -22,7 +22,7 @@
 
 #include "Misc/Helpers.h" // + ifaces + preprocessors
 #include "Players/NczPlayerManager.h"
-#include "Systems/BaseSystem.h"
+#include "Systems/BanRequest.h"
 
 class BaseDetection :
 	public HeapMemoryManager::OverrideNew<16>
@@ -47,7 +47,7 @@ public:
 	virtual ~SubDetection () override
 	{};
 
-	void PrepareDetectionData ( playerDataStructT* dataStruct )
+	void PrepareDetectionData ( playerDataStructT const * const dataStruct )
 	{
 		static_assert ( std::is_copy_assignable<playerDataStructT>::value, "Data must be copy-assignable" );
 
@@ -84,6 +84,8 @@ class LogDetection : public SubDetection<playerDataStructT>
 {
 	typedef SubDetection<playerDataStructT> BaseClass;
 public:
+	typedef playerDataStructT data_type;
+
 	LogDetection () : BaseClass ()
 	{
 		this->m_testerName = nullptr;
@@ -108,7 +110,7 @@ public:
 		Helpers::writeToLogfile ( this->GetDataDump () );
 	};
 
-	void PrepareDetectionLog ( NczPlayer* player, BaseSystem* tester )
+	void PrepareDetectionLog ( NczPlayer const * const player, BaseSystem const * const tester )
 	{
 		m_testerName = tester->GetName ();
 
@@ -120,5 +122,30 @@ protected:
 	const char * m_testerName;
 	basic_string m_playerIdentity;
 };
+
+template <class playerDataStructT>
+inline void ProcessDetectionAndTakeAction(LogDetection<playerDataStructT> && info, playerDataStructT const * const pData, PlayerHandler::iterator const player, BaseTesterSystem const * const pSystem)
+{
+	info.PrepareDetectionData(pData);
+	info.PrepareDetectionLog(*player, pSystem);
+	info.Log();
+
+	if (pSystem->GetAction() == BaseTesterSystem::DetectionAction_t::LOG)
+	{
+		return;
+	}
+	else if (pSystem->GetAction() == BaseTesterSystem::DetectionAction_t::BAN_ASYNC)
+	{
+		BanRequest::GetInstance()->AddAsyncBan(*player, 0, Helpers::format("Banned by NoCheatZ 4 : %s detection with %s", info.GetDetectionLogMessage().c_str(), pSystem->GetName()));
+	}
+	else if (pSystem->GetAction() == BaseTesterSystem::DetectionAction_t::BAN_NOW)
+	{
+		BanRequest::GetInstance()->BanNow(*player, 0, Helpers::format("Banned by NoCheatZ 4 : %s detection with %s", info.GetDetectionLogMessage().c_str(), pSystem->GetName()));
+	}
+	else
+	{
+		BanRequest::GetInstance()->KickNow(*player, Helpers::format("Kicked by NoCheatZ 4 : %s detection with %s", info.GetDetectionLogMessage().c_str(), pSystem->GetName()));
+	}
+}
 
 #endif
