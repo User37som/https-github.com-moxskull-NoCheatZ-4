@@ -222,6 +222,10 @@ bool ConVarTester::sys_cmd_fn ( const SourceSdk::CCommand &args )
 			return true;
 		}
 	}
+	else
+	{
+		return true;
+	}
 	return false;
 }
 
