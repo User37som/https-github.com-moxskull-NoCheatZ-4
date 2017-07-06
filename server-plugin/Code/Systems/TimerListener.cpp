@@ -47,7 +47,7 @@ void TimerListener::RT_OnTick (float const curtime)
 			{
 				TimerInfo& v ( child[ pos ] );
 
-				if( curtime - v.m_last_exec >= v.m_period_seconds )
+				if( v.m_last_exec + v.m_period_seconds <= curtime)
 				{
 					it1->m_value->RT_TimerCallback ( v.m_name );
 
@@ -56,6 +56,10 @@ void TimerListener::RT_OnTick (float const curtime)
 						child.FindAndRemove ( v );
 						--max;
 						continue;
+					}
+					else
+					{
+						v.m_last_exec = curtime;
 					}
 				}
 				++pos;
