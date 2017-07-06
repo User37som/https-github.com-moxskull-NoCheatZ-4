@@ -25,7 +25,7 @@
 /////////////////////////////////////////////////////////////////////////
 
 ConVarTester::ConVarTester () :
-	BaseDynamicSystem ( "ConVarTester", "Enable - Disable - Verbose - AddRule - RemoveRule - ResetRules" ),
+	BaseTesterSystem ( "ConVarTester", "Enable - Disable - Verbose - SetAction - AddRule - RemoveRule - ResetRules" ),
 	OnTickListener (),
 	playerdata_class (),
 	singleton_class (),
@@ -140,84 +140,87 @@ ConVarInfoT* ConVarTester::RT_FindConvarRuleset ( const char * name )
 
 bool ConVarTester::sys_cmd_fn ( const SourceSdk::CCommand &args )
 {
-	if( stricmp ( "AddRule", args.Arg ( 2 ) ) == 0 )
-		// example : ncz ConVarTester AddRule sv_cheats 0 NO_VALUE
+	if (!BaseTesterSystem::sys_cmd_fn(args))
 	{
-		if( args.ArgC () == 6 )
+		if (stricmp("AddRule", args.Arg(2)) == 0)
+			// example : ncz ConVarTester AddRule sv_cheats 0 NO_VALUE
 		{
-			ConVarRuleT rule;
-
-			if( stricmp ( "NO_VALUE", args.Arg ( 5 ) ) == 0 ) rule = ConVarRule::NO_VALUE;
-			else if( stricmp ( "SAME", args.Arg ( 5 ) ) == 0 ) rule = ConVarRule::SAME;
-			else if( stricmp ( "SAME_FLOAT", args.Arg ( 5 ) ) == 0 ) rule = ConVarRule::SAME_FLOAT;
-			else if( stricmp ( "SAME_AS_SERVER", args.Arg ( 5 ) ) == 0 ) rule = ConVarRule::SAME_AS_SERVER;
-			else if( stricmp ( "SAME_FLOAT_AS_SERVER", args.Arg ( 5 ) ) == 0 ) rule = ConVarRule::SAME_FLOAT_AS_SERVER;
-			else if( stricmp ( "LOWER", args.Arg( 5 ) ) == 0 ) rule = ConVarRule::LOWER;
-			else if( stricmp ( "HIGHER", args.Arg( 5 ) ) == 0) rule = ConVarRule::HIGHER;
-			/*else if( stricmp ( "INRANGE", args.Arg(5)) == 0) // Need to re-order AddRule arguments ...
+			if (args.ArgC() == 6)
 			{
-				if (args.ArgC() == 7)
+				ConVarRuleT rule;
+
+				if (stricmp("NO_VALUE", args.Arg(5)) == 0) rule = ConVarRule::NO_VALUE;
+				else if (stricmp("SAME", args.Arg(5)) == 0) rule = ConVarRule::SAME;
+				else if (stricmp("SAME_FLOAT", args.Arg(5)) == 0) rule = ConVarRule::SAME_FLOAT;
+				else if (stricmp("SAME_AS_SERVER", args.Arg(5)) == 0) rule = ConVarRule::SAME_AS_SERVER;
+				else if (stricmp("SAME_FLOAT_AS_SERVER", args.Arg(5)) == 0) rule = ConVarRule::SAME_FLOAT_AS_SERVER;
+				else if (stricmp("LOWER", args.Arg(5)) == 0) rule = ConVarRule::LOWER;
+				else if (stricmp("HIGHER", args.Arg(5)) == 0) rule = ConVarRule::HIGHER;
+				/*else if( stricmp ( "INRANGE", args.Arg(5)) == 0) // Need to re-order AddRule arguments ...
 				{
-					rule = ConVarRule::RANGE;
+					if (args.ArgC() == 7)
+					{
+						rule = ConVarRule::RANGE;
+					}
+					else
+					{
+						Logger::GetInstance()->Msg<MSG_CMD_REPLY>("INRANGE expects 2 values");
+					}
+				}*/
+				else
+				{
+					Logger::GetInstance()->Msg<MSG_CMD_REPLY>(Helpers::format("Arg %s not found.", args.Arg(5)));
+					return true;
+				}
+
+				if (strnicmp("sv_", args.Arg(3), 3) == 0) rule = ConVarRule::SAME_AS_SERVER;
+				else rule = ConVarRule::SAME;
+
+				basic_string value = args.Arg(4);
+
+				if (value.find('.') != basic_string::npos)
+				{
+					if (rule == ConVarRule::SAME_AS_SERVER) rule = ConVarRule::SAME_FLOAT_AS_SERVER;
+					else rule = ConVarRule::SAME_FLOAT;
 				}
 				else
 				{
-					Logger::GetInstance()->Msg<MSG_CMD_REPLY>("INRANGE expects 2 values");
+					if (rule != ConVarRule::SAME_AS_SERVER) rule = ConVarRule::SAME_FLOAT_AS_SERVER;
+					else rule = ConVarRule::SAME_FLOAT;
 				}
-			}*/ 
-			else
-			{
-				Logger::GetInstance()->Msg<MSG_CMD_REPLY> ( Helpers::format ( "Arg %s not found.", args.Arg ( 5 ) ) );
+
+				AddConvarRuleset(args.Arg(3), args.Arg(4), rule, false);
+				Logger::GetInstance()->Msg<MSG_CMD_REPLY>("Added convar test rule.");
 				return true;
-			}
-
-			if( strnicmp ( "sv_", args.Arg ( 3 ), 3 ) == 0 ) rule = ConVarRule::SAME_AS_SERVER;
-			else rule = ConVarRule::SAME;
-
-			basic_string value = args.Arg ( 4 );
-
-			if( value.find ( '.' ) != basic_string::npos )
-			{
-				if( rule == ConVarRule::SAME_AS_SERVER ) rule = ConVarRule::SAME_FLOAT_AS_SERVER;
-				else rule = ConVarRule::SAME_FLOAT;
 			}
 			else
 			{
-				if( rule != ConVarRule::SAME_AS_SERVER ) rule = ConVarRule::SAME_FLOAT_AS_SERVER;
-				else rule = ConVarRule::SAME_FLOAT;
-			}
-
-			AddConvarRuleset ( args.Arg ( 3 ), args.Arg ( 4 ), rule, false );
-			Logger::GetInstance ()->Msg<MSG_CMD_REPLY> ( "Added convar test rule." );
-			return true;
-		}
-		else
-		{
-			Logger::GetInstance ()->Msg<MSG_CMD_REPLY> ( "ncz ConVarTester AddRule [ConVar] [value] [TestType]\nTestType : NO_VALUE - SAME - SAME_FLOAT - SAME_AS_SERVER - SAME_FLOAT_AS_SERVER - LOWER - HIGHER" );
-			return true;
-		}
-	}
-	else if( stricmp ( "RemoveRule", args.Arg ( 2 ) ) == 0 )
-	{
-		size_t pos ( 0 );
-		size_t const max ( m_convars_rules.Size () );
-		while( pos < max )
-		{
-			if( stricmp ( m_convars_rules[ pos ].name, args.Arg ( 3 ) ) == 0 )
-			{
-				m_convars_rules.Remove ( pos );
+				Logger::GetInstance()->Msg<MSG_CMD_REPLY>("ncz ConVarTester AddRule [ConVar] [value] [TestType]\nTestType : NO_VALUE - SAME - SAME_FLOAT - SAME_AS_SERVER - SAME_FLOAT_AS_SERVER - LOWER - HIGHER");
 				return true;
 			}
-			++pos;
 		}
-		Logger::GetInstance ()->Msg<MSG_CMD_REPLY> ( "Can't find such convar to remove." );
-		return false;
-	}
-	else if( stricmp ( "ResetRules", args.Arg ( 2 ) ) == 0 )
-		// example : ncz ConVarTester ResetRules
-	{
-		LoadDefaultRules ();
-		return true;
+		else if (stricmp("RemoveRule", args.Arg(2)) == 0)
+		{
+			size_t pos(0);
+			size_t const max(m_convars_rules.Size());
+			while (pos < max)
+			{
+				if (stricmp(m_convars_rules[pos].name, args.Arg(3)) == 0)
+				{
+					m_convars_rules.Remove(pos);
+					return true;
+				}
+				++pos;
+			}
+			Logger::GetInstance()->Msg<MSG_CMD_REPLY>("Can't find such convar to remove.");
+			return false;
+		}
+		else if (stricmp("ResetRules", args.Arg(2)) == 0)
+			// example : ncz ConVarTester ResetRules
+		{
+			LoadDefaultRules();
+			return true;
+		}
 	}
 	return false;
 }
@@ -328,11 +331,7 @@ void ConVarTester::RT_OnQueryCvarValueFinished ( PlayerHandler::const_iterator p
 						{
 novalue:
 							{
-								Detection_ConVar pDetection;
-								pDetection.PrepareDetectionData(req);
-								pDetection.PrepareDetectionLog(*ph, this);
-								pDetection.Log();
-								BanRequest::GetInstance()->AddAsyncBan(*ph, 0, "Banned by NoCheatZ 4");
+								ProcessDetectionAndTakeAction<Detection_ConVar::data_type>(Detection_ConVar(), req, ph, this);
 
 								break;
 							}
@@ -352,11 +351,7 @@ novalue:
 					req->answer = "NO VALUE";
 					if( ruleset->rule != ConVarRule::NO_VALUE )
 					{
-						Detection_ConVar pDetection;
-						pDetection.PrepareDetectionData ( req );
-						pDetection.PrepareDetectionLog ( *ph, this );
-						pDetection.Log ();
-						BanRequest::GetInstance ()->AddAsyncBan ( *ph, 0, "Banned by NoCheatZ 4" );
+						ProcessDetectionAndTakeAction<Detection_ConVar::data_type>(Detection_ConVar(), req, ph, this);
 					}
 					break;
 				}
@@ -386,11 +381,7 @@ novalue:
 
 		return;
 unexpected2:
-		Detection_ConVar pDetection;
-		pDetection.PrepareDetectionData ( req );
-		pDetection.PrepareDetectionLog ( *ph, this );
-		pDetection.Log ();
-		BanRequest::GetInstance ()->AddAsyncBan ( *ph, 0, "Banned by NoCheatZ 4" );
+		ProcessDetectionAndTakeAction<Detection_ConVar::data_type>(Detection_ConVar(), req, ph, this);
 	}
 }
 

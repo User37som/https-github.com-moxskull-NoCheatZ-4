@@ -88,9 +88,6 @@
     <None Include="Makefile">
       <Filter>Resources</Filter>
     </None>
-    <None Include="Res\nocheatz-CSGO.cfg">
-      <Filter>Resources\Config Files</Filter>
-    </None>
     <None Include="..\scripts\prepare-build.bat">
       <Filter>Scripts</Filter>
     </None>
@@ -155,9 +152,6 @@
     </ClCompile>
     <ClCompile Include="Code\Systems\Logger.cpp">
       <Filter>Code\Systems</Filter>
-    </ClCompile>
-    <ClCompile Include="Code\Systems\Testers\ShotTester.cpp">
-      <Filter>Code\Systems\Testers</Filter>
     </ClCompile>
     <ClCompile Include="Code\Systems\Testers\JumpTester.cpp">
       <Filter>Code\Systems\Testers</Filter>
@@ -255,6 +249,12 @@
     <ClCompile Include="Code\Hooks\DearMetamodSource.cpp">
       <Filter>Code\Hooks</Filter>
     </ClCompile>
+    <ClCompile Include="Code\vtabledumphelper.cpp">
+      <Filter>Code</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Systems\Testers\AimTester.cpp">
+      <Filter>Code\Systems\Testers</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Code\plugin.h">
@@ -310,9 +310,6 @@
     </ClInclude>
     <ClInclude Include="Code\Systems\Logger.h">
       <Filter>Code\Systems</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\Systems\Testers\ShotTester.h">
-      <Filter>Code\Systems\Testers</Filter>
     </ClInclude>
     <ClInclude Include="Code\Systems\Testers\JumpTester.h">
       <Filter>Code\Systems\Testers</Filter>
@@ -571,6 +568,12 @@
     </ClInclude>
     <ClInclude Include="Code\Hooks\DearMetamodSource.h">
       <Filter>Code\Hooks</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Systems\Testers\AimTester.h">
+      <Filter>Code\Systems\Testers</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\vtabledumphelper.h">
+      <Filter>Code</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -68,7 +68,7 @@ public:
 
 	void GetEyeAngles ( SourceSdk::QAngle & out ) const;
 
-	inline basic_string const GetReadableIdentity ();
+	inline basic_string const GetReadableIdentity () const;
 
 	inline float const GetTimeConnected () const;
 
@@ -132,7 +132,7 @@ inline float const NczPlayer::GetTimeConnected () const
 	return Plat_FloatTime () - m_time_connected;
 }
 
-inline basic_string const NczPlayer::GetReadableIdentity ()
+inline basic_string const NczPlayer::GetReadableIdentity () const
 {
 	if( SteamGameServer_BSecure () )
 	{

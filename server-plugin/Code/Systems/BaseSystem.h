@@ -44,7 +44,7 @@ protected:
 #endif
 
 protected:
-	BaseSystem ( char const * const name, char const * const commands = "Enable - Disable - Verbose" );
+	BaseSystem ( char const * const name, char const * const commands = "Verbose" );
 	virtual ~BaseSystem ();
 
 public:
@@ -83,7 +83,7 @@ protected:
 	/* Commande(s) console du système,
 	donne vrai si la commande existe
 	Le premier argument est en fait le troisième */
-	virtual bool sys_cmd_fn ( const SourceSdk::CCommand &args )
+	virtual bool sys_cmd_fn(const SourceSdk::CCommand &args)
 	{
 		return false;
 	}
@@ -242,6 +242,93 @@ protected:
 	{
 		return true;
 	}
+};
+
+class BaseTesterSystem :
+	public BaseDynamicSystem
+{
+public:
+	typedef enum DetectionAction : size_t
+	{
+		BAN_ASYNC = 0,
+		BAN_NOW,
+		KICK,
+		LOG
+	} DetectionAction_t;
+
+private:
+	DetectionAction_t m_action_on_detection;
+
+protected:
+	BaseTesterSystem(char const * const name, char const * const commands = "Enable - Disable - Verbose - SetAction");
+
+	virtual ~BaseTesterSystem();
+
+public:
+	void SetAction(DetectionAction_t action)
+	{
+		m_action_on_detection = action;
+	}
+
+	bool SetAction(basic_string const & in)
+	{
+		basic_string lower_in(in);
+		lower_in.lower();
+
+		if (lower_in == "ban_async")
+		{
+			SetAction(DetectionAction_t::BAN_ASYNC);
+			return true;
+		}
+		else if (lower_in == "ban_now")
+		{
+			SetAction(DetectionAction_t::BAN_NOW);
+			return true;
+		}
+		else if (lower_in == "kick")
+		{
+			SetAction(DetectionAction_t::KICK);
+			return true;
+		}
+		else if (lower_in == "log")
+		{
+			SetAction(DetectionAction_t::LOG);
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	DetectionAction_t GetAction() const
+	{
+		return m_action_on_detection;
+	}
+
+	void GetAction(basic_string & out) const
+	{
+		switch (m_action_on_detection)
+		{
+		case DetectionAction_t::BAN_ASYNC:
+			out = "BAN_ASYNC";
+			break;
+		case DetectionAction_t::BAN_NOW:
+			out = "BAN_NOW";
+			break;
+		case DetectionAction_t::KICK:
+			out = "KICK";
+			break;
+		case DetectionAction_t::LOG:
+			out = "LOG";
+			break;
+		default:
+			out = "ERROR VALUE";
+			break;
+		}
+	}
+
+	virtual bool sys_cmd_fn(const SourceSdk::CCommand &args);
 };
 
 #endif

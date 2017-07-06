@@ -21,11 +21,15 @@ limitations under the License.
 #include "Logger.h"
 
 AutoTVRecord::AutoTVRecord () :
-	BaseDynamicSystem ( "AutoTVRecord", "Enable - Disable - Verbose" ),
+	BaseDynamicSystem ( "AutoTVRecord", "Enable - Disable - Verbose - SetDemoPrefix - SetMinPlayers - SplitDemoBy" ),
 	singleton_class (),
 	m_prefix ( "NoCheatZ-autorecords/" ),
 	m_waitfortv_time ( 0.0f ),
 	m_minplayers ( 1 ),
+	m_splitrule ( demo_split_t::SPLIT_BY_MAP ),
+	m_round_id (0),
+	m_max_rounds (0),
+	m_splittimer_seconds (0.0f),
 	m_spawn_once ( true )
 {}
 
@@ -39,14 +43,132 @@ void AutoTVRecord::Init ()
 	
 }
 
+void AutoTVRecord::OnRoundStart()
+{
+	if (IsActive())
+	{
+		if (m_splitrule == demo_split_t::SPLIT_BY_ROUNDS)
+		{
+			if (++m_round_id > m_max_rounds)
+			{
+				SplitRecord();
+				m_round_id = 0;
+			}
+		}
+	}
+}
+
+bool AutoTVRecord::sys_cmd_fn(const SourceSdk::CCommand & args)
+{
+	if (stricmp("setdemoprefix", args.Arg(2)))
+	{
+		if (args.ArgC() > 3)
+		{
+			basic_string prefix(args.Arg(3));
+			prefix.replace(":?\"<>|%", '-');
+			/// TODO : Sanitize the user input to avoid breakin attempts (top-level directory access)
+			/// TODO : Test if we can write a test-file with this prefix before validating the user input
+			/// TODO : Eventually move all the sanitize stuff inside SetRecordPrefix
+			SetRecordPrefix(prefix);
+			Logger::GetInstance()->Msg<MSG_CMD_REPLY>(Helpers::format("Prefix is \"%s\"", prefix.c_str()));
+			return true;
+		}
+		Logger::GetInstance()->Msg<MSG_CMD_REPLY>(Helpers::format("Unable to set prefix. Current prefix is \"%s\"", m_prefix.c_str()));
+		return false;
+	}
+	else if (stricmp("setminplayers", args.Arg(2)))
+	{
+		if (args.ArgC() > 3)
+		{
+			int min(atoi(args.Arg(3)));
+			if (min > 0)
+			{
+				SetMinPlayers(min);
+				Logger::GetInstance()->Msg<MSG_CMD_REPLY>(Helpers::format("MinPlayers is \"%d\"", m_minplayers));
+				return true;
+			}
+		}
+		Logger::GetInstance()->Msg<MSG_CMD_REPLY>(Helpers::format("Missing agrument. Current minimum human players required to start a record is \"%d\"", m_minplayers));
+		return false;
+	}
+	else if (stricmp("splitdemoby", args.Arg(2)))
+	{
+		if (args.ArgC() > 3)
+		{
+			if (stricmp("map", args.Arg(3)))
+			{
+				m_splitrule = demo_split_t::SPLIT_BY_MAP;
+				Logger::GetInstance()->Msg<MSG_CMD_REPLY>("Will split demos by map");
+				RemoveTimer("autotv");
+				TimerListener::RemoveTimerListener(this);
+				return true;
+			}
+			else if (stricmp("rounds", args.Arg(3)))
+			{
+				m_splitrule = demo_split_t::SPLIT_BY_ROUNDS;
+				if (args.ArgC() > 4)
+				{
+					m_max_rounds = atoi(args.Arg(4));
+					if (m_max_rounds < 1) m_max_rounds = 1;
+				}
+				else
+				{
+					m_max_rounds = 1;
+				}
+				if (m_max_rounds > 1)
+				{
+					Logger::GetInstance()->Msg<MSG_CMD_REPLY>(Helpers::format("Will split demos every %d rounds", m_max_rounds));
+				}
+				else
+				{
+					Logger::GetInstance()->Msg<MSG_CMD_REPLY>("Will split demos every round");
+				}
+				m_round_id = 0;
+				RemoveTimer("autotv");
+				TimerListener::RemoveTimerListener(this);
+				return true;
+			}
+			else if (stricmp("time", args.Arg(3)))
+			{
+				if (args.ArgC() > 4)
+				{
+					m_splittimer_seconds = (float)atof(args.Arg(4));
+					if (m_splittimer_seconds < 60.0f) m_splittimer_seconds = 60.0f;
+				}
+				else
+				{
+					Logger::GetInstance()->Msg<MSG_CMD_REPLY>("Missing float argument");
+					return false;
+				}
+				Logger::GetInstance()->Msg<MSG_CMD_REPLY>(Helpers::format("Will split demos every %s seconds", m_splittimer_seconds));
+				RemoveTimer("autotv");
+				TimerListener::AddTimerListener(this);
+				AddTimer(m_splittimer_seconds, "autotv");
+				return true;
+			}
+		}
+		Logger::GetInstance()->Msg<MSG_CMD_REPLY>("SplitDemoBy Usage : Map / Rounds [optionnal number] / Time [seconds]");
+		return false;
+	}
+	return false;
+}
+
 void AutoTVRecord::Load ()
 {
 	m_waitfortv_time = Plat_FloatTime () + 5.0f;
+	m_round_id = 0;
+	if (m_splitrule == demo_split_t::SPLIT_BY_TIMER_SECONDS)
+	{
+		RemoveTimer("autotv");
+		TimerListener::AddTimerListener(this);
+		AddTimer(m_splittimer_seconds, "autotv");
+	}
 }
 
 void AutoTVRecord::Unload ()
 {
 	StopRecord ();
+	TimerListener::RemoveTimerListener(this);
 }
 
 bool AutoTVRecord::GotJob () const
@@ -57,6 +179,11 @@ bool AutoTVRecord::GotJob () const
 	PlayerHandler::const_iterator it(&filter_class);
 	// Return if we have job to do or not ...
 	return it != PlayerHandler::end();
+}
+
+void AutoTVRecord::RT_TimerCallback(char const * const timer_name)
+{
+	SplitRecord();
 }
 
 void AutoTVRecord::StartRecord ()
@@ -78,7 +205,7 @@ void AutoTVRecord::StartRecord ()
 		size_t const strip ( mapname.find_last_of ( "/\\" ) );
 		if( strip != basic_string::npos ) mapname = mapname.c_str () + strip + 1;
 
-		mapname.replace ( ":?\"<>|", '-' );
+		mapname.replace ( ":?\"<>|%", '-' );
 
 		SourceSdk::InterfacesProxy::Call_ServerExecute ();
 		

@@ -21,6 +21,7 @@ limitations under the License.
 #include "Hooks/ConCommandHookListener.h"
 #include "Misc/temp_basicstring.h"
 #include "Misc/temp_singleton.h"
+#include "TimerListener.h"
 
 /*
 	This system will :
@@ -30,22 +31,38 @@ limitations under the License.
 
 class AutoTVRecord :
 	private BaseDynamicSystem,
+	private TimerListener,
 	public Singleton<AutoTVRecord>
 {
 	typedef Singleton<AutoTVRecord> singleton_class;
+
+public:
+	typedef enum demo_split : size_t
+	{
+		SPLIT_BY_MAP = 0,
+		SPLIT_BY_ROUNDS,
+		SPLIT_BY_TIMER_SECONDS
+	} demo_split_t;
 
 private:
 	basic_string m_prefix;
 	float m_waitfortv_time;
 	int m_minplayers;
+	demo_split_t m_splitrule;
+	unsigned int m_round_id;
+	unsigned int m_max_rounds;
+	float m_splittimer_seconds;
 	bool m_spawn_once;
 
 public:
+
 	AutoTVRecord ();
 	virtual ~AutoTVRecord () final;
 
 private:
 	virtual void Init () override final;
+
+	virtual bool sys_cmd_fn(const SourceSdk::CCommand &args) override final;
 
 	virtual void Load () override final;
 
@@ -53,13 +70,21 @@ private:
 
 	virtual bool GotJob () const override final;
 
+	virtual void RT_TimerCallback(char const * const timer_name /* Pointer can be invalid past the function */) override final;
+
 public:
 	void StartRecord ();
 
 	void StopRecord ();
 
+	inline void SplitRecord();
+
+	void OnRoundStart();
+
 	// How much human players must be in the game before we start recording. 1 or 2 are great values.
 	void SetMinPlayers ( int min );
+
+	inline int GetMinPlayers();
 
 	// Prefix in the filename of records
 	void SetRecordPrefix ( basic_string const & prefix );
@@ -67,6 +92,16 @@ public:
 	//	Will try to spawn the TV once and once a client connects (ClientActive)
 	void SpawnTV ();
 };
+
+inline void AutoTVRecord::SplitRecord()
+{
+	StopRecord(); StartRecord();
+}
+
+inline int AutoTVRecord::GetMinPlayers()
+{
+	return m_minplayers;
+}
 
 class TVWatcher :
 	private BaseStaticSystem,

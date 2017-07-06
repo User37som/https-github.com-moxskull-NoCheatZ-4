@@ -17,8 +17,8 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LocalDebuggerCommandArguments>-console -condebug -condump -game csgo -insecure -maxplayers 64 +game_type 0 +game_mode 0 +map de_inferno +rcon_password cderfv +bot_join_team any +bot_quota 64 +mp_limitteams 0 +mp_autoteambalance 0</LocalDebuggerCommandArguments>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
-    <LocalDebuggerCommand>B:\steamcmd\CSGO\srcds.exe</LocalDebuggerCommand>
-    <LocalDebuggerWorkingDirectory>B:\steamcmd\CSGO\</LocalDebuggerWorkingDirectory>
+    <LocalDebuggerCommand>E:\steamcmd\CSGO\srcds.exe</LocalDebuggerCommand>
+    <LocalDebuggerWorkingDirectory>E:\steamcmd\CSGO\</LocalDebuggerWorkingDirectory>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Profiler|Win32'">
     <LocalDebuggerCommandArguments>-console -game csgo -insecure -maxplayers 64 +game_type 0 +game_mode 0 +map de_inferno +rcon_password cderfv +bot_join_team any +bot_quota 64 +mp_limitteams 0 +mp_autoteambalance 0</LocalDebuggerCommandArguments>

@@ -11,7 +11,7 @@ Source Engine serversided anti-cheat plugin. (CS:S, CS:GO).
         1. [Detection Systems](#detection-systems)
         2. [Blocking Systems](#blocking-systems)
         3. [Other Systems](#other-systems)
-    2. [Available Command](#command)
+    2. [Available Commands](#command)
 5. [Contributing](#Contributing)
     1. [Installing a Game Server](#Installation)
     2. [Cloning the repository](#Cloning)
@@ -71,7 +71,7 @@ Currently [CS:GO](http://store.steampowered.com/app/730) is the base of this pro
 # Current Project Status
 ___
 
-* **Status** : [Slowly fighting, but hope is lost](https://github.com/L-EARN/NoCheatZ-4/tree/master)
+* **Status** : [Killer humanized aimbot detection incoming ... if you're wise](https://github.com/L-EARN/NoCheatZ-4/tree/master)
 
 <a name="Features"></a> 
 # Features
@@ -113,30 +113,10 @@ ___
 * Logger : Outputs NoCheatZ logs into `logs/NoCheatZ_4_Logs/`
 
 <a name="command"></a> 
-## Available command
+## Available commands
 ___
 
-`ncz [system] [args ...]`
-
-* Print status of systems and available commands : `ncz`
-
-* You can disable a system using `ncz [system] disable` or `ncz [system] off`
-* Enable a system using `ncz [system] enable` or `ncz [system] on`
-
-* Print additionnal informations if available (**Will slow down the server**) `ncz [system] verbose 1`
-* Print more informations if available (**Will slow down the server even more**) `ncz [system] verbose 2`
-* Stop that verbose thingy that slow down the server for nothing `ncz [system] verbose 0`
-
-* Add a ConVar to be tested by ConVarTester : `ncz ConVarTester AddRule sv_cheats 0 SAME_AS_SERVER` means the clients must have the same value as the server
-* Add a floating point ConVar : `ncz ConVarTester AddRule mp_convar_to_test 0.0 SAME_FLOAT`
-* Add a string ConVar : `ncz ConVarTester AddRule r_stringconvar oye SAME`
-* Reset default rules of ConVarTester : `ncz ConVarTester ResetRules`
-* Remove a specific ConVar from ConVarTester : `ncz ConVarTester RemoveRule sv_cheats`
-
-* Disable kick ( Will also disable bans ) : `ncz BanRequest CanKick No`
-* Disable ban ( Bans will be translated in to kicks ) : `ncz BanRequest CanBan No`
-* Enable kick : `ncz BanRequest CanKick Yes`
-* Enable ban ( Will also enable kick ) : `ncz BanRequest CanBan Yes`
+See https://github.com/L-EARN/NoCheatZ-4/blob/master/server-plugin/Res/nocheatz.cfg
 
 <a name="Contributing"></a> 
 # Contributing
@@ -211,9 +191,9 @@ apt-get install g++-4.8 g++-4.8-multilib
 The binary and all other stuff will go in `NoCheatZ-4/Builds/[CONFIG]/addons/NoCheatZ`
 
 You can copy-paste the entire content of the `Builds` directory into the root directory of your gameserver.
-(e.g. `cp /R ./NoCheatZ-4/Builds/Release/* /home/user/steamcmd/CSS/cstrike` )
+(e.g. `cp /R ./NoCheatZ-4/Builds/Release/* /home/user/steamcmd/CSGO/csgo` )
 
-5. If you want to run the server using gdb, create a script in `steamcmd/CSS` with something like this :
+5. If you want to run the server using gdb, create a script in `steamcmd/CSGO` with something like this :
 
 ```sh
 #!/bin/sh
@@ -256,4 +236,4 @@ ___
 
 * Whatever you want but first make sure to have your own branch a/o fork.
 
-* Feel free to report using [Issues](https://github.com/L-EARN/NoCheatZ-4/issues) if you see anything you think is not good.
+* Feel free to report using [Issues](https://github.com/L-EARN/NoCheatZ-4/issues) if you see anything you think is not good, for a feature request or just some help.

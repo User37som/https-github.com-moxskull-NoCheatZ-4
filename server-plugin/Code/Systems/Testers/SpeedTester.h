@@ -71,7 +71,7 @@ public:
 };
 
 class SpeedTester :
-	private BaseDynamicSystem,
+	private BaseTesterSystem,
 	private OnTickListener,
 	public PlayerDataStructHandler<SpeedHolderT>,
 	private PlayerRunCommandHookListener,

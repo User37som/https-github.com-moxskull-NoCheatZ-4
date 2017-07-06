@@ -82,6 +82,11 @@ float Plat_FloatTime ()
 	return ( GlobalTimer::GetInstance ()->GetCurrent () * 0.001f );
 }
 
+float HOOKFN_INT GetTickInterval(void * const preserve_me)
+{
+	return ConfigManager::tickinterval;
+}
+
 void CNoCheatZPlugin::CreateSingletons ()
 {
 	SourceHookSafety::CreateInstance();
@@ -192,6 +197,22 @@ bool CNoCheatZPlugin::Load ( SourceSdk::CreateInterfaceFn _interfaceFactory, Sou
 		return false;
 	}
 
+	// replace tickinterval
+
+	switch (SourceSdk::InterfacesProxy::m_servergamedll_version)
+	{
+	case 5:
+	case 6:
+		ReplaceVirtualFunctionByFakeVirtual((DWORD)GetTickInterval, &(IFACE_PTR(SourceSdk::InterfacesProxy::m_servergamedll)[9]));
+		break;
+	case 9:
+	case 10:
+		ReplaceVirtualFunctionByFakeVirtual((DWORD)GetTickInterval, &(IFACE_PTR(SourceSdk::InterfacesProxy::m_servergamedll)[10]));
+		break;
+	default:
+		break;
+	};
+
 	SourceHookSafety::GetInstance()->TryHookMMSourceHook();
 
 	if( SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive )
@@ -227,6 +248,7 @@ bool CNoCheatZPlugin::Load ( SourceSdk::CreateInterfaceFn _interfaceFactory, Sou
 
 	SourceSdk::InterfacesProxy::Call_ServerExecute ();
 	SourceSdk::InterfacesProxy::Call_ServerCommand ( "exec nocheatz.cfg\n" );
+	SourceSdk::InterfacesProxy::Call_ServerCommand (Helpers::format("sv_mincmdrate %d\n", ConfigManager::GetInstance()->tickrate_override));
 	SourceSdk::InterfacesProxy::Call_ServerExecute ();
 
 	ProcessFilter::HumanAtLeastConnectedOrBot filter_class;
@@ -399,8 +421,8 @@ void CNoCheatZPlugin::LevelShutdown ( void ) // !!!!this can get called multiple
 
 	BanRequest::GetInstance ()->WriteBansIfNeeded ();
 	BaseSystem::UnloadAllSystems ();
-	Logger::GetInstance ()->Flush ();
 	TVWatcher::GetInstance()->RecordEnded();
+	Logger::GetInstance ()->Flush ();
 }
 
 //---------------------------------------------------------------------------------

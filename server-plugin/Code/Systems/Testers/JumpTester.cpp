@@ -28,7 +28,7 @@
 */
 
 JumpTester::JumpTester () :
-	BaseDynamicSystem ( "JumpTester" ),
+	BaseTesterSystem ( "JumpTester" ),
 	OnGroundHookListener (),
 	playerdata_class (),
 	PlayerRunCommandHookListener (),
@@ -195,22 +195,13 @@ void JumpTester::OnPlayerTouchGround ( PlayerHandler::const_iterator ph, int gam
 
 		if( avg_jmp_per_second > 10.0f && playerData->total_bhopCount > 1 )
 		{
-			Detection_BunnyHopScript pDetection;
-			pDetection.PrepareDetectionData ( playerData );
-			pDetection.PrepareDetectionLog ( *ph, this );
-			pDetection.Log ();
-			ph->Kick ( "You have to turn off your BunnyHop Script to play on this server." );
+			ProcessDetectionAndTakeAction<Detection_BunnyHopScript::data_type>(Detection_BunnyHopScript(), playerData, ph, this);
 		}
 	}
 
 	if( playerData->jumpCmdHolder.outsideJumpCmdCount == 0 && playerData->perfectBhopsCount > 5 && playerData->perfectBhopsPercent >= std::max (0, ( 100 - std::min ( 95, playerData->perfectBhopsCount * 2 ) ) ) )
 	{
-		Detection_BunnyHopProgram pDetection;
-		pDetection.PrepareDetectionData ( playerData );
-		pDetection.PrepareDetectionLog ( *ph, this );
-		pDetection.Log ();
-
-		ph->Ban ( "[NoCheatZ 4] You have been banned for using BunnyHop on this server." );
+		ProcessDetectionAndTakeAction<Detection_BunnyHopProgram::data_type>(Detection_BunnyHopProgram(), playerData, ph, this);
 	}
 
 	playerData->jumpCmdHolder.outsideJumpCmdCount = 0;
@@ -238,11 +229,7 @@ void JumpTester::OnPlayerJumpButtonDown ( PlayerHandler::const_iterator ph, int 
 
 	if( cmd_diff > 0 && cmd_diff <= 3 )
 	{
-		Detection_BunnyHopScript pDetection;
-		pDetection.PrepareDetectionData ( playerData );
-		pDetection.PrepareDetectionLog ( *ph, this );
-		pDetection.Log ();
-		ph->Kick ( "You have to turn off your BunnyHop Script to play on this server." );
+		ProcessDetectionAndTakeAction<Detection_BunnyHopScript::data_type>(Detection_BunnyHopScript(), playerData, ph, this);
 	}
 
 	if( playerData->isOnGround )

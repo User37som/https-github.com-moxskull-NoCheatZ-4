@@ -87,3 +87,28 @@ void MoveVirtualFunction ( DWORD const * const from, DWORD * const to )
 	mprotect ( p, sizeof ( DWORD ) & ( psize - 1 ), PROT_READ | PROT_EXEC );
 #endif // WIN32
 }
+
+void ReplaceVirtualFunctionByFakeVirtual(DWORD const replace_by, DWORD * const replace_here)
+{
+#ifdef WIN32
+	DWORD dwOld;
+	if (!VirtualProtect(replace_here, sizeof(DWORD), PAGE_EXECUTE_READWRITE, &dwOld))
+	{
+		return;
+	}
+#else // LINUX
+	uint32_t psize(sysconf(_SC_PAGESIZE));
+	void *p = (void *)((DWORD)(replace_here) & ~(psize - 1));
+	if (mprotect(p, sizeof(DWORD) & (psize - 1), PROT_READ | PROT_WRITE | PROT_EXEC) < 0)
+	{
+		return;
+	}
+#endif // WIN32
+	DebugMessage(Helpers::format("ReplaceVirtualFunctionByFakeVirtual : function 0x%X replaced by 0x%X.", replace_by, *replace_here));
+	*replace_here = replace_by;
+#ifdef WIN32
+	VirtualProtect(replace_here, sizeof(DWORD), dwOld, &dwOld);
+#else // LINUX
+	mprotect(p, sizeof(DWORD) & (psize - 1), PROT_READ | PROT_EXEC);
+#endif // WIN32
+}
