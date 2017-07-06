@@ -287,3 +287,35 @@ void BaseDynamicSystem::SetActive ( bool active )
 		Unload ();
 	}
 }
+
+BaseTesterSystem::BaseTesterSystem(char const * const name, char const * const commands) :
+	BaseDynamicSystem(name, commands),
+	m_action_on_detection(DetectionAction_t::BAN_ASYNC)
+{
+}
+
+BaseTesterSystem::~BaseTesterSystem()
+{
+}
+
+bool BaseTesterSystem::sys_cmd_fn(const SourceSdk::CCommand & args)
+{
+	if (args.ArgC() >= 3)
+	{
+		if (stricmp(args.Arg(2), "setaction") == 0)
+		{
+			if (SetAction(args.Arg(3)))
+			{
+				basic_string current_action;
+				GetAction(current_action);
+				Logger::GetInstance()->Msg<MSG_CMD_REPLY>(Helpers::format("Action on detection is %s", current_action.c_str()));
+				return true;
+			}
+			else
+			{
+				Logger::GetInstance()->Msg<MSG_CMD_REPLY>("SetAction Usage : BAN_ASYNC / BAN_NOW / KICK / LOG");
+			}
+		}
+	}
+	return false;
+}
