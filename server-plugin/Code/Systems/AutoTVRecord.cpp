@@ -140,7 +140,8 @@ bool AutoTVRecord::sys_cmd_fn(const SourceSdk::CCommand & args)
 					Logger::GetInstance()->Msg<MSG_CMD_REPLY>("Missing float argument");
 					return false;
 				}
-				Logger::GetInstance()->Msg<MSG_CMD_REPLY>(Helpers::format("Will split demos every %s seconds", m_splittimer_seconds));
+				m_splitrule = demo_split_t::SPLIT_BY_TIMER_SECONDS;
+				Logger::GetInstance()->Msg<MSG_CMD_REPLY>(Helpers::format("Will split demos every %f seconds", m_splittimer_seconds));
 				RemoveTimer("autotv");
 				TimerListener::AddTimerListener(this);
 				AddTimer(m_splittimer_seconds, "autotv");
