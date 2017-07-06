@@ -60,7 +60,7 @@ void AutoTVRecord::OnRoundStart()
 
 bool AutoTVRecord::sys_cmd_fn(const SourceSdk::CCommand & args)
 {
-	if (stricmp("setdemoprefix", args.Arg(2)))
+	if (stricmp("setdemoprefix", args.Arg(2)) == 0)
 	{
 		if (args.ArgC() > 3)
 		{
@@ -76,7 +76,7 @@ bool AutoTVRecord::sys_cmd_fn(const SourceSdk::CCommand & args)
 		Logger::GetInstance()->Msg<MSG_CMD_REPLY>(Helpers::format("Unable to set prefix. Current prefix is \"%s\"", m_prefix.c_str()));
 		return false;
 	}
-	else if (stricmp("setminplayers", args.Arg(2)))
+	else if (stricmp("setminplayers", args.Arg(2)) == 0)
 	{
 		if (args.ArgC() > 3)
 		{
@@ -91,11 +91,11 @@ bool AutoTVRecord::sys_cmd_fn(const SourceSdk::CCommand & args)
 		Logger::GetInstance()->Msg<MSG_CMD_REPLY>(Helpers::format("Missing agrument. Current minimum human players required to start a record is \"%d\"", m_minplayers));
 		return false;
 	}
-	else if (stricmp("splitdemoby", args.Arg(2)))
+	else if (stricmp("splitdemoby", args.Arg(2)) == 0)
 	{
 		if (args.ArgC() > 3)
 		{
-			if (stricmp("map", args.Arg(3)))
+			if (stricmp("map", args.Arg(3)) == 0)
 			{
 				m_splitrule = demo_split_t::SPLIT_BY_MAP;
 				Logger::GetInstance()->Msg<MSG_CMD_REPLY>("Will split demos by map");
@@ -103,7 +103,7 @@ bool AutoTVRecord::sys_cmd_fn(const SourceSdk::CCommand & args)
 				TimerListener::RemoveTimerListener(this);
 				return true;
 			}
-			else if (stricmp("rounds", args.Arg(3)))
+			else if (stricmp("rounds", args.Arg(3)) == 0)
 			{
 				m_splitrule = demo_split_t::SPLIT_BY_ROUNDS;
 				if (args.ArgC() > 4)
@@ -128,7 +128,7 @@ bool AutoTVRecord::sys_cmd_fn(const SourceSdk::CCommand & args)
 				TimerListener::RemoveTimerListener(this);
 				return true;
 			}
-			else if (stricmp("time", args.Arg(3)))
+			else if (stricmp("time", args.Arg(3)) == 0)
 			{
 				if (args.ArgC() > 4)
 				{
