@@ -70,7 +70,7 @@ struct AttackTriggerStats
 };
 
 class AutoAttackTester :
-	public BaseDynamicSystem,
+	public BaseTesterSystem,
 	public PlayerDataStructHandler<AttackTriggerStats>,
 	public PlayerRunCommandHookListener,
 	public Singleton<AutoAttackTester>

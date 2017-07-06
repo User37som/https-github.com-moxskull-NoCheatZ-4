@@ -252,6 +252,9 @@
     <ClCompile Include="Code\vtabledumphelper.cpp">
       <Filter>Code</Filter>
     </ClCompile>
+    <ClCompile Include="Code\Systems\Testers\AimTester.cpp">
+      <Filter>Code\Systems\Testers</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Code\plugin.h">

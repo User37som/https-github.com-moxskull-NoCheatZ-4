@@ -18,7 +18,7 @@
 #include "Systems/Logger.h"
 
 SpeedTester::SpeedTester () :
-	BaseDynamicSystem ( "SpeedTester" ),
+	BaseTesterSystem ( "SpeedTester" ),
 	OnTickListener (),
 	playerdata_class (),
 	PlayerRunCommandHookListener (),
@@ -84,14 +84,7 @@ void SpeedTester::RT_ProcessOnTick ( float const curtime )
 
 			if( pInfo->detections >= 30 && curtime > pInfo->lastDetectionTime + 30.0f )
 			{
-				Detection_SpeedHack pDetection;
-				pDetection.PrepareDetectionData ( pInfo );
-				pDetection.PrepareDetectionLog ( *ph, this );
-				pDetection.Log ();
-
-				pInfo->lastDetectionTime = curtime;
-
-				ph->Ban ();
+				ProcessDetectionAndTakeAction<Detection_SpeedHack::data_type>(Detection_SpeedHack(), pInfo, ph, this);
 			}
 		}
 		else if( pInfo->detections )

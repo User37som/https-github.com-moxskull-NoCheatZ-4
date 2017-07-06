@@ -22,7 +22,7 @@
 #include "Systems/BanRequest.h"
 
 EyeAnglesTester::EyeAnglesTester ( void ) :
-	BaseDynamicSystem ( "EyeAnglesTester" ),
+	BaseTesterSystem ( "EyeAnglesTester" ),
 	SourceSdk::IGameEventListener002 (),
 	playerdata_class (),
 	PlayerRunCommandHookListener (),
@@ -98,10 +98,7 @@ PlayerRunCommandRet EyeAnglesTester::RT_PlayerRunCommandCallback ( PlayerHandler
 			{
 				playerData->x.lastDetectionPrintTime = Plat_FloatTime ();
 
-				Detection_EyeAngleX pDetection;
-				pDetection.PrepareDetectionData ( playerData );
-				pDetection.PrepareDetectionLog ( *ph, this );
-				pDetection.Log ();
+				ProcessDetectionAndTakeAction<Detection_EyeAngleX::data_type>(Detection_EyeAngleX(), playerData, ph, this);
 			}
 		}
 		if( playerData->y.abs_value > 180.0f )
@@ -111,10 +108,7 @@ PlayerRunCommandRet EyeAnglesTester::RT_PlayerRunCommandCallback ( PlayerHandler
 			{
 				playerData->y.lastDetectionPrintTime = Plat_FloatTime ();
 
-				Detection_EyeAngleY pDetection;
-				pDetection.PrepareDetectionData ( playerData );
-				pDetection.PrepareDetectionLog ( *ph, this );
-				pDetection.Log ();
+				ProcessDetectionAndTakeAction<Detection_EyeAngleY::data_type>(Detection_EyeAngleY(), playerData, ph, this);
 			}
 		}
 		if( playerData->z.abs_value > 1.0f )
@@ -124,14 +118,9 @@ PlayerRunCommandRet EyeAnglesTester::RT_PlayerRunCommandCallback ( PlayerHandler
 			{
 				playerData->z.lastDetectionPrintTime = Plat_FloatTime ();
 
-				Detection_EyeAngleZ pDetection;
-				pDetection.PrepareDetectionData ( playerData );
-				pDetection.PrepareDetectionLog ( *ph, this );
-				pDetection.Log ();
+				ProcessDetectionAndTakeAction<Detection_EyeAngleZ::data_type>(Detection_EyeAngleZ(), playerData, ph, this);
 			}
 		}
-
-		BanRequest::GetInstance ()->AddAsyncBan ( *ph, 0, "Banned by NoCheatZ 4" );
 	}
 	return drop_cmd;
 }

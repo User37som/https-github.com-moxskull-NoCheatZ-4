@@ -147,7 +147,7 @@ public:
 };
 
 class ConVarTester :
-	public BaseDynamicSystem,
+	public BaseTesterSystem,
 	public OnTickListener,
 	public PlayerDataStructHandler<CurrentConVarRequestT>,
 	public Singleton<ConVarTester>
@@ -175,7 +175,7 @@ private:
 
 	virtual bool GotJob () const override final;
 
-	virtual bool sys_cmd_fn ( SourceSdk::CCommand const &args ) override final;
+	virtual bool sys_cmd_fn ( SourceSdk::CCommand const &args );
 
 	/* Nouvelle version de la fonction qui va faire en sorte de ne tester qu'un seul joueur par frame */
 	virtual void RT_ProcessOnTick ( float const curtime ) override final;

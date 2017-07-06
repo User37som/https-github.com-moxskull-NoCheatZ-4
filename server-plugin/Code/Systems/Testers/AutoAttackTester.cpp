@@ -22,7 +22,7 @@ limitations under the License.
 #include "Systems/BanRequest.h"
 
 AutoAttackTester::AutoAttackTester ( void ) :
-	BaseDynamicSystem ( "AutoAttackTester" ),
+	BaseTesterSystem( "AutoAttackTester" ),
 	playerdata_class (),
 	PlayerRunCommandHookListener (),
 	singleton_class ()
@@ -228,12 +228,7 @@ void AutoAttackTester::FindDetection ( PlayerHandler::const_iterator ph, tb_int*
 
 				// push detection
 
-				Detection_AutoAttack pDetection;
-				pDetection.PrepareDetectionData ( &info );
-				pDetection.PrepareDetectionLog ( *ph, this );
-				pDetection.Log ();
-
-				BanRequest::GetInstance ()->AddAsyncBan ( *ph, 0, "Banned by NoCheatZ 4" );
+				ProcessDetectionAndTakeAction<Detection_AutoAttack::data_type>(Detection_AutoAttack(), &info, ph, this);
 
 				// reset the graph ( let others detections be incoming without adding error or flooding )
 
