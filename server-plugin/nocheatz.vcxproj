@@ -378,7 +378,6 @@ copy "$(TargetPath)" ..\..\..\game\bin\"$(TargetName)".pdb
     <None Include="SourceSdk\Interfaces\Protobuf\cstrike15_usermessages.proto" />
     <None Include="SourceSdk\Interfaces\Protobuf\netmessages.proto" />
     <None Include="Makefile" />
-    <None Include="Res\nocheatz-CSGO.cfg" />
     <None Include="Res\!nocheatz.vdf" />
   </ItemGroup>
   <ItemGroup>
@@ -437,7 +436,6 @@ copy "$(TargetPath)" ..\..\..\game\bin\"$(TargetName)".pdb
     <ClCompile Include="Code\Systems\Logger.cpp" />
     <ClCompile Include="Code\Systems\OnTickListener.cpp" />
     <ClCompile Include="Code\Systems\Testers\ConCommandTester.cpp" />
-    <ClCompile Include="Code\Systems\Testers\ShotTester.cpp" />
     <ClCompile Include="Code\Systems\Testers\JumpTester.cpp" />
     <ClCompile Include="Code\Systems\Testers\ConVarTester.cpp" />
     <ClCompile Include="Code\Systems\Testers\EyeAnglesTester.cpp" />
@@ -545,7 +543,6 @@ copy "$(TargetPath)" ..\..\..\game\bin\"$(TargetName)".pdb
     <ClInclude Include="Code\Systems\Logger.h" />
     <ClInclude Include="Code\Systems\OnTickListener.h" />
     <ClInclude Include="Code\Systems\Testers\ConCommandTester.h" />
-    <ClInclude Include="Code\Systems\Testers\ShotTester.h" />
     <ClInclude Include="Code\Systems\Testers\JumpTester.h" />
     <ClInclude Include="Code\Systems\Testers\ConVarTester.h" />
     <ClInclude Include="Code\Systems\Testers\Detections\temp_BaseDetection.h" />
