@@ -132,7 +132,7 @@ bool AutoTVRecord::sys_cmd_fn(const SourceSdk::CCommand & args)
 			{
 				if (args.ArgC() > 4)
 				{
-					m_splittimer_seconds = atof(args.Arg(4));
+					m_splittimer_seconds = (float)atof(args.Arg(4));
 					if (m_splittimer_seconds < 60.0f) m_splittimer_seconds = 60.0f;
 				}
 				else
