@@ -28,13 +28,14 @@
 */
 
 JumpTester::JumpTester () :
-	BaseTesterSystem ( "JumpTester" ),
+	BaseTesterSystem ( "JumpTester", "Enable - Disable - Verbose - SetAction - DetectScripts" ),
 	OnGroundHookListener (),
 	playerdata_class (),
 	PlayerRunCommandHookListener (),
 	singleton_class (),
 	convar_sv_enablebunnyhopping ( nullptr ),
-	convar_sv_autobunnyhopping ( nullptr )
+	convar_sv_autobunnyhopping ( nullptr ),
+	detect_scripts(false)
 {}
 
 JumpTester::~JumpTester ()
@@ -62,6 +63,39 @@ void JumpTester::Init ()
 			Logger::GetInstance ()->Msg<MSG_WARNING> ( "JumpTester::Init : Unable to locate ConVar sv_enablebunnyhopping" );
 		}
 	}
+}
+
+bool JumpTester::sys_cmd_fn(const SourceSdk::CCommand & args)
+{
+	if (!BaseTesterSystem::sys_cmd_fn(args))
+	{
+		if (args.ArgC() >= 4)
+		{
+			if (stricmp(args.Arg(2), "detectscripts") == 0)
+			{
+				if (stricmp(args.Arg(3), "yes") == 0)
+				{
+					detect_scripts = true;
+					Logger::GetInstance()->Msg<MSG_CMD_REPLY>("DetectScripts is Yes");
+				}
+				else if (stricmp(args.Arg(3), "no") == 0)
+				{
+					detect_scripts = false;
+					Logger::GetInstance()->Msg<MSG_CMD_REPLY>("DetectScripts is No");
+				}
+				else
+				{
+					Logger::GetInstance()->Msg<MSG_CMD_REPLY>("DetectScripts Usage : Yes / No");
+					return false;
+				}
+			}
+		}
+	}
+	else
+	{
+		return true;
+	}
+	return false;
 }
 
 void JumpTester::Load ()
@@ -195,7 +229,10 @@ void JumpTester::OnPlayerTouchGround ( PlayerHandler::const_iterator ph, int gam
 
 		if( avg_jmp_per_second > 10.0f && playerData->total_bhopCount > 1 )
 		{
-			ProcessDetectionAndTakeAction<Detection_BunnyHopScript::data_type>(Detection_BunnyHopScript(), playerData, ph, this);
+			if (detect_scripts)
+			{
+				ProcessDetectionAndTakeAction<Detection_BunnyHopScript::data_type>(Detection_BunnyHopScript(), playerData, ph, this);
+			}
 		}
 	}
 
@@ -227,9 +264,12 @@ void JumpTester::OnPlayerJumpButtonDown ( PlayerHandler::const_iterator ph, int 
 	int const cmd_diff ( game_tick - playerData->jumpCmdHolder.JumpUp_Tick );
 	int const wd_diff ( game_tick - playerData->onGroundHolder.onGround_Tick );
 
-	if( cmd_diff > 0 && cmd_diff <= 3 )
+	if( cmd_diff > 1 && cmd_diff <= 3 )
 	{
-		ProcessDetectionAndTakeAction<Detection_BunnyHopScript::data_type>(Detection_BunnyHopScript(), playerData, ph, this);
+		if (detect_scripts)
+		{
+			ProcessDetectionAndTakeAction<Detection_BunnyHopScript::data_type>(Detection_BunnyHopScript(), playerData, ph, this);
+		}
 	}
 
 	if( playerData->isOnGround )
@@ -239,16 +279,18 @@ void JumpTester::OnPlayerJumpButtonDown ( PlayerHandler::const_iterator ph, int 
 			++playerData->total_bhopCount;
 			SystemVerbose1 ( Helpers::format ( "Player %s : total_bhopCount = %d\n", ph->GetName (), playerData->total_bhopCount ) );
 
-			if( wd_diff == 0 )
+			if( wd_diff <= 1 )
 			{
 				++playerData->perfectBhopsCount;
 				__assume ( playerData->perfectBhopsCount <= playerData->total_bhopCount );
-				playerData->perfectBhopsPercent = ( int ) ( ( playerData->perfectBhopsCount / playerData->total_bhopCount ) * 100.0f );
+				playerData->perfectBhopsPercent = ( (float)(playerData->perfectBhopsCount) / (float)(playerData->total_bhopCount) ) * 100.0f;
 				SystemVerbose1 ( Helpers::format ( "Player %s : perfectBhopsCount = %d\n", ph->GetName (), playerData->perfectBhopsCount ) );
 			}
 			else if( wd_diff < 3 )
 			{
 				++playerData->goodBhopsCount;
+				__assume (playerData->perfectBhopsCount <= playerData->total_bhopCount);
+				playerData->perfectBhopsPercent = ((float)(playerData->perfectBhopsCount) / (float)(playerData->total_bhopCount)) * 100.0f;
 				SystemVerbose1 ( Helpers::format ( "Player %s : goodBhopsCount = %d\n", ph->GetName (), playerData->goodBhopsCount ) );
 			}
 		}
@@ -256,6 +298,11 @@ void JumpTester::OnPlayerJumpButtonDown ( PlayerHandler::const_iterator ph, int 
 	else
 	{
 		++playerData->jumpCmdHolder.outsideJumpCmdCount;
+		++playerData->total_outside_jump;
+		if (playerData->total_bhopCount != 0) // Yes it can happen ...
+		{
+			playerData->totaloutsidepercent = ((float)(playerData->total_outside_jump) / (float)(playerData->total_bhopCount)) * 100.0f;
+		}
 	}
 
 	SystemVerbose1 ( Helpers::format ( "Player %s pushed the jump button.", ph->GetName () ) );
@@ -293,13 +340,17 @@ basic_string Detection_BunnyHopScript::GetDataDump ()
 							 ":::::::: },\n"
 							 ":::::::: Total Bunny Hop Count : %d,\n"
 							 ":::::::: Good Bunny Hop Count : %d,\n"
-							 ":::::::: Perfect Bunny Hop Ratio : %d %%,\n"
+							 ":::::::: Total Jump Commands Done While Flying : %d,\n"
+							 ":::::::: Total Jump Commands Done While Flying Ratio : %f,\n"
+							 ":::::::: Perfect Bunny Hop Ratio : %f %%,\n"
 							 ":::::::: Perfect Bunny Hop Count : %d\n"
 							 ":::: }",
 							 GetDataStruct ()->onGroundHolder.onGround_Tick, GetDataStruct ()->onGroundHolder.notOnGround_Tick, GetDataStruct ()->onGroundHolder.jumpCount,
 							 ConvertButton ( GetDataStruct ()->jumpCmdHolder.lastJumpCmdState ), GetDataStruct ()->jumpCmdHolder.JumpDown_Tick, GetDataStruct ()->jumpCmdHolder.JumpUp_Tick, GetDataStruct ()->jumpCmdHolder.outsideJumpCmdCount,
 							 GetDataStruct ()->total_bhopCount,
 							 GetDataStruct ()->goodBhopsCount,
+							 GetDataStruct()->total_outside_jump,
+							 GetDataStruct()->totaloutsidepercent,
 							 GetDataStruct ()->perfectBhopsPercent,
 							 GetDataStruct ()->perfectBhopsCount );
 }
