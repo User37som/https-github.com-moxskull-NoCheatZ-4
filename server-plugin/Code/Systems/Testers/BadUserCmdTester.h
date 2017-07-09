@@ -20,19 +20,23 @@
 #include "Players/temp_PlayerDataStruct.h"
 #include "Hooks/PlayerRunCommandHookListener.h"
 #include "Misc/temp_singleton.h"
+#include "Systems/Testers/Detections/temp_BaseDetection.h"
 
-enum TickStatus
+typedef enum TickStatus : int
 {
 	OK = 0,
 	IN_RESET,
 	RESET
-};
+} TickStatus_t;
 
 struct UserCmdInfo
 {
-	TickStatus m_tick_status;
+	TickStatus_t m_tick_status;
 	bool m_prev_dead;
 	float m_detected_time;
+	int prev_cmd;
+	int prev_tick;
+	int cmd_offset;
 
 	UserCmdInfo ()
 	{
@@ -48,18 +52,44 @@ struct UserCmdInfo
 	};
 };
 
-class BadUserCmdBlocker :
-	public BaseDynamicSystem,
+struct BadCmdInfo
+{
+	UserCmdInfo m_inner;
+	SourceSdk::CUserCmd_csgo m_current_cmd;
+
+	BadCmdInfo(UserCmdInfo const * inner, SourceSdk::CUserCmd_csgo const * cmd)
+	{
+		memcpy(&m_inner, inner, sizeof(UserCmdInfo));
+		memcpy(&m_current_cmd, cmd, sizeof(SourceSdk::CUserCmd_csgo));
+	}
+};
+
+class Detection_BadUserCmd :
+	public LogDetection<BadCmdInfo>
+{
+	typedef LogDetection<BadCmdInfo> hClass;
+
+public:
+	virtual basic_string GetDetectionLogMessage() override final
+	{
+		return "Tempered UserCmd";
+	};
+
+	virtual basic_string GetDataDump() override final;
+};
+
+class BadUserCmdTester :
+	public BaseTesterSystem,
 	public PlayerDataStructHandler<UserCmdInfo>,
 	public PlayerRunCommandHookListener,
-	public Singleton<BadUserCmdBlocker>
+	public Singleton<BadUserCmdTester>
 {
-	typedef Singleton<BadUserCmdBlocker> singleton_class;
+	typedef Singleton<BadUserCmdTester> singleton_class;
 	typedef PlayerDataStructHandler<UserCmdInfo> playerdatahandler_class;
 
 public:
-	BadUserCmdBlocker ();
-	virtual ~BadUserCmdBlocker () final;
+	BadUserCmdTester();
+	virtual ~BadUserCmdTester() final;
 
 	virtual void Init () override final;
 

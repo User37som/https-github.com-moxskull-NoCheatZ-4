@@ -83,45 +83,40 @@ PlayerRunCommandRet EyeAnglesTester::RT_PlayerRunCommandCallback ( PlayerHandler
 	playerData->y.abs_value = fabs ( playerData->y.value = static_cast< SourceSdk::CUserCmd_csgo* >( pCmd )->viewangles.y );
 	playerData->z.abs_value = fabs ( playerData->z.value = static_cast< SourceSdk::CUserCmd_csgo* >( pCmd )->viewangles.z );
 
-	if( playerData->x.abs_value > 89.0f || playerData->z.abs_value > 1.0f || playerData->y.abs_value > 180.0f )
+	if( playerData->x.abs_value > 89.0f )
 	{
-		if( playerData->ignore_last ) --( playerData->ignore_last );
-		else drop_cmd = PlayerRunCommandRet::INERT;
-	}
-
-	if( drop_cmd > PlayerRunCommandRet::CONTINUE )
-	{
-		if( playerData->x.abs_value > 89.0f )
+		++playerData->x.detectionsCount;
+		drop_cmd = PlayerRunCommandRet::INERT;
+		if( playerData->x.lastDetectionPrintTime + ANTIFLOOD_LOGGING_TIME < Plat_FloatTime () )
 		{
-			++playerData->x.detectionsCount;
-			if( playerData->x.lastDetectionPrintTime + ANTIFLOOD_LOGGING_TIME < Plat_FloatTime () )
-			{
-				playerData->x.lastDetectionPrintTime = Plat_FloatTime ();
+			playerData->x.lastDetectionPrintTime = Plat_FloatTime ();
 
-				ProcessDetectionAndTakeAction<Detection_EyeAngleX::data_type>(Detection_EyeAngleX(), playerData, ph, this);
-			}
-		}
-		if( playerData->y.abs_value > 180.0f )
-		{
-			++playerData->y.detectionsCount;
-			if( playerData->y.lastDetectionPrintTime + ANTIFLOOD_LOGGING_TIME < Plat_FloatTime () )
-			{
-				playerData->y.lastDetectionPrintTime = Plat_FloatTime ();
-
-				ProcessDetectionAndTakeAction<Detection_EyeAngleY::data_type>(Detection_EyeAngleY(), playerData, ph, this);
-			}
-		}
-		if( playerData->z.abs_value > 1.0f )
-		{
-			++playerData->z.detectionsCount;
-			if( playerData->z.lastDetectionPrintTime + ANTIFLOOD_LOGGING_TIME < Plat_FloatTime () )
-			{
-				playerData->z.lastDetectionPrintTime = Plat_FloatTime ();
-
-				ProcessDetectionAndTakeAction<Detection_EyeAngleZ::data_type>(Detection_EyeAngleZ(), playerData, ph, this);
-			}
+			ProcessDetectionAndTakeAction<Detection_EyeAngleX::data_type>(Detection_EyeAngleX(), playerData, ph, this);
 		}
 	}
+	if( playerData->y.abs_value > 180.0f )
+	{
+		++playerData->y.detectionsCount;
+		drop_cmd = PlayerRunCommandRet::INERT;
+		if( playerData->y.lastDetectionPrintTime + ANTIFLOOD_LOGGING_TIME < Plat_FloatTime () )
+		{
+			playerData->y.lastDetectionPrintTime = Plat_FloatTime ();
+
+			ProcessDetectionAndTakeAction<Detection_EyeAngleY::data_type>(Detection_EyeAngleY(), playerData, ph, this);
+		}
+	}
+	if (playerData->z.abs_value > 0.0f)
+	{
+		++playerData->z.detectionsCount;
+		drop_cmd = PlayerRunCommandRet::INERT;
+		if (playerData->z.lastDetectionPrintTime + ANTIFLOOD_LOGGING_TIME < Plat_FloatTime())
+		{
+			playerData->z.lastDetectionPrintTime = Plat_FloatTime();
+
+			ProcessDetectionAndTakeAction<Detection_EyeAngleZ::data_type>(Detection_EyeAngleZ(), playerData, ph, this);
+		}
+	}
+
 	return drop_cmd;
 }
 

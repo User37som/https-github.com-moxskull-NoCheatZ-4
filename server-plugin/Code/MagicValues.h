@@ -55,7 +55,8 @@
 
 namespace SystemPriority
 {
-	size_t const constexpr SpeedTester(0);
+	size_t const constexpr BadUserCmdTester(0);
+	size_t const constexpr SpeedTester(BadUserCmdTester + 1);
 	size_t const constexpr EyeAnglesTester(SpeedTester + 1);
 	size_t const constexpr AutoAttackTester(EyeAnglesTester + 1);
 	size_t const constexpr AimTester(AutoAttackTester + 1);
