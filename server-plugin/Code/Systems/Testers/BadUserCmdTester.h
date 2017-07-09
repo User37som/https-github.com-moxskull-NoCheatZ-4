@@ -59,6 +59,10 @@ struct BadCmdInfo
 	UserCmdInfo m_inner;
 	SourceSdk::CUserCmd_csgo m_current_cmd;
 
+	BadCmdInfo()
+	{
+		// not needed
+	}
 	BadCmdInfo(UserCmdInfo const * inner, SourceSdk::CUserCmd_csgo const * cmd)
 	{
 		memcpy(&m_inner, inner, sizeof(UserCmdInfo));

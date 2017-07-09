@@ -30,7 +30,7 @@
 #include "Systems/Testers/SpamChangeNameTester.h"
 #include "Systems/Blockers/AntiFlashbangBlocker.h"
 #include "Systems/Blockers/AntiSmokeBlocker.h"
-#include "Systems/Blockers/BadUserCmdBlocker.h"
+#include "Systems/Testers/BadUserCmdTester.h"
 #include "Systems/Blockers/WallhackBlocker.h"
 #include "Systems/Blockers/RadarHackBlocker.h"
 #include "Systems/Blockers/BhopBlocker.h"
@@ -101,7 +101,7 @@ void CNoCheatZPlugin::CreateSingletons ()
 
 	AntiFlashbangBlocker::CreateInstance ();
 	AntiSmokeBlocker::CreateInstance ();
-	BadUserCmdBlocker::CreateInstance ();
+	BadUserCmdTester::CreateInstance ();
 	BhopBlocker::CreateInstance ();
 	WallhackBlocker::CreateInstance ();
 	ConCommandTester::CreateInstance ();
@@ -134,7 +134,7 @@ void CNoCheatZPlugin::DestroySingletons ()
 	ConCommandTester::DestroyInstance ();
 	WallhackBlocker::DestroyInstance ();
 	BhopBlocker::DestroyInstance ();
-	BadUserCmdBlocker::DestroyInstance ();
+	BadUserCmdTester::DestroyInstance ();
 	AntiSmokeBlocker::DestroyInstance ();
 	AntiFlashbangBlocker::DestroyInstance ();
 
@@ -539,7 +539,7 @@ SourceSdk::PLUGIN_RESULT CNoCheatZPlugin::ClientConnect ( bool *bAllowConnect, S
 		ConCommandTester::GetInstance ()->ResetPlayerDataStruct ( player );
 		AntiFlashbangBlocker::GetInstance ()->ResetPlayerDataStruct ( player );
 		AntiSmokeBlocker::GetInstance ()->ResetPlayerDataStruct ( player );
-		BadUserCmdBlocker::GetInstance ()->ResetPlayerDataStruct ( player );
+		BadUserCmdTester::GetInstance ()->ResetPlayerDataStruct ( player );
 		WallhackBlocker::GetInstance ()->ResetPlayerDataStruct ( player );
 		SpamChangeNameTester::GetInstance ()->ResetPlayerDataStruct ( player );
 		RadarHackBlocker::GetInstance ()->ResetPlayerDataStruct ( player );

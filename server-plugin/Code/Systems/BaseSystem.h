@@ -373,6 +373,6 @@ public:
 	{
 		return true;
 	}
-}
+};
 
 #endif
