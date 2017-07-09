@@ -52,9 +52,17 @@ enum msg_type
 	MSG_VERBOSE2,
 	// Prints to stderr only if the project build is in debug mode and verbose is at least 3
 	MSG_DEBUG,
+	MSG_CHAT_ADMIN,
 	// Used inside ConCommands
 	MSG_CMD_REPLY
 };
+
+typedef enum logger_chat : size_t
+{
+	ON = 0,
+	ADMIN,
+	OFF
+} logger_chat_t;
 
 class Logger :
 	public BaseStaticSystem,
@@ -67,15 +75,23 @@ class Logger :
 private:
 	CUtlVector<basic_string> m_msg;
 	basic_string const prolog;
-	bool m_always_flush;
-	bool m_allow_chat;
+	logger_chat_t m_allow_chat;
+	size_t m_current_memory_used;
 
 	MsgFunc_t m_msg_func;
 
-	size_t m_current_memory_used;
+	bool m_always_flush;
 
 public:
-	Logger () : BaseStaticSystem ( "Logger", "Verbose - AlwaysFlush - AllowChat" ), singleton_class (), m_msg (), prolog ( basic_string("[NoCheatZ ").append(NCZ_VERSION_GIT_SHORT).append("] ") ), m_always_flush(false), m_allow_chat(true), m_msg_func( nullptr ), m_current_memory_used ( 0 )
+	Logger () :
+		BaseStaticSystem ( "Logger", "Verbose - AlwaysFlush - AllowChat" ),
+		singleton_class (),
+		m_msg (),
+		prolog ( basic_string("[NoCheatZ ").append(NCZ_VERSION_GIT_SHORT).append("] ") ),
+		m_allow_chat(logger_chat_t::ON),
+		m_current_memory_used ( 0 ),
+		m_msg_func(nullptr),
+		m_always_flush(false)
 	{
 		ConnectToServerConsole ();
 	};
@@ -99,6 +115,11 @@ public:
 	static void SpewAssert ( char const * expr, char const * file, unsigned int line );
 
 	inline bool IsConsoleConnected () const;
+
+	logger_chat_t GetAllowChat() const
+	{
+		return m_allow_chat;
+	}
 
 	void Push ( const char * msg );
 	void Flush ();

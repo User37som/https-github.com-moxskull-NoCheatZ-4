@@ -23,6 +23,7 @@
 #include "Misc/temp_Metrics.h"
 #include "Players/NczPlayerManager.h"
 #include "Systems/AutoTVRecord.h"
+#include "Systems/ConfigManager.h"
 
 #ifdef GNUC
 
@@ -179,11 +180,15 @@ void Logger::Msg<MSG_CMD_REPLY> ( const char * msg, int verbose /*= 0*/ )
 template <>
 void Logger::Msg<MSG_CHAT> ( const char * msg, int verbose /*= 0*/ )
 {
-	Msg<MSG_CONSOLE> ( msg );
-	if (m_allow_chat)
+	//Msg<MSG_CONSOLE> ( msg );
+	if (m_allow_chat == logger_chat_t::ON)
 	{
 		basic_string m(prolog);
 		Helpers::chatprintf(m.append(msg).c_str());
+	}
+	else if (m_allow_chat == logger_chat_t::ADMIN)
+	{
+		Msg<MSG_CHAT_ADMIN>(msg);
 	}
 }
 
@@ -198,10 +203,36 @@ template <>
 void Logger::Msg<MSG_LOG_CHAT> ( const char * msg, int verbose /*= 0*/ )
 {
 	Msg<MSG_LOG> ( msg );
-	if (m_allow_chat)
+	Msg<MSG_CHAT>(msg);
+}
+
+template <>
+void Logger::Msg<MSG_CHAT_ADMIN>(const char * msg, int verbose /*= 0*/)
+{
+	basic_string m(prolog);
+	m.append(msg);
+
+	int maxclients;
+	if (SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive)
 	{
-		basic_string m(prolog);
-		Helpers::chatprintf(m.append(msg).c_str());
+		maxclients = static_cast< SourceSdk::CGlobalVars_csgo* >(SourceSdk::InterfacesProxy::Call_GetGlobalVars())->maxClients;
+	}
+	else
+	{
+		maxclients = static_cast< SourceSdk::CGlobalVars* >(SourceSdk::InterfacesProxy::Call_GetGlobalVars())->maxClients;
+	}
+	for (int i(1); i <= maxclients; i++)
+	{
+		SourceSdk::edict_t * ent_id(Helpers::PEntityOfEntIndex(i));
+		SourceSdk::IPlayerInfo * const player(static_cast< SourceSdk::IPlayerInfo * >(SourceSdk::InterfacesProxy::Call_GetPlayerInfo(ent_id)));
+
+		if (player)
+		{
+			if (player->IsConnected() && ConfigManager::GetInstance()->IsAdmin(player->GetNetworkIDString()))
+			{
+				Helpers::tell(ent_id, m);
+			}
+		}
 	}
 }
 
@@ -321,19 +352,24 @@ bool Logger::sys_cmd_fn ( const SourceSdk::CCommand &args )
 	{
 		if (stricmp("on", args.Arg(3)))
 		{
-			m_allow_chat = true;
+			m_allow_chat = logger_chat_t::ON;
 			Msg<MSG_CMD_REPLY>("Logger AllowChat is on");
 			return true;
 		}
 		else if (stricmp("off", args.Arg(3)))
 		{
-			m_allow_chat = false;
+			m_allow_chat = logger_chat_t::OFF;
 			Msg<MSG_CMD_REPLY>("Logger AllowChat is off");
 			return true;
 		}
+		else if (stricmp("off", args.Arg(3)))
+		{
+			m_allow_chat = logger_chat_t::ADMIN;
+			Msg<MSG_CMD_REPLY>("Logger AllowChat is admin");
+		}
 		else
 		{
-			Msg<MSG_CMD_REPLY>("Usage : On / Off");
+			Msg<MSG_CMD_REPLY>("Usage : On / Admin / Off");
 			return false;
 		}
 	}
