@@ -100,7 +100,7 @@ private:
 
 	virtual bool GotJob () const override final;
 
-	virtual void RT_ProcessOnTick ( float const curtime ) override final;
+	virtual void RT_ProcessOnTick ( float const & curtime ) override final;
 
 	virtual void RT_ThinkPostCallback ( SourceSdk::edict_t const * const pent ) override final;
 

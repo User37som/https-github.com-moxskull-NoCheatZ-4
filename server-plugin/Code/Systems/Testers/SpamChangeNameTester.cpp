@@ -109,7 +109,7 @@ void SpamChangeNameTester::FireGameEvent ( SourceSdk::IGameEvent* ev )
 	++( pInfo->namechange_count );
 }
 
-void SpamChangeNameTester::RT_ProcessOnTick ( float const curtime )
+void SpamChangeNameTester::RT_ProcessOnTick ( float const & curtime )
 {
 	ProcessFilter::HumanAtLeastConnected filter_class;
 	for( PlayerHandler::const_iterator ph ( &filter_class ); ph != PlayerHandler::end (); ph+=&filter_class )

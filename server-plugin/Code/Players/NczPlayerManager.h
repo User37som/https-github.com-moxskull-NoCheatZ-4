@@ -386,7 +386,7 @@ public:
 	void FireGameEvent ( SourceSdk::IGameEvent* ev );
 	void DeclareKickedPlayer ( int const slot );
 
-	void RT_Think ( float const curtime );
+	void RT_Think ( float const & curtime );
 
 	const int GetMaxIndex () const
 	{

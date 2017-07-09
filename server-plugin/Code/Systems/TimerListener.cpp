@@ -30,7 +30,7 @@ TimerListener::~TimerListener ()
 
 }
 
-void TimerListener::RT_OnTick (float const curtime)
+void TimerListener::RT_OnTick (float const & curtime)
 {
 	m_undersample = !m_undersample;
 

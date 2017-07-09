@@ -37,7 +37,7 @@ void OnTickListener::RemoveOnTickListener(OnTickListener const * const tester)
 	m_tickTestersList.Remove(const_cast<OnTickListener*const>(tester));
 }
 
-void OnTickListener::RT_OnTick(float const curtime)
+void OnTickListener::RT_OnTick(float const & curtime)
 {
 	TickListenersListT::elem_t* it = m_tickTestersList.GetFirst();
 	while(it != nullptr)

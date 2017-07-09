@@ -152,7 +152,7 @@ void AntiFlashbangBlocker::FireGameEvent ( SourceSdk::IGameEvent* ev ) // player
 	METRICS_LEAVE_SECTION ( "AntiFlashbangBlocker::FireGameEvent" );
 }
 
-void AntiFlashbangBlocker::RT_ProcessOnTick ( float const curtime )
+void AntiFlashbangBlocker::RT_ProcessOnTick ( float const & curtime )
 {
 	ProcessFilter::HumanAtLeastConnected filter_class;
 	for( PlayerHandler::const_iterator ph ( &filter_class ); ph != PlayerHandler::end (); ph += &filter_class )

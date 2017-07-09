@@ -81,7 +81,7 @@ bool AntiSmokeBlocker::GotJob () const
 	return it != PlayerHandler::end ();
 }
 
-void AntiSmokeBlocker::RT_ProcessOnTick ( float const curtime )
+void AntiSmokeBlocker::RT_ProcessOnTick ( float const & curtime )
 {
 	METRICS_ENTER_SECTION ( "AntiSmokeBlocker::OnFrame" );
 

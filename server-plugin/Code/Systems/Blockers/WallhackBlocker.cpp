@@ -234,7 +234,7 @@ void WallhackBlocker::RT_WeaponDropCallback ( PlayerHandler::const_iterator ph, 
 	WallhackBlocker::GetInstance ()->m_weapon_owner[ weapon_index ] = nullptr;
 }
 
-void WallhackBlocker::RT_ProcessOnTick ( float const curtime )
+void WallhackBlocker::RT_ProcessOnTick ( float const & curtime )
 {
 	METRICS_LEAVE_SECTION ( "WallhackBlocker TraceRay Count Per Tick" );
 	METRICS_ENTER_SECTION ( "WallhackBlocker::OnFrame" );

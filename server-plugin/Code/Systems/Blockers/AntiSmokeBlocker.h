@@ -100,7 +100,7 @@ private:
 
 	virtual void FireGameEvent ( SourceSdk::IGameEvent* ev ) override final;
 
-	virtual void RT_ProcessOnTick ( float const curtime ) override final;
+	virtual void RT_ProcessOnTick ( float const & curtime ) override final;
 
 	virtual bool RT_SetTransmitCallback ( PlayerHandler::const_iterator sender, PlayerHandler::const_iterator receiver ) override final;
 };

@@ -93,7 +93,7 @@ private:
 
 	virtual bool GotJob () const override final;
 
-	virtual void RT_ProcessOnTick ( float const curtime ) override final;
+	virtual void RT_ProcessOnTick ( float const & curtime ) override final;
 
 	virtual PlayerRunCommandRet RT_PlayerRunCommandCallback ( PlayerHandler::const_iterator ph, void * const cmd, void * const old_cmd ) override final;
 };

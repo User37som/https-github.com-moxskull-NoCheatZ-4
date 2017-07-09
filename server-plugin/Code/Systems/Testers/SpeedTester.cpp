@@ -62,7 +62,7 @@ bool SpeedTester::GotJob () const
 	return it != PlayerHandler::end ();
 }
 
-void SpeedTester::RT_ProcessOnTick ( float const curtime )
+void SpeedTester::RT_ProcessOnTick ( float const & curtime )
 {
 	ProcessFilter::InTestsNoBot filter_class;
 
