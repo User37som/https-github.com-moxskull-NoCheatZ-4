@@ -174,9 +174,6 @@
     <ClCompile Include="Code\Systems\Blockers\AntiSmokeBlocker.cpp">
       <Filter>Code\Systems\Blockers</Filter>
     </ClCompile>
-    <ClCompile Include="Code\Systems\Blockers\BadUserCmdBlocker.cpp">
-      <Filter>Code\Systems\Blockers</Filter>
-    </ClCompile>
     <ClCompile Include="Code\Systems\Blockers\WallhackBlocker.cpp">
       <Filter>Code\Systems\Blockers</Filter>
     </ClCompile>
@@ -256,6 +253,9 @@
       <Filter>Code</Filter>
     </ClCompile>
     <ClCompile Include="Code\Systems\Testers\AimTester.cpp">
+      <Filter>Code\Systems\Testers</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Systems\Testers\BadUserCmdTester.cpp">
       <Filter>Code\Systems\Testers</Filter>
     </ClCompile>
   </ItemGroup>
@@ -339,9 +339,6 @@
       <Filter>Code\Misc</Filter>
     </ClInclude>
     <ClInclude Include="Code\Systems\Blockers\AntiSmokeBlocker.h">
-      <Filter>Code\Systems\Blockers</Filter>
-    </ClInclude>
-    <ClInclude Include="Code\Systems\Blockers\BadUserCmdBlocker.h">
       <Filter>Code\Systems\Blockers</Filter>
     </ClInclude>
     <ClInclude Include="Code\Systems\Blockers\WallhackBlocker.h">
@@ -580,6 +577,9 @@
     </ClInclude>
     <ClInclude Include="Code\vtabledumphelper.h">
       <Filter>Code</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Systems\Testers\BadUserCmdTester.h">
+      <Filter>Code\Systems\Testers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
