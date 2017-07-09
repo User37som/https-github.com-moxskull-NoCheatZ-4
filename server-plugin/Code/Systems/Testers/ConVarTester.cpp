@@ -53,7 +53,7 @@ bool ConVarTester::GotJob () const
 	return it != PlayerHandler::end ();
 }
 
-void ConVarTester::RT_ProcessOnTick ( float const curtime )
+void ConVarTester::RT_ProcessOnTick ( float const & curtime )
 {
 	if( m_convars_rules.IsEmpty () ) return;
 	if( !IsActive () ) return;

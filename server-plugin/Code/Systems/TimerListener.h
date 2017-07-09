@@ -90,7 +90,7 @@ protected:
 	virtual void RT_TimerCallback ( char const * const timer_name /* Pointer can be invalid past the function */ ) = 0;
 
 public:
-	static void RT_OnTick (float const curtime);
+	static void RT_OnTick (float const & curtime);
 
 };
 

@@ -25,7 +25,7 @@
 #include "Misc/Helpers.h"
 
 AntiFlashbangBlocker::AntiFlashbangBlocker () :
-	BaseDynamicSystem ( "AntiFlashbangBlocker" ),
+	BaseBlockerSystem( "AntiFlashbangBlocker" ),
 	IGameEventListener002 (),
 	playerdatahandler_class (),
 	SetTransmitHookListener (),
@@ -53,7 +53,7 @@ void AntiFlashbangBlocker::Load ()
 	}
 
 	SourceSdk::InterfacesProxy::GetGameEventManager ()->AddListener ( this, "player_blind", true );
-	SetTransmitHookListener::RegisterSetTransmitHookListener ( this, 0 );
+	SetTransmitHookListener::RegisterSetTransmitHookListener ( this, SystemPriority::AntiFlashbangBlocker );
 	OnTickListener::RegisterOnTickListener ( this );
 }
 
@@ -152,7 +152,7 @@ void AntiFlashbangBlocker::FireGameEvent ( SourceSdk::IGameEvent* ev ) // player
 	METRICS_LEAVE_SECTION ( "AntiFlashbangBlocker::FireGameEvent" );
 }
 
-void AntiFlashbangBlocker::RT_ProcessOnTick ( float const curtime )
+void AntiFlashbangBlocker::RT_ProcessOnTick ( float const & curtime )
 {
 	ProcessFilter::HumanAtLeastConnected filter_class;
 	for( PlayerHandler::const_iterator ph ( &filter_class ); ph != PlayerHandler::end (); ph += &filter_class )

@@ -5,6 +5,7 @@
 
 #include "Misc/temp_basicstring.h"
 #include "Misc/temp_singleton.h"
+#include "Players/NczPlayerManager.h"
 
 class ConfigManager :
 	public Singleton<ConfigManager>
@@ -14,6 +15,8 @@ class ConfigManager :
 private:
 
 	int const content_version; // Backward compatible if we ever change the layout of the config file
+
+	CUtlVector<basic_string> m_admins;
 
 public:
 	basic_string m_playerdataclass;
@@ -44,6 +47,10 @@ public:
 		Load the config file containing configuration. Returns false if error parsing the config file.
 	*/
 	bool LoadConfig ();
+
+	bool IsAdmin(PlayerHandler::const_iterator ph);
+
+	bool IsAdmin(char const * steamid);
 };
 
 #endif // CONFIGMANAGER_H

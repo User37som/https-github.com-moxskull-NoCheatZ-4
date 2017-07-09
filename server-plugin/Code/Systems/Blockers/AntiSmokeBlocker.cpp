@@ -25,7 +25,7 @@
 #include "Systems/ConfigManager.h"
 
 AntiSmokeBlocker::AntiSmokeBlocker () :
-	BaseDynamicSystem ( "AntiSmokeBlocker" ),
+	BaseBlockerSystem( "AntiSmokeBlocker" ),
 	IGameEventListener002 (),
 	OnTickListener (),
 	playerdatahandler_class (),
@@ -55,7 +55,7 @@ void AntiSmokeBlocker::Load ()
 	SourceSdk::InterfacesProxy::GetGameEventManager ()->AddListener ( this, "smokegrenade_detonate", true );
 	SourceSdk::InterfacesProxy::GetGameEventManager ()->AddListener ( this, "round_start", true );
 	OnTickListener::RegisterOnTickListener ( this );
-	SetTransmitHookListener::RegisterSetTransmitHookListener ( this, 1 );
+	SetTransmitHookListener::RegisterSetTransmitHookListener ( this, SystemPriority::AntiSmokeBlocker );
 }
 
 void AntiSmokeBlocker::Unload ()
@@ -81,7 +81,7 @@ bool AntiSmokeBlocker::GotJob () const
 	return it != PlayerHandler::end ();
 }
 
-void AntiSmokeBlocker::RT_ProcessOnTick ( float const curtime )
+void AntiSmokeBlocker::RT_ProcessOnTick ( float const & curtime )
 {
 	METRICS_ENTER_SECTION ( "AntiSmokeBlocker::OnFrame" );
 

@@ -26,7 +26,7 @@
 #include "Misc/MathCache.h"
 
 WallhackBlocker::WallhackBlocker () :
-	BaseDynamicSystem ( "WallhackBlocker" ),
+	BaseBlockerSystem( "WallhackBlocker" ),
 	OnTickListener (),
 	playerdatahandler_class (),
 	SetTransmitHookListener (),
@@ -63,7 +63,7 @@ void WallhackBlocker::Load ()
 	m_viscache.Invalidate ();
 	memset ( m_weapon_owner, 0, MAX_EDICTS * sizeof ( NczPlayer* ) );
 	WeaponHookListener::RegisterWeaponHookListener ( this );
-	SetTransmitHookListener::RegisterSetTransmitHookListener ( this, 2 );
+	SetTransmitHookListener::RegisterSetTransmitHookListener ( this, SystemPriority::WallhackBlocker );
 	OnTickListener::RegisterOnTickListener ( this );
 }
 
@@ -234,7 +234,7 @@ void WallhackBlocker::RT_WeaponDropCallback ( PlayerHandler::const_iterator ph, 
 	WallhackBlocker::GetInstance ()->m_weapon_owner[ weapon_index ] = nullptr;
 }
 
-void WallhackBlocker::RT_ProcessOnTick ( float const curtime )
+void WallhackBlocker::RT_ProcessOnTick ( float const & curtime )
 {
 	METRICS_LEAVE_SECTION ( "WallhackBlocker TraceRay Count Per Tick" );
 	METRICS_ENTER_SECTION ( "WallhackBlocker::OnFrame" );

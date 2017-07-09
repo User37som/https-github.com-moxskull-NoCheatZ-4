@@ -434,7 +434,7 @@ void NczPlayerManager::DeclareKickedPlayer ( int const slot )
 	FullHandlersList[ slot ].status = SlotStatus::KICK;
 }
 
-void NczPlayerManager::RT_Think ( float const curtime )
+void NczPlayerManager::RT_Think ( float const & curtime )
 {
 	while( m_max_index > 0 && FullHandlersList[ m_max_index ].status == SlotStatus::INVALID )
 		--m_max_index;

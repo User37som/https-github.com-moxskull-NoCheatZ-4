@@ -68,9 +68,11 @@ typedef struct JumpInfo
 	OnGroundHolderT onGroundHolder;
 	JumpCmdHolderT jumpCmdHolder;
 	int total_bhopCount;
+	int total_outside_jump;
 
 	int goodBhopsCount;
-	int perfectBhopsPercent;
+	float perfectBhopsPercent;
+	float totaloutsidepercent;
 	int perfectBhopsCount;
 
 	bool isOnGround;
@@ -111,7 +113,7 @@ public:
 
 	virtual basic_string GetDetectionLogMessage () override final
 	{
-		return "BunnyHop Program";
+		return "BunnyHop Injected";
 	};
 };
 
@@ -128,12 +130,15 @@ class JumpTester :
 private:
 	void * convar_sv_enablebunnyhopping;
 	void * convar_sv_autobunnyhopping;
+	bool detect_scripts;
 
 public:
 	JumpTester ();
 	virtual ~JumpTester () final;
 
 	virtual void Init () override final;
+
+	virtual bool sys_cmd_fn(const SourceSdk::CCommand & args);
 
 	virtual void Load () override final;
 

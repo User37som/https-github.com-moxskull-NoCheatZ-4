@@ -22,7 +22,7 @@ limitations under the License.
 #include "Systems/Logger.h"
 
 BhopBlocker::BhopBlocker () :
-	BaseDynamicSystem ( "BhopBlocker" ),
+	BaseBlockerSystem( "BhopBlocker" ),
 	playerdatahandler_class (),
 	PlayerRunCommandHookListener (),
 	singleton_class (),
@@ -66,7 +66,7 @@ void BhopBlocker::Load ()
 		ResetPlayerDataStructByIndex ( it.GetIndex () );
 	}
 
-	RegisterPlayerRunCommandHookListener ( this, SystemPriority::UserCmdHookListener::BhopBlocker, SlotStatus::PLAYER_IN_TESTS );
+	RegisterPlayerRunCommandHookListener ( this, SystemPriority::BhopBlocker, SlotStatus::PLAYER_IN_TESTS );
 	RegisterOnGroundHookListener ( this );
 }
 

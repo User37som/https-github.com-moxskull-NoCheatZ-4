@@ -39,10 +39,10 @@ public:
 
 	/* Appelé par le plugin à chaque frame
 	   Permet d'appeler les classes filles qui sont à l'écoute */
-	static void RT_OnTick(float const curtime);
+	static void RT_OnTick(float const & curtime);
 
 protected:
-	virtual void RT_ProcessOnTick(float const curtime) = 0;
+	virtual void RT_ProcessOnTick(float const & curtime) = 0;
 
 	/* Permet de se mettre à l'écoute de l'événement, appelé par Load/Unload des testeurs */
 	static void RegisterOnTickListener(OnTickListener const * const listener);

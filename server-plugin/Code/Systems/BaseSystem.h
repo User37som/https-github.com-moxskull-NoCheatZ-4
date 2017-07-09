@@ -95,6 +95,10 @@ protected:
 
 	virtual bool IsDynamic () const = 0;
 
+	virtual bool IsTester() const = 0;
+
+	virtual bool IsBlocker() const = 0;
+
 protected:
 	virtual void Load () = 0;
 	virtual void Unload () = 0; // Defined by child, unregister from callbacks
@@ -178,6 +182,16 @@ protected:
 		return false;
 	}
 
+	virtual bool IsTester() const override final
+	{
+		return false;
+	}
+
+	virtual bool IsBlocker() const override final
+	{
+		return false;
+	}
+
 private:
 	virtual void Load () override final
 	{}
@@ -241,6 +255,16 @@ protected:
 	virtual bool IsDynamic () const override final
 	{
 		return true;
+	}
+
+	virtual bool IsTester() const override
+	{
+		return false;
+	}
+
+	virtual bool IsBlocker() const override
+	{
+		return false;
 	}
 };
 
@@ -329,6 +353,26 @@ public:
 	}
 
 	virtual bool sys_cmd_fn(const SourceSdk::CCommand &args);
+
+	virtual bool IsTester() const override final
+	{
+		return true;
+	}
+};
+
+class BaseBlockerSystem :
+	public BaseDynamicSystem
+{
+protected:
+	BaseBlockerSystem(char const * const name, char const * const commands = "Enable - Disable - Verbose");
+
+	virtual ~BaseBlockerSystem();
+
+public:
+	virtual bool IsBlocker() const override final
+	{
+		return true;
+	}
 };
 
 #endif

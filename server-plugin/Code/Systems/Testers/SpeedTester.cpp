@@ -43,7 +43,7 @@ void SpeedTester::Load ()
 	}
 
 	OnTickListener::RegisterOnTickListener ( this );
-	PlayerRunCommandHookListener::RegisterPlayerRunCommandHookListener ( this, SystemPriority::UserCmdHookListener::SpeedTester );
+	PlayerRunCommandHookListener::RegisterPlayerRunCommandHookListener ( this, SystemPriority::SpeedTester );
 }
 
 void SpeedTester::Unload ()
@@ -62,7 +62,7 @@ bool SpeedTester::GotJob () const
 	return it != PlayerHandler::end ();
 }
 
-void SpeedTester::RT_ProcessOnTick ( float const curtime )
+void SpeedTester::RT_ProcessOnTick ( float const & curtime )
 {
 	ProcessFilter::InTestsNoBot filter_class;
 

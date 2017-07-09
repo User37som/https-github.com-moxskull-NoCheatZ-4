@@ -233,6 +233,12 @@ bool ConfigManager::LoadConfig ()
 				}
 			}
 
+			if (GetIniAttributeValue(file, gamename, "admin_ids", value))
+			{
+				value.lower();
+				SplitString<char>(value, ';', m_admins);
+			}
+
 			return true;
 
 		}
@@ -247,4 +253,27 @@ bool ConfigManager::LoadConfig ()
 	}
 
 	return false;
+}
+
+bool ConfigManager::IsAdmin(PlayerHandler::const_iterator ph)
+{
+	if (ph >= SlotStatus::PLAYER_CONNECTING)
+	{
+		return IsAdmin(ph->GetSteamID());
+	}
+	return false;
+}
+
+bool ConfigManager::IsAdmin(char const * steamid)
+{
+	basic_string lower_id(steamid);
+	lower_id.lower();
+	if (m_admins.Find(lower_id))
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
 }
