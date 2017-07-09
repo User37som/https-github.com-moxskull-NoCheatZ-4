@@ -43,12 +43,14 @@ struct UserCmdInfo
 		m_tick_status = IN_RESET;
 		m_prev_dead = true;
 		m_detected_time = 0.0;
+		prev_cmd = -1;
+		prev_tick = -1;
+		m_tick_status = TickStatus_t::OK;
+		cmd_offset = 0;
 	};
 	UserCmdInfo ( const UserCmdInfo& other )
 	{
-		m_tick_status = other.m_tick_status;
-		m_prev_dead = other.m_prev_dead;
-		m_detected_time = other.m_detected_time;
+		memcpy(this, &other, sizeof(UserCmdInfo));
 	};
 };
 
