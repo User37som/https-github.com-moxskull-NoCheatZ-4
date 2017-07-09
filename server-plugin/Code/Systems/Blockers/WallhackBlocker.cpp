@@ -63,7 +63,7 @@ void WallhackBlocker::Load ()
 	m_viscache.Invalidate ();
 	memset ( m_weapon_owner, 0, MAX_EDICTS * sizeof ( NczPlayer* ) );
 	WeaponHookListener::RegisterWeaponHookListener ( this );
-	SetTransmitHookListener::RegisterSetTransmitHookListener ( this, 2 );
+	SetTransmitHookListener::RegisterSetTransmitHookListener ( this, SystemPriority::WallhackBlocker );
 	OnTickListener::RegisterOnTickListener ( this );
 }
 

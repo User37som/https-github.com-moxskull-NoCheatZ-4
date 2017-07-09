@@ -55,16 +55,20 @@
 
 namespace SystemPriority
 {
-	namespace UserCmdHookListener
-	{
-		size_t const constexpr BadUserCmdBlocker ( 0 );
-		size_t const constexpr SpeedTester ( BadUserCmdBlocker + 1 );
-		size_t const constexpr EyeAnglesTester ( SpeedTester + 1 );
-		size_t const constexpr AutoAttackTester ( EyeAnglesTester + 1 );
-		size_t const constexpr ShotTester ( AutoAttackTester + 1 );
-		size_t const constexpr JumpTester ( ShotTester + 1 );
-		size_t const constexpr BhopBlocker ( JumpTester + 1 );
-	}
+	size_t const constexpr SpeedTester(0);
+	size_t const constexpr EyeAnglesTester(SpeedTester + 1);
+	size_t const constexpr AutoAttackTester(EyeAnglesTester + 1);
+	size_t const constexpr AimTester(AutoAttackTester + 1);
+	size_t const constexpr JumpTester(AimTester + 1);
+	size_t const constexpr BhopBlocker(JumpTester + 1);
+	size_t const constexpr AntiFlashbangBlocker(BhopBlocker + 1);
+	size_t const constexpr AntiSmokeBlocker(AntiFlashbangBlocker + 1);
+	size_t const constexpr WallhackBlocker(AntiSmokeBlocker + 1);
+	size_t const constexpr RadarHackBlocker(WallhackBlocker + 1);
+	size_t const constexpr ConVarTester(RadarHackBlocker + 1);
+	size_t const constexpr ConCommandTester(ConVarTester + 1);
+	size_t const constexpr SpamChangenameTester(ConCommandTester + 1);
+	size_t const constexpr SpamConnectTester(SpamChangenameTester + 1);
 }
 
 #endif // MAGICVALUES_H

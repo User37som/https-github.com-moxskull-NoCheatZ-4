@@ -106,7 +106,7 @@ void JumpTester::Load ()
 	}
 
 	OnGroundHookListener::RegisterOnGroundHookListener ( this );
-	PlayerRunCommandHookListener::RegisterPlayerRunCommandHookListener ( this, SystemPriority::UserCmdHookListener::JumpTester );
+	PlayerRunCommandHookListener::RegisterPlayerRunCommandHookListener ( this, SystemPriority::JumpTester );
 }
 
 void JumpTester::Unload ()

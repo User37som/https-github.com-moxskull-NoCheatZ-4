@@ -53,7 +53,7 @@ void AntiFlashbangBlocker::Load ()
 	}
 
 	SourceSdk::InterfacesProxy::GetGameEventManager ()->AddListener ( this, "player_blind", true );
-	SetTransmitHookListener::RegisterSetTransmitHookListener ( this, 0 );
+	SetTransmitHookListener::RegisterSetTransmitHookListener ( this, SystemPriority::AntiFlashbangBlocker );
 	OnTickListener::RegisterOnTickListener ( this );
 }
 

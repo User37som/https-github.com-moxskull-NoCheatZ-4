@@ -55,7 +55,7 @@ void AntiSmokeBlocker::Load ()
 	SourceSdk::InterfacesProxy::GetGameEventManager ()->AddListener ( this, "smokegrenade_detonate", true );
 	SourceSdk::InterfacesProxy::GetGameEventManager ()->AddListener ( this, "round_start", true );
 	OnTickListener::RegisterOnTickListener ( this );
-	SetTransmitHookListener::RegisterSetTransmitHookListener ( this, 1 );
+	SetTransmitHookListener::RegisterSetTransmitHookListener ( this, SystemPriority::AntiSmokeBlocker );
 }
 
 void AntiSmokeBlocker::Unload ()
