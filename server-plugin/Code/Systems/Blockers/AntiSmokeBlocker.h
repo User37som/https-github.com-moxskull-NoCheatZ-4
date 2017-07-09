@@ -71,7 +71,7 @@ typedef struct ALIGN8 SmokeInfoS
 } ALIGN8_POST SmokeInfoT;
 
 class AntiSmokeBlocker :
-	private BaseDynamicSystem,
+	private BaseBlockerSystem,
 	private SourceSdk::IGameEventListener002,
 	private OnTickListener,
 	public PlayerDataStructHandler<SmokeInfoT>,

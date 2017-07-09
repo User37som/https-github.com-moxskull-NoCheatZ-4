@@ -41,7 +41,7 @@ struct JmpInfo
 };
 
 class BhopBlocker :
-	public BaseDynamicSystem,
+	public BaseBlockerSystem,
 	public PlayerDataStructHandler<JmpInfo>,
 	public PlayerRunCommandHookListener,
 	public OnGroundHookListener,

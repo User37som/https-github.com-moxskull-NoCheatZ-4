@@ -22,7 +22,7 @@ limitations under the License.
 #include "Systems/Logger.h"
 
 BhopBlocker::BhopBlocker () :
-	BaseDynamicSystem ( "BhopBlocker" ),
+	BaseBlockerSystem( "BhopBlocker" ),
 	playerdatahandler_class (),
 	PlayerRunCommandHookListener (),
 	singleton_class (),

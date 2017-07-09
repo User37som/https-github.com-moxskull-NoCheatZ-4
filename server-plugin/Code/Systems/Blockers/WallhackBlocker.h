@@ -120,7 +120,7 @@ public:
 };
 
 class WallhackBlocker :
-	private BaseDynamicSystem,
+	private BaseBlockerSystem,
 	private OnTickListener,
 	public PlayerDataStructHandler<ClientDataS>,
 	private SetTransmitHookListener,

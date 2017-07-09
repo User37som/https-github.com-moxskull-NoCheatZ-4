@@ -25,7 +25,7 @@
 #include "Systems/ConfigManager.h"
 
 AntiSmokeBlocker::AntiSmokeBlocker () :
-	BaseDynamicSystem ( "AntiSmokeBlocker" ),
+	BaseBlockerSystem( "AntiSmokeBlocker" ),
 	IGameEventListener002 (),
 	OnTickListener (),
 	playerdatahandler_class (),

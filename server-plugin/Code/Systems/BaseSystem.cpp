@@ -319,3 +319,12 @@ bool BaseTesterSystem::sys_cmd_fn(const SourceSdk::CCommand & args)
 	}
 	return false;
 }
+
+BaseBlockerSystem::BaseBlockerSystem(char const * const name, char const * const commands) :
+	BaseDynamicSystem(name, commands)
+{
+}
+
+BaseBlockerSystem::~BaseBlockerSystem()
+{
+}

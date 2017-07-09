@@ -25,7 +25,7 @@
 #include "Misc/Helpers.h"
 
 AntiFlashbangBlocker::AntiFlashbangBlocker () :
-	BaseDynamicSystem ( "AntiFlashbangBlocker" ),
+	BaseBlockerSystem( "AntiFlashbangBlocker" ),
 	IGameEventListener002 (),
 	playerdatahandler_class (),
 	SetTransmitHookListener (),

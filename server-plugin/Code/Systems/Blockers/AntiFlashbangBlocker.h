@@ -37,7 +37,7 @@ typedef struct FlashInfoS
 } FlashInfoT;
 
 class AntiFlashbangBlocker :
-	private BaseDynamicSystem,
+	private BaseBlockerSystem,
 	private SourceSdk::IGameEventListener002,
 	private OnTickListener,
 	public PlayerDataStructHandler<FlashInfoT>,
