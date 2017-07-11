@@ -71,7 +71,7 @@ PlayerRunCommandRet BadUserCmdTester::RT_PlayerRunCommandCallback ( PlayerHandle
 
 	if( k_newcmd->command_number <= 0 )
 	{
-		DebugMessage(Helpers::format("Droped CUserCmd from %s (null command number)", ph->GetName()));
+		//DebugMessage(Helpers::format("Droped CUserCmd from %s (null command number)", ph->GetName()));
 		return PlayerRunCommandRet::BLOCK;
 	}
 
@@ -95,6 +95,8 @@ PlayerRunCommandRet BadUserCmdTester::RT_PlayerRunCommandCallback ( PlayerHandle
 		{
 			if( pInfo->m_tick_status == TickStatus_t::IN_RESET )
 				pInfo->m_tick_status = TickStatus_t::RESET;
+		
+			++(pInfo->cmd_offset);
 		}
 		else
 		{
@@ -105,10 +107,11 @@ PlayerRunCommandRet BadUserCmdTester::RT_PlayerRunCommandCallback ( PlayerHandle
 			pInfo->cmd_offset = 1;
 		}
 
+		pInfo->prev_tick = k_newcmd->tick_count;
+
 		return PlayerRunCommandRet::CONTINUE;
 	}
-
-	if( pInfo->prev_cmd > k_newcmd->command_number )
+	else if( pInfo->prev_cmd > k_newcmd->command_number )
 	{
 		if( pInfo->m_tick_status != TickStatus_t::OK )
 		{
@@ -134,33 +137,35 @@ PlayerRunCommandRet BadUserCmdTester::RT_PlayerRunCommandCallback ( PlayerHandle
 
 			return PlayerRunCommandRet::BLOCK;
 		}
-
-		if (SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive)
-		{
-			if (pInfo->prev_tick + 1 != k_newcmd->tick_count && pInfo->prev_tick != k_newcmd->tick_count )
-			{
-				pInfo->m_detected_time = Plat_FloatTime() + 10.0f;
-
-				// Push detection
-
-				BadCmdInfo detect_info(pInfo, k_newcmd);
-				ProcessDetectionAndTakeAction<BadCmdInfo>(Detection_BadUserCmd(), &detect_info, ph, this);
-
-				return PlayerRunCommandRet::BLOCK;
-			}
-		}
 		else
 		{
-			if (k_oldcmd->tick_count + 1 != k_newcmd->tick_count)
+			if (SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive)
 			{
-				pInfo->m_detected_time = Plat_FloatTime() + 10.0f;
+				if (pInfo->prev_tick + 1 != k_newcmd->tick_count && pInfo->prev_tick != k_newcmd->tick_count)
+				{
+					pInfo->m_detected_time = Plat_FloatTime() + 10.0f;
 
-				// Push detection
+					// Push detection
 
-				BadCmdInfo detect_info(pInfo, k_newcmd);
-				ProcessDetectionAndTakeAction<BadCmdInfo>(Detection_BadUserCmd(), &detect_info, ph, this);
+					BadCmdInfo detect_info(pInfo, k_newcmd);
+					ProcessDetectionAndTakeAction<BadCmdInfo>(Detection_BadUserCmd(), &detect_info, ph, this);
 
-				return PlayerRunCommandRet::BLOCK;
+					return PlayerRunCommandRet::BLOCK;
+				}
+			}
+			else
+			{
+				if (k_oldcmd->tick_count + 1 != k_newcmd->tick_count)
+				{
+					pInfo->m_detected_time = Plat_FloatTime() + 10.0f;
+
+					// Push detection
+
+					BadCmdInfo detect_info(pInfo, k_newcmd);
+					ProcessDetectionAndTakeAction<BadCmdInfo>(Detection_BadUserCmd(), &detect_info, ph, this);
+
+					return PlayerRunCommandRet::BLOCK;
+				}
 			}
 		}
 		++(pInfo->cmd_offset);

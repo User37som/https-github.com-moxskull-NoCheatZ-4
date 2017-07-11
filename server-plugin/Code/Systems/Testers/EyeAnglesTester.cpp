@@ -23,7 +23,6 @@
 
 EyeAnglesTester::EyeAnglesTester ( void ) :
 	BaseTesterSystem ( "EyeAnglesTester" ),
-	SourceSdk::IGameEventListener002 (),
 	playerdata_class (),
 	PlayerRunCommandHookListener (),
 	singleton_class ()
@@ -46,14 +45,12 @@ void EyeAnglesTester::Load ()
 		ResetPlayerDataStructByIndex ( it.GetIndex () );
 	}
 
-	SourceSdk::InterfacesProxy::GetGameEventManager ()->AddListener ( this, "round_end", true );
 	PlayerRunCommandHookListener::RegisterPlayerRunCommandHookListener ( this, SystemPriority::EyeAnglesTester );
 }
 
 void EyeAnglesTester::Unload ()
 {
 	PlayerRunCommandHookListener::RemovePlayerRunCommandHookListener ( this );
-	SourceSdk::InterfacesProxy::GetGameEventManager ()->RemoveListener ( this );
 }
 
 bool EyeAnglesTester::GotJob () const
@@ -76,14 +73,22 @@ PlayerRunCommandRet EyeAnglesTester::RT_PlayerRunCommandCallback ( PlayerHandler
 	*/
 	if( *flags & ( 3 << 5 ) ) return PlayerRunCommandRet::CONTINUE;
 
+	if (SourceSdk::VectorEqual(static_cast<SourceSdk::CUserCmd_csgo*>(pCmd)->viewangles, static_cast<SourceSdk::CUserCmd_csgo*>(old_cmd)->viewangles))
+	{
+		return PlayerRunCommandRet::CONTINUE;
+	}
+
 	PlayerRunCommandRet drop_cmd ( PlayerRunCommandRet::CONTINUE );
 
 	EyeAngleInfoT* playerData ( GetPlayerDataStructByIndex ( ph.GetIndex () ) );
 	playerData->x.abs_value = fabs ( playerData->x.value = static_cast< SourceSdk::CUserCmd_csgo* >( pCmd )->viewangles.x );
 	playerData->y.abs_value = fabs ( playerData->y.value = static_cast< SourceSdk::CUserCmd_csgo* >( pCmd )->viewangles.y );
 	playerData->z.abs_value = fabs ( playerData->z.value = static_cast< SourceSdk::CUserCmd_csgo* >( pCmd )->viewangles.z );
+	playerData->past_x.abs_value = fabs(playerData->x.value = static_cast< SourceSdk::CUserCmd_csgo* >(old_cmd)->viewangles.x);
+	playerData->past_y.abs_value = fabs(playerData->y.value = static_cast< SourceSdk::CUserCmd_csgo* >(old_cmd)->viewangles.y);
+	playerData->past_z.abs_value = fabs(playerData->z.value = static_cast< SourceSdk::CUserCmd_csgo* >(old_cmd)->viewangles.z);
 
-	if( playerData->x.abs_value > 89.0f )
+	if( playerData->x.abs_value > 89.0f && playerData->past_x.abs_value > 89.0f )
 	{
 		++playerData->x.detectionsCount;
 		drop_cmd = PlayerRunCommandRet::INERT;
@@ -94,7 +99,7 @@ PlayerRunCommandRet EyeAnglesTester::RT_PlayerRunCommandCallback ( PlayerHandler
 			ProcessDetectionAndTakeAction<Detection_EyeAngleX::data_type>(Detection_EyeAngleX(), playerData, ph, this);
 		}
 	}
-	if( playerData->y.abs_value > 180.0f )
+	if( playerData->y.abs_value > 180.0f && playerData->past_y.abs_value > 180.0f )
 	{
 		++playerData->y.detectionsCount;
 		drop_cmd = PlayerRunCommandRet::INERT;
@@ -105,7 +110,7 @@ PlayerRunCommandRet EyeAnglesTester::RT_PlayerRunCommandCallback ( PlayerHandler
 			ProcessDetectionAndTakeAction<Detection_EyeAngleY::data_type>(Detection_EyeAngleY(), playerData, ph, this);
 		}
 	}
-	if (playerData->z.abs_value > 0.0f)
+	if (playerData->z.abs_value > 0.5f && playerData->past_z.abs_value > 0.5f )
 	{
 		++playerData->z.detectionsCount;
 		drop_cmd = PlayerRunCommandRet::INERT;
@@ -120,21 +125,35 @@ PlayerRunCommandRet EyeAnglesTester::RT_PlayerRunCommandCallback ( PlayerHandler
 	return drop_cmd;
 }
 
-void EyeAnglesTester::FireGameEvent ( SourceSdk::IGameEvent *ev ) // round_end
-{
-	ProcessFilter::HumanAtLeastConnected filter_class;
-	for( PlayerHandler::const_iterator ph ( &filter_class ); ph != PlayerHandler::end (); ph+=&filter_class )
-	{
-		++( GetPlayerDataStructByIndex ( ph.GetIndex () )->ignore_last );
-	}
-}
-
 basic_string Detection_EyeAngle::GetDataDump ()
 {
-	return Helpers::format ( ":::: EyeAngleInfo {\n:::::::: EyeAngleX {\n:::::::::::: Angle : %f,\n:::::::::::: Detections Count : %ud\n:::::::: },\n:::::::: EyeAngleY {\n:::::::::::: Angle : %f,\n:::::::::::: Detections Count : %ud\n:::::::: },\n:::::::: EyeAngleZ {\n:::::::::::: Angle : %f,\n:::::::::::: Detections Count : %ud\n:::::::: }\n:::: }",
-							 GetDataStruct ()->x.value, GetDataStruct ()->x.detectionsCount,
-							 GetDataStruct ()->y.value, GetDataStruct ()->y.detectionsCount,
-							 GetDataStruct ()->z.value, GetDataStruct ()->z.detectionsCount );
+	return Helpers::format (
+		":::: EyeAngleInfo {\n"
+		":::::::: EyeAngleX {\n"
+		":::::::::::: Angle : %f,\n"
+		":::::::::::: Previous Angle : %f,\n"
+		":::::::::::: Detections Count : %u\n"
+		":::::::: },"
+		"\n:::::::: EyeAngleY {\n"
+		":::::::::::: Angle : %f,\n"
+		":::::::::::: Previous Angle : %f,\n"
+		":::::::::::: Detections Count : %u\n"
+		":::::::: },\n"
+		":::::::: EyeAngleZ {\n"
+		":::::::::::: Angle : %f,\n"
+		":::::::::::: Previous Angle : %f,\n"
+		":::::::::::: Detections Count : %u\n"
+		":::::::: }\n"
+		":::: }",
+		GetDataStruct ()->x.value, 
+		GetDataStruct ()->past_x.value,
+		GetDataStruct ()->x.detectionsCount,
+		GetDataStruct ()->y.value, 
+		GetDataStruct()->past_y.value,
+		GetDataStruct ()->y.detectionsCount,
+		GetDataStruct ()->z.value, 
+		GetDataStruct()->past_z.value,
+		GetDataStruct ()->z.detectionsCount );
 }
 
 basic_string Detection_EyeAngleX::GetDetectionLogMessage ()

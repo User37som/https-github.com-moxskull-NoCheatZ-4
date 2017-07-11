@@ -131,21 +131,26 @@ inline void ProcessDetectionAndTakeAction(LogDetection<playerDataStructT> && inf
 	info.PrepareDetectionLog(*player, pSystem);
 	info.Log();
 
+	// https://github.com/L-EARN/NoCheatZ-4/issues/151
+	// calling Helpers::format to set string X with string X also in arguments
+	basic_string kick_message(Helpers::format("Banned by NoCheatZ 4 : %s detection with %s", info.GetDetectionLogMessage().c_str(), pSystem->GetName()));
+
 	if (pSystem->GetAction() == BaseTesterSystem::DetectionAction_t::LOG)
 	{
 		return;
 	}
 	else if (pSystem->GetAction() == BaseTesterSystem::DetectionAction_t::BAN_ASYNC)
 	{
-		BanRequest::GetInstance()->AddAsyncBan(*player, 0, Helpers::format("Banned by NoCheatZ 4 : %s detection with %s", info.GetDetectionLogMessage().c_str(), pSystem->GetName()));
+		BanRequest::GetInstance()->AddAsyncBan(*player, 0, kick_message.c_str());
 	}
 	else if (pSystem->GetAction() == BaseTesterSystem::DetectionAction_t::BAN_NOW)
 	{
-		BanRequest::GetInstance()->BanNow(*player, 0, Helpers::format("Banned by NoCheatZ 4 : %s detection with %s", info.GetDetectionLogMessage().c_str(), pSystem->GetName()));
+		BanRequest::GetInstance()->BanNow(*player, 0, kick_message.c_str());
 	}
 	else
 	{
-		BanRequest::GetInstance()->KickNow(*player, Helpers::format("Kicked by NoCheatZ 4 : %s detection with %s", info.GetDetectionLogMessage().c_str(), pSystem->GetName()));
+		kick_message = Helpers::format("Kicked by NoCheatZ 4 : %s detection with %s", info.GetDetectionLogMessage().c_str(), pSystem->GetName());
+		BanRequest::GetInstance()->KickNow(*player, kick_message.c_str());
 	}
 }
 

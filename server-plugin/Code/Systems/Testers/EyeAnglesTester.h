@@ -43,8 +43,9 @@ typedef struct EyeAngle
 
 typedef struct EyeAngleInfo
 {
-	unsigned int ignore_last; // Ignore values potentially not initialized by the engine
-
+	EyeAngleT past_x;
+	EyeAngleT past_y;
+	EyeAngleT past_z;
 	EyeAngleT x;
 	EyeAngleT y;
 	EyeAngleT z;
@@ -106,7 +107,6 @@ public:
 
 class EyeAnglesTester :
 	public BaseTesterSystem,
-	public SourceSdk::IGameEventListener002,
 	public PlayerDataStructHandler<EyeAngleInfoT>,
 	public PlayerRunCommandHookListener,
 	public Singleton<EyeAnglesTester>
@@ -126,8 +126,6 @@ private:
 	virtual void Unload () override final;
 
 	virtual bool GotJob () const override final;
-
-	virtual void FireGameEvent ( SourceSdk::IGameEvent *ev ) override final;
 
 	virtual PlayerRunCommandRet RT_PlayerRunCommandCallback ( PlayerHandler::const_iterator ph, void * const cmd, void * const old_cmd ) override final;
 };
