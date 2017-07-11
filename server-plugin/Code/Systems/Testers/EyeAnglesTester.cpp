@@ -110,7 +110,7 @@ PlayerRunCommandRet EyeAnglesTester::RT_PlayerRunCommandCallback ( PlayerHandler
 			ProcessDetectionAndTakeAction<Detection_EyeAngleY::data_type>(Detection_EyeAngleY(), playerData, ph, this);
 		}
 	}
-	if (playerData->z.abs_value > 0.5f && playerData->past_x.abs_value > 0.5f )
+	if (playerData->z.abs_value > 0.5f && playerData->past_z.abs_value > 0.5f )
 	{
 		++playerData->z.detectionsCount;
 		drop_cmd = PlayerRunCommandRet::INERT;
