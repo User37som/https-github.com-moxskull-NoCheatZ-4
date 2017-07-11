@@ -46,7 +46,7 @@ struct UserCmdInfo
 		prev_cmd = -1;
 		prev_tick = -1;
 		m_tick_status = TickStatus_t::OK;
-		cmd_offset = 0;
+		cmd_offset = 1;
 	};
 	UserCmdInfo ( const UserCmdInfo& other )
 	{
