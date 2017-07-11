@@ -84,6 +84,7 @@ void SpeedTester::RT_ProcessOnTick ( float const & curtime )
 
 			if( pInfo->detections >= 30 && curtime > pInfo->lastDetectionTime + 30.0f )
 			{
+				pInfo->lastDetectionTime = curtime;
 				ProcessDetectionAndTakeAction<Detection_SpeedHack::data_type>(Detection_SpeedHack(), pInfo, ph, this);
 			}
 		}
