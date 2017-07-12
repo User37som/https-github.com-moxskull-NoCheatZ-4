@@ -171,6 +171,16 @@ public:
 		assign ( src );
 	}
 
+	// concat 2 strings right now
+	String(pod const *srca, pod const *srcb) : String()
+	{
+		size_t const alen(autolen(srca));
+		size_t const blen(autolen(srcb));
+		Grow(alen + blen + 1, false);
+		memcpy(m_alloc, srca, alen);
+		memcpy(m_alloc + alen, srcb, blen + 1);
+	}
+
 	String ( pod const *src, size_t start, size_t count = std::numeric_limits<size_t>::max () ) : String ()
 	{
 		assign ( src + start, count );
@@ -179,6 +189,36 @@ public:
 	String ( String<pod> const &src ) : String ()
 	{
 		assign ( src.c_str () );
+	}
+
+	// concat 2 strings right now
+	String(String<pod> const &srca, String<pod> const &srcb) : String()
+	{
+		size_t const alen(srca.size());
+		size_t const blen(srcb.size());
+		Grow(alen + blen + 1, false);
+		memcpy(m_alloc, srca.c_str(), alen);
+		memcpy(m_alloc + alen, srcb.c_str(), blen + 1);
+	}
+
+	// concat 2 strings right now
+	String(String<pod> const &srca, pod const * srcb) : String()
+	{
+		size_t const alen(srca.size());
+		size_t const blen(autolen(srcb));
+		Grow(alen + blen + 1, false);
+		memcpy(m_alloc, srca.c_str(), alen);
+		memcpy(m_alloc + alen, srcb, blen + 1);
+	}
+
+	// concat 2 strings right now
+	String(pod const * srca, String<pod> const &srcb) : String()
+	{
+		size_t const alen(autolen(srca));
+		size_t const blen(srcb.size());
+		Grow(alen + blen + 1, false);
+		memcpy(m_alloc, srca, alen);
+		memcpy(m_alloc + alen, srcb.c_str(), blen + 1);
 	}
 
 	String ( String<pod> && src ) : String ()
