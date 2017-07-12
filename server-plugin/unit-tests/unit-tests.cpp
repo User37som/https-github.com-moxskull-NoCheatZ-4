@@ -141,6 +141,7 @@ TEST ( Sring_Class, Constructors )
 	char weak_string[] = { 'a', '\0', 'z' };
 	basic_string t ( weak_string, 0, 3 );
 	ASSERT_STREQ ( "a", t.c_str () );
+	ASSERT_EQ(1, t.size());
 
 	basic_string e ( t );
 	ASSERT_STREQ ( "a", e.c_str () );
@@ -152,6 +153,9 @@ TEST ( Sring_Class, Constructors )
 	ASSERT_STREQ ( "a", q.c_str () );
 	ASSERT_STREQ ( "", t.c_str () );
 	ASSERT_TRUE ( t.isempty () );
+
+	basic_string z(weak_string, weak_string);
+	ASSERT_STREQ("aa", z.c_str());
 }
 
 TEST ( Sring_Class, Assignements )
@@ -211,6 +215,19 @@ TEST ( Sring_Class, Modifiers )
 
 	g.lower ();
 	ASSERT_STREQ ( "bbaaaaaaaqq", g.c_str () );
+
+	g.insert_at_start(basic_string("zsc"));
+	ASSERT_STREQ("zscbbaaaaaaaqq", g.c_str());
+
+	g.insert_at_start("zsc");
+	ASSERT_STREQ("zsczscbbaaaaaaaqq", g.c_str());
+
+	g.insert_at_start('z');
+	ASSERT_STREQ("zzsczscbbaaaaaaaqq", g.c_str());
+
+	g.insert_at_start('\0');
+	ASSERT_STREQ("", g.c_str());
+	ASSERT_EQ(0, g.size());
 }
 
 TEST ( Sring_Class, Size_Consistency )

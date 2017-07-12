@@ -43,6 +43,7 @@ private:
 		{
 			HeapMemoryManager::FreeMemory ( m_alloc, m_capacity );
 			m_alloc = nullptr;
+			m_size = 0;
 		}
 	}
 
@@ -65,8 +66,17 @@ private:
 
 		if( m_alloc )
 		{
-			if( copy ) memcpy ( n, m_alloc, ( m_size + 1 ) * sizeof ( pod ) );
-			Dealloc ();
+			if (copy)
+			{
+				size_t const save_size(m_size);
+				memcpy(n, m_alloc, (m_size + 1) * sizeof(pod));
+				Dealloc();
+				m_size = save_size;
+			}
+			else
+			{
+				Dealloc();
+			}
 		}
 		else
 		{
@@ -161,6 +171,16 @@ public:
 		assign ( src );
 	}
 
+	// concat 2 strings right now
+	String(pod const *srca, pod const *srcb) : String()
+	{
+		size_t const alen(autolen(srca));
+		size_t const blen(autolen(srcb));
+		Grow(alen + blen + 1, false);
+		memcpy(m_alloc, srca, alen);
+		memcpy(m_alloc + alen, srcb, blen + 1);
+	}
+
 	String ( pod const *src, size_t start, size_t count = std::numeric_limits<size_t>::max () ) : String ()
 	{
 		assign ( src + start, count );
@@ -169,6 +189,36 @@ public:
 	String ( String<pod> const &src ) : String ()
 	{
 		assign ( src.c_str () );
+	}
+
+	// concat 2 strings right now
+	String(String<pod> const &srca, String<pod> const &srcb) : String()
+	{
+		size_t const alen(srca.size());
+		size_t const blen(srcb.size());
+		Grow(alen + blen + 1, false);
+		memcpy(m_alloc, srca.c_str(), alen);
+		memcpy(m_alloc + alen, srcb.c_str(), blen + 1);
+	}
+
+	// concat 2 strings right now
+	String(String<pod> const &srca, pod const * srcb) : String()
+	{
+		size_t const alen(srca.size());
+		size_t const blen(autolen(srcb));
+		Grow(alen + blen + 1, false);
+		memcpy(m_alloc, srca.c_str(), alen);
+		memcpy(m_alloc + alen, srcb, blen + 1);
+	}
+
+	// concat 2 strings right now
+	String(pod const * srca, String<pod> const &srcb) : String()
+	{
+		size_t const alen(autolen(srca));
+		size_t const blen(srcb.size());
+		Grow(alen + blen + 1, false);
+		memcpy(m_alloc, srca, alen);
+		memcpy(m_alloc + alen, srcb.c_str(), blen + 1);
 	}
 
 	String ( String<pod> && src ) : String ()
@@ -281,6 +331,94 @@ public:
 	String<pod>& append ( String<pod> const & d )
 	{
 		append ( d.c_str () );
+		return *this;
+	}
+
+	String<pod>& append(String<pod> && d)
+	{
+		append(d.c_str());
+		d.Dealloc();
+		return *this;
+	}
+
+	String<pod>& insert_at_start(pod const c)
+	{
+		if (c == '\0')
+		{
+			Dealloc();
+			Grow(1, false);
+		}
+		else
+		{
+			Grow(m_size + 2);
+			pod * cur(m_alloc + m_size);
+			do
+			{
+				*(cur + 1) = *cur;
+			} while (--cur >= m_alloc);
+			*m_alloc = c;
+			++m_size;
+		}
+		return *this;
+	}
+
+	String<pod>& insert_at_start(pod const * c)
+	{
+		if (*c == '\0')
+		{
+			Dealloc();
+			Grow(1, false);
+		}
+		else
+		{
+			size_t const c_len(autolen(c));
+			Grow(m_size + c_len + 1);
+			pod * cur(m_alloc + m_size);
+			do
+			{
+				*(cur + c_len) = *cur;
+			} while (--cur >= m_alloc);
+			memcpy(m_alloc, c, c_len);
+			m_size += c_len;
+		}
+		return *this;
+	}
+
+	String<pod>& insert_at_start(String<pod> const & c)
+	{
+		if (c[0] == '\0')
+		{
+			Dealloc();
+			Grow(1, false);
+		}
+		else
+		{
+			Grow(m_size + c.size() + 1);
+			pod * cur(m_alloc + m_size);
+			do
+			{
+				*(cur + c.size()) = *cur;
+			} while (--cur >= m_alloc);
+			memcpy(m_alloc, c, c.size());
+			m_size += c.size();
+		}
+		return *this;
+	}
+
+	String<pod>& insert_at_start(String<pod> && c)
+	{
+		if (c[0] == '\0')
+		{
+			memcpy(this, &c, sizeof(String<pod>));
+			memset(&c, 0, sizeof(String<pod>));
+		}
+		else
+		{
+			c.append(m_alloc);
+			Dealloc();
+			memcpy(this, &c, sizeof(String<pod>));
+			memset(&c, 0, sizeof(String<pod>));
+		}
 		return *this;
 	}
 
