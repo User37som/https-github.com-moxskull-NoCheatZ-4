@@ -359,6 +359,8 @@ const char *CNoCheatZPlugin::GetPluginDescription ( void )
 //---------------------------------------------------------------------------------
 void CNoCheatZPlugin::LevelInit ( char const *pMapName )
 {	
+	Logger::GetInstance()->OnLevelInit();
+
 	Logger::GetInstance ()->Msg<MSG_LOG> ( Helpers::format ( "PLAYING ON A NEW MAP : %s", pMapName ) );
 
 	Logger::GetInstance ()->Flush ();

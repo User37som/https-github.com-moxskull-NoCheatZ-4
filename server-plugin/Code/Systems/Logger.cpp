@@ -183,27 +183,37 @@ void Logger::Msg<MSG_CHAT_ADMIN>(const char * msg, int verbose /*= 0*/)
 	basic_string m(prolog);
 	m.append(msg);
 
-	int maxclients;
-	if (SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive)
+	if (!m_sm_chat)
 	{
-		maxclients = static_cast< SourceSdk::CGlobalVars_csgo* >(SourceSdk::InterfacesProxy::Call_GetGlobalVars())->maxClients;
+		int maxclients;
+		if (SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive)
+		{
+			maxclients = static_cast<SourceSdk::CGlobalVars_csgo*>(SourceSdk::InterfacesProxy::Call_GetGlobalVars())->maxClients;
+		}
+		else
+		{
+			maxclients = static_cast<SourceSdk::CGlobalVars*>(SourceSdk::InterfacesProxy::Call_GetGlobalVars())->maxClients;
+		}
+		for (int i(1); i <= maxclients; i++)
+		{
+			SourceSdk::edict_t * ent_id(Helpers::PEntityOfEntIndex(i));
+			SourceSdk::IPlayerInfo * const player(static_cast<SourceSdk::IPlayerInfo *>(SourceSdk::InterfacesProxy::Call_GetPlayerInfo(ent_id)));
+
+			if (player)
+			{
+				if (player->IsConnected() && ConfigManager::GetInstance()->IsAdmin(player->GetNetworkIDString()))
+				{
+					Helpers::tell(ent_id, m);
+				}
+			}
+		}
 	}
 	else
 	{
-		maxclients = static_cast< SourceSdk::CGlobalVars* >(SourceSdk::InterfacesProxy::Call_GetGlobalVars())->maxClients;
-	}
-	for (int i(1); i <= maxclients; i++)
-	{
-		SourceSdk::edict_t * ent_id(Helpers::PEntityOfEntIndex(i));
-		SourceSdk::IPlayerInfo * const player(static_cast< SourceSdk::IPlayerInfo * >(SourceSdk::InterfacesProxy::Call_GetPlayerInfo(ent_id)));
-
-		if (player)
-		{
-			if (player->IsConnected() && ConfigManager::GetInstance()->IsAdmin(player->GetNetworkIDString()))
-			{
-				Helpers::tell(ent_id, m);
-			}
-		}
+		m.reserve(m.size() + 9);
+		m.insert_at_start("sm_chat ");
+		m.append('\n');
+		SourceSdk::InterfacesProxy::Call_ServerCommand(m.c_str());
 	}
 }
 
@@ -378,6 +388,11 @@ bool Logger::sys_cmd_fn ( const SourceSdk::CCommand &args )
 	{
 		return false;
 	}
+}
+
+void Logger::OnLevelInit()
+{
+	m_sm_chat = SourceSdk::InterfacesProxy::ICvar_FindCommand("sm_chat");
 }
 
 void Logger::SpewAssert ( char const * expr, char const * file, unsigned int line )

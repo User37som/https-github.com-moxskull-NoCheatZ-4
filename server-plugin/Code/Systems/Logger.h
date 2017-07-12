@@ -77,6 +77,7 @@ private:
 	basic_string const prolog;
 	logger_chat_t m_allow_chat;
 	size_t m_current_memory_used;
+	void * m_sm_chat;
 
 	MsgFunc_t m_msg_func;
 
@@ -104,6 +105,8 @@ public:
 	{};
 
 	virtual bool sys_cmd_fn ( const SourceSdk::CCommand &args ) override final;
+
+	void OnLevelInit();
 
 	void SetAlwaysFlush (bool v)
 	{
