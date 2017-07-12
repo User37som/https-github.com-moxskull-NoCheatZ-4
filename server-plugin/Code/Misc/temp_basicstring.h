@@ -399,7 +399,7 @@ public:
 			{
 				*(cur + c.size()) = *cur;
 			} while (--cur >= m_alloc);
-			memcpy(m_alloc, c, c_len);
+			memcpy(m_alloc, c, c.size());
 			m_size += c.size();
 		}
 		return *this;
