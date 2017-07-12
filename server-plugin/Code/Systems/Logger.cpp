@@ -147,13 +147,13 @@ void Logger::Msg<MSG_CONSOLE> ( const char * msg, int verbose /*= 0*/ )
 {
 	if( this->IsConsoleConnected () )
 	{
-		m_msg_func ( "%s%f %s\n", prolog.c_str (), Plat_FloatTime (), msg );
+		m_msg_func ( "%s%f %s\n", log_prolog.c_str (), Plat_FloatTime (), msg );
 	}
 	else
 	{
-		std::cout << prolog.c_str () << Plat_FloatTime () << ' ' << msg << '\n';
+		std::cout << log_prolog.c_str () << Plat_FloatTime () << ' ' << msg << '\n';
 #ifdef WIN32
-		OutputDebugStringA ( prolog.c_str () );
+		OutputDebugStringA ( log_prolog.c_str () );
 		OutputDebugStringA ( msg );
 		OutputDebugStringA ( "\n" );
 #endif
@@ -180,8 +180,7 @@ void Logger::Msg<MSG_CMD_REPLY> ( const char * msg, int verbose /*= 0*/ )
 template <>
 void Logger::Msg<MSG_CHAT_ADMIN>(const char * msg, int verbose /*= 0*/)
 {
-	basic_string m(prolog);
-	m.append(msg);
+	basic_string m(chat_prolog.c_str(), msg);
 
 	if (!m_sm_chat)
 	{
@@ -223,8 +222,7 @@ void Logger::Msg<MSG_CHAT> ( const char * msg, int verbose /*= 0*/ )
 	//Msg<MSG_CONSOLE> ( msg );
 	if (m_allow_chat == logger_chat_t::ON)
 	{
-		basic_string m(prolog);
-		Helpers::chatprintf(m.append(msg).c_str());
+		Helpers::chatprintf(basic_string(chat_prolog.c_str(), msg).c_str());
 	}
 	else if (m_allow_chat == logger_chat_t::ADMIN)
 	{
@@ -249,21 +247,19 @@ void Logger::Msg<MSG_LOG_CHAT> ( const char * msg, int verbose /*= 0*/ )
 template <>
 void Logger::Msg<MSG_WARNING> ( const char * msg, int verbose /*= 0*/ )
 {
-	basic_string m1 ( "WARNING : " );
-	m1.append ( msg );
-	Push ( m1.c_str () );
+	basic_string m("WARNING : ", msg);
+	Push ( m.c_str () );
 
-	Msg<MSG_CONSOLE> ( m1 );
+	Msg<MSG_CONSOLE> ( m.c_str() );
 }
 
 template <>
 void Logger::Msg<MSG_ERROR> ( const char * msg, int verbose /*= 0*/ )
 {
-	basic_string m1 ( "ERROR : " );
-	m1.append ( msg );
-	Push ( m1.c_str () );
+	basic_string m("ERROR : ", msg);
+	Push(m.c_str());
 
-	Msg<MSG_CONSOLE> ( m1 );
+	Msg<MSG_CONSOLE>(m.c_str());
 }
 
 template <>
@@ -278,7 +274,7 @@ void Logger::Msg<MSG_VERBOSE1> ( const char * msg, int verbose /*= 0*/ )
 {
 	if( verbose == 1 )
 	{
-		Msg<MSG_CONSOLE> ( basic_string ( "VERBOSE1 : " ).append ( msg ) );
+		Msg<MSG_CONSOLE> ( basic_string ( "VERBOSE1 : ", msg ).c_str() );
 	}
 }
 
@@ -287,14 +283,14 @@ void Logger::Msg<MSG_VERBOSE2> ( const char * msg, int verbose /*= 0*/ )
 {
 	if( verbose == 2 )
 	{
-		Msg<MSG_CONSOLE> ( basic_string ( "VERBOSE2 : " ).append ( msg ) );
+		Msg<MSG_CONSOLE>(basic_string("VERBOSE2 : ", msg).c_str());
 	}
 }
 
 template <>
 void Logger::Msg<MSG_DEBUG> ( const char * msg, int verbose /*= 0*/ )
 {
-	Msg<MSG_CONSOLE> ( basic_string ( "DEBUG : " ).append ( msg ) );
+	Msg<MSG_CONSOLE> ( basic_string ( "DEBUG : ", msg ).c_str() );
 }
 
 void Logger::Flush ()
@@ -318,15 +314,15 @@ void Logger::Flush ()
 	}
 	else
 	{
-		basic_string m1 ( prolog );
-		m1.append ( Helpers::format ( "Can't write to logfile at %s ... Please check write access and if the directory exists.\n", path.c_str () ) );
-		Msg<MSG_CONSOLE> ( m1 );
+		basic_string m1 ( log_prolog, Helpers::format("Can't write to logfile at %s ... Please check write access and if the directory exists.\n", path.c_str()));
+		Msg<MSG_CONSOLE> ( m1.c_str() );
 		SourceSdk::InterfacesProxy::Call_LogPrint ( m1.c_str () );
-		m1 = prolog;
 		size_t pos ( 0 );
 		size_t const max ( m_msg.Size () );
 		do
 		{
+			m1.reserve(log_prolog.size() + m_msg[pos].size());
+			m1 = log_prolog;
 			SourceSdk::InterfacesProxy::Call_LogPrint ( m1.append ( m_msg[ pos ] ).c_str () );
 		}
 		while( ++pos != max );

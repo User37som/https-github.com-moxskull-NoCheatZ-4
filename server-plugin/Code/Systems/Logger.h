@@ -74,7 +74,8 @@ class Logger :
 
 private:
 	CUtlVector<basic_string> m_msg;
-	basic_string const prolog;
+	basic_string const chat_prolog;
+	basic_string const log_prolog;
 	logger_chat_t m_allow_chat;
 	size_t m_current_memory_used;
 	void * m_sm_chat;
@@ -88,9 +89,11 @@ public:
 		BaseStaticSystem ( "Logger", "Verbose - AlwaysFlush - AllowChat" ),
 		singleton_class (),
 		m_msg (),
-		prolog ( basic_string("[NoCheatZ ").append(NCZ_VERSION_GIT_SHORT).append("] ") ),
+		chat_prolog ( basic_string("\x01[\x04NoCheatZ ").append(NCZ_VERSION_GIT_SHORT).append("\x01] ") ),
+		log_prolog(basic_string("[NoCheatZ ").append(NCZ_VERSION_GIT_SHORT).append("] ")),
 		m_allow_chat(logger_chat_t::ON),
 		m_current_memory_used ( 0 ),
+		m_sm_chat(nullptr),
 		m_msg_func(nullptr),
 		m_always_flush(false)
 	{
@@ -129,12 +132,6 @@ public:
 
 	template <msg_type type = MSG_CONSOLE>
 	void Msg ( const char * msg, int verbose = 0 );
-
-	template <msg_type type = MSG_CONSOLE>
-	inline void Msg ( const basic_string& msg, int verbose = 0 )
-	{
-		Msg<type> ( msg.c_str (), verbose );
-	}
 };
 
 inline bool Logger::IsConsoleConnected () const
