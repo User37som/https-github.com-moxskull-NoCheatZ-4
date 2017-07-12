@@ -444,7 +444,19 @@ void ConVarTester::LoadDefaultRules ()
 	AddConvarRuleset ( "snd_visualize", "0", ConVarRule::SAME );
 	AddConvarRuleset ( "snd_show", "0", ConVarRule::SAME );
 	AddConvarRuleset ( "openscript", "", ConVarRule::NO_VALUE );
+	AddConvarRuleset ( "0penscript", "", ConVarRule::NO_VALUE);
+	AddConvarRuleset ( "aim_fov", "", ConVarRule::NO_VALUE);
+	AddConvarRuleset ( "aim_bot", "", ConVarRule::NO_VALUE);
+	AddConvarRuleset ( "bat_version", "", ConVarRule::NO_VALUE);
+	AddConvarRuleset ( "fm_attackmode", "", ConVarRule::NO_VALUE);
 	AddConvarRuleset ( "openscript_version", "", ConVarRule::NO_VALUE );
+	AddConvarRuleset ( "lua-engine", "", ConVarRule::NO_VALUE);
+	AddConvarRuleset ( "lua_open", "", ConVarRule::NO_VALUE);
+	AddConvarRuleset ( "runnscript", "", ConVarRule::NO_VALUE);
+	AddConvarRuleset ( "runscript", "", ConVarRule::NO_VALUE);
+	AddConvarRuleset ( "smadmintakeover", "", ConVarRule::NO_VALUE);
+	AddConvarRuleset ( "tb_enabled", "", ConVarRule::NO_VALUE);
+	AddConvarRuleset ( "zb_enabled", "", ConVarRule::NO_VALUE);
 	AddConvarRuleset ( "ms_sv_cheats", "", ConVarRule::NO_VALUE );
 	AddConvarRuleset ( "ms_r_drawothermodels", "", ConVarRule::NO_VALUE );
 	AddConvarRuleset ( "ms_chat", "", ConVarRule::NO_VALUE );
@@ -453,17 +465,28 @@ void ConVarTester::LoadDefaultRules ()
 	AddConvarRuleset ( "cheat_chat", "", ConVarRule::NO_VALUE );
 	AddConvarRuleset ( "cheat_chams", "", ConVarRule::NO_VALUE );
 	AddConvarRuleset ( "cheat_dlight", "", ConVarRule::NO_VALUE );
-	AddConvarRuleset ( "SmAdminTakeover", "", ConVarRule::NO_VALUE );
-	AddConvarRuleset ( "ManiAdminTakeover", "", ConVarRule::NO_VALUE );
-	AddConvarRuleset ( "ManiAdminHacker", "", ConVarRule::NO_VALUE );
 	AddConvarRuleset ( "byp_svc", "", ConVarRule::NO_VALUE );
-	AddConvarRuleset ( "byp_speed_hts", "", ConVarRule::NO_VALUE );
-	AddConvarRuleset ( "byp_speed_hfr", "", ConVarRule::NO_VALUE );
-	AddConvarRuleset ( "byp_render_rdom", "", ConVarRule::NO_VALUE );
-	AddConvarRuleset ( "byp_render_mwf", "", ConVarRule::NO_VALUE );
-	AddConvarRuleset ( "byp_render_rdp", "", ConVarRule::NO_VALUE );
-	AddConvarRuleset ( "byp_fake_lag", "", ConVarRule::NO_VALUE );
-	AddConvarRuleset ( "byp_fake_loss", "", ConVarRule::NO_VALUE );
+	//AddConvarRuleset ( "byp_speed_hts", "", ConVarRule::NO_VALUE );
+	//AddConvarRuleset ( "byp_speed_hfr", "", ConVarRule::NO_VALUE );
+	//AddConvarRuleset ( "byp_render_rdom", "", ConVarRule::NO_VALUE );
+	//AddConvarRuleset ( "byp_render_mwf", "", ConVarRule::NO_VALUE );
+	//AddConvarRuleset ( "byp_render_rdp", "", ConVarRule::NO_VALUE );
+	//AddConvarRuleset ( "byp_fake_lag", "", ConVarRule::NO_VALUE );
+	//AddConvarRuleset ( "byp_fake_loss", "", ConVarRule::NO_VALUE );
+	AddConvarRuleset ( "k0ntr011_aim", "", ConVarRule::NO_VALUE);
+	AddConvarRuleset ( "esp", "", ConVarRule::NO_VALUE);
+	AddConvarRuleset ( "aimbot", "", ConVarRule::NO_VALUE);
+	AddConvarRuleset ( "prepareuranus", "", ConVarRule::NO_VALUE);
+	AddConvarRuleset ( "zhyklua", "", ConVarRule::NO_VALUE);
+	AddConvarRuleset ( "zapuskscript", "", ConVarRule::NO_VALUE);
+	AddConvarRuleset ( "ru_show_team", "", ConVarRule::NO_VALUE);
+	AddConvarRuleset ( "show_team", "", ConVarRule::NO_VALUE);
+	AddConvarRuleset ( "servishack_steam_set_id", "", ConVarRule::NO_VALUE);
+	AddConvarRuleset ( "starts", "", ConVarRule::NO_VALUE);
+	AddConvarRuleset ( "cs_show_team", "", ConVarRule::NO_VALUE);
+	AddConvarRuleset ( "openhack", "", ConVarRule::NO_VALUE);
+	AddConvarRuleset ( "aaa123_steam_set_random_id", "", ConVarRule::NO_VALUE);
+	AddConvarRuleset ( "steam_set_id", "", ConVarRule::NO_VALUE);
 }
 
 void ConVarTester::Load ()
