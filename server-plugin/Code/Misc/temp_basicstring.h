@@ -334,6 +334,94 @@ public:
 		return *this;
 	}
 
+	String<pod>& append(String<pod> && d)
+	{
+		append(d.c_str());
+		d.Dealloc();
+		return *this;
+	}
+
+	String<pod>& insert_at_start(pod const c)
+	{
+		if (c == '\0')
+		{
+			Dealloc();
+			Grow(1, false);
+		}
+		else
+		{
+			Grow(m_size + 2);
+			pod * cur(m_alloc + m_size);
+			do
+			{
+				*(cur + 1) = *cur;
+			} while (--cur >= m_alloc);
+			*m_alloc = c;
+			++m_size;
+		}
+		return *this;
+	}
+
+	String<pod>& insert_at_start(pod const * c)
+	{
+		if (*c == '\0')
+		{
+			Dealloc();
+			Grow(1, false);
+		}
+		else
+		{
+			size_t const c_len(autolen(c));
+			Grow(m_size + c_len + 1);
+			pod * cur(m_alloc + m_size);
+			do
+			{
+				*(cur + c_len) = *cur;
+			} while (--cur >= m_alloc);
+			memcpy(m_alloc, c, c_len);
+			m_size += c_len;
+		}
+		return *this;
+	}
+
+	String<pod>& insert_at_start(String<pod> const & c)
+	{
+		if (c[0] == '\0')
+		{
+			Dealloc();
+			Grow(1, false);
+		}
+		else
+		{
+			Grow(m_size + c.size() + 1);
+			pod * cur(m_alloc + m_size);
+			do
+			{
+				*(cur + c.size()) = *cur;
+			} while (--cur >= m_alloc);
+			memcpy(m_alloc, c, c_len);
+			m_size += c.size();
+		}
+		return *this;
+	}
+
+	String<pod>& insert_at_start(String<pod> && c)
+	{
+		if (c[0] == '\0')
+		{
+			memcpy(this, &c, sizeof(String<pod>));
+			memset(&c, 0, sizeof(String<pod>));
+		}
+		else
+		{
+			c.append(m_alloc);
+			Dealloc();
+			memcpy(this, &c, sizeof(String<pod>));
+			memset(&c, 0, sizeof(String<pod>));
+		}
+		return *this;
+	}
+
 	bool isempty () const
 	{
 		return m_size == 0;

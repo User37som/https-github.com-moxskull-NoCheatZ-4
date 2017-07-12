@@ -215,6 +215,19 @@ TEST ( Sring_Class, Modifiers )
 
 	g.lower ();
 	ASSERT_STREQ ( "bbaaaaaaaqq", g.c_str () );
+
+	g.insert_at_start(basic_string("zsc"));
+	ASSERT_STREQ("zscbbaaaaaaaqq", g.c_str());
+
+	g.insert_at_start("zsc");
+	ASSERT_STREQ("zsczscbbaaaaaaaqq", g.c_str());
+
+	g.insert_at_start('z');
+	ASSERT_STREQ("zzsczscbbaaaaaaaqq", g.c_str());
+
+	g.insert_at_start('\0');
+	ASSERT_STREQ("", g.c_str());
+	ASSERT_EQ(0, g.size());
 }
 
 TEST ( Sring_Class, Size_Consistency )
