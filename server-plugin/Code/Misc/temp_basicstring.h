@@ -43,6 +43,7 @@ private:
 		{
 			HeapMemoryManager::FreeMemory ( m_alloc, m_capacity );
 			m_alloc = nullptr;
+			m_size = 0;
 		}
 	}
 
@@ -65,8 +66,17 @@ private:
 
 		if( m_alloc )
 		{
-			if( copy ) memcpy ( n, m_alloc, ( m_size + 1 ) * sizeof ( pod ) );
-			Dealloc ();
+			if (copy)
+			{
+				size_t const save_size(m_size);
+				memcpy(n, m_alloc, (m_size + 1) * sizeof(pod));
+				Dealloc();
+				m_size = save_size;
+			}
+			else
+			{
+				Dealloc();
+			}
 		}
 		else
 		{
