@@ -191,7 +191,7 @@ void AutoTVRecord::StartRecord ()
 {
 	if( TVWatcher::GetInstance()->IsRecording() ) return;
 
-	if( TVWatcher::GetInstance()->IsTVPresent () )
+	if( TVWatcher::GetInstance()->IsTVPresent () && IsActive())
 	{
 		basic_string mapname;
 		if( SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive )
@@ -219,7 +219,7 @@ void AutoTVRecord::StartRecord ()
 
 void AutoTVRecord::StopRecord ()
 {
-	if( !TVWatcher::GetInstance()->IsRecording()) return;
+	if( !TVWatcher::GetInstance()->IsRecording() || ! IsActive()) return;
 
 	SourceSdk::InterfacesProxy::Call_ServerExecute ();
 
@@ -239,36 +239,39 @@ void AutoTVRecord::SetRecordPrefix ( basic_string const & prefix )
 
 void AutoTVRecord::SpawnTV ()
 {
-	SourceSdk::InterfacesProxy::Call_ServerExecute ();
-
-	SourceSdk::InterfacesProxy::Call_ServerCommand ( "tv_autorecord 0\n" );
-	SourceSdk::InterfacesProxy::Call_ServerCommand ( "tv_enable 1\n" );
-
-	if( !TVWatcher::GetInstance()->IsTVPresent () )
+	if (IsActive())
 	{
-		if( m_spawn_once )
-		{
-			Logger::GetInstance ()->Msg<MSG_LOG> ( "TV not detected. Reloading the map ..." );
+		SourceSdk::InterfacesProxy::Call_ServerExecute();
 
-			basic_string mapname;
-			if( SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive )
+		SourceSdk::InterfacesProxy::Call_ServerCommand("tv_autorecord 0\n");
+		SourceSdk::InterfacesProxy::Call_ServerCommand("tv_enable 1\n");
+
+		if (!TVWatcher::GetInstance()->IsTVPresent())
+		{
+			if (m_spawn_once)
 			{
-				mapname = static_cast< SourceSdk::CGlobalVars_csgo* >( SourceSdk::InterfacesProxy::Call_GetGlobalVars () )->mapname;
-				size_t const strip ( mapname.find_last_of ( "/\\" ) );
-				if( strip != basic_string::npos ) mapname = mapname.c_str () + strip + 1;
-				SourceSdk::InterfacesProxy::Call_ServerCommand ( Helpers::format ( "map %s\n", mapname.c_str () ) );
+				Logger::GetInstance()->Msg<MSG_LOG>("TV not detected. Reloading the map ...");
+
+				basic_string mapname;
+				if (SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive)
+				{
+					mapname = static_cast<SourceSdk::CGlobalVars_csgo*>(SourceSdk::InterfacesProxy::Call_GetGlobalVars())->mapname;
+					size_t const strip(mapname.find_last_of("/\\"));
+					if (strip != basic_string::npos) mapname = mapname.c_str() + strip + 1;
+					SourceSdk::InterfacesProxy::Call_ServerCommand(Helpers::format("map %s\n", mapname.c_str()));
+				}
+				else
+				{
+					mapname = static_cast<SourceSdk::CGlobalVars*>(SourceSdk::InterfacesProxy::Call_GetGlobalVars())->mapname;
+					SourceSdk::InterfacesProxy::Call_ServerCommand(Helpers::format("changelevel %s\n", mapname.c_str()));
+				}
+
+				m_spawn_once = false;
 			}
 			else
 			{
-				mapname = static_cast< SourceSdk::CGlobalVars* >( SourceSdk::InterfacesProxy::Call_GetGlobalVars () )->mapname;
-				SourceSdk::InterfacesProxy::Call_ServerCommand ( Helpers::format ( "changelevel %s\n", mapname.c_str () ) );
+				Logger::GetInstance()->Msg<MSG_ERROR>("Was unable to spawn the TV.");
 			}
-
-			m_spawn_once = false;
-		}
-		else
-		{
-			Logger::GetInstance ()->Msg<MSG_ERROR> ( "Was unable to spawn the TV." );
 		}
 	}
 }
