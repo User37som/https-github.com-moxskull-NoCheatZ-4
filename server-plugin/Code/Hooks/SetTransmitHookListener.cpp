@@ -64,12 +64,12 @@ void HOOKFN_INT SetTransmitHookListener::RT_nSetTransmit ( void * const This, vo
 #endif
 {
 	SetTransmit_t gpOldFn;
-	PlayerHandler::const_iterator receiver_assumed_player ( Helpers::IndexOfEdict ( *pInfo ) );
+	PlayerHandler::iterator receiver_assumed_player ( Helpers::IndexOfEdict ( *pInfo ) );
 
 	if( !bAlways && !( m_listeners.GetFirst () == nullptr ) && receiver_assumed_player > SlotStatus::PLAYER_CONNECTING )
 	{
 		NczPlayerManager const * const inst ( NczPlayerManager::GetInstance () );
-		PlayerHandler::const_iterator sender_assumed_client ( inst->GetPlayerHandlerByBasePlayer ( This ) );
+		PlayerHandler::iterator sender_assumed_client ( inst->GetPlayerHandlerByBasePlayer ( This ) );
 
 		if( sender_assumed_client != receiver_assumed_player && sender_assumed_client != SlotStatus::PLAYER_CONNECTING && sender_assumed_client >= SlotStatus::BOT )
 		{
@@ -97,7 +97,7 @@ void HOOKFN_INT SetTransmitHookListener::RT_nSetTransmitWeapon(void * const This
 #endif
 {
 	SetTransmit_t gpOldFn;
-	PlayerHandler::const_iterator receiver_assumed_player(Helpers::IndexOfEdict(*pInfo));
+	PlayerHandler::iterator receiver_assumed_player(Helpers::IndexOfEdict(*pInfo));
 
 	if (!bAlways && !(m_listeners.GetFirst() == nullptr) && receiver_assumed_player > SlotStatus::PLAYER_CONNECTING)
 	{

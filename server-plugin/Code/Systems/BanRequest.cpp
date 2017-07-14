@@ -319,7 +319,7 @@ void BanRequest::RT_TimerCallback ( char const * const timer_name )
 
 		if( v.request_time + m_wait_time < curtime )
 		{
-			PlayerHandler::const_iterator ph = SteamGameServer_BSecure () ? NczPlayerManager::GetInstance ()->GetPlayerHandlerBySteamID ( v.steamid ) : NczPlayerManager::GetInstance ()->GetPlayerHandlerByUserId ( v.userid );
+			PlayerHandler::iterator ph = SteamGameServer_BSecure () ? NczPlayerManager::GetInstance ()->GetPlayerHandlerBySteamID ( v.steamid ) : NczPlayerManager::GetInstance ()->GetPlayerHandlerByUserId ( v.userid );
 
 			if( CanKick () )
 			{

@@ -177,7 +177,7 @@ bool AutoTVRecord::GotJob () const
 	// Create a filter
 	ProcessFilter::HumanAtLeastConnected const filter_class;
 	// Initiate the iterator at the first match in the filter
-	PlayerHandler::const_iterator it(&filter_class);
+	PlayerHandler::iterator it(&filter_class);
 	// Return if we have job to do or not ...
 	return it != PlayerHandler::end();
 }
@@ -302,7 +302,7 @@ void TVWatcher::Init()
 	ConCommandHookListener::RegisterConCommandHookListener(this);
 }
 
-bool TVWatcher::RT_ConCommandCallback(PlayerHandler::const_iterator ph, void * const cmd, SourceSdk::CCommand const & args)
+bool TVWatcher::RT_ConCommandCallback(PlayerHandler::iterator ph, void * const cmd, SourceSdk::CCommand const & args)
 {
 	if (args.ArgC() >= 2)
 	{
@@ -362,7 +362,7 @@ bool TVWatcher::IsRecording() const
 bool TVWatcher::IsTVPresent() const
 {
 	ProcessFilter::TVOnly filter_class;
-	return PlayerHandler::const_iterator(&filter_class) != PlayerHandler::end();
+	return PlayerHandler::iterator(&filter_class) != PlayerHandler::end();
 }
 
 basic_string const & TVWatcher::GetRecordFilename() const
@@ -373,7 +373,7 @@ basic_string const & TVWatcher::GetRecordFilename() const
 void TVWatcher::SendTVChatMessage(basic_string const & msg)
 {
 	ProcessFilter::TVOnly filter_class;
-	for (PlayerHandler::const_iterator it(&filter_class); it != PlayerHandler::end(); it += &filter_class)
+	for (PlayerHandler::iterator it(&filter_class); it != PlayerHandler::end(); it += &filter_class)
 	{
 		Helpers::tell(it->GetEdict(), msg);
 	}

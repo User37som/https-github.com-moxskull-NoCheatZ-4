@@ -53,12 +53,12 @@ public:
 	virtual ~PlayerRunCommandHookListener ();
 
 protected:
-	virtual PlayerRunCommandRet RT_PlayerRunCommandCallback ( PlayerHandler::const_iterator ph, void * const cmd, void * const old_cmd ) = 0;
+	virtual PlayerRunCommandRet RT_PlayerRunCommandCallback ( PlayerHandler::iterator ph, void * const cmd, void * const old_cmd ) = 0;
 
 public:
-	static void HookPlayerRunCommand ( PlayerHandler::const_iterator ph );
+	static void HookPlayerRunCommand ( PlayerHandler::iterator ph );
 
-	static void* RT_GetLastUserCmd ( PlayerHandler::const_iterator ph );
+	static void* RT_GetLastUserCmd ( PlayerHandler::iterator ph );
 	static void* RT_GetLastUserCmd ( int index );
 
 protected:

@@ -157,23 +157,23 @@ private:
 
 	virtual bool GotJob () const override final;
 
-	virtual bool RT_ConCommandCallback ( PlayerHandler::const_iterator ph, void * const cmd, SourceSdk::CCommand const & args ) override final;
+	virtual bool RT_ConCommandCallback ( PlayerHandler::iterator ph, void * const cmd, SourceSdk::CCommand const & args ) override final;
 
 public:
 	/* Called by the plugin */
-	bool RT_TestPlayerCommand ( PlayerHandler::const_iterator ph, const basic_string& command );
-	bool RT_TestPlayerCommand_Anon ( PlayerHandler::const_iterator ph, const basic_string& command );
+	bool RT_TestPlayerCommand ( PlayerHandler::iterator ph, const basic_string& command );
+	bool RT_TestPlayerCommand_Anon ( PlayerHandler::iterator ph, const basic_string& command );
 
 private:
 	void AddCommandInfo ( const basic_string& name, const bool ignore = false, const bool ban = false );
 
 	void RemoveCommandInfo ( const basic_string& name );
 
-	void RT_AddPlayerCommand ( PlayerHandler::const_iterator ph, const basic_string& command );
+	void RT_AddPlayerCommand ( PlayerHandler::iterator ph, const basic_string& command );
 
-	static bool RT_HookSayCallback ( PlayerHandler::const_iterator ph, const void* const command, const SourceSdk::CCommand & args );
+	static bool RT_HookSayCallback ( PlayerHandler::iterator ph, const void* const command, const SourceSdk::CCommand & args );
 
-	static bool RT_HookEntCallback ( PlayerHandler::const_iterator ph, const void* const command, const SourceSdk::CCommand & args );
+	static bool RT_HookEntCallback ( PlayerHandler::iterator ph, const void* const command, const SourceSdk::CCommand & args );
 };
 
 class Detection_CmdFlood : public LogDetection<LastPlayerCommandsT>

@@ -61,7 +61,7 @@ void BhopBlocker::Init ()
 
 void BhopBlocker::Load ()
 {
-	for( PlayerHandler::const_iterator it ( PlayerHandler::begin () ); it != PlayerHandler::end (); ++it )
+	for( PlayerHandler::iterator it ( PlayerHandler::begin () ); it != PlayerHandler::end (); ++it )
 	{
 		ResetPlayerDataStructByIndex ( it.GetIndex () );
 	}
@@ -96,12 +96,12 @@ bool BhopBlocker::GotJob () const
 	// Create a filter
 	ProcessFilter::HumanAtLeastConnecting const filter_class;
 	// Initiate the iterator at the first match in the filter
-	PlayerHandler::const_iterator it ( &filter_class );
+	PlayerHandler::iterator it ( &filter_class );
 	// Return if we have job to do or not ...
 	return it != PlayerHandler::end ();
 }
 
-PlayerRunCommandRet BhopBlocker::RT_PlayerRunCommandCallback ( PlayerHandler::const_iterator ph, void* pCmd, void* old_cmd )
+PlayerRunCommandRet BhopBlocker::RT_PlayerRunCommandCallback ( PlayerHandler::iterator ph, void* pCmd, void* old_cmd )
 {
 	METRICS_ENTER_SECTION ( "BhopBlocker::PlayerRunCommandCallback" );
 
@@ -231,7 +231,7 @@ PlayerRunCommandRet BhopBlocker::RT_PlayerRunCommandCallback ( PlayerHandler::co
 	return PlayerRunCommandRet::CONTINUE;
 }
 
-void BhopBlocker::RT_m_hGroundEntityStateChangedCallback ( PlayerHandler::const_iterator ph, bool const new_isOnGround )
+void BhopBlocker::RT_m_hGroundEntityStateChangedCallback ( PlayerHandler::iterator ph, bool const new_isOnGround )
 {
 	if( new_isOnGround )
 	{

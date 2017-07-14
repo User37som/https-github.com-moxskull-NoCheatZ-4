@@ -99,7 +99,7 @@ bool RadarHackBlocker::GotJob () const
 	// Create a filter
 	ProcessFilter::HumanAtLeastConnecting const filter_class;
 	// Initiate the iterator at the first match in the filter
-	PlayerHandler::const_iterator it ( &filter_class );
+	PlayerHandler::iterator it ( &filter_class );
 	// Return if we have job to do or not ...
 	return it != PlayerHandler::end ();
 }
@@ -108,7 +108,7 @@ void RadarHackBlocker::RT_ThinkPostCallback ( SourceSdk::edict_t const * const p
 {
 	ProcessFilter::HumanAtLeastConnectedOrBot const filter_class;
 
-	for( PlayerHandler::const_iterator ph ( &filter_class ); ph != PlayerHandler::end (); ph += &filter_class )
+	for( PlayerHandler::iterator ph ( &filter_class ); ph != PlayerHandler::end (); ph += &filter_class )
 	{
 		int const index ( ph.GetIndex () );
 		ClientRadarData * pData ( GetPlayerDataStructByIndex ( index ) );
@@ -279,7 +279,7 @@ void RadarHackBlocker::RT_ProcessOnTick ( float const & curtime )
 {
 	ProcessFilter::HumanAtLeastConnectedOrBot const filter_class;
 
-	for( PlayerHandler::const_iterator ph ( &filter_class ); ph != PlayerHandler::end (); ph += &filter_class )
+	for( PlayerHandler::iterator ph ( &filter_class ); ph != PlayerHandler::end (); ph += &filter_class )
 	{
 		int const index ( ph.GetIndex () );
 

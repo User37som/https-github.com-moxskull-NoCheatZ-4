@@ -39,7 +39,7 @@ WeaponHookListener::~WeaponHookListener ()
 	}
 }
 
-void WeaponHookListener::HookWeapon ( PlayerHandler::const_iterator ph )
+void WeaponHookListener::HookWeapon ( PlayerHandler::iterator ph )
 {
 	LoggerAssert ( Helpers::isValidEdict ( ph->GetEdict () ) );
 	void* unk ( ph->GetEdict ()->m_pUnk );
@@ -56,7 +56,7 @@ void HOOKFN_INT WeaponHookListener::RT_nWeapon_Equip ( void * const basePlayer, 
 void HOOKFN_INT WeaponHookListener::RT_nWeapon_Equip ( void * const basePlayer, void * const, void * const weapon )
 #endif
 {
-	PlayerHandler::const_iterator ph ( NczPlayerManager::GetInstance ()->GetPlayerHandlerByBasePlayer ( basePlayer ) );
+	PlayerHandler::iterator ph ( NczPlayerManager::GetInstance ()->GetPlayerHandlerByBasePlayer ( basePlayer ) );
 
 	if( ph != SlotStatus::INVALID )
 	{
@@ -84,7 +84,7 @@ void HOOKFN_INT WeaponHookListener::RT_nWeapon_Drop ( void * const basePlayer, v
 void HOOKFN_INT WeaponHookListener::RT_nWeapon_Drop ( void * const basePlayer, void * const, void * const weapon, SourceSdk::Vector const * const targetVec, SourceSdk::Vector const * const velocity )
 #endif
 {
-	PlayerHandler::const_iterator ph ( NczPlayerManager::GetInstance ()->GetPlayerHandlerByBasePlayer ( basePlayer ) );
+	PlayerHandler::iterator ph ( NczPlayerManager::GetInstance ()->GetPlayerHandlerByBasePlayer ( basePlayer ) );
 
 	if( ph != SlotStatus::INVALID && weapon != nullptr )
 	{

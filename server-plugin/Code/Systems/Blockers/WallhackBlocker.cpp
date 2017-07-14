@@ -55,7 +55,7 @@ void WallhackBlocker::Init ()
 
 void WallhackBlocker::Load ()
 {
-	for( PlayerHandler::const_iterator it ( PlayerHandler::begin () ); it != PlayerHandler::end (); ++it )
+	for( PlayerHandler::iterator it ( PlayerHandler::begin () ); it != PlayerHandler::end (); ++it )
 	{
 		ResetPlayerDataStructByIndex ( it.GetIndex () );
 	}
@@ -82,7 +82,7 @@ bool WallhackBlocker::GotJob () const
 	// Create a filter
 	ProcessFilter::HumanAtLeastConnecting const filter_class;
 	// Initiate the iterator at the first match in the filter
-	PlayerHandler::const_iterator it ( &filter_class );
+	PlayerHandler::iterator it ( &filter_class );
 	// Return if we have job to do or not ...
 	return it != PlayerHandler::end ();
 }
@@ -115,7 +115,7 @@ void WallhackBlocker::OnMapStart ()
 	}
 }
 
-bool WallhackBlocker::RT_SetTransmitCallback ( PlayerHandler::const_iterator sender_player, PlayerHandler::const_iterator receiver_player )
+bool WallhackBlocker::RT_SetTransmitCallback ( PlayerHandler::iterator sender_player, PlayerHandler::iterator receiver_player )
 {
 	/*
 		@sender : could be BOT, PLAYER_CONNECTED or PLAYER_IN_TESTS.
@@ -161,7 +161,7 @@ bool WallhackBlocker::RT_SetTransmitCallback ( PlayerHandler::const_iterator sen
 				int const bh_index ( bh->GetEntryIndex () );
 				if( bh_index > 0 && bh_index <= NczPlayerManager::GetInstance ()->GetMaxIndex () )
 				{
-					PlayerHandler::const_iterator spec_player ( bh_index );
+					PlayerHandler::iterator spec_player ( bh_index );
 
 					if( spec_player && sender_player != spec_player )
 					{
@@ -201,7 +201,7 @@ bool WallhackBlocker::RT_SetTransmitCallback ( PlayerHandler::const_iterator sen
 	return !cache.IsVisible ( sender_player.GetIndex (), receiver_player.GetIndex () );
 }
 
-bool WallhackBlocker::RT_SetTransmitWeaponCallback ( SourceSdk::edict_t const * const sender, PlayerHandler::const_iterator receiver )
+bool WallhackBlocker::RT_SetTransmitWeaponCallback ( SourceSdk::edict_t const * const sender, PlayerHandler::iterator receiver )
 {
 	const int weapon_index ( Helpers::IndexOfEdict ( sender ) );
 	NczPlayer const * const owner_player ( WallhackBlocker::GetInstance ()->m_weapon_owner[ weapon_index ] );
@@ -209,7 +209,7 @@ bool WallhackBlocker::RT_SetTransmitWeaponCallback ( SourceSdk::edict_t const * 
 
 	if( owner_player == *receiver ) return false;
 
-	PlayerHandler::const_iterator owner_ph ( owner_player->GetIndex () );
+	PlayerHandler::iterator owner_ph ( owner_player->GetIndex () );
 
 	if( receiver > SlotStatus::PLAYER_CONNECTING && owner_ph >= SlotStatus::BOT && owner_ph != SlotStatus::PLAYER_CONNECTING )
 	{
@@ -221,14 +221,14 @@ bool WallhackBlocker::RT_SetTransmitWeaponCallback ( SourceSdk::edict_t const * 
 	}
 }
 
-void WallhackBlocker::RT_WeaponEquipCallback ( PlayerHandler::const_iterator ph, SourceSdk::edict_t const * const weapon )
+void WallhackBlocker::RT_WeaponEquipCallback ( PlayerHandler::iterator ph, SourceSdk::edict_t const * const weapon )
 {
 	const int weapon_index ( Helpers::IndexOfEdict ( weapon ) );
 	WallhackBlocker::GetInstance ()->m_weapon_owner[ weapon_index ] = *ph;
 	SetTransmitHookListener::HookSetTransmit ( weapon, false );
 }
 
-void WallhackBlocker::RT_WeaponDropCallback ( PlayerHandler::const_iterator ph, SourceSdk::edict_t const * const weapon )
+void WallhackBlocker::RT_WeaponDropCallback ( PlayerHandler::iterator ph, SourceSdk::edict_t const * const weapon )
 {
 	const int weapon_index ( Helpers::IndexOfEdict ( weapon ) );
 	WallhackBlocker::GetInstance ()->m_weapon_owner[ weapon_index ] = nullptr;
@@ -260,7 +260,7 @@ void WallhackBlocker::RT_ProcessOnTick ( float const & curtime )
 	ST_R_STATIC SourceSdk::Vector hull_max ( 5.0f, 5.0f, 5.0f );
 
 	ProcessFilter::HumanAtLeastConnectedOrBot filter_class;
-	for( PlayerHandler::const_iterator ph ( &filter_class ); ph != PlayerHandler::end (); ph += &filter_class )
+	for( PlayerHandler::iterator ph ( &filter_class ); ph != PlayerHandler::end (); ph += &filter_class )
 	{
 		SourceSdk::IPlayerInfo * const playerinfo ( ph->GetPlayerInfo () );
 		if( playerinfo != nullptr )
@@ -395,7 +395,7 @@ void WallhackBlocker::RT_ProcessOnTick ( float const & curtime )
 	METRICS_LEAVE_SECTION ( "WallhackBlocker::OnFrame" );
 }
 
-void WallhackBlocker::ClientDisconnect ( PlayerHandler::const_iterator ph )
+void WallhackBlocker::ClientDisconnect ( PlayerHandler::iterator ph )
 {
 	for( int x ( 0 ); x < MAX_EDICTS; ++x )
 	{
@@ -532,7 +532,7 @@ bool WallhackBlocker::RT_IsVisible ( const SourceSdk::Vector& origin, const Sour
 	return false;
 }
 
-bool WallhackBlocker::RT_IsAbleToSee ( PlayerHandler::const_iterator sender, PlayerHandler::const_iterator receiver )
+bool WallhackBlocker::RT_IsAbleToSee ( PlayerHandler::iterator sender, PlayerHandler::iterator receiver )
 {
 	const ClientDataS* const sender_data ( GetPlayerDataStructByIndex ( sender.GetIndex () ) );
 	const ClientDataS* const receiver_data ( GetPlayerDataStructByIndex ( receiver.GetIndex () ) );

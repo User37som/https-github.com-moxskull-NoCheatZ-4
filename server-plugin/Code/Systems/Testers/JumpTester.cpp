@@ -102,7 +102,7 @@ bool JumpTester::sys_cmd_fn(const SourceSdk::CCommand & args)
 
 void JumpTester::Load ()
 {
-	for( PlayerHandler::const_iterator it ( PlayerHandler::begin () ); it != PlayerHandler::end (); ++it )
+	for( PlayerHandler::iterator it ( PlayerHandler::begin () ); it != PlayerHandler::end (); ++it )
 	{
 		ResetPlayerDataStructByIndex ( it.GetIndex () );
 	}
@@ -137,12 +137,12 @@ bool JumpTester::GotJob () const
 	// Create a filter
 	ProcessFilter::HumanAtLeastConnected const filter_class;
 	// Initiate the iterator at the first match in the filter
-	PlayerHandler::const_iterator it ( &filter_class );
+	PlayerHandler::iterator it ( &filter_class );
 	// Return if we have job to do or not ...
 	return it != PlayerHandler::end ();
 }
 
-void JumpTester::RT_m_hGroundEntityStateChangedCallback ( PlayerHandler::const_iterator ph, bool new_isOnGround )
+void JumpTester::RT_m_hGroundEntityStateChangedCallback ( PlayerHandler::iterator ph, bool new_isOnGround )
 {
 	if( new_isOnGround )
 	{
@@ -154,7 +154,7 @@ void JumpTester::RT_m_hGroundEntityStateChangedCallback ( PlayerHandler::const_i
 	}
 }
 
-PlayerRunCommandRet JumpTester::RT_PlayerRunCommandCallback ( PlayerHandler::const_iterator ph, void* pCmd, void* old_cmd )
+PlayerRunCommandRet JumpTester::RT_PlayerRunCommandCallback ( PlayerHandler::iterator ph, void* pCmd, void* old_cmd )
 {
 	PlayerRunCommandRet const constexpr drop_cmd ( PlayerRunCommandRet::CONTINUE );
 
@@ -213,7 +213,7 @@ PlayerRunCommandRet JumpTester::RT_PlayerRunCommandCallback ( PlayerHandler::con
 	return drop_cmd;
 }
 
-void JumpTester::OnPlayerTouchGround ( PlayerHandler::const_iterator ph, int game_tick )
+void JumpTester::OnPlayerTouchGround ( PlayerHandler::iterator ph, int game_tick )
 {
 	JumpInfoT * const playerData ( GetPlayerDataStructByIndex ( ph.GetIndex () ) );
 
@@ -246,7 +246,7 @@ void JumpTester::OnPlayerTouchGround ( PlayerHandler::const_iterator ph, int gam
 	playerData->jumpCmdHolder.outsideJumpCmdCount = 0;
 }
 
-void JumpTester::OnPlayerLeaveGround ( PlayerHandler::const_iterator ph, int game_tick )
+void JumpTester::OnPlayerLeaveGround ( PlayerHandler::iterator ph, int game_tick )
 {
 	JumpInfoT * const playerData ( GetPlayerDataStructByIndex ( ph.GetIndex () ) );
 
@@ -256,7 +256,7 @@ void JumpTester::OnPlayerLeaveGround ( PlayerHandler::const_iterator ph, int gam
 	SystemVerbose1 ( Helpers::format ( "Player %s leaved the ground.", ph->GetName () ) );
 }
 
-void JumpTester::OnPlayerJumpButtonDown ( PlayerHandler::const_iterator ph, int game_tick )
+void JumpTester::OnPlayerJumpButtonDown ( PlayerHandler::iterator ph, int game_tick )
 {
 	JumpInfoT * const playerData ( GetPlayerDataStructByIndex ( ph.GetIndex () ) );
 
@@ -310,7 +310,7 @@ void JumpTester::OnPlayerJumpButtonDown ( PlayerHandler::const_iterator ph, int 
 	SystemVerbose1 ( Helpers::format ( "Player %s pushed the jump button.", ph->GetName () ) );
 }
 
-void JumpTester::OnPlayerJumpButtonUp ( PlayerHandler::const_iterator ph, int game_tick )
+void JumpTester::OnPlayerJumpButtonUp ( PlayerHandler::iterator ph, int game_tick )
 {
 	JumpInfoT * const playerData ( GetPlayerDataStructByIndex ( ph.GetIndex () ) );
 

@@ -258,7 +258,7 @@ bool ConfigManager::LoadConfig ()
 	return false;
 }
 
-bool ConfigManager::IsAdmin(PlayerHandler::const_iterator ph)
+bool ConfigManager::IsAdmin(PlayerHandler::iterator ph)
 {
 	if (ph >= SlotStatus::PLAYER_CONNECTING)
 	{

@@ -39,12 +39,10 @@ class alignas(16) PlayerHandler :
 {
 	friend NczPlayerManager;
 
-	typedef NczPlayer* const NczPlayer_ptr;
-
 public:
 	class iterator;
 
-	typedef iterator const const_iterator;
+	//typedef iterator const const_iterator;
 
 	/*
 		Wrapper of the PlayerHandler (pointer) type.
@@ -54,7 +52,7 @@ public:
 		friend NczPlayerManager;
 
 	private:
-		mutable PlayerHandler const * m_ptr;
+		PlayerHandler * m_ptr;
 
 		inline PlayerHandler * GetHandler () const; // backdoor for NczPlayerManager
 
@@ -66,7 +64,7 @@ public:
 	public:
 		iterator () : m_ptr ( invalid.m_ptr )
 		{}
-		iterator ( PlayerHandler const * const ptr ) : m_ptr ( ptr )
+		iterator ( PlayerHandler * const ptr ) : m_ptr ( ptr )
 		{}
 		iterator ( BaseProcessFilter const * const filter ) : m_ptr ( invalid.m_ptr )
 		{
@@ -75,12 +73,12 @@ public:
 		}
 		iterator ( int const slot_index ) : m_ptr ( invalid.m_ptr + slot_index )
 		{}
-		iterator ( const_iterator & other ) : m_ptr ( other.m_ptr )
+		iterator ( iterator & other ) : m_ptr ( other.m_ptr )
 		{}
 		/*
 			Assign by copy
 		*/
-		const_iterator & operator=( PlayerHandler const * const ptr ) const
+		iterator & operator=( PlayerHandler * const ptr )
 		{
 			m_ptr = ptr;
 			LoggerAssert ( IsIteratorValid () );
@@ -89,7 +87,7 @@ public:
 		/*
 			Assign by copy
 		*/
-		const_iterator & operator=( const_iterator & other ) const
+		iterator & operator=( iterator & other )
 		{
 			LoggerAssert ( other.IsIteratorValid () );
 			m_ptr = other.m_ptr;
@@ -98,7 +96,7 @@ public:
 		/*
 			Assign by index (no check)
 		*/
-		const_iterator & operator=( int const slot_index ) const
+		iterator & operator=( int const slot_index )
 		{
 			m_ptr = invalid.m_ptr + slot_index;
 			LoggerAssert ( IsIteratorValid () );
@@ -109,11 +107,11 @@ public:
 		/*
 			Advance the iterator to the next handler until the end.
 		*/
-		inline const_iterator & operator++() const;
+		inline iterator & operator++();
 		/*
 			Advance the iterator to the next handler that matches the conditions in target
 		*/
-		inline const_iterator & operator+=( BaseProcessFilter const * const target ) const;
+		inline iterator & operator+=( BaseProcessFilter const * const target );
 		/*
 			Returns the index of the handler
 		*/
@@ -121,11 +119,11 @@ public:
 		/*
 			Returns true if the iterator is at the same index than other
 		*/
-		inline bool operator==( const_iterator & other ) const;
+		inline bool operator==(iterator & other ) const;
 		/*
 			Returns false if the iterator is at the same index than other
 		*/
-		inline bool operator!=( const_iterator & other ) const;
+		inline bool operator!=(iterator & other ) const;
 		/*
 			Returns true if the status of the handler matches other_status
 		*/
@@ -165,18 +163,18 @@ public:
 		/*
 			Convert the iterator to the dereferenced NczPlayer pointer in the handler (might be null)
 		*/
-		inline NczPlayer_ptr operator*() const;
+		inline NczPlayer* operator*() const;
 		/*
 			Convert the iterator to the dereferenced NczPlayer pointer in the handler (might be null)
 		*/
-		inline NczPlayer_ptr operator->() const;
+		inline NczPlayer* operator->() const;
 	} ALIGN4_POST;
 
 private:
 
-	static const_iterator first;
-	static const_iterator last;
-	static const_iterator invalid;
+	static iterator first;
+	static iterator last;
+	static iterator invalid;
 
 	SlotStatus status;
 	NczPlayer* playerClass;
@@ -202,9 +200,9 @@ private:
 	}
 
 public:
-	inline static const_iterator & begin ();
+	inline static iterator & begin ();
 
-	inline static const_iterator & end ();
+	inline static iterator & end ();
 
 } ALIGN16_POST;
 
@@ -219,14 +217,14 @@ inline PlayerHandler * PlayerHandler::iterator::GetHandler () const
 	return const_cast< PlayerHandler * >( m_ptr );
 }
 
-inline PlayerHandler::const_iterator & PlayerHandler::iterator::operator++() const // CONST CHEATTERR
+inline PlayerHandler::iterator & PlayerHandler::iterator::operator++()
 {
 	LoggerAssert ( IsIteratorValid () );
 	--m_ptr;
 	return *this;
 }
 
-inline PlayerHandler::const_iterator & PlayerHandler::iterator::operator+=( BaseProcessFilter const * const target ) const
+inline PlayerHandler::iterator & PlayerHandler::iterator::operator+=( BaseProcessFilter const * const target )
 {
 	LoggerAssert ( IsIteratorValid () );
 	if( this->operator==( PlayerHandler::end () ) ) // We already are at the end ... but our tester wants to work :'(
@@ -252,12 +250,12 @@ inline PlayerHandler::const_iterator & PlayerHandler::iterator::operator+=( Base
 	return *this;
 }
 
-inline PlayerHandler::const_iterator & PlayerHandler::begin ()
+inline PlayerHandler::iterator & PlayerHandler::begin ()
 {
 	return last; // Let's blow your brain ... it's reversed.
 }
 
-inline PlayerHandler::const_iterator & PlayerHandler::end ()
+inline PlayerHandler::iterator & PlayerHandler::end ()
 {
 	return invalid;
 }
@@ -280,14 +278,14 @@ inline int PlayerHandler::iterator::GetIndex () const
 	return m_ptr - invalid.m_ptr;
 }
 
-inline bool PlayerHandler::iterator::operator==( const_iterator & other ) const
+inline bool PlayerHandler::iterator::operator==(iterator & other ) const
 {
 	LoggerAssert ( IsIteratorValid () );
 	LoggerAssert ( other.IsIteratorValid () );
 	return m_ptr == other.m_ptr;
 }
 
-inline bool PlayerHandler::iterator::operator!=( const_iterator & other ) const
+inline bool PlayerHandler::iterator::operator!=(iterator & other ) const
 {
 	LoggerAssert ( IsIteratorValid () );
 	LoggerAssert ( other.IsIteratorValid () );
@@ -336,13 +334,13 @@ inline PlayerHandler::iterator::operator SlotStatus() const
 	return m_ptr->status;
 }
 
-inline PlayerHandler::NczPlayer_ptr PlayerHandler::iterator::operator*() const
+inline NczPlayer* PlayerHandler::iterator::operator*() const
 {
 	LoggerAssert ( IsIteratorValid () );
 	return m_ptr->playerClass;
 }
 
-inline PlayerHandler::NczPlayer_ptr PlayerHandler::iterator::operator->() const
+inline NczPlayer* PlayerHandler::iterator::operator->() const
 {
 	LoggerAssert ( IsIteratorValid () );
 	return m_ptr->playerClass;
@@ -361,6 +359,8 @@ class NczPlayerManager :
 private:
 	static PlayerHandler FullHandlersList[ MAX_PLAYERS + 1 ];
 	int m_max_index;
+
+	void ResetRange();
 	
 public:
 	NczPlayerManager ();
@@ -371,12 +371,12 @@ public:
 	void LoadPlayerManager ();
 	void OnLevelInit ();
 
-	inline PlayerHandler::const_iterator GetPlayerHandlerByIndex ( int const slot ) const;
-	inline PlayerHandler::const_iterator GetPlayerHandlerByUserId ( int const userid ) const;
-	PlayerHandler::const_iterator GetPlayerHandlerByBasePlayer ( void* BasePlayer ) const;
-	PlayerHandler::const_iterator GetPlayerHandlerBySteamID ( const char * steamid ) const;
-	inline PlayerHandler::const_iterator GetPlayerHandlerByEdict ( SourceSdk::edict_t const * const pEdict ) const;
-	PlayerHandler::const_iterator GetPlayerHandlerByName ( const char * playerName ) const;
+	inline PlayerHandler::iterator GetPlayerHandlerByIndex ( int const slot ) const;
+	inline PlayerHandler::iterator GetPlayerHandlerByUserId ( int const userid ) const;
+	PlayerHandler::iterator GetPlayerHandlerByBasePlayer ( void* BasePlayer ) const;
+	PlayerHandler::iterator GetPlayerHandlerBySteamID ( const char * steamid ) const;
+	inline PlayerHandler::iterator GetPlayerHandlerByEdict ( SourceSdk::edict_t const * const pEdict ) const;
+	PlayerHandler::iterator GetPlayerHandlerByName ( const char * playerName ) const;
 
 	short GetPlayerCount ( BaseProcessFilter const * const filter ) const;
 
@@ -394,14 +394,14 @@ public:
 	};
 };
 
-inline PlayerHandler::const_iterator NczPlayerManager::GetPlayerHandlerByIndex ( int const slot ) const
+inline PlayerHandler::iterator NczPlayerManager::GetPlayerHandlerByIndex ( int const slot ) const
 {
 	return slot;
 }
 
-inline PlayerHandler::const_iterator NczPlayerManager::GetPlayerHandlerByUserId ( int const userid ) const
+inline PlayerHandler::iterator NczPlayerManager::GetPlayerHandlerByUserId ( int const userid ) const
 {
-	for( PlayerHandler::const_iterator it ( PlayerHandler::begin () ); it != PlayerHandler::end (); ++it )
+	for( PlayerHandler::iterator it ( PlayerHandler::begin () ); it != PlayerHandler::end (); ++it )
 	{
 		if( it )
 		{
@@ -415,7 +415,7 @@ inline PlayerHandler::const_iterator NczPlayerManager::GetPlayerHandlerByUserId 
 	return PlayerHandler::end ();
 }
 
-inline PlayerHandler::const_iterator NczPlayerManager::GetPlayerHandlerByEdict ( SourceSdk::edict_t const * const pEdict ) const
+inline PlayerHandler::iterator NczPlayerManager::GetPlayerHandlerByEdict ( SourceSdk::edict_t const * const pEdict ) const
 {
 	return Helpers::IndexOfEdict ( pEdict );
 }

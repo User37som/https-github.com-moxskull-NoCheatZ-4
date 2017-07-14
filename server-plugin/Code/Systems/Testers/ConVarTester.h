@@ -114,7 +114,7 @@ typedef struct CurrentConVarRequest
 		attempts = 0;
 	}
 
-	void SendCurrentRequest ( PlayerHandler::const_iterator ph, float const curtime, ConVarRulesListT const & rules )
+	void SendCurrentRequest ( PlayerHandler::iterator ph, float const curtime, ConVarRulesListT const & rules )
 	{
 		cookie = SourceSdk::InterfacesProxy::GetServerPluginHelpers ()->StartQueryCvarValue ( ph->GetEdict (), rules[ ruleset ].name );
 		if( cookie != InvalidQueryCvarCookie )
@@ -181,10 +181,10 @@ private:
 	virtual void RT_ProcessOnTick ( float const & curtime ) override final;
 
 public:
-	void RT_OnQueryCvarValueFinished ( PlayerHandler::const_iterator ph, SourceSdk::QueryCvarCookie_t cookie, SourceSdk::EQueryCvarValueStatus eStatus, const char *pCvarName, const char *pCvarValue );
+	void RT_OnQueryCvarValueFinished ( PlayerHandler::iterator ph, SourceSdk::QueryCvarCookie_t cookie, SourceSdk::EQueryCvarValueStatus eStatus, const char *pCvarName, const char *pCvarValue );
 
 private:
-	void RT_ProcessPlayerTest ( PlayerHandler::const_iterator ph, float const curtime );
+	void RT_ProcessPlayerTest ( PlayerHandler::iterator ph, float const curtime );
 
 	void AddConvarRuleset ( const char * name, const char * value, ConVarRuleT rule, bool safe = true );
 
@@ -192,7 +192,7 @@ private:
 
 	ConVarInfoT* RT_FindConvarRuleset ( const char * name );
 
-	PlayerHandler::const_iterator m_current_player;
+	PlayerHandler::iterator m_current_player;
 };
 
 #endif // CONVARTESTER_H

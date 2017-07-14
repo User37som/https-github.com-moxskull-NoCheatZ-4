@@ -48,7 +48,7 @@ public:
 	*/
 	bool LoadConfig ();
 
-	bool IsAdmin(PlayerHandler::const_iterator ph);
+	bool IsAdmin(PlayerHandler::iterator ph);
 
 	bool IsAdmin(char const * steamid);
 };

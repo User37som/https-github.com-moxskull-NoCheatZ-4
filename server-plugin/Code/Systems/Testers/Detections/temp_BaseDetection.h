@@ -125,7 +125,7 @@ protected:
 };
 
 template <class playerDataStructT>
-inline void ProcessDetectionAndTakeAction(LogDetection<playerDataStructT> && info, playerDataStructT const * const pData, PlayerHandler::iterator const player, BaseTesterSystem const * const pSystem)
+inline void ProcessDetectionAndTakeAction(LogDetection<playerDataStructT> && info, playerDataStructT const * const pData, PlayerHandler::iterator player, BaseTesterSystem const * const pSystem)
 {
 	info.PrepareDetectionData(pData);
 	info.PrepareDetectionLog(*player, pSystem);

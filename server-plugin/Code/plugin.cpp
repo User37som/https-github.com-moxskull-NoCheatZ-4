@@ -167,7 +167,7 @@ CNoCheatZPlugin::~CNoCheatZPlugin ()
 	DestroySingletons ();
 }
 
-void HookBasePlayer ( PlayerHandler::const_iterator ph )
+void HookBasePlayer ( PlayerHandler::iterator ph )
 {
 	OnGroundHookListener::HookOnGround ( ph );
 	PlayerRunCommandHookListener::HookPlayerRunCommand ( ph );
@@ -255,7 +255,7 @@ bool CNoCheatZPlugin::Load ( SourceSdk::CreateInterfaceFn _interfaceFactory, Sou
 	SourceSdk::InterfacesProxy::Call_ServerExecute ();
 
 	ProcessFilter::HumanAtLeastConnectedOrBot filter_class;
-	for( PlayerHandler::const_iterator ph ( &filter_class ); ph != PlayerHandler::end(); ph += &filter_class )
+	for( PlayerHandler::iterator ph ( &filter_class ); ph != PlayerHandler::end(); ph += &filter_class )
 	{
 		HookEntity ( ph->GetEdict () );
 		WeaponHookListener::HookWeapon ( ph );
@@ -331,7 +331,7 @@ void CNoCheatZPlugin::UnPause ( void )
 	SourceSdk::InterfacesProxy::Call_ServerExecute ();
 
 	ProcessFilter::HumanAtLeastConnectedOrBot filter_class;
-	for( PlayerHandler::const_iterator ph ( &filter_class ); ph != PlayerHandler::end (); ph += &filter_class )
+	for( PlayerHandler::iterator ph ( &filter_class ); ph != PlayerHandler::end (); ph += &filter_class )
 	{
 		HookEntity ( ph->GetEdict () );
 		WeaponHookListener::HookWeapon ( ph );
@@ -437,7 +437,7 @@ void CNoCheatZPlugin::ClientActive ( SourceSdk::edict_t *pEntity )
 {
 	NczPlayerManager::GetInstance ()->ClientActive ( pEntity );
 
-	PlayerHandler::const_iterator ph ( NczPlayerManager::GetInstance ()->GetPlayerHandlerByEdict ( pEntity ) );
+	PlayerHandler::iterator ph ( NczPlayerManager::GetInstance ()->GetPlayerHandlerByEdict ( pEntity ) );
 
 	DebugMessage ( Helpers::format ( "CNoCheatZPlugin::ClientActive (pEntity:%p -> pEntity->classname:%s -> clientname:%s)", pEntity, pEntity->GetClassName (), ph->GetName() ) );
 
@@ -561,7 +561,7 @@ SourceSdk::PLUGIN_RESULT CNoCheatZPlugin::RT_ClientCommand ( SourceSdk::edict_t 
 		return SourceSdk::PLUGIN_CONTINUE;
 	}
 
-	PlayerHandler::const_iterator ph ( NczPlayerManager::GetInstance ()->GetPlayerHandlerByEdict ( pEntity ) );
+	PlayerHandler::iterator ph ( NczPlayerManager::GetInstance ()->GetPlayerHandlerByEdict ( pEntity ) );
 
 	/*if( stricmp ( args[ 0 ], "joingame" ) == 0 || stricmp ( args[ 0 ], "jointeam" ) == 0 || stricmp ( args[ 0 ], "joinclass" ) == 0 )
 	{
@@ -599,7 +599,7 @@ SourceSdk::PLUGIN_RESULT CNoCheatZPlugin::NetworkIDValidated ( const char *pszUs
 //---------------------------------------------------------------------------------
 void CNoCheatZPlugin::RT_OnQueryCvarValueFinished ( SourceSdk::QueryCvarCookie_t iCookie, SourceSdk::edict_t *pPlayerEntity, SourceSdk::EQueryCvarValueStatus eStatus, const char *pCvarName, const char *pCvarValue )
 {
-	PlayerHandler::const_iterator ph ( NczPlayerManager::GetInstance ()->GetPlayerHandlerByEdict ( pPlayerEntity ) );
+	PlayerHandler::iterator ph ( NczPlayerManager::GetInstance ()->GetPlayerHandlerByEdict ( pPlayerEntity ) );
 	if( !( ph >= SlotStatus::PLAYER_CONNECTING ) )
 	{
 		DebugMessage ( "RT_OnQueryCvarValueFinished : ConVarTester cannot process callback" );

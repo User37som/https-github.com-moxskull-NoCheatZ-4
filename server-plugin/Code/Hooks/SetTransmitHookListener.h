@@ -44,8 +44,8 @@ protected:
 	static void RegisterSetTransmitHookListener ( SetTransmitHookListener const * const listener, size_t const priority );
 	static void RemoveSetTransmitHookListener ( SetTransmitHookListener const * const listener );
 
-	virtual bool RT_SetTransmitCallback ( PlayerHandler::const_iterator sender, PlayerHandler::const_iterator receiver ) = 0;
-	virtual bool RT_SetTransmitWeaponCallback ( SourceSdk::edict_t const *  const, PlayerHandler::const_iterator )
+	virtual bool RT_SetTransmitCallback ( PlayerHandler::iterator sender, PlayerHandler::iterator receiver ) = 0;
+	virtual bool RT_SetTransmitWeaponCallback ( SourceSdk::edict_t const *  const, PlayerHandler::iterator )
 	{
 		return false;
 	};

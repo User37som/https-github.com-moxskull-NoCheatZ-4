@@ -47,7 +47,7 @@ void AntiSmokeBlocker::Init ()
 
 void AntiSmokeBlocker::Load ()
 {
-	for( PlayerHandler::const_iterator it ( PlayerHandler::begin () ); it != PlayerHandler::end (); ++it )
+	for( PlayerHandler::iterator it ( PlayerHandler::begin () ); it != PlayerHandler::end (); ++it )
 	{
 		ResetPlayerDataStructByIndex ( it.GetIndex () );
 	}
@@ -76,7 +76,7 @@ bool AntiSmokeBlocker::GotJob () const
 	// Create a filter
 	ProcessFilter::HumanAtLeastConnecting const filter_class;
 	// Initiate the iterator at the first match in the filter
-	PlayerHandler::const_iterator it ( &filter_class );
+	PlayerHandler::iterator it ( &filter_class );
 	// Return if we have job to do or not ...
 	return it != PlayerHandler::end ();
 }
@@ -104,7 +104,7 @@ void AntiSmokeBlocker::RT_ProcessOnTick ( float const & curtime )
 	// Test if players are immersed in smoke
 	ProcessFilter::InTestsNoBot l1_filter;
 	ProcessFilter::InTestsOrBot l2_filter;
-	for( PlayerHandler::const_iterator ph ( &l1_filter ); ph != PlayerHandler::end (); ph+=&l1_filter )
+	for( PlayerHandler::iterator ph ( &l1_filter ); ph != PlayerHandler::end (); ph+=&l1_filter )
 	{
 		SourceSdk::Vector delta, other_delta;
 
@@ -126,7 +126,7 @@ void AntiSmokeBlocker::RT_ProcessOnTick ( float const & curtime )
 				const SourceSdk::vec_t ang_smoke ( tanf ( ConfigManager::GetInstance ()->m_smoke_radius / sqrtf ( dst ) ) );
 				SourceSdk::VectorNorm ( delta );
 
-				for( PlayerHandler::const_iterator other_ph ( &l2_filter ); other_ph != PlayerHandler::end (); other_ph+=&l2_filter )
+				for( PlayerHandler::iterator other_ph ( &l2_filter ); other_ph != PlayerHandler::end (); other_ph+=&l2_filter )
 				{
 					if( ph == other_ph ) continue;
 
@@ -162,7 +162,7 @@ void AntiSmokeBlocker::RT_ProcessOnTick ( float const & curtime )
 	METRICS_LEAVE_SECTION ( "AntiSmokeBlocker::OnFrame" );
 }
 
-bool AntiSmokeBlocker::RT_SetTransmitCallback ( PlayerHandler::const_iterator sender, PlayerHandler::const_iterator receiver )
+bool AntiSmokeBlocker::RT_SetTransmitCallback ( PlayerHandler::iterator sender, PlayerHandler::iterator receiver )
 {
 	//if(!receiver) return false;
 

@@ -91,17 +91,17 @@ public:
 
 	virtual bool GotJob () const override final;
 
-	virtual PlayerRunCommandRet RT_PlayerRunCommandCallback ( PlayerHandler::const_iterator ph, void * const pCmd, void * const old_cmd ) override final;
+	virtual PlayerRunCommandRet RT_PlayerRunCommandCallback ( PlayerHandler::iterator ph, void * const pCmd, void * const old_cmd ) override final;
 
-	void OnAttack1Up ( PlayerHandler::const_iterator ph, int game_tick );
+	void OnAttack1Up ( PlayerHandler::iterator ph, int game_tick );
 
-	void OnAttack1Down ( PlayerHandler::const_iterator ph, int game_tick );
+	void OnAttack1Down ( PlayerHandler::iterator ph, int game_tick );
 
-	void OnAttack2Up ( PlayerHandler::const_iterator ph, int game_tick );
+	void OnAttack2Up ( PlayerHandler::iterator ph, int game_tick );
 
-	void OnAttack2Down ( PlayerHandler::const_iterator ph, int game_tick );
+	void OnAttack2Down ( PlayerHandler::iterator ph, int game_tick );
 
-	void FindDetection ( PlayerHandler::const_iterator ph, tb_int* graph );
+	void FindDetection ( PlayerHandler::iterator ph, tb_int* graph );
 };
 
 /*

@@ -39,7 +39,7 @@ MathInfo& MathCache::RT_GetCachedMaths ( int const player_index, bool const forc
 	MathInfo& info ( item.m_info );
 	if( ( item.m_is_not_expired == false ) || force_update )
 	{
-		PlayerHandler::const_iterator ph ( player_index );
+		PlayerHandler::iterator ph ( player_index );
 
 		LoggerAssert ( ph > SlotStatus::INVALID );
 

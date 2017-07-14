@@ -48,7 +48,7 @@ bool ConVarTester::GotJob () const
 	// Create a filter
 	ProcessFilter::HumanAtLeastConnecting const filter_class;
 	// Initiate the iterator at the first match in the filter
-	PlayerHandler::const_iterator it ( &filter_class );
+	PlayerHandler::iterator it ( &filter_class );
 	// Return if we have job to do or not ...
 	return it != PlayerHandler::end ();
 }
@@ -85,7 +85,7 @@ void ConVarTester::RT_ProcessOnTick ( float const & curtime )
 	}
 }
 
-void ConVarTester::RT_ProcessPlayerTest ( PlayerHandler::const_iterator ph, float const curtime )
+void ConVarTester::RT_ProcessPlayerTest ( PlayerHandler::iterator ph, float const curtime )
 {
 	CurrentConVarRequestT* const req ( GetPlayerDataStructByIndex ( ph.GetIndex () ) );
 
@@ -249,7 +249,7 @@ void ConVarTester::AddConvarRuleset ( const char * name, const char * value, Con
 	}
 }
 
-void ConVarTester::RT_OnQueryCvarValueFinished ( PlayerHandler::const_iterator ph, SourceSdk::QueryCvarCookie_t cookie, SourceSdk::EQueryCvarValueStatus eStatus, const char *pCvarName, const char *pCvarValue )
+void ConVarTester::RT_OnQueryCvarValueFinished ( PlayerHandler::iterator ph, SourceSdk::QueryCvarCookie_t cookie, SourceSdk::EQueryCvarValueStatus eStatus, const char *pCvarName, const char *pCvarValue )
 {
 	CurrentConVarRequest* const req ( GetPlayerDataStructByIndex ( ph.GetIndex () ) );
 
@@ -491,7 +491,7 @@ void ConVarTester::LoadDefaultRules ()
 
 void ConVarTester::Load ()
 {
-	for( PlayerHandler::const_iterator it ( PlayerHandler::begin () ); it != PlayerHandler::end (); ++it )
+	for( PlayerHandler::iterator it ( PlayerHandler::begin () ); it != PlayerHandler::end (); ++it )
 	{
 		ResetPlayerDataStructByIndex ( it.GetIndex () );
 	}

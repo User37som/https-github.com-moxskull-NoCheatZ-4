@@ -38,7 +38,7 @@ OnGroundHookListener::~OnGroundHookListener ()
 	}
 }
 
-void OnGroundHookListener::HookOnGround ( PlayerHandler::const_iterator ph )
+void OnGroundHookListener::HookOnGround ( PlayerHandler::iterator ph )
 {
 	LoggerAssert ( Helpers::isValidEdict ( ph->GetEdict () ) );
 	void* unk ( ph->GetEdict ()->m_pUnk );
@@ -63,7 +63,7 @@ void HOOKFN_INT OnGroundHookListener::RT_nNetworkStateChanged_m_hGroundEntity ( 
 void HOOKFN_INT OnGroundHookListener::RT_nNetworkStateChanged_m_hGroundEntity ( void * const basePlayer, void * const, int const * const new_m_hGroundEntity )
 #endif
 {
-	PlayerHandler::const_iterator  ph ( NczPlayerManager::GetInstance ()->GetPlayerHandlerByBasePlayer ( basePlayer ) );
+	PlayerHandler::iterator  ph ( NczPlayerManager::GetInstance ()->GetPlayerHandlerByBasePlayer ( basePlayer ) );
 	bool new_isOnground ( true );
 
 	if( ph >= SlotStatus::PLAYER_CONNECTED )

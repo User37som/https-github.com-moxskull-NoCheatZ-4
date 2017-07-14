@@ -40,7 +40,7 @@ void AutoAttackTester::Init ()
 
 void AutoAttackTester::Load ()
 {
-	for( PlayerHandler::const_iterator it ( PlayerHandler::begin () ); it != PlayerHandler::end (); ++it )
+	for( PlayerHandler::iterator it ( PlayerHandler::begin () ); it != PlayerHandler::end (); ++it )
 	{
 		ResetPlayerDataStructByIndex ( it.GetIndex () );
 	}
@@ -58,12 +58,12 @@ bool AutoAttackTester::GotJob () const
 	// Create a filter
 	ProcessFilter::HumanAtLeastConnected const filter_class;
 	// Initiate the iterator at the first match in the filter
-	PlayerHandler::const_iterator it ( &filter_class );
+	PlayerHandler::iterator it ( &filter_class );
 	// Return if we have job to do or not ...
 	return it != PlayerHandler::end ();
 }
 
-PlayerRunCommandRet AutoAttackTester::RT_PlayerRunCommandCallback ( PlayerHandler::const_iterator ph, void* pCmd, void* lastcmd )
+PlayerRunCommandRet AutoAttackTester::RT_PlayerRunCommandCallback ( PlayerHandler::iterator ph, void* pCmd, void* lastcmd )
 {
 	PlayerRunCommandRet const constexpr drop_cmd = PlayerRunCommandRet::CONTINUE;
 
@@ -139,7 +139,7 @@ PlayerRunCommandRet AutoAttackTester::RT_PlayerRunCommandCallback ( PlayerHandle
 	return drop_cmd;
 }
 
-void AutoAttackTester::OnAttack1Up ( PlayerHandler::const_iterator ph, int game_tick )
+void AutoAttackTester::OnAttack1Up ( PlayerHandler::iterator ph, int game_tick )
 {
 	AttackTriggerStats * const pdata ( GetPlayerDataStructByIndex ( ph.GetIndex () ) );
 
@@ -149,14 +149,14 @@ void AutoAttackTester::OnAttack1Up ( PlayerHandler::const_iterator ph, int game_
 	FindDetection ( ph, &( pdata->attack1_sustain_stats ) );
 }
 
-void AutoAttackTester::OnAttack1Down ( PlayerHandler::const_iterator ph, int game_tick )
+void AutoAttackTester::OnAttack1Down ( PlayerHandler::iterator ph, int game_tick )
 {
 	AttackTriggerStats * const pdata ( GetPlayerDataStructByIndex ( ph.GetIndex () ) );
 
 	pdata->attack1_down_tick = game_tick;
 }
 
-void AutoAttackTester::OnAttack2Up ( PlayerHandler::const_iterator ph, int game_tick )
+void AutoAttackTester::OnAttack2Up ( PlayerHandler::iterator ph, int game_tick )
 {
 	AttackTriggerStats * const pdata ( GetPlayerDataStructByIndex ( ph.GetIndex () ) );
 
@@ -166,14 +166,14 @@ void AutoAttackTester::OnAttack2Up ( PlayerHandler::const_iterator ph, int game_
 	FindDetection ( ph, &( pdata->attack2_sustain_stats ) );
 }
 
-void AutoAttackTester::OnAttack2Down ( PlayerHandler::const_iterator ph, int game_tick )
+void AutoAttackTester::OnAttack2Down ( PlayerHandler::iterator ph, int game_tick )
 {
 	AttackTriggerStats * const pdata ( GetPlayerDataStructByIndex ( ph.GetIndex () ) );
 
 	pdata->attack2_down_tick = game_tick;
 }
 
-void AutoAttackTester::FindDetection ( PlayerHandler::const_iterator ph, tb_int* graph )
+void AutoAttackTester::FindDetection ( PlayerHandler::iterator ph, tb_int* graph )
 {
 	// get trigger graph
 

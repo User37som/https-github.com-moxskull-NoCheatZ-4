@@ -43,7 +43,7 @@ void SpamChangeNameTester::Init ()
 
 void SpamChangeNameTester::Load ()
 {
-	for( PlayerHandler::const_iterator it ( PlayerHandler::begin () ); it != PlayerHandler::end (); ++it )
+	for( PlayerHandler::iterator it ( PlayerHandler::begin () ); it != PlayerHandler::end (); ++it )
 	{
 		ResetPlayerDataStructByIndex ( it.GetIndex () );
 	}
@@ -63,7 +63,7 @@ bool SpamChangeNameTester::GotJob () const
 	// Create a filter
 	ProcessFilter::HumanAtLeastConnecting const filter_class;
 	// Initiate the iterator at the first match in the filter
-	PlayerHandler::const_iterator it ( &filter_class );
+	PlayerHandler::iterator it ( &filter_class );
 	// Return if we have job to do or not ...
 	return it != PlayerHandler::end ();
 }
@@ -100,7 +100,7 @@ bool IsNameValid ( const char* const o_name )
 
 void SpamChangeNameTester::FireGameEvent ( SourceSdk::IGameEvent* ev )
 {
-	PlayerHandler::const_iterator ph ( NczPlayerManager::GetInstance ()->GetPlayerHandlerByUserId ( ev->GetInt ( "userid", 0 ) ) );
+	PlayerHandler::iterator ph ( NczPlayerManager::GetInstance ()->GetPlayerHandlerByUserId ( ev->GetInt ( "userid", 0 ) ) );
 
 	if( ph < SlotStatus::PLAYER_CONNECTED ) return;
 
@@ -112,7 +112,7 @@ void SpamChangeNameTester::FireGameEvent ( SourceSdk::IGameEvent* ev )
 void SpamChangeNameTester::RT_ProcessOnTick ( float const & curtime )
 {
 	ProcessFilter::HumanAtLeastConnected filter_class;
-	for( PlayerHandler::const_iterator ph ( &filter_class ); ph != PlayerHandler::end (); ph+=&filter_class )
+	for( PlayerHandler::iterator ph ( &filter_class ); ph != PlayerHandler::end (); ph+=&filter_class )
 	{
 		ChangeNameInfo* const pInfo ( GetPlayerDataStruct ( *ph ) );
 

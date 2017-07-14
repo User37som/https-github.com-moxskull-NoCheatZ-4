@@ -49,7 +49,7 @@ protected:
 
 	Returning true will bypass the original function.
 	*/
-	virtual bool RT_ConCommandCallback ( PlayerHandler::const_iterator ph, void * const cmd, SourceSdk::CCommand const & args ) = 0;
+	virtual bool RT_ConCommandCallback ( PlayerHandler::iterator ph, void * const cmd, SourceSdk::CCommand const & args ) = 0;
 
 	/*
 		Called by the child to register a ConCommand to be hooked.
