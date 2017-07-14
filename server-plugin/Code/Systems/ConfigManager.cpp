@@ -271,7 +271,7 @@ bool ConfigManager::IsAdmin(char const * steamid)
 {
 	basic_string lower_id(steamid);
 	lower_id.lower();
-	if (m_admins.Find(lower_id))
+	if (m_admins.Find(lower_id) != -1)
 	{
 		return true;
 	}
