@@ -201,6 +201,7 @@ void NczPlayerManager::ClientDisconnect ( SourceSdk::edict_t* pEntity )
 
 	if (FullHandlersList[index].playerClass->GetDetected())
 	{
+		AutoTVRecord::GetInstance()->OnDetectedPlayerDisconnect();
 	}
 
 	FullHandlersList[ index ].Reset ();

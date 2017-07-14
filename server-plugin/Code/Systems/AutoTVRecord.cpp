@@ -30,6 +30,7 @@ AutoTVRecord::AutoTVRecord () :
 	m_round_id (0),
 	m_max_rounds (0),
 	m_splittimer_seconds (0.0f),
+	m_current_detected_players(0),
 	m_spawn_once ( true )
 {}
 
@@ -147,8 +148,20 @@ bool AutoTVRecord::sys_cmd_fn(const SourceSdk::CCommand & args)
 				AddTimer(m_splittimer_seconds, "autotv");
 				return true;
 			}
+			else if (stricmp("detection", args.Arg(3)) == 0)
+			{
+				m_splitrule = demo_split_t::SPLIT_BY_DETECTION;
+				Logger::GetInstance()->Msg<MSG_CMD_REPLY>(Helpers::format("Will record only when at least one detected player is in game", m_splittimer_seconds));
+				RemoveTimer("autotv");
+				TimerListener::RemoveTimerListener(this);
+				if (m_current_detected_players)
+				{
+					StartRecord();
+				}
+				return true;
+			}
 		}
-		Logger::GetInstance()->Msg<MSG_CMD_REPLY>("SplitDemoBy Usage : Map / Rounds [optionnal number] / Time [seconds]");
+		Logger::GetInstance()->Msg<MSG_CMD_REPLY>("SplitDemoBy Usage : Map / Detection / Rounds [optional number] / Time [seconds]");
 		return false;
 	}
 	return false;

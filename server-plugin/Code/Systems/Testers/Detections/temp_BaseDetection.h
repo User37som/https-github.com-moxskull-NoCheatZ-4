@@ -23,6 +23,7 @@
 #include "Misc/Helpers.h" // + ifaces + preprocessors
 #include "Players/NczPlayerManager.h"
 #include "Systems/BanRequest.h"
+#include "Systems/AutoTVRecord.h"
 
 class BaseDetection :
 	public HeapMemoryManager::OverrideNew<16>
@@ -127,6 +128,10 @@ protected:
 template <class playerDataStructT>
 inline void ProcessDetectionAndTakeAction(LogDetection<playerDataStructT> && info, playerDataStructT const * const pData, PlayerHandler::iterator player, BaseTesterSystem const * const pSystem)
 {
+	player->SetDetected(true);
+
+	AutoTVRecord::GetInstance()->DeclareDetectedPlayer();
+
 	info.PrepareDetectionData(pData);
 	info.PrepareDetectionLog(*player, pSystem);
 	info.Log();
