@@ -38,7 +38,7 @@ public:
 	SetTransmitHookListener ();
 	virtual ~SetTransmitHookListener ();
 
-	static void HookSetTransmit ( SourceSdk::edict_t const * const ent );
+	static void HookSetTransmit ( SourceSdk::edict_t const * const ent, bool isplayer );
 
 protected:
 	static void RegisterSetTransmitHookListener ( SetTransmitHookListener const * const listener, size_t const priority );
@@ -53,9 +53,18 @@ protected:
 private:
 #ifdef GNUC
 	static void HOOKFN_INT RT_nSetTransmit ( void * const This, SourceSdk::CCheckTransmitInfo *, bool );
+	static void HOOKFN_INT RT_nSetTransmitWeapon(void * const This, SourceSdk::CCheckTransmitInfo *, bool);
 #else
 	static void HOOKFN_INT RT_nSetTransmit ( void * const This, void* const, SourceSdk::CCheckTransmitInfo *, bool );
+	static void HOOKFN_INT RT_nSetTransmitWeapon(void * const This, void* const, SourceSdk::CCheckTransmitInfo *, bool);
 #endif
 };
+
+class Fool
+{
+
+};
+
+typedef Fool SetTransmitHookListenerWeapon;
 
 #endif // SETTRANSMITHOOKLISTENER

@@ -40,13 +40,21 @@ SetTransmitHookListener::~SetTransmitHookListener ()
 	}
 }
 
-void SetTransmitHookListener::HookSetTransmit ( SourceSdk::edict_t const * const ent )
+void SetTransmitHookListener::HookSetTransmit ( SourceSdk::edict_t const * const ent, bool isplayer )
 {
 	LoggerAssert ( Helpers::isValidEdict ( ent ) );
 	void* unk ( ent->m_pUnk );
 
-	HookInfo info ( unk, ConfigManager::GetInstance ()->vfid_settransmit, ( DWORD ) RT_nSetTransmit );
-	HookGuard<SetTransmitHookListener>::GetInstance ()->VirtualTableHook ( info, "CBaseEntity::SetTransmit" );
+	if (isplayer)
+	{
+		HookInfo info(unk, ConfigManager::GetInstance()->vfid_settransmit, (DWORD)RT_nSetTransmit);
+		HookGuard<SetTransmitHookListener>::GetInstance()->VirtualTableHook(info, "CBaseEntity::SetTransmit");
+	}
+	else
+	{
+		HookInfo info(unk, ConfigManager::GetInstance()->vfid_settransmit, (DWORD)RT_nSetTransmitWeapon);
+		HookGuard<SetTransmitHookListenerWeapon>::GetInstance()->VirtualTableHook(info, "CBaseEntity::SetTransmit (Weapon)");
+	}
 }
 
 #ifdef GNUC
@@ -55,6 +63,7 @@ void HOOKFN_INT SetTransmitHookListener::RT_nSetTransmit ( void * const This, So
 void HOOKFN_INT SetTransmitHookListener::RT_nSetTransmit ( void * const This, void * const, SourceSdk::CCheckTransmitInfo * pInfo, bool bAlways )
 #endif
 {
+	SetTransmit_t gpOldFn;
 	PlayerHandler::const_iterator receiver_assumed_player ( Helpers::IndexOfEdict ( *pInfo ) );
 
 	if( !bAlways && !( m_listeners.GetFirst () == nullptr ) && receiver_assumed_player > SlotStatus::PLAYER_CONNECTING )
@@ -62,50 +71,51 @@ void HOOKFN_INT SetTransmitHookListener::RT_nSetTransmit ( void * const This, vo
 		NczPlayerManager const * const inst ( NczPlayerManager::GetInstance () );
 		PlayerHandler::const_iterator sender_assumed_client ( inst->GetPlayerHandlerByBasePlayer ( This ) );
 
-		if( sender_assumed_client )
+		if( sender_assumed_client != receiver_assumed_player && sender_assumed_client != SlotStatus::PLAYER_CONNECTING && sender_assumed_client >= SlotStatus::BOT )
 		{
-			if( sender_assumed_client != receiver_assumed_player && sender_assumed_client != SlotStatus::PLAYER_CONNECTING && sender_assumed_client >= SlotStatus::BOT )
-			{
-				TransmitListenersListT::elem_t* it ( m_listeners.GetFirst () );
+			TransmitListenersListT::elem_t* it ( m_listeners.GetFirst () );
 
-				while( it != nullptr )
+			while( it != nullptr )
+			{
+				if( it->m_value.listener->RT_SetTransmitCallback ( sender_assumed_client, receiver_assumed_player ) )
 				{
-					if( it->m_value.listener->RT_SetTransmitCallback ( sender_assumed_client, receiver_assumed_player ) )
-					{
-						return;
-					}
-					it = it->m_next;
+					return;
 				}
-			}
-		}
-		else // is not a player
-		{
-			SourceSdk::edict_t const * const pEdict_sender ( Helpers::edictOfUnknown ( This ) );
-			if (pEdict_sender) // https://github.com/L-EARN/NoCheatZ-4/issues/131#issuecomment-306068870
-			{
-				TransmitListenersListT::elem_t* it(m_listeners.GetFirst());
-
-				LoggerAssert(Helpers::IndexOfEdict(pEdict_sender) > inst->GetMaxIndex());
-
-				while (it != nullptr)
-				{
-					if (it->m_value.listener->RT_SetTransmitWeaponCallback(pEdict_sender, receiver_assumed_player))
-					{
-						return;
-					}
-					it = it->m_next;
-				}
-			}
-			else
-			{
-				DebugMessage("SetTransmitHookListener::RT_nSetTransmit : null pEdict_sender");
+				it = it->m_next;
 			}
 		}
 	}
 
-	SetTransmit_t gpOldFn;
-	*( uint32_t* )&( gpOldFn ) = HookGuard<SetTransmitHookListener>::GetInstance ()->RT_GetOldFunction ( This, ConfigManager::GetInstance ()->vfid_settransmit );
+	*(uint32_t*)&(gpOldFn) = HookGuard<SetTransmitHookListener>::GetInstance()->RT_GetOldFunction(This, ConfigManager::GetInstance()->vfid_settransmit);
 	gpOldFn ( This, pInfo, bAlways );
+}
+
+#ifdef GNUC
+void HOOKFN_INT SetTransmitHookListener::RT_nSetTransmitWeapon(void * const This, SourceSdk::CCheckTransmitInfo * pInfo, bool bAlways)
+#else
+void HOOKFN_INT SetTransmitHookListener::RT_nSetTransmitWeapon(void * const This, void * const, SourceSdk::CCheckTransmitInfo * pInfo, bool bAlways)
+#endif
+{
+	SetTransmit_t gpOldFn;
+	PlayerHandler::const_iterator receiver_assumed_player(Helpers::IndexOfEdict(*pInfo));
+
+	if (!bAlways && !(m_listeners.GetFirst() == nullptr) && receiver_assumed_player > SlotStatus::PLAYER_CONNECTING)
+	{
+		SourceSdk::edict_t const * const pEdict_sender(Helpers::edictOfUnknown(This));
+		TransmitListenersListT::elem_t* it(m_listeners.GetFirst());
+
+		while (it != nullptr)
+		{
+			if (it->m_value.listener->RT_SetTransmitWeaponCallback(pEdict_sender, receiver_assumed_player))
+			{
+				return;
+			}
+			it = it->m_next;
+		}
+	}
+
+	*(uint32_t*)&(gpOldFn) = HookGuard<SetTransmitHookListenerWeapon>::GetInstance()->RT_GetOldFunction(This, ConfigManager::GetInstance()->vfid_settransmit);
+	gpOldFn(This, pInfo, bAlways);
 }
 
 void SetTransmitHookListener::RegisterSetTransmitHookListener ( SetTransmitHookListener const * const listener, size_t const priority )

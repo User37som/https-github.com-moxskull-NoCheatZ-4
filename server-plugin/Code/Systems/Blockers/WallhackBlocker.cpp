@@ -225,7 +225,7 @@ void WallhackBlocker::RT_WeaponEquipCallback ( PlayerHandler::const_iterator ph,
 {
 	const int weapon_index ( Helpers::IndexOfEdict ( weapon ) );
 	WallhackBlocker::GetInstance ()->m_weapon_owner[ weapon_index ] = *ph;
-	SetTransmitHookListener::HookSetTransmit ( weapon );
+	SetTransmitHookListener::HookSetTransmit ( weapon, false );
 }
 
 void WallhackBlocker::RT_WeaponDropCallback ( PlayerHandler::const_iterator ph, SourceSdk::edict_t const * const weapon )

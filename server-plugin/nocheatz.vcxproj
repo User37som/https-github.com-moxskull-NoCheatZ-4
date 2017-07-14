@@ -94,7 +94,7 @@
       </Outputs>
     </CustomBuildStep>
     <ClCompile>
-      <Optimization>Disabled</Optimization>
+      <Optimization>Custom</Optimization>
       <AdditionalIncludeDirectories>.\SourceSdk\Interfaces\Protobuf\protobuf-2.5.0\src;.\Code;.\SourceSdk;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_WIN32;_DEBUG;DEBUG;_WINDOWS;_USRDLL;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_MBCS;_HAS_ITERATOR_DEBUGGING=0;WIN32_LEAN_AND_MEAN;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
@@ -124,6 +124,7 @@
       <FloatingPointExceptions>true</FloatingPointExceptions>
       <ForcedIncludeFiles>version.h</ForcedIncludeFiles>
       <EnablePREfast>false</EnablePREfast>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>_DEBUG;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>

@@ -176,7 +176,7 @@ void HookBasePlayer ( PlayerHandler::const_iterator ph )
 
 void HookEntity ( SourceSdk::edict_t* ent )
 {
-	SetTransmitHookListener::HookSetTransmit ( ent );
+	SetTransmitHookListener::HookSetTransmit ( ent, true );
 }
 
 //---------------------------------------------------------------------------------
