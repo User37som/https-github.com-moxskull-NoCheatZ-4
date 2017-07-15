@@ -21,3 +21,4 @@ server-plugin/Code/version.cpp
 *.ipdb
 .vs/
 server-plugin/Code/version.cpp
+*.psess
