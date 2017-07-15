@@ -73,7 +73,7 @@ public:
 		}
 		iterator ( int const slot_index ) : m_ptr ( invalid.m_ptr + slot_index )
 		{}
-		iterator ( iterator & other ) : m_ptr ( other.m_ptr )
+		iterator ( iterator const & other ) : m_ptr ( other.m_ptr )
 		{}
 		/*
 			Assign by copy
@@ -87,7 +87,7 @@ public:
 		/*
 			Assign by copy
 		*/
-		iterator & operator=( iterator & other )
+		iterator & operator=( iterator const & other )
 		{
 			LoggerAssert ( other.IsIteratorValid () );
 			m_ptr = other.m_ptr;
