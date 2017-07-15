@@ -29,6 +29,7 @@ SetTransmitHookListener::TransmitListenersListT SetTransmitHookListener::m_liste
 SetTransmitHookListener::SetTransmitHookListener ()
 {
 	HookGuard<SetTransmitHookListener>::Required ();
+	HookGuard<SetTransmitHookListenerWeapon>::Required();
 }
 
 SetTransmitHookListener::~SetTransmitHookListener ()
@@ -37,6 +38,12 @@ SetTransmitHookListener::~SetTransmitHookListener ()
 	{
 		HookGuard<SetTransmitHookListener>::GetInstance ()->UnhookAll ();
 		HookGuard<SetTransmitHookListener>::DestroyInstance ();
+	}
+
+	if (HookGuard<SetTransmitHookListenerWeapon>::IsCreated())
+	{
+		HookGuard<SetTransmitHookListenerWeapon>::GetInstance()->UnhookAll();
+		HookGuard<SetTransmitHookListenerWeapon>::DestroyInstance();
 	}
 }
 
