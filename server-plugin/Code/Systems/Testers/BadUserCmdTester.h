@@ -40,7 +40,6 @@ struct UserCmdInfo
 
 	UserCmdInfo ()
 	{
-		m_tick_status = IN_RESET;
 		m_prev_dead = true;
 		m_detected_time = 0.0;
 		prev_cmd = -1;
