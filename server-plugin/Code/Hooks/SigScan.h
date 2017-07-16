@@ -35,7 +35,7 @@ struct sig_ctx :
 
 	~sig_ctx()
 	{
-		delete m_codestrip;
+		delete[] m_codestrip;
 	}
 };
 
