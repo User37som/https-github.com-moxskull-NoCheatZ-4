@@ -85,7 +85,7 @@ void ConVarTester::RT_ProcessOnTick ( float const & curtime )
 	}
 }
 
-void ConVarTester::RT_ProcessPlayerTest ( PlayerHandler::iterator ph, float const curtime )
+void ConVarTester::RT_ProcessPlayerTest ( PlayerHandler::iterator ph, float const & curtime )
 {
 	CurrentConVarRequestT* const req ( GetPlayerDataStructByIndex ( ph.GetIndex () ) );
 

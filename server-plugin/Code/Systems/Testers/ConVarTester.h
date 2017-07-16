@@ -184,7 +184,7 @@ public:
 	void RT_OnQueryCvarValueFinished ( PlayerHandler::iterator ph, SourceSdk::QueryCvarCookie_t cookie, SourceSdk::EQueryCvarValueStatus eStatus, const char *pCvarName, const char *pCvarValue );
 
 private:
-	void RT_ProcessPlayerTest ( PlayerHandler::iterator ph, float const curtime );
+	void RT_ProcessPlayerTest ( PlayerHandler::iterator ph, float const & curtime );
 
 	void AddConvarRuleset ( const char * name, const char * value, ConVarRuleT rule, bool safe = true );
 
