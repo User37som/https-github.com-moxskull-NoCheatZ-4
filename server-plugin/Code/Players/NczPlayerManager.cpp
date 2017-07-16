@@ -149,9 +149,9 @@ void NczPlayerManager::ClientConnect ( SourceSdk::edict_t* pEntity )
 	LoggerAssert ( index );
 	PlayerHandler& ph ( FullHandlersList[ index ] );
 	LoggerAssert ( ph.status == SlotStatus::INVALID || ph.status == SlotStatus::PLAYER_CONNECTING );
+	if (ph.playerClass)
+		ph.Reset();
 	ph.playerClass = new NczPlayer ( index );
-	// Should not be here, but heh ...
-	//*PlayerRunCommandHookListener::GetLastUserCmd(ph.playerClass) = SourceSdk::CUserCmd();
 	ph.status = SlotStatus::PLAYER_CONNECTING;
 	ph.playerClass->OnConnect ();
 
