@@ -368,7 +368,7 @@ bool Logger::sys_cmd_fn ( const SourceSdk::CCommand &args )
 			Msg<MSG_CMD_REPLY>("Logger AllowChat is off");
 			return true;
 		}
-		else if (stricmp("off", args.Arg(3)) == 0)
+		else if (stricmp("admin", args.Arg(3)) == 0)
 		{
 			m_allow_chat = logger_chat_t::ADMIN;
 			Msg<MSG_CMD_REPLY>("Logger AllowChat is admin");
