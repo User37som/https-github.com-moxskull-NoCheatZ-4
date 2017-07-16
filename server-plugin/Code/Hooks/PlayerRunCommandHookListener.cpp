@@ -49,7 +49,7 @@ PlayerRunCommandHookListener::~PlayerRunCommandHookListener ()
 	}
 }
 
-void* PlayerRunCommandHookListener::RT_GetLastUserCmd ( PlayerHandler::const_iterator ph )
+void* PlayerRunCommandHookListener::RT_GetLastUserCmd ( PlayerHandler::iterator ph )
 {
 	return &( m_lastCUserCmd[ ph.GetIndex () ] );
 }
@@ -59,7 +59,7 @@ void* PlayerRunCommandHookListener::RT_GetLastUserCmd ( int index )
 	return &( m_lastCUserCmd[ index ] );
 }
 
-void PlayerRunCommandHookListener::HookPlayerRunCommand ( PlayerHandler::const_iterator ph )
+void PlayerRunCommandHookListener::HookPlayerRunCommand ( PlayerHandler::iterator ph )
 {
 	LoggerAssert ( Helpers::isValidEdict ( ph->GetEdict () ) );
 	SourceSdk::IServerUnknown* unk ( ph->GetEdict ()->m_pUnk );
@@ -84,7 +84,7 @@ void PlayerRunCommandHookListener::RT_nPlayerRunCommand ( void * const This, voi
 void HOOKFN_INT PlayerRunCommandHookListener::RT_nPlayerRunCommand ( void* This, void*, void * const pCmd, IMoveHelper const * const pMoveHelper )
 #endif
 {
-	PlayerHandler::const_iterator ph ( NczPlayerManager::GetInstance ()->GetPlayerHandlerByBasePlayer ( This ) );
+	PlayerHandler::iterator ph ( NczPlayerManager::GetInstance ()->GetPlayerHandlerByBasePlayer ( This ) );
 	PlayerRunCommandRet ret ( PlayerRunCommandRet::CONTINUE );
 
 	if( ph > SlotStatus::PLAYER_CONNECTING )

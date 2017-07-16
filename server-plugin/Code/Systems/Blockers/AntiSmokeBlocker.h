@@ -102,7 +102,7 @@ private:
 
 	virtual void RT_ProcessOnTick ( float const & curtime ) override final;
 
-	virtual bool RT_SetTransmitCallback ( PlayerHandler::const_iterator sender, PlayerHandler::const_iterator receiver ) override final;
+	virtual bool RT_SetTransmitCallback ( PlayerHandler::iterator sender, PlayerHandler::iterator receiver ) override final;
 };
 
 #endif // ANTIFLASHBANGBLOCKER_H

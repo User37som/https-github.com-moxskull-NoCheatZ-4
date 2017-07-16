@@ -51,14 +51,14 @@ public:
 		Hook and unhook functions.
 		FIXME : May not works well with others plugins ...
 	*/
-	static void HookWeapon ( PlayerHandler::const_iterator ph );
+	static void HookWeapon ( PlayerHandler::iterator ph );
 
 protected:
 	static void RegisterWeaponHookListener ( WeaponHookListener const * const listener );
 	static void RemoveWeaponHookListener ( WeaponHookListener const * const listener );
 
-	virtual void RT_WeaponEquipCallback ( PlayerHandler::const_iterator ph, SourceSdk::edict_t const * const weapon ) = 0;
-	virtual void RT_WeaponDropCallback ( PlayerHandler::const_iterator ph, SourceSdk::edict_t const * const weapon ) = 0;
+	virtual void RT_WeaponEquipCallback ( PlayerHandler::iterator ph, SourceSdk::edict_t const * const weapon ) = 0;
+	virtual void RT_WeaponDropCallback ( PlayerHandler::iterator ph, SourceSdk::edict_t const * const weapon ) = 0;
 
 private:
 #ifdef GNUC

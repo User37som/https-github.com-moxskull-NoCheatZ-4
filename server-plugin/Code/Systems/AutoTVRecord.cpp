@@ -30,6 +30,7 @@ AutoTVRecord::AutoTVRecord () :
 	m_round_id (0),
 	m_max_rounds (0),
 	m_splittimer_seconds (0.0f),
+	m_current_detected_players(0),
 	m_spawn_once ( true )
 {}
 
@@ -147,8 +148,20 @@ bool AutoTVRecord::sys_cmd_fn(const SourceSdk::CCommand & args)
 				AddTimer(m_splittimer_seconds, "autotv");
 				return true;
 			}
+			else if (stricmp("detection", args.Arg(3)) == 0)
+			{
+				m_splitrule = demo_split_t::SPLIT_BY_DETECTION;
+				Logger::GetInstance()->Msg<MSG_CMD_REPLY>(Helpers::format("Will record only when at least one detected player is in game", m_splittimer_seconds));
+				RemoveTimer("autotv");
+				TimerListener::RemoveTimerListener(this);
+				if (m_current_detected_players)
+				{
+					StartRecord();
+				}
+				return true;
+			}
 		}
-		Logger::GetInstance()->Msg<MSG_CMD_REPLY>("SplitDemoBy Usage : Map / Rounds [optionnal number] / Time [seconds]");
+		Logger::GetInstance()->Msg<MSG_CMD_REPLY>("SplitDemoBy Usage : Map / Detection / Rounds [optional number] / Time [seconds]");
 		return false;
 	}
 	return false;
@@ -177,7 +190,7 @@ bool AutoTVRecord::GotJob () const
 	// Create a filter
 	ProcessFilter::HumanAtLeastConnected const filter_class;
 	// Initiate the iterator at the first match in the filter
-	PlayerHandler::const_iterator it(&filter_class);
+	PlayerHandler::iterator it(&filter_class);
 	// Return if we have job to do or not ...
 	return it != PlayerHandler::end();
 }
@@ -191,7 +204,7 @@ void AutoTVRecord::StartRecord ()
 {
 	if( TVWatcher::GetInstance()->IsRecording() ) return;
 
-	if( TVWatcher::GetInstance()->IsTVPresent () )
+	if( TVWatcher::GetInstance()->IsTVPresent () && IsActive())
 	{
 		basic_string mapname;
 		if( SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive )
@@ -219,7 +232,7 @@ void AutoTVRecord::StartRecord ()
 
 void AutoTVRecord::StopRecord ()
 {
-	if( !TVWatcher::GetInstance()->IsRecording()) return;
+	if( !TVWatcher::GetInstance()->IsRecording() || ! IsActive()) return;
 
 	SourceSdk::InterfacesProxy::Call_ServerExecute ();
 
@@ -239,36 +252,39 @@ void AutoTVRecord::SetRecordPrefix ( basic_string const & prefix )
 
 void AutoTVRecord::SpawnTV ()
 {
-	SourceSdk::InterfacesProxy::Call_ServerExecute ();
-
-	SourceSdk::InterfacesProxy::Call_ServerCommand ( "tv_autorecord 0\n" );
-	SourceSdk::InterfacesProxy::Call_ServerCommand ( "tv_enable 1\n" );
-
-	if( !TVWatcher::GetInstance()->IsTVPresent () )
+	if (IsActive())
 	{
-		if( m_spawn_once )
-		{
-			Logger::GetInstance ()->Msg<MSG_LOG> ( "TV not detected. Reloading the map ..." );
+		SourceSdk::InterfacesProxy::Call_ServerExecute();
 
-			basic_string mapname;
-			if( SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive )
+		SourceSdk::InterfacesProxy::Call_ServerCommand("tv_autorecord 0\n");
+		SourceSdk::InterfacesProxy::Call_ServerCommand("tv_enable 1\n");
+
+		if (!TVWatcher::GetInstance()->IsTVPresent())
+		{
+			if (m_spawn_once)
 			{
-				mapname = static_cast< SourceSdk::CGlobalVars_csgo* >( SourceSdk::InterfacesProxy::Call_GetGlobalVars () )->mapname;
-				size_t const strip ( mapname.find_last_of ( "/\\" ) );
-				if( strip != basic_string::npos ) mapname = mapname.c_str () + strip + 1;
-				SourceSdk::InterfacesProxy::Call_ServerCommand ( Helpers::format ( "map %s\n", mapname.c_str () ) );
+				Logger::GetInstance()->Msg<MSG_LOG>("TV not detected. Reloading the map ...");
+
+				basic_string mapname;
+				if (SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive)
+				{
+					mapname = static_cast<SourceSdk::CGlobalVars_csgo*>(SourceSdk::InterfacesProxy::Call_GetGlobalVars())->mapname;
+					size_t const strip(mapname.find_last_of("/\\"));
+					if (strip != basic_string::npos) mapname = mapname.c_str() + strip + 1;
+					SourceSdk::InterfacesProxy::Call_ServerCommand(Helpers::format("map %s\n", mapname.c_str()));
+				}
+				else
+				{
+					mapname = static_cast<SourceSdk::CGlobalVars*>(SourceSdk::InterfacesProxy::Call_GetGlobalVars())->mapname;
+					SourceSdk::InterfacesProxy::Call_ServerCommand(Helpers::format("changelevel %s\n", mapname.c_str()));
+				}
+
+				m_spawn_once = false;
 			}
 			else
 			{
-				mapname = static_cast< SourceSdk::CGlobalVars* >( SourceSdk::InterfacesProxy::Call_GetGlobalVars () )->mapname;
-				SourceSdk::InterfacesProxy::Call_ServerCommand ( Helpers::format ( "changelevel %s\n", mapname.c_str () ) );
+				Logger::GetInstance()->Msg<MSG_ERROR>("Was unable to spawn the TV.");
 			}
-
-			m_spawn_once = false;
-		}
-		else
-		{
-			Logger::GetInstance ()->Msg<MSG_ERROR> ( "Was unable to spawn the TV." );
 		}
 	}
 }
@@ -299,7 +315,7 @@ void TVWatcher::Init()
 	ConCommandHookListener::RegisterConCommandHookListener(this);
 }
 
-bool TVWatcher::RT_ConCommandCallback(PlayerHandler::const_iterator ph, void * const cmd, SourceSdk::CCommand const & args)
+bool TVWatcher::RT_ConCommandCallback(PlayerHandler::iterator ph, void * const cmd, SourceSdk::CCommand const & args)
 {
 	if (args.ArgC() >= 2)
 	{
@@ -359,7 +375,7 @@ bool TVWatcher::IsRecording() const
 bool TVWatcher::IsTVPresent() const
 {
 	ProcessFilter::TVOnly filter_class;
-	return PlayerHandler::const_iterator(&filter_class) != PlayerHandler::end();
+	return PlayerHandler::iterator(&filter_class) != PlayerHandler::end();
 }
 
 basic_string const & TVWatcher::GetRecordFilename() const
@@ -370,7 +386,7 @@ basic_string const & TVWatcher::GetRecordFilename() const
 void TVWatcher::SendTVChatMessage(basic_string const & msg)
 {
 	ProcessFilter::TVOnly filter_class;
-	for (PlayerHandler::const_iterator it(&filter_class); it != PlayerHandler::end(); it += &filter_class)
+	for (PlayerHandler::iterator it(&filter_class); it != PlayerHandler::end(); it += &filter_class)
 	{
 		Helpers::tell(it->GetEdict(), msg);
 	}

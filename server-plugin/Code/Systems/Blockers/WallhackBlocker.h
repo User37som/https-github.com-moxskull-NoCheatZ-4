@@ -153,21 +153,21 @@ private:
 
 	virtual void RT_ProcessOnTick ( float const & curtime ) override final;
 
-	virtual bool RT_SetTransmitCallback ( PlayerHandler::const_iterator sender, PlayerHandler::const_iterator receiver ) override final;
+	virtual bool RT_SetTransmitCallback ( PlayerHandler::iterator sender, PlayerHandler::iterator receiver ) override final;
 
-	virtual bool RT_SetTransmitWeaponCallback ( SourceSdk::edict_t const * const sender, PlayerHandler::const_iterator receiver ) override final;
+	virtual bool RT_SetTransmitWeaponCallback ( SourceSdk::edict_t const * const sender, PlayerHandler::iterator receiver ) override final;
 
-	virtual void RT_WeaponEquipCallback ( PlayerHandler::const_iterator ph, SourceSdk::edict_t const * const weapon ) override final;
+	virtual void RT_WeaponEquipCallback ( PlayerHandler::iterator ph, SourceSdk::edict_t const * const weapon ) override final;
 
-	virtual void RT_WeaponDropCallback ( PlayerHandler::const_iterator ph, SourceSdk::edict_t const * const weapon ) override final;
+	virtual void RT_WeaponDropCallback ( PlayerHandler::iterator ph, SourceSdk::edict_t const * const weapon ) override final;
 
 public:
-	void ClientDisconnect ( PlayerHandler::const_iterator client );
+	void ClientDisconnect ( PlayerHandler::iterator client );
 
 	void OnMapStart ();
 
 private:
-	bool RT_IsAbleToSee ( PlayerHandler::const_iterator sender, PlayerHandler::const_iterator receiver );
+	bool RT_IsAbleToSee ( PlayerHandler::iterator sender, PlayerHandler::iterator receiver );
 
 	bool RT_IsInFOV ( const SourceSdk::Vector& origin, const SourceSdk::QAngle& dir, const SourceSdk::Vector& target );
 

@@ -44,6 +44,8 @@ private:
 	SourceSdk::INetChannelInfo* m_channelinfo;
 	SourceSdk::IPlayerInfo * m_playerinfo;
 	float m_time_connected;
+	
+	bool m_is_detected; 
 
 public:
 	NczPlayer ( int const index );
@@ -73,6 +75,10 @@ public:
 	inline float const GetTimeConnected () const;
 
 	inline bool const isValidEdict () const;
+
+	inline void SetDetected(bool detected);
+
+	inline bool GetDetected() const;
 
 	void OnConnect ();
 
@@ -142,6 +148,16 @@ inline basic_string const NczPlayer::GetReadableIdentity () const
 	{
 		return Helpers::format ( "%s [%s]", this->GetName (), this->GetIPAddress () );
 	}
+}
+
+inline void NczPlayer::SetDetected(bool detected)
+{
+	m_is_detected = true;
+}
+
+inline bool NczPlayer::GetDetected() const
+{
+	return m_is_detected;
 }
 
 #endif

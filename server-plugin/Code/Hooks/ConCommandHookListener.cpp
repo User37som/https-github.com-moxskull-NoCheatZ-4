@@ -55,7 +55,7 @@ void HOOKFN_INT ConCommandHookListener::RT_nDispatch ( void* cmd, void*, SourceS
 	{
 		if( index <= NczPlayerManager::GetInstance ()->GetMaxIndex () ) // https://github.com/L-EARN/NoCheatZ-4/issues/59#issuecomment-230506264
 		{
-			PlayerHandler::const_iterator ph = NczPlayerManager::GetInstance ()->GetPlayerHandlerByIndex ( index );
+			PlayerHandler::iterator ph = NczPlayerManager::GetInstance ()->GetPlayerHandlerByIndex ( index );
 
 			if( ph > SlotStatus::INVALID )
 			{

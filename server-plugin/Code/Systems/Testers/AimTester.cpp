@@ -35,7 +35,7 @@ bool AimTester::GotJob() const
 	// Create a filter
 	ProcessFilter::HumanAtLeastConnected const filter_class;
 	// Initiate the iterator at the first match in the filter
-	PlayerHandler::const_iterator it(&filter_class);
+	PlayerHandler::iterator it(&filter_class);
 	// Return if we have job to do or not ...
 	return it != PlayerHandler::end();
 }
@@ -45,7 +45,7 @@ void AimTester::FireGameEvent(SourceSdk::IGameEvent * ev)
 
 }
 
-PlayerRunCommandRet AimTester::RT_PlayerRunCommandCallback(PlayerHandler::const_iterator ph, void * const cmd, void * const old_cmd)
+PlayerRunCommandRet AimTester::RT_PlayerRunCommandCallback(PlayerHandler::iterator ph, void * const cmd, void * const old_cmd)
 {
 
 

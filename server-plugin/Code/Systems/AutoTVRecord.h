@@ -41,7 +41,8 @@ public:
 	{
 		SPLIT_BY_MAP = 0,
 		SPLIT_BY_ROUNDS,
-		SPLIT_BY_TIMER_SECONDS
+		SPLIT_BY_TIMER_SECONDS,
+		SPLIT_BY_DETECTION
 	} demo_split_t;
 
 private:
@@ -52,6 +53,7 @@ private:
 	unsigned int m_round_id;
 	unsigned int m_max_rounds;
 	float m_splittimer_seconds;
+	unsigned int m_current_detected_players;
 	bool m_spawn_once;
 
 public:
@@ -91,11 +93,33 @@ public:
 
 	//	Will try to spawn the TV once and once a client connects (ClientActive)
 	void SpawnTV ();
+
+	inline void DeclareDetectedPlayer();
+
+	void OnDetectedPlayerDisconnect();
 };
 
 inline void AutoTVRecord::SplitRecord()
 {
 	StopRecord(); StartRecord();
+}
+
+inline void AutoTVRecord::DeclareDetectedPlayer()
+{
+	++m_current_detected_players;
+	if (m_splitrule == demo_split_t::SPLIT_BY_DETECTION)
+	{
+		StartRecord();
+	}
+}
+
+inline void AutoTVRecord::OnDetectedPlayerDisconnect()
+{
+	--m_current_detected_players;
+	if (m_splitrule == demo_split_t::SPLIT_BY_DETECTION && m_current_detected_players == 0)
+	{
+		StopRecord();
+	}
 }
 
 inline int AutoTVRecord::GetMinPlayers()
@@ -121,7 +145,7 @@ public:
 
 	virtual void Init() override final;
 
-	virtual bool RT_ConCommandCallback(PlayerHandler::const_iterator ph, void * const cmd, SourceSdk::CCommand const & args) override final;
+	virtual bool RT_ConCommandCallback(PlayerHandler::iterator ph, void * const cmd, SourceSdk::CCommand const & args) override final;
 
 	void RecordStarted(SourceSdk::CCommand const & args);
 

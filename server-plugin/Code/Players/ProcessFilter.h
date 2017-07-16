@@ -25,7 +25,6 @@ typedef enum class SlotStatus : unsigned int
 	PLAYER_CONNECTING, // Not a bot, not connected
 	PLAYER_CONNECTED, // Connected as spectator or dead
 	PLAYER_IN_TESTS, // Playing the round and shooting people everywhere like a mad nerd :)
-	PLAYER_IN_TESTS_TAKEOVER // Controling a bot
 } SlotStatus_t;
 
 enum SlotFilterBehavior
@@ -230,8 +229,6 @@ inline const char * const SlotStatusToString ( SlotStatus_t status )
 			return "PLAYER_CONNECTED";
 		case SlotStatus::PLAYER_IN_TESTS:
 			return "PLAYER_IN_TESTS";
-		case SlotStatus::PLAYER_IN_TESTS_TAKEOVER:
-			return "PLAYER_IN_TESTS_TAKEOVER";
 		default:
 			Assert ( 0 && "Undefined SloStatus in SlotStatusToString" );
 			return "ERROR";

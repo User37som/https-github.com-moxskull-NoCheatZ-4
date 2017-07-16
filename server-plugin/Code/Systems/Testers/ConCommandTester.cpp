@@ -39,7 +39,7 @@ void ConCommandTester::Init ()
 
 void ConCommandTester::Load ()
 {
-	for( PlayerHandler::const_iterator it ( PlayerHandler::begin () ); it != PlayerHandler::end (); ++it )
+	for( PlayerHandler::iterator it ( PlayerHandler::begin () ); it != PlayerHandler::end (); ++it )
 	{
 		ResetPlayerDataStructByIndex ( it.GetIndex () );
 	}
@@ -125,12 +125,12 @@ bool ConCommandTester::GotJob () const
 	// Create a filter
 	ProcessFilter::HumanAtLeastConnecting const filter_class;
 	// Initiate the iterator at the first match in the filter
-	PlayerHandler::const_iterator it ( &filter_class );
+	PlayerHandler::iterator it ( &filter_class );
 	// Return if we have job to do or not ...
 	return it != PlayerHandler::end ();
 }
 
-void ConCommandTester::RT_AddPlayerCommand ( PlayerHandler::const_iterator ph, const basic_string& command )
+void ConCommandTester::RT_AddPlayerCommand ( PlayerHandler::iterator ph, const basic_string& command )
 {
 	LastPlayerCommandsT* playerData ( this->GetPlayerDataStructByIndex ( ph.GetIndex () ) );
 
@@ -169,7 +169,7 @@ void ConCommandTester::RemoveCommandInfo ( const basic_string& name )
 	m_commands_list.FindAndRemove ( temp );
 }
 
-bool ConCommandTester::RT_TestPlayerCommand ( PlayerHandler::const_iterator ph, const basic_string& command )
+bool ConCommandTester::RT_TestPlayerCommand ( PlayerHandler::iterator ph, const basic_string& command )
 {
 	if( IsActive () )
 	{
@@ -212,7 +212,7 @@ bool ConCommandTester::RT_TestPlayerCommand ( PlayerHandler::const_iterator ph, 
 	return false;
 }
 
-bool ConCommandTester::RT_TestPlayerCommand_Anon ( PlayerHandler::const_iterator ph, const basic_string& command )
+bool ConCommandTester::RT_TestPlayerCommand_Anon ( PlayerHandler::iterator ph, const basic_string& command )
 {
 	if( IsActive () )
 	{
@@ -257,7 +257,7 @@ bool ConCommandTester::RT_TestPlayerCommand_Anon ( PlayerHandler::const_iterator
 	return false;
 }
 
-bool ConCommandTester::RT_HookEntCallback ( PlayerHandler::const_iterator ph, const void* const command, const SourceSdk::CCommand & args )
+bool ConCommandTester::RT_HookEntCallback ( PlayerHandler::iterator ph, const void* const command, const SourceSdk::CCommand & args )
 {
 	char cmd_str[ 512 ];
 	strcpy_s ( cmd_str, 512 * sizeof ( char ), args.GetCommandString () );
@@ -334,7 +334,7 @@ bool ConCommandTester::RT_HookEntCallback ( PlayerHandler::const_iterator ph, co
 	return false;
 }
 
-bool ConCommandTester::RT_HookSayCallback ( PlayerHandler::const_iterator ph, const void* const command, const SourceSdk::CCommand & args )
+bool ConCommandTester::RT_HookSayCallback ( PlayerHandler::iterator ph, const void* const command, const SourceSdk::CCommand & args )
 {
 	char cmd_str[ 256 ];
 	strcpy_s ( cmd_str, 256 * sizeof ( char ), args.GetCommandString () );
@@ -376,7 +376,7 @@ bool ConCommandTester::RT_HookSayCallback ( PlayerHandler::const_iterator ph, co
 	return false;
 }
 
-bool ConCommandTester::RT_ConCommandCallback ( PlayerHandler::const_iterator ph, void* cmd, const SourceSdk::CCommand & args )
+bool ConCommandTester::RT_ConCommandCallback ( PlayerHandler::iterator ph, void* cmd, const SourceSdk::CCommand & args )
 {
 	char const * const command_name ( SourceSdk::InterfacesProxy::ConCommand_GetName ( cmd ) );
 

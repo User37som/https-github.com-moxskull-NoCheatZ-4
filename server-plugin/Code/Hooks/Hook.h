@@ -89,19 +89,21 @@ struct HookInfo
 		debugname( nullptr ),
 		ishooked( false )
 	{}
-	HookInfo ( void* class_ptr, int vfid ) :
-		origEnt ( class_ptr ),
-		pInterface ( ( DWORD* )*( DWORD* ) origEnt ),
-		vf_entry ( &( pInterface[ vfid ] ) ),
-		debugname( nullptr ),
-		ishooked( false )
+	HookInfo ( void* class_ptr, int vfid ) : // This constructor is used only to create a reference for comparison
+		//origEnt ( class_ptr ),
+		//pInterface ( ( DWORD* )*( DWORD* ) origEnt ),
+		vf_entry ( (*(DWORD**)class_ptr) + vfid )//,
+		//debugname( nullptr ),
+		//ishooked( false )
 	{}
 
-	bool operator== ( const HookInfo& other ) const
-	{
-		return ( vf_entry == other.vf_entry );
-	}
+	inline bool operator== (const HookInfo& other) const;
 };
+
+inline bool HookInfo::operator== (const HookInfo& other) const
+{
+	return (vf_entry == other.vf_entry);
+}
 
 typedef CUtlVector<HookInfo> hooked_list_t;
 
@@ -199,7 +201,7 @@ public:
 	}
 
 	// Find by virtual table entry address
-	DWORD RT_GetOldFunction ( void* class_ptr, int vfid ) const
+	inline DWORD RT_GetOldFunction ( void* class_ptr, int vfid ) const
 	{
 		int it ( m_list.Find ( HookInfo ( class_ptr, vfid ) ) );
 		if( it != -1 )

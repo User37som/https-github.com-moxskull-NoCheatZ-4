@@ -258,7 +258,7 @@ bool ConfigManager::LoadConfig ()
 	return false;
 }
 
-bool ConfigManager::IsAdmin(PlayerHandler::const_iterator ph)
+bool ConfigManager::IsAdmin(PlayerHandler::iterator ph)
 {
 	if (ph >= SlotStatus::PLAYER_CONNECTING)
 	{
@@ -271,7 +271,7 @@ bool ConfigManager::IsAdmin(char const * steamid)
 {
 	basic_string lower_id(steamid);
 	lower_id.lower();
-	if (m_admins.Find(lower_id))
+	if (m_admins.Find(lower_id) != -1)
 	{
 		return true;
 	}

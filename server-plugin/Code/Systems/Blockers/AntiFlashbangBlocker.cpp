@@ -47,7 +47,7 @@ void AntiFlashbangBlocker::Init ()
 
 void AntiFlashbangBlocker::Load ()
 {
-	for( PlayerHandler::const_iterator it ( PlayerHandler::begin () ); it != PlayerHandler::end (); ++it )
+	for( PlayerHandler::iterator it ( PlayerHandler::begin () ); it != PlayerHandler::end (); ++it )
 	{
 		ResetPlayerDataStructByIndex ( it.GetIndex () );
 	}
@@ -69,12 +69,12 @@ bool AntiFlashbangBlocker::GotJob () const
 	// Create a filter
 	ProcessFilter::HumanAtLeastConnecting const filter_class;
 	// Initiate the iterator at the first match in the filter
-	PlayerHandler::const_iterator it ( &filter_class );
+	PlayerHandler::iterator it ( &filter_class );
 	// Return if we have job to do or not ...
 	return it != PlayerHandler::end ();
 }
 
-bool AntiFlashbangBlocker::RT_SetTransmitCallback ( PlayerHandler::const_iterator sender, PlayerHandler::const_iterator receiver )
+bool AntiFlashbangBlocker::RT_SetTransmitCallback ( PlayerHandler::iterator sender, PlayerHandler::iterator receiver )
 {
 	METRICS_ENTER_SECTION ( "AntiFlashbangBlocker::SetTransmitCallback" );
 
@@ -115,7 +115,7 @@ void AntiFlashbangBlocker::FireGameEvent ( SourceSdk::IGameEvent* ev ) // player
 {
 	METRICS_ENTER_SECTION ( "AntiFlashbangBlocker::FireGameEvent" );
 
-	PlayerHandler::const_iterator ph ( NczPlayerManager::GetInstance ()->GetPlayerHandlerByUserId ( ev->GetInt ( "userid", 0 ) ) );
+	PlayerHandler::iterator ph ( NczPlayerManager::GetInstance ()->GetPlayerHandlerByUserId ( ev->GetInt ( "userid", 0 ) ) );
 	if( !ph )
 	{
 		METRICS_LEAVE_SECTION ( "AntiFlashbangBlocker::FireGameEvent" );
@@ -155,7 +155,7 @@ void AntiFlashbangBlocker::FireGameEvent ( SourceSdk::IGameEvent* ev ) // player
 void AntiFlashbangBlocker::RT_ProcessOnTick ( float const & curtime )
 {
 	ProcessFilter::HumanAtLeastConnected filter_class;
-	for( PlayerHandler::const_iterator ph ( &filter_class ); ph != PlayerHandler::end (); ph += &filter_class )
+	for( PlayerHandler::iterator ph ( &filter_class ); ph != PlayerHandler::end (); ph += &filter_class )
 	{
 		FlashInfoT* const pInfo ( GetPlayerDataStruct ( *ph ) );
 

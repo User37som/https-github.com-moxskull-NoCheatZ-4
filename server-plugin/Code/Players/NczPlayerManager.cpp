@@ -26,14 +26,36 @@ limitations under the License.
 #include "Systems/AutoTVRecord.h"
 
 PlayerHandler NczPlayerManager::FullHandlersList[ MAX_PLAYERS + 1 ];
-PlayerHandler::const_iterator PlayerHandler::invalid ( NczPlayerManager::FullHandlersList );
-PlayerHandler::const_iterator PlayerHandler::first ( invalid );
-PlayerHandler::const_iterator PlayerHandler::last ( invalid );
+PlayerHandler::iterator PlayerHandler::invalid ( NczPlayerManager::FullHandlersList );
+PlayerHandler::iterator PlayerHandler::first ( invalid );
+PlayerHandler::iterator PlayerHandler::last ( invalid );
 
 
 //---------------------------------------------------------------------------------
 // NczPlayerManager
 //---------------------------------------------------------------------------------
+
+void NczPlayerManager::ResetRange()
+{
+	while (m_max_index > 0 && FullHandlersList[m_max_index].status == SlotStatus::INVALID)
+		--m_max_index;
+
+	if (m_max_index)
+	{
+		size_t id_start(1);
+
+		while (FullHandlersList[id_start].status != SlotStatus::INVALID)
+			++id_start;
+
+		PlayerHandler::first = (&FullHandlersList[id_start]);
+		PlayerHandler::last = (&FullHandlersList[m_max_index]);
+	}
+	else
+	{
+		PlayerHandler::first = PlayerHandler::invalid;
+		PlayerHandler::last = PlayerHandler::invalid;
+	}
+}
 
 NczPlayerManager::NczPlayerManager () :
 	singleton_class (),
@@ -80,7 +102,7 @@ void NczPlayerManager::LoadPlayerManager ()
 	//{
 	//int maxcl = Helpers::GetMaxClients();
 
-	for( PlayerHandler::const_iterator ph ( PlayerHandler::begin () ); ph != PlayerHandler::end (); ++ph )
+	for( PlayerHandler::iterator ph ( PlayerHandler::begin () ); ph != PlayerHandler::end (); ++ph )
 	{
 		SourceSdk::edict_t* const pEntity ( Helpers::PEntityOfEntIndex ( ph.GetIndex () ) );
 		if( Helpers::isValidEdict ( pEntity ) )
@@ -116,16 +138,7 @@ void NczPlayerManager::LoadPlayerManager ()
 
 	//}
 
-	if( m_max_index )
-	{
-		PlayerHandler::first = ( &FullHandlersList[ 1 ] );
-		PlayerHandler::last = ( &FullHandlersList[ m_max_index ] );
-	}
-	else
-	{
-		PlayerHandler::first = PlayerHandler::invalid;
-		PlayerHandler::last = PlayerHandler::invalid;
-	}
+	ResetRange();
 
 	BaseSystem::ManageSystems ();
 }
@@ -136,16 +149,15 @@ void NczPlayerManager::ClientConnect ( SourceSdk::edict_t* pEntity )
 	LoggerAssert ( index );
 	PlayerHandler& ph ( FullHandlersList[ index ] );
 	LoggerAssert ( ph.status == SlotStatus::INVALID || ph.status == SlotStatus::PLAYER_CONNECTING );
+	if (ph.playerClass)
+		ph.Reset();
 	ph.playerClass = new NczPlayer ( index );
-	// Should not be here, but heh ...
-	//*PlayerRunCommandHookListener::GetLastUserCmd(ph.playerClass) = SourceSdk::CUserCmd();
 	ph.status = SlotStatus::PLAYER_CONNECTING;
 	ph.playerClass->OnConnect ();
 
 	if( index > m_max_index ) m_max_index = index;
 
-	PlayerHandler::first = ( &FullHandlersList[ 1 ] );
-	PlayerHandler::last = ( &FullHandlersList[ m_max_index ] );
+	ResetRange();
 
 	BaseSystem::ManageSystems ();
 }
@@ -177,8 +189,7 @@ void NczPlayerManager::ClientActive ( SourceSdk::edict_t* pEntity )
 
 	if( index > m_max_index ) m_max_index = index;
 
-	PlayerHandler::first = ( &FullHandlersList[ 1 ] );
-	PlayerHandler::last = ( &FullHandlersList[ m_max_index ] );
+	ResetRange();
 
 	BaseSystem::ManageSystems ();
 }
@@ -187,21 +198,15 @@ void NczPlayerManager::ClientDisconnect ( SourceSdk::edict_t* pEntity )
 {
 	const int index ( Helpers::IndexOfEdict ( pEntity ) );
 	LoggerAssert ( index );
+
+	if (FullHandlersList[index].playerClass->GetDetected())
+	{
+		AutoTVRecord::GetInstance()->OnDetectedPlayerDisconnect();
+	}
+
 	FullHandlersList[ index ].Reset ();
 
-	while( m_max_index > 0 && FullHandlersList[ m_max_index ].status == SlotStatus::INVALID )
-		--m_max_index;
-
-	if( m_max_index )
-	{
-		PlayerHandler::first = ( &FullHandlersList[ 1 ] );
-		PlayerHandler::last = ( &FullHandlersList[ m_max_index ] );
-	}
-	else
-	{
-		PlayerHandler::first = PlayerHandler::invalid;
-		PlayerHandler::last = PlayerHandler::invalid;
-	}
+	ResetRange();
 
 	BaseSystem::ManageSystems ();
 }
@@ -226,7 +231,7 @@ bot_takeover
 		DebugMessage("event round_end");
 		for( int x ( 1 ); x <= maxcl; ++x )
 		{
-			PlayerHandler::const_iterator ph ( x );
+			PlayerHandler::iterator ph ( x );
 			if( ph == SlotStatus::PLAYER_IN_TESTS )
 			{
 				ph.GetHandler()->status = SlotStatus::PLAYER_CONNECTED;
@@ -283,13 +288,13 @@ bot_takeover
 		return;
 	}
 
-	PlayerHandler::const_iterator ph ( GetPlayerHandlerByUserId ( ev->GetInt ( "userid" ) ) );
+	PlayerHandler::iterator ph ( GetPlayerHandlerByUserId ( ev->GetInt ( "userid" ) ) );
 
 	if( *event_name == 'k' ) // bot_takeover
 	{
 		DebugMessage(Helpers::format("event bot_takeover : %s -> %s", ph->GetName (), GetPlayerHandlerByUserId ( ev->GetInt ( "botid" ) )->GetName ()));
-		//PlayerHandler::const_iterator bh1 ( GetPlayerHandlerByUserId ( ev->GetInt ( "botid" ) ) );
-		//PlayerHandler::const_iterator bh2 ( GetPlayerHandlerByUserId (  ) );
+		//PlayerHandler::iterator bh1 ( GetPlayerHandlerByUserId ( ev->GetInt ( "botid" ) ) );
+		//PlayerHandler::iterator bh2 ( GetPlayerHandlerByUserId (  ) );
 		//DebugMessage ( Helpers::format ( "Player %s taking control of bot %s or bot %d", ph->GetName (), bh1->GetName (), ev->GetInt ( "index" ) ));
 
 		//ph->EnterBotTakeover ( ev->GetInt ( "index" ) );
@@ -436,19 +441,7 @@ void NczPlayerManager::DeclareKickedPlayer ( int const slot )
 
 void NczPlayerManager::RT_Think ( float const & curtime )
 {
-	while( m_max_index > 0 && FullHandlersList[ m_max_index ].status == SlotStatus::INVALID )
-		--m_max_index;
-
-	if( m_max_index )
-	{
-		PlayerHandler::first = ( &FullHandlersList[ 1 ] );
-		PlayerHandler::last = ( &FullHandlersList[ m_max_index ] );
-	}
-	else
-	{
-		PlayerHandler::first = PlayerHandler::invalid;
-		PlayerHandler::last = PlayerHandler::invalid;
-	}
+	ResetRange();
 
 	const int maxcl ( m_max_index );
 
@@ -480,10 +473,10 @@ void NczPlayerManager::RT_Think ( float const & curtime )
 	if( in_tests_count >= AutoTVRecord::GetInstance()->GetMinPlayers()) AutoTVRecord::GetInstance ()->StartRecord ();
 }
 
-PlayerHandler::const_iterator NczPlayerManager::GetPlayerHandlerByBasePlayer ( void * const BasePlayer ) const
+PlayerHandler::iterator NczPlayerManager::GetPlayerHandlerByBasePlayer ( void * const BasePlayer ) const
 {
 	SourceSdk::edict_t * tEdict;
-	for( PlayerHandler::const_iterator it ( PlayerHandler::begin () ); it != PlayerHandler::end (); ++it )
+	for( PlayerHandler::iterator it ( PlayerHandler::begin () ); it != PlayerHandler::end (); ++it )
 	{
 		if( it )
 		{
@@ -498,11 +491,11 @@ PlayerHandler::const_iterator NczPlayerManager::GetPlayerHandlerByBasePlayer ( v
 	return PlayerHandler::end ();
 }
 
-PlayerHandler::const_iterator NczPlayerManager::GetPlayerHandlerBySteamID ( const char * steamid ) const
+PlayerHandler::iterator NczPlayerManager::GetPlayerHandlerBySteamID ( const char * steamid ) const
 {
 	const char * tSteamId;
 
-	for( PlayerHandler::const_iterator it ( PlayerHandler::begin () ); it != PlayerHandler::end (); ++it )
+	for( PlayerHandler::iterator it ( PlayerHandler::begin () ); it != PlayerHandler::end (); ++it )
 	{
 		if( it )
 		{
@@ -514,11 +507,11 @@ PlayerHandler::const_iterator NczPlayerManager::GetPlayerHandlerBySteamID ( cons
 	return PlayerHandler::end ();
 }
 
-PlayerHandler::const_iterator NczPlayerManager::GetPlayerHandlerByName ( const char * playerName ) const
+PlayerHandler::iterator NczPlayerManager::GetPlayerHandlerByName ( const char * playerName ) const
 {
 	const char * tName;
 
-	for( PlayerHandler::const_iterator it ( PlayerHandler::begin () ); it != PlayerHandler::end (); ++it )
+	for( PlayerHandler::iterator it ( PlayerHandler::begin () ); it != PlayerHandler::end (); ++it )
 	{
 		if( it )
 		{
@@ -533,7 +526,7 @@ PlayerHandler::const_iterator NczPlayerManager::GetPlayerHandlerByName ( const c
 short NczPlayerManager::GetPlayerCount ( BaseProcessFilter const * const filter ) const
 {
 	short count ( 0 );
-	for( PlayerHandler::const_iterator it ( filter ); it != PlayerHandler::end (); it += filter )
+	for( PlayerHandler::iterator it ( filter ); it != PlayerHandler::end (); it += filter )
 	{
 		++count;
 	}

@@ -39,7 +39,7 @@ void BadUserCmdTester::Init ()
 
 void BadUserCmdTester::Load ()
 {
-	for( PlayerHandler::const_iterator it ( PlayerHandler::begin ()); it != PlayerHandler::end (); ++it )
+	for( PlayerHandler::iterator it ( PlayerHandler::begin ()); it != PlayerHandler::end (); ++it )
 	{
 		ResetPlayerDataStructByIndex ( it.GetIndex () );
 	}
@@ -57,14 +57,14 @@ bool BadUserCmdTester::GotJob () const
 	/*// Create a filter
 	ProcessFilter::HumanAtLeastConnecting const filter_class;
 	// Initiate the iterator at the first match in the filter
-	PlayerHandler::const_iterator it ( &filter_class );
+	PlayerHandler::iterator it ( &filter_class );
 	// Return if we have job to do or not ...
 	return it != PlayerHandler::end ();*/
 
 	return true;
 }
 
-PlayerRunCommandRet BadUserCmdTester::RT_PlayerRunCommandCallback ( PlayerHandler::const_iterator ph, void* pCmd, void* old_cmd )
+PlayerRunCommandRet BadUserCmdTester::RT_PlayerRunCommandCallback ( PlayerHandler::iterator ph, void* pCmd, void* old_cmd )
 {
 	SourceSdk::CUserCmd_csgo const * const k_oldcmd ( ( SourceSdk::CUserCmd_csgo const * const )old_cmd);
 	SourceSdk::CUserCmd_csgo const * const k_newcmd ( ( SourceSdk::CUserCmd_csgo const * const )pCmd);

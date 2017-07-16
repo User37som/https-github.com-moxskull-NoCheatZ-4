@@ -99,7 +99,7 @@ void MRecipientFilter::RemoveAll ()
 
 void MRecipientFilter::AddTeam ( int teamid )
 {
-	for( PlayerHandler::const_iterator ph ( PlayerHandler::begin () ); ph != PlayerHandler::end (); ++ph )
+	for( PlayerHandler::iterator ph ( PlayerHandler::begin () ); ph != PlayerHandler::end (); ++ph )
 	{
 		if( ph )
 		{
