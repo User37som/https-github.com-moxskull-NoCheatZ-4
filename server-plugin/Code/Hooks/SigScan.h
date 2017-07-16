@@ -3,10 +3,14 @@
 
 #include <string.h>
 
+#include "Misc/ClassSpecifications.h"
+
 typedef unsigned char mem_byte;
 typedef unsigned int mem_dword;
 
-struct sig_ctx
+struct sig_ctx :
+	private NoCopy,
+	private NoMove
 {
 	size_t const m_siglength;
 	mem_byte const * const m_code;
