@@ -207,10 +207,12 @@ bool CNoCheatZPlugin::Load ( SourceSdk::CreateInterfaceFn _interfaceFactory, Sou
 	case 5:
 	case 6:
 		ReplaceVirtualFunctionByFakeVirtual((DWORD)GetTickInterval, &(IFACE_PTR(SourceSdk::InterfacesProxy::m_servergamedll)[9]));
+		SourceSdk::InterfacesProxy::_vfptr_GetTickInterval = (SourceSdk::InterfacesProxy::GetTickInterval_t)GetTickInterval;
 		break;
 	case 9:
 	case 10:
 		ReplaceVirtualFunctionByFakeVirtual((DWORD)GetTickInterval, &(IFACE_PTR(SourceSdk::InterfacesProxy::m_servergamedll)[10]));
+		SourceSdk::InterfacesProxy::_vfptr_GetTickInterval = (SourceSdk::InterfacesProxy::GetTickInterval_t)GetTickInterval;
 		break;
 	default:
 		break;
@@ -370,6 +372,7 @@ void CNoCheatZPlugin::LevelInit ( char const *pMapName )
 	NczPlayerManager::GetInstance ()->OnLevelInit ();
 
 	BanRequest::GetInstance ()->OnLevelInit ();
+
 }
 
 //---------------------------------------------------------------------------------
