@@ -172,13 +172,15 @@ public:
 	}
 
 	// concat 2 strings right now
-	String(pod const *srca, pod const *srcb) : String()
+	String(pod const *srca, pod const *srcb) :
+		String()
 	{
 		size_t const alen(autolen(srca));
 		size_t const blen(autolen(srcb));
 		Grow(alen + blen + 1, false);
 		memcpy(m_alloc, srca, alen);
 		memcpy(m_alloc + alen, srcb, blen + 1);
+		m_size = autolen(srca) + autolen(srcb);
 	}
 
 	String ( pod const *src, size_t start, size_t count = std::numeric_limits<size_t>::max () ) : String ()
@@ -192,33 +194,39 @@ public:
 	}
 
 	// concat 2 strings right now
-	String(String<pod> const &srca, String<pod> const &srcb) : String()
+	String(String<pod> const &srca, String<pod> const &srcb) :
+		String()
 	{
 		size_t const alen(srca.size());
 		size_t const blen(srcb.size());
 		Grow(alen + blen + 1, false);
 		memcpy(m_alloc, srca.c_str(), alen);
 		memcpy(m_alloc + alen, srcb.c_str(), blen + 1);
+		m_size = srca.size() + srcb.size();
 	}
 
 	// concat 2 strings right now
-	String(String<pod> const &srca, pod const * srcb) : String()
+	String(String<pod> const &srca, pod const * srcb) :
+		String()
 	{
 		size_t const alen(srca.size());
 		size_t const blen(autolen(srcb));
 		Grow(alen + blen + 1, false);
 		memcpy(m_alloc, srca.c_str(), alen);
 		memcpy(m_alloc + alen, srcb, blen + 1);
+		m_size = srca.size() + autolen(srcb);
 	}
 
 	// concat 2 strings right now
-	String(pod const * srca, String<pod> const &srcb) : String()
+	String(pod const * srca, String<pod> const &srcb) :
+		String()
 	{
 		size_t const alen(autolen(srca));
 		size_t const blen(srcb.size());
 		Grow(alen + blen + 1, false);
 		memcpy(m_alloc, srca, alen);
 		memcpy(m_alloc + alen, srcb.c_str(), blen + 1);
+		m_size = autolen(srca) + srcb.size();
 	}
 
 	String ( String<pod> && src ) : String ()
@@ -318,12 +326,10 @@ public:
 	{
 		if( c != 0 )
 		{
-			size_t pos ( m_size );
-			Grow ( pos + 2 ); // should be + 1 but when m_alloc is not allocated we also need to add '\0'
-			m_alloc[ pos ] = c;
-			++pos;
-			m_alloc[ pos ] = 0;
+			Grow (m_size + 2 ); // should be + 1 but when m_alloc is not allocated we also need to add '\0'
+			m_alloc[m_size] = c;
 			++m_size;
+			m_alloc[m_size] = 0;
 		}
 		return *this;
 	}
@@ -378,7 +384,7 @@ public:
 			{
 				*(cur + c_len) = *cur;
 			} while (--cur >= m_alloc);
-			memcpy(m_alloc, c, c_len);
+			memcpy(m_alloc, c, c_len * sizeof(pod));
 			m_size += c_len;
 		}
 		return *this;
