@@ -583,10 +583,10 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Library Include="SourceSdk\Interfaces\Protobuf\protobuf-2.5.0\vsprojects\Debug\libprotobuf.lib">
+    <Library Include="SourceSdk\libs\libprotobuf-debug.lib">
       <Filter>Link Libraries\Debug</Filter>
     </Library>
-    <Library Include="SourceSdk\Interfaces\Protobuf\protobuf-2.5.0\vsprojects\Release\libprotobuf.lib">
+    <Library Include="SourceSdk\libs\libprotobuf.lib">
       <Filter>Link Libraries\Release</Filter>
     </Library>
   </ItemGroup>

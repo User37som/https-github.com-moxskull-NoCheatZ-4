@@ -55,7 +55,7 @@ typedef struct SmokeEntityS
 
 typedef basic_slist<SmokeEntityT> SmokeListT;
 
-typedef struct ALIGN8 SmokeInfoS
+typedef struct alignas(8) SmokeInfoS
 {
 	bool is_in_smoke;
 	bool can_not_see_this_player[ MAX_PLAYERS ];
@@ -68,7 +68,7 @@ typedef struct ALIGN8 SmokeInfoS
 	{
 		memcpy ( this, &other, sizeof ( SmokeInfoS ) );
 	};
-} ALIGN8_POST SmokeInfoT;
+} SmokeInfoT;
 
 class AntiSmokeBlocker :
 	private BaseBlockerSystem,
