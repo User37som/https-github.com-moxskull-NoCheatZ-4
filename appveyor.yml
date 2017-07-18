@@ -4,6 +4,8 @@ pull_requests:
 branches:
   only:
   - appveyor-test
+  - dev2
+  - master
 max_jobs: 1
 image: Visual Studio 2017
 configuration:
