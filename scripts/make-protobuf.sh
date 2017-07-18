@@ -15,17 +15,3 @@ if [ ! -e "$autogenfile" ]; then
 	rm release-1.5.0.tar.gz
 	mv googletest-release-1.5.0 gtest
 fi
-echo "Building protobuf 2.5.0"
-make
-OUT=$?
-configfile=./configure
-if [ $OUT -eq 0 ] && [ -e "$configfile" ]; then
-	echo "protobuf 2.5.0 is ok."
-else
-	echo "Configuring protobuf 2.5.0"
-	chmod +x autogen.sh
-	./autogen.sh
-	./configure --build=i686-pc-linux-gnu --prefix=/usr CFLAGS="-m32 -DNDEBUG" CXXFLAGS="-m32 -DNDEBUG" LDFLAGS=-m32 CXX=$1
-	echo "Building protobuf 2.5.0"
-	make -j6
-fi

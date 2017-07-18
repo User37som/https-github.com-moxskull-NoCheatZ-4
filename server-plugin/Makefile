@@ -66,7 +66,7 @@ BINARY_DIR = $(BUILD_DIR)/addons/NoCheatZ
 #######################################
 ########## Libraries to link ##########
 
-LINK_A = $(SDK_DIR)/Interfaces/Protobuf/protobuf-2.5.0/src/.libs/libprotobuf.a
+LINK_A = $(SDK_DIR)/libs/libprotobuf.a
 
 ####################################
 ########## Linker options ########## 
