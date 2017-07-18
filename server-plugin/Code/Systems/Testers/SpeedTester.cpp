@@ -80,7 +80,7 @@ void SpeedTester::RT_ProcessOnTick ( float const & curtime )
 		{
 			++( pInfo->detections );
 
-			DebugMessage ( Helpers::format ( "Player %s :  Speedhack pre-detection #%ud", ph->GetName (), pInfo->detections ) );
+			//DebugMessage ( Helpers::format ( "Player %s :  Speedhack pre-detection #%ud", ph->GetName (), pInfo->detections ) );
 
 			if( pInfo->detections >= 30 && curtime > pInfo->lastDetectionTime + 30.0f )
 			{
@@ -118,7 +118,7 @@ PlayerRunCommandRet SpeedTester::RT_PlayerRunCommandCallback ( PlayerHandler::it
 basic_string Detection_SpeedHack::GetDataDump ()
 {
 	return Helpers::format ( ":::: SpeedHolderT {\n"
-							 ":::::::: Ticks Left : %lu,\n"
+							 ":::::::: Ticks Left : %f,\n"
 							 ":::::::: Detections Count : %lu,\n"
 							 ":::::::: Last Detection Time %f,\n"
 							 ":::::::: Last Latency : %f,\n"

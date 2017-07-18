@@ -6,10 +6,7 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "nocheatzX", "server-plugin\nocheatz.vcxproj", "{B6572CBE-7C7F-4FFF-94DE-AFBBBAB11C64}"
 	ProjectSection(ProjectDependencies) = postProject
 		{4440A41E-4236-4A75-9A7D-8AA1C01E5309} = {4440A41E-4236-4A75-9A7D-8AA1C01E5309}
-		{3E283F37-A4ED-41B7-A3E6-A2D89D131A30} = {3E283F37-A4ED-41B7-A3E6-A2D89D131A30}
 	EndProjectSection
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libprotobuf", "server-plugin\SourceSdk\Interfaces\Protobuf\protobuf-2.5.0\vsprojects\libprotobuf.vcxproj", "{3E283F37-A4ED-41B7-A3E6-A2D89D131A30}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "unit-tests", "server-plugin\unit-tests\unit-tests.vcxproj", "{4440A41E-4236-4A75-9A7D-8AA1C01E5309}"
 EndProject
@@ -32,15 +29,6 @@ Global
 		{B6572CBE-7C7F-4FFF-94DE-AFBBBAB11C64}.Release|Win32.ActiveCfg = Release|Win32
 		{B6572CBE-7C7F-4FFF-94DE-AFBBBAB11C64}.Release|Win32.Build.0 = Release|Win32
 		{B6572CBE-7C7F-4FFF-94DE-AFBBBAB11C64}.Release|x64.ActiveCfg = Release|Win32
-		{3E283F37-A4ED-41B7-A3E6-A2D89D131A30}.Debug|Win32.ActiveCfg = Debug|Win32
-		{3E283F37-A4ED-41B7-A3E6-A2D89D131A30}.Debug|Win32.Build.0 = Debug|Win32
-		{3E283F37-A4ED-41B7-A3E6-A2D89D131A30}.Debug|x64.ActiveCfg = Debug|Win32
-		{3E283F37-A4ED-41B7-A3E6-A2D89D131A30}.Profiler|Win32.ActiveCfg = Release|Win32
-		{3E283F37-A4ED-41B7-A3E6-A2D89D131A30}.Profiler|Win32.Build.0 = Release|Win32
-		{3E283F37-A4ED-41B7-A3E6-A2D89D131A30}.Profiler|x64.ActiveCfg = Profiler|Win32
-		{3E283F37-A4ED-41B7-A3E6-A2D89D131A30}.Release|Win32.ActiveCfg = Release|Win32
-		{3E283F37-A4ED-41B7-A3E6-A2D89D131A30}.Release|Win32.Build.0 = Release|Win32
-		{3E283F37-A4ED-41B7-A3E6-A2D89D131A30}.Release|x64.ActiveCfg = Release|Win32
 		{4440A41E-4236-4A75-9A7D-8AA1C01E5309}.Debug|Win32.ActiveCfg = Release|Win32
 		{4440A41E-4236-4A75-9A7D-8AA1C01E5309}.Debug|Win32.Build.0 = Release|Win32
 		{4440A41E-4236-4A75-9A7D-8AA1C01E5309}.Debug|x64.ActiveCfg = Debug|x64

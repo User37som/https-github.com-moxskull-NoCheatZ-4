@@ -27,7 +27,7 @@
 
 class TimerListener;
 
-struct ALIGN4 TimerInfo
+struct alignas(4) TimerInfo
 {
 	char m_name[ TIMERINFO_CHARCOUNT ];
 	float m_period_seconds;
@@ -61,7 +61,7 @@ struct ALIGN4 TimerInfo
 		return strcmp ( m_name, other.m_name ) == 0;
 	}
 
-} ALIGN4_POST;
+};
 
 typedef CUtlVector<TimerInfo> timer_list_t;
 typedef basic_slist<TimerListener*> timer_listeners_list_t;

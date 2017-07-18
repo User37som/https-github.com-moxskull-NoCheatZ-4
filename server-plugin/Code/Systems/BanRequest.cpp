@@ -328,7 +328,7 @@ void BanRequest::RT_TimerCallback ( char const * const timer_name )
 					NczPlayerManager::GetInstance ()->DeclareKickedPlayer ( ph->GetIndex () );
 				}
 
-				BanInternal ( v.ban_time, v.steamid, v.userid, v.kick_message, v.ip );
+				BanInternal ( v.ban_time, v.steamid, v.userid, v.kick_message.c_str(), v.ip );
 			}
 			
 			it = m_requests.Remove ( it );

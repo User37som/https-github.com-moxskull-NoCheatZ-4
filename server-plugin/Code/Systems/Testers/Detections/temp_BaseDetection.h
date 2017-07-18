@@ -102,11 +102,8 @@ public:
 	virtual void Log ()
 	{
 		basic_string msg ( Helpers::format ( "%s triggered a detection : %s is using a %s.", this->m_testerName, this->m_playerIdentity.c_str (), this->GetDetectionLogMessage ().c_str () ) );
-		Helpers::writeToLogfile ( msg );
-		char const * text2 ( Helpers::format ( "[" NCZ_PLUGIN_NAME "] %s", msg.c_str () ) );
-		SourceSdk::InterfacesProxy::Call_LogPrint ( text2 );
-
-		Logger::GetInstance()->Msg<MSG_CHAT>(text2);
+		Logger::GetInstance()->Msg<MSG_LOG>(msg.c_str());
+		Logger::GetInstance()->Msg<MSG_CHAT>(msg.c_str());
 
 		Helpers::writeToLogfile ( NCZ_VERSION_GIT );
 		Helpers::writeToLogfile ( this->GetDataDump () );

@@ -54,7 +54,7 @@ struct ClientDataS
 	};
 };
 
-struct ALIGN4 VisInfo
+struct alignas(4) VisInfo
 {
 	bool m_visible;
 	bool m_valid;
@@ -73,7 +73,7 @@ struct ALIGN4 VisInfo
 		m_valid = true;
 		m_visible = visibility;
 	};
-} ALIGN4_POST;
+};
 
 class VisCache :
 	protected NoCopy,

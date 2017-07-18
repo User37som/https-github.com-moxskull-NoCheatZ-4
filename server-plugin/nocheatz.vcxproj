@@ -61,7 +61,7 @@
     <PreLinkEventUseInBuild>true</PreLinkEventUseInBuild>
     <LinkIncremental>true</LinkIncremental>
     <GenerateManifest>false</GenerateManifest>
-    <PostBuildEventUseInBuild>true</PostBuildEventUseInBuild>
+    <PostBuildEventUseInBuild>false</PostBuildEventUseInBuild>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>..\Builds\Release\addons\NoCheatZ\</OutDir>
@@ -70,7 +70,7 @@
     <PreLinkEventUseInBuild>true</PreLinkEventUseInBuild>
     <LinkIncremental>false</LinkIncremental>
     <GenerateManifest>false</GenerateManifest>
-    <PostBuildEventUseInBuild>true</PostBuildEventUseInBuild>
+    <PostBuildEventUseInBuild>false</PostBuildEventUseInBuild>
     <CodeAnalysisRuleSet>BasicDesignGuidelineRules.ruleset</CodeAnalysisRuleSet>
     <RunCodeAnalysis>false</RunCodeAnalysis>
   </PropertyGroup>
@@ -557,21 +557,17 @@ copy "$(TargetPath)" ..\..\..\game\bin\"$(TargetName)".pdb
     <ClInclude Include="Code\Systems\TimerListener.h" />
   </ItemGroup>
   <ItemGroup>
-    <Library Include="SourceSdk\Interfaces\Protobuf\protobuf-2.5.0\vsprojects\Debug\libprotobuf.lib">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Profiler|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
-    </Library>
-    <Library Include="SourceSdk\Interfaces\Protobuf\protobuf-2.5.0\vsprojects\Release\libprotobuf.lib">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Profiler|Win32'">false</ExcludedFromBuild>
-    </Library>
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Res\config.ini">
       <FileType>XML</FileType>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="SourceSdk\libs\libprotobuf-debug.lib">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </Library>
+    <Library Include="SourceSdk\libs\libprotobuf.lib">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </Library>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
