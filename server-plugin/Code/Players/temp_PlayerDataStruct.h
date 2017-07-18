@@ -22,7 +22,7 @@
 #include "Misc/Helpers.h"
 
 template <typename DataT>
-class ALIGN16 PlayerDataStructHandler :
+class alignas(16) PlayerDataStructHandler :
 	public BaseDataStructHandler<DataT, MAX_PLAYERS>
 {
 	typedef BaseDataStructHandler<DataT, MAX_PLAYERS> BaseClass;
@@ -60,6 +60,6 @@ protected:
 	{
 		return GetPlayerDataStructByIndex ( Helpers::IndexOfEdict ( player ) );
 	};
-} ALIGN16_POST;
+};
 
 #endif

@@ -204,7 +204,7 @@ public:
 
 	inline static iterator & end ();
 
-} ALIGN16_POST;
+};
 
 inline bool PlayerHandler::iterator::IsIteratorValid () const
 {
