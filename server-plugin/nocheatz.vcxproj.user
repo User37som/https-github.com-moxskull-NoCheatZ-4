@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LocalDebuggerCommand>E:\steamcmd\CSGO\srcds.exe</LocalDebuggerCommand>
     <LocalDebuggerCommandArguments>-console -condebug -condump -game csgo -insecure -maxplayers 64 +game_type 0 +game_mode 0 +map de_inferno +rcon_password cderfv +bot_join_team any +bot_quota 31 +mp_limitteams 0 +bot_chatter off</LocalDebuggerCommandArguments>
     <LocalDebuggerWorkingDirectory>E:\steamcmd\CSGO\</LocalDebuggerWorkingDirectory>
@@ -8,19 +8,19 @@
     <LocalDebuggerAmpDefaultAccelerator>
     </LocalDebuggerAmpDefaultAccelerator>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debub-CSGO|x86'">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debub-CSGO|Win32'">
     <LocalDebuggerCommand>C:\steamcmd\CSGO\srcds.exe</LocalDebuggerCommand>
     <LocalDebuggerCommandArguments>-console -game cstrike -insecure -maxplayers 64 +map de_dust2 +rcon_password cderfv</LocalDebuggerCommandArguments>
     <LocalDebuggerWorkingDirectory>C:\steamcmd\CSS\</LocalDebuggerWorkingDirectory>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LocalDebuggerCommandArguments>-console -condebug -condump -game csgo -insecure -maxplayers 64 +game_type 0 +game_mode 0 +map de_inferno +rcon_password cderfv +bot_join_team any +bot_quota 64 +mp_limitteams 0 +mp_autoteambalance 0</LocalDebuggerCommandArguments>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
     <LocalDebuggerCommand>E:\steamcmd\CSGO\srcds.exe</LocalDebuggerCommand>
     <LocalDebuggerWorkingDirectory>E:\steamcmd\CSGO\</LocalDebuggerWorkingDirectory>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Profiler|x86'">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Profiler|Win32'">
     <LocalDebuggerCommandArguments>-console -game csgo -insecure -maxplayers 64 +game_type 0 +game_mode 0 +map de_inferno +rcon_password cderfv +bot_join_team any +bot_quota 64 +mp_limitteams 0 +mp_autoteambalance 0</LocalDebuggerCommandArguments>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
     <LocalDebuggerCommand>B:\steamcmd\CSGO\srcds.exe</LocalDebuggerCommand>
