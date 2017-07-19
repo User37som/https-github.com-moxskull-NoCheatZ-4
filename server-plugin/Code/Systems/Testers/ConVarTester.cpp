@@ -77,12 +77,16 @@ void ConVarTester::RT_ProcessOnTick ( float const & curtime )
 		SystemVerbose2 (  "ConVarTester : Not processing any player this tick" );
 #endif
 	}*/
-	m_current_player = PlayerHandler::end ();
+	/*m_current_player = PlayerHandler::end ();
 	m_current_player += &filter_class;
 	for( ; m_current_player != PlayerHandler::end (); m_current_player += &filter_class )
 	{
 		RT_ProcessPlayerTest ( m_current_player, curtime );
-	}
+	}*/
+
+	m_current_player += &filter_class;
+	if(m_current_player)
+		RT_ProcessPlayerTest(m_current_player, curtime);
 }
 
 void ConVarTester::RT_ProcessPlayerTest ( PlayerHandler::iterator ph, float const & curtime )
@@ -93,11 +97,12 @@ void ConVarTester::RT_ProcessPlayerTest ( PlayerHandler::iterator ph, float cons
 	{
 		case ConVarRequestStatus::SENT: // Not yet replyed, check for timeout
 			{
-				if( curtime - 30.0f > req->timeStart )
+				if( curtime >= req->timeEnd )
 				{
 					if( req->attempts >= 2 )
 					{
-						Detection_ConVar pDetection;
+						req->answer = "NO ANSWER - TIMED OUT";
+						Detection_ConVarRequestTimedOut pDetection;
 						pDetection.PrepareDetectionData ( req );
 						pDetection.PrepareDetectionLog ( *ph, this );
 						pDetection.Log ();
@@ -105,7 +110,7 @@ void ConVarTester::RT_ProcessPlayerTest ( PlayerHandler::iterator ph, float cons
 					}
 					else
 					{
-						Logger::GetInstance ()->Msg<MSG_WARNING> ( Helpers::format ( "ConVarTester : First chance - ConVar request timed out for %s (%s).", ph->GetName (), m_convars_rules[ req->ruleset ].name ) );
+						Logger::GetInstance ()->Msg<MSG_WARNING> ( Helpers::format ( "ConVarTester : ConVar request timed out for %s (%s) : %d attempts.", ph->GetName (), m_convars_rules[ req->ruleset ].name, req->attempts) );
 						++req->attempts;
 						req->SendCurrentRequest ( ph, curtime, m_convars_rules ); // Send the request again
 					}
@@ -253,11 +258,11 @@ void ConVarTester::RT_OnQueryCvarValueFinished ( PlayerHandler::iterator ph, Sou
 {
 	CurrentConVarRequest* const req ( GetPlayerDataStructByIndex ( ph.GetIndex () ) );
 
-	if( req->cookie == cookie )
+	if (req->cookie == cookie)
 	{
-		LoggerAssert ( req->status == ConVarRequestStatus::SENT );
+		LoggerAssert(req->status == ConVarRequestStatus::SENT);
 
-		if( SourceSdk::InterfacesProxy::ConVar_GetBool ( var_sv_cheats ) )
+		if (SourceSdk::InterfacesProxy::ConVar_GetBool(var_sv_cheats))
 		{
 			/* Some servers silently set sv_cheats to 1 in a short timespan to make some mods.
 			 This is where some players can get kicked without reason.
@@ -268,124 +273,127 @@ void ConVarTester::RT_OnQueryCvarValueFinished ( PlayerHandler::iterator ph, Sou
 			return;
 		}
 
-		ConVarInfoT* ruleset ( RT_FindConvarRuleset ( pCvarName ) );
-		LoggerAssert ( ruleset );
+		ConVarInfoT* ruleset(RT_FindConvarRuleset(pCvarName));
+		LoggerAssert(ruleset);
 		req->status = ConVarRequestStatus::REPLYED;
 		req->answer = pCvarValue;
 
-		switch( eStatus )
+		switch (eStatus)
 		{
-			case SourceSdk::eQueryCvarValueStatus_ValueIntact:
+		case SourceSdk::eQueryCvarValueStatus_ValueIntact:
+		{
+			req->answer_status = "ValueIntact";
+
+			float fcval((float)atof(pCvarValue));
+			float fsval((float)atof(ruleset->value));
+
+			switch (ruleset->rule)
+			{
+			case ConVarRule::SAME:
+			{
+				if (strcmp(ruleset->value, pCvarValue))
 				{
-					req->answer_status = "ValueIntact";
-
-					float fcval ((float)atof(pCvarValue));
-					float fsval ((float)atof(ruleset->value));
-
-					switch (ruleset->rule)
-					{
-						case ConVarRule::SAME:
-							{
-								if (strcmp(ruleset->value, pCvarValue))
-								{
-									goto novalue;
-								}
-
-								break;
-							}
-
-						case ConVarRule::SAME_AS_SERVER:
-							{
-								if (strcmp(SourceSdk::InterfacesProxy::ConVar_GetString(ruleset->sv_var), pCvarValue))
-								{
-									goto novalue;
-								}
-
-								break;
-							}
-
-						case ConVarRule::SAME_FLOAT_AS_SERVER:
-							fsval = (float)atof(SourceSdk::InterfacesProxy::ConVar_GetString(ruleset->sv_var));
-
-						case ConVarRule::SAME_FLOAT:
-							if (fcval != fsval)
-							{
-								goto novalue;
-							}
-
-							break;
-
-						case ConVarRule::LOWER:
-							if (fcval >= fsval)
-							{
-								goto novalue;
-							}
-
-							break;
-
-						case ConVarRule::HIGHER:
-							if (fcval <= fsval)
-							{
-								goto novalue;
-							}
-
-							break;
-
-						case ConVarRule::NO_VALUE:
-						{
-novalue:
-							{
-								ProcessDetectionAndTakeAction<Detection_ConVar::data_type>(Detection_ConVar(), req, ph, this);
-
-								break;
-							}
-						}
-
-						default:
-							Logger::GetInstance()->Msg<MSG_ERROR>(Helpers::format("ConVarTester : Unknown code, server memory is crashed.", ph->GetName()));
-							break;
-						
-					}
-					break;
-				}
-
-			case SourceSdk::eQueryCvarValueStatus_CvarNotFound:
-				{
-					req->answer_status = "CvarNotFound";
-					req->answer = "NO VALUE";
-					if( ruleset->rule != ConVarRule::NO_VALUE )
-					{
-						ProcessDetectionAndTakeAction<Detection_ConVar::data_type>(Detection_ConVar(), req, ph, this);
-					}
-					break;
-				}
-
-			case SourceSdk::eQueryCvarValueStatus_NotACvar:
-				{
-					req->answer_status = "NotACvar";
-					req->answer = "CONCOMMAND";
 					goto unexpected2;
 				}
 
-			case SourceSdk::eQueryCvarValueStatus_CvarProtected:
+				break;
+			}
+
+			case ConVarRule::SAME_AS_SERVER:
+			{
+				if (strcmp(SourceSdk::InterfacesProxy::ConVar_GetString(ruleset->sv_var), pCvarValue))
 				{
-					req->answer_status = "CvarProtected";
-					req->answer = "NO VALUE";
 					goto unexpected2;
 				}
+
+				break;
+			}
+
+			case ConVarRule::SAME_FLOAT_AS_SERVER:
+				fsval = (float)atof(SourceSdk::InterfacesProxy::ConVar_GetString(ruleset->sv_var));
+
+			case ConVarRule::SAME_FLOAT:
+				if (fcval != fsval)
+				{
+					goto unexpected2;
+				}
+
+				break;
+
+			case ConVarRule::LOWER:
+				if (fcval >= fsval)
+				{
+					goto unexpected2;
+				}
+
+				break;
+
+			case ConVarRule::HIGHER:
+				if (fcval <= fsval)
+				{
+					goto unexpected2;
+				}
+
+				break;
+
+			case ConVarRule::NO_VALUE:
+			{
+				{
+					ProcessDetectionAndTakeAction<Detection_IllegalConVar::data_type>(Detection_IllegalConVar(), req, ph, this);
+
+					break;
+				}
+			}
 
 			default:
-				{
-					Logger::GetInstance()->Msg<MSG_LOG>("ConVarTester : The following player is banned because of an unknown ConVar Request Answer code.");
-					req->answer_status = "NO STATUS";
-					req->answer = "NO VALUE";
-					goto unexpected2;
-				}
+				Logger::GetInstance()->Msg<MSG_ERROR>(Helpers::format("ConVarTester : Unknown code, server memory is crashed.", ph->GetName()));
+				break;
+
+			}
+			break;
+		}
+
+		case SourceSdk::eQueryCvarValueStatus_CvarNotFound:
+		{
+			req->answer_status = "CvarNotFound";
+			req->answer = "NO VALUE";
+			if (ruleset->rule != ConVarRule::NO_VALUE)
+			{
+				ProcessDetectionAndTakeAction<Detection_ConVar::data_type>(Detection_ConVar(), req, ph, this);
+			}
+			break;
+		}
+
+		case SourceSdk::eQueryCvarValueStatus_NotACvar:
+		{
+			req->answer_status = "NotACvar";
+			req->answer = "CONCOMMAND";
+			goto unexpected2;
+		}
+
+		case SourceSdk::eQueryCvarValueStatus_CvarProtected:
+		{
+			req->answer_status = "CvarProtected";
+			req->answer = "NO VALUE";
+			goto unexpected2;
+		}
+
+		default:
+		{
+			Logger::GetInstance()->Msg<MSG_LOG>("ConVarTester : The following player is banned because of an unknown ConVar Request Answer code.");
+			req->answer_status = "NO STATUS";
+			req->answer = "NO VALUE - UNKNOWN eQueryCvarValueStatus ";
+			goto unexpected2;
+		}
 		}
 
 		return;
-unexpected2:
+	unexpected2:
 		ProcessDetectionAndTakeAction<Detection_ConVar::data_type>(Detection_ConVar(), req, ph, this);
+	}
+	else
+	{
+		// Do not detect invalid cookie because it means this request comes from another plugin
 	}
 }
 
@@ -560,3 +568,12 @@ basic_string Detection_ConVar::GetDetectionLogMessage ()
 	return Helpers::format ( "%s ConVar Bypasser", ConVarTester::GetInstance ()->m_convars_rules[ GetDataStruct ()->ruleset ].name );
 }
 
+basic_string Detection_ConVarRequestTimedOut::GetDetectionLogMessage()
+{
+	return Helpers::format("%s ConVar request time out", ConVarTester::GetInstance()->m_convars_rules[GetDataStruct()->ruleset].name);
+}
+
+basic_string Detection_IllegalConVar::GetDetectionLogMessage()
+{
+	return Helpers::format("%s illegal ConVar", ConVarTester::GetInstance()->m_convars_rules[GetDataStruct()->ruleset].name);
+}
