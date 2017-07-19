@@ -1,6 +1,7 @@
 version: v4-r{build}
 pull_requests:
   do_not_increment_build_number: true
+skip_non_tags: true
 max_jobs: 2
 image: Visual Studio 2017
 configuration:
@@ -66,8 +67,10 @@ after_build:
     Push-AppveyorArtifact $p2 -FileName $p3 -DeploymentName deploy-out
 deploy:
 - provider: GitHub
-  tag: $(version)
-  release: NoCheatZ $(version)
+  tag: $(appveyor_repo_tag_name)
+  release: NoCheatZ $(appveyor_repo_tag_name)
   auth_token:
     secure: cmeI5Mwc+kiqp/KVpsM++TVOdsmMhb1jIAnW9oeV27mxuQpiHD5uu1zlHCD9ttLA
   artifact: deploy-out
+  on:
+    appveyor_repo_tag: true
