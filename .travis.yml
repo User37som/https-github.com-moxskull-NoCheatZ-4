@@ -15,6 +15,7 @@ before_install:
   - sudo apt-get -qq install -y curl build-essential lib32z1 lib32ncurses5 lib32bz2-1.0 gcc-multilib g++-multilib g++-4.8 g++-4.8-multilib lib32gcc1 libc6-i386 libc6-dev-i386 autotools-dev autoconf libtool cppcheck
 before_script:
   - git fetch --tags
+  - git tag
   - cd server-plugin
   - sh ../scripts/make-protobuf.sh
 script:
@@ -29,7 +30,8 @@ deploy:
   skip_cleanup: true
   api_key:
     secure: oU1lQi1TA/Kaa/aIKuCe/2VJxlVTnu1kZyO4nLkwaVArZpJwqdjgm++66mIPkvi4A62MolCUErI7rcTEGKXDjUo7rByTp9dVCiTxFbrEJiLWq5V5mEwFEqq5W1vl+iI0e0Lgr+jqiy9n6SNlQ7r5jbypZA3tmrWQg7x04UILPwa77d9G37/HoXL5rBcLQdFx3J9pNEZLHGyrxKusOJfZ5gBoWZRlz5uX4z5CLvUPPF+uZCvB5tp31OLSa8kEKtTi5D1SRmzz8/ofGIW3so9wSILTz0MKqS1Wsk5VSG54a1Sg3RYB13PjrlhIqQP2qTCA+2N7aRzPogIjgywPeg7h/BZFdEdnZBZioDGw2oaJZxxq4tG/csgsqmyICu/6zJNU5A8hvKBTtKKrDdoqH4Qwh2xU6Eni9ZBHmznhpo5noiGzwE63bsBc8TaWTv5C542hIy79BbQFIUbO/9XhHUc9Tha3uGWbWKmPv82IrPBrbdTWdr1Iit40Sb7z5tJ1TOaiQ+8rop/TvGiTa8Mg2hEtBtjJRRw6Tg3Z0P85y1cWbd+lz5asqey30HdGKTg/pqSkWI9GwsZupdm5ZcPpwA0VaxFKTaxvRctEu50B16O11n16HnGXvkCS913MJePhm+jo2I+Z2T0m5P486UwD+jywJ82kU8rnqYWhJVcjvPjGGaA=
-  file: Builds/out/*
+  file_glob: true
+  file: Builds/out/*.tar.gz
   on:
     tags: true
     all_branches: true
