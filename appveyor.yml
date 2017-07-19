@@ -51,7 +51,7 @@ after_build:
 
     $p2 = "Builds\" + $p1
 
-    cd ..\Builds
+    cd c:\github\NoCheatZ-4\Builds
 
     Get-ChildItem -Include *.exp | Remove-Item -recurse
 
@@ -71,7 +71,7 @@ after_build:
 
     Push-AppveyorArtifact $p2
 deploy:
-  release: NoCheatZ-v4-r$(appveyor_build_version)
+  release: NoCheatZ-$(APPVEYOR_REPO_TAG_NAME)
   description: ''
   provider: GitHub
   auth_token:
@@ -80,5 +80,4 @@ deploy:
   draft: false
   prerelease: false
   on:
-    branch: master
     appveyor_repo_tag: true
