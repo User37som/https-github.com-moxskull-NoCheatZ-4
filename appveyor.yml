@@ -40,7 +40,9 @@ after_build:
 
     $p0 = $env:configuration + "\*"
 
-    $p1 = "out\" + $env:configuration + "-Windows.zip"
+    $p3 = $env:configuration + "-Windows.zip"
+
+    $p1 = "out\" + $p3
 
     $p2 = "Builds\" + $p1
 
@@ -62,7 +64,7 @@ after_build:
 
     cd ..
 
-    Push-AppveyorArtifact -FileName $p2 -DeploymentName deploy-out
+    Push-AppveyorArtifact $p2 -FileName $p3 -DeploymentName deploy-out
 artifacts:
 - path: Builds\out\*.zip
   name: deploy-out
