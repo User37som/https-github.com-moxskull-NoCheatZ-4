@@ -65,9 +65,6 @@ after_build:
     cd ..
 
     Push-AppveyorArtifact $p2 -FileName $p3 -DeploymentName deploy-out
-artifacts:
-- path: Builds\out\*.zip
-  name: deploy-out
 deploy:
 - provider: GitHub
   tag: $(appveyor_repo_tag_name)
