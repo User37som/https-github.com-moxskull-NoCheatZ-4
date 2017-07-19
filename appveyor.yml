@@ -1,16 +1,18 @@
-version: r{build}-{branch}
+version: r{build}
 pull_requests:
   do_not_increment_build_number: true
 branches:
   only:
-  - appveyor-test
-  - dev2
   - master
-max_jobs: 1
+max_jobs: 2
 image: Visual Studio 2017
 configuration:
 - Debug
 - Release
+artifacts:
+  - path: Builds\out\$(configuration)-Windows.zip
+    name: ncz-$(version)-$(configuration)-Windows.zip
+    type: zip
 platform: Win32
 clone_folder: c:\github\NoCheatZ-4
 install:
@@ -38,3 +40,19 @@ build:
   project: nocheatz.sln
   parallel: true
   verbosity: minimal
+ 
+before_deploy:
+  - ps: scripts\ci-before-deploy.ps1
+  
+deploy:
+  release: NoCheatZ-v4-r$(appveyor_build_version)
+  description: ''
+  provider: GitHub
+  auth_token:
+    secure: Fq0z0kE14rIeOVfo5RcAEPMO57YOsEPigKUGbgV7ZiwfFu25w7Qi0ngdhyBYl09k
+  artifact: Builds\out\*
+  draft: false
+  prerelease: false
+  on:
+    branch: master
+    appveyor_repo_tag: true
