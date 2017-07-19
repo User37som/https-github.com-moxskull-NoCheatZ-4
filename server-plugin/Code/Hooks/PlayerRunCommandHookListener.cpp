@@ -116,7 +116,7 @@ void HOOKFN_INT PlayerRunCommandHookListener::RT_nPlayerRunCommand ( void* This,
 
 		if( SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive )
 		{
-			static_cast< SourceSdk::CUserCmd_csgo* >( pCmd )->random_seed = ( int ) std::rand ();
+			//static_cast< SourceSdk::CUserCmd_csgo* >( pCmd )->random_seed = ( int ) std::rand ();
 		}
 		else
 		{
