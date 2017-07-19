@@ -73,7 +73,7 @@ deploy:
   tag: $(appveyor_repo_tag_name)
   release: NoCheatZ $(appveyor_repo_tag_name)
   auth_token:
-    secure: QhVrTFzzl4FAkSNGNElMylIzcTpDMqak7gxIE0Bm+a3FJ+j9E/OndhE7OnAtskcRLeF4eZcrMgoenj6oTn+FFeJytJz9UdKOiYvOlXyX6GE=
+    secure: cmeI5Mwc+kiqp/KVpsM++TVOdsmMhb1jIAnW9oeV27mxuQpiHD5uu1zlHCD9ttLA
   artifact: deploy-out
   on:
     appveyor_repo_tag: true
