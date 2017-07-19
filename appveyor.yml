@@ -66,8 +66,8 @@ after_build:
     Push-AppveyorArtifact $p2 -FileName $p3 -DeploymentName deploy-out
 deploy:
 - provider: GitHub
-  tag: $(version)
-  release: NoCheatZ $(version)
+  tag: $(APPVEYOR_BUILD_VERSION)
+  release: NoCheatZ $(APPVEYOR_BUILD_VERSION)
   auth_token:
     secure: cmeI5Mwc+kiqp/KVpsM++TVOdsmMhb1jIAnW9oeV27mxuQpiHD5uu1zlHCD9ttLA
   artifact: deploy-out
