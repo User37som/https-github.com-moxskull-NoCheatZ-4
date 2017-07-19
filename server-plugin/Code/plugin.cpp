@@ -80,7 +80,7 @@ void* SourceSdk::CreateInterface ( char const * pName, int * pReturnCode )
 
 float Plat_FloatTime ()
 {
-	return ( GlobalTimer::GetInstance ()->GetCurrent () );
+	return ( GlobalTimer::GetInstance ()->GetCurrent () * 0.001f );
 }
 
 float HOOKFN_INT GetTickInterval(void * const preserve_me)
