@@ -90,7 +90,7 @@ void HOOKFN_INT PlayerRunCommandHookListener::RT_nPlayerRunCommand ( void* This,
 	if( ph > SlotStatus::PLAYER_CONNECTING )
 	{
 		SourceSdk::CUserCmd_csgo& old_cmd ( m_lastCUserCmd[ ph->GetIndex () ] );
-		SourceSdk::CUserCmd_csgo temp_cmd();
+		SourceSdk::CUserCmd_csgo temp_cmd;
 		memcpy((char *)(&temp_cmd) + sizeof(void *), (char *)pCmd + sizeof(void *), sizeof(SourceSdk::CUserCmd_csgo) - sizeof(void *));
 
 		ListenersListT::elem_t* it ( m_listeners.GetFirst () );
