@@ -11,7 +11,7 @@ configuration:
 - Release
 artifacts:
   - path: Builds\out\$(configuration)-Windows.zip
-    name: ncz-$(version)-$(configuration)-Windows.zip
+    name: ncz-$(APPVEYOR_REPO_TAG_NAME)-$(configuration)-Windows.zip
     type: zip
 platform: Win32
 clone_folder: c:\github\NoCheatZ-4
@@ -41,9 +41,15 @@ build:
   parallel: true
   verbosity: minimal
  
-before_deploy:
+after_build:
 - ps: >-
     $ErrorActionPreference = 'SilentlyContinue'
+
+    $p0 = $env:configuration + "\*"
+
+    $p1 = "out\" + $env:configuration + "-Windows.zip"
+
+    $p2 = "Builds\" + $p1
 
     cd ..\Builds
 
@@ -59,9 +65,11 @@ before_deploy:
 
     New-Item -ItemType directory -Path out
 
-    Compress-Archive -Path Debug\* -DestinationPath out\Debug-Windows.zip
+    Compress-Archive -Path $p0 -DestinationPath $p1
 
-    Compress-Archive -Path Release\* -DestinationPath out\Release-Windows.zip
+    cd ..
+
+    Push-AppveyorArtifact $p2
 deploy:
   release: NoCheatZ-v4-r$(appveyor_build_version)
   description: ''
