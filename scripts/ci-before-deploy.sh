@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cd ../Builds
+cd Builds
 rm -rf .gitignore
 mkdir out
 cd Debug

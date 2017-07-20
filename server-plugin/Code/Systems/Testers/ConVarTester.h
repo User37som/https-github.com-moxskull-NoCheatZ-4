@@ -80,6 +80,7 @@ typedef struct CurrentConVarRequest
 {
 	ConVarRequestStatus status;
 	float timeStart;
+	float timeEnd;
 	int ruleset;
 	SourceSdk::QueryCvarCookie_t cookie;
 	int attempts;
@@ -89,6 +90,7 @@ typedef struct CurrentConVarRequest
 	CurrentConVarRequest () : 
 		status ( ConVarRequestStatus::NOT_PROCESSING ),
 		timeStart (0.0f),
+		timeEnd (0.0f),
 		ruleset (0),
 		cookie (0),
 		attempts (0),
@@ -99,7 +101,7 @@ typedef struct CurrentConVarRequest
 
 	CurrentConVarRequest ( const CurrentConVarRequest& other )
 	{
-		status = other.status; timeStart = other.timeStart; ruleset = other.ruleset; answer = other.answer; answer_status = other.answer_status;
+		status = other.status; timeStart = other.timeStart; timeEnd = other.timeEnd;  ruleset = other.ruleset; answer = other.answer; answer_status = other.answer_status;
 	};
 
 	void PrepareNextRequest (ConVarRulesListT const & rules)
@@ -121,6 +123,7 @@ typedef struct CurrentConVarRequest
 		{
 			status = ConVarRequestStatus::SENT;
 			timeStart = curtime;
+			timeEnd = timeStart + 60.0f;
 		}
 		else
 		{
@@ -146,6 +149,34 @@ public:
 	virtual basic_string GetDetectionLogMessage ();
 };
 
+class Detection_ConVarRequestTimedOut : public Detection_ConVar
+{
+	friend ConVarTester;
+	typedef Detection_ConVar hClass;
+
+public:
+	Detection_ConVarRequestTimedOut() : hClass()
+	{};
+	~Detection_ConVarRequestTimedOut()
+	{};
+
+	virtual basic_string GetDetectionLogMessage();
+};
+
+class Detection_IllegalConVar : public Detection_ConVar
+{
+	friend ConVarTester;
+	typedef Detection_ConVar hClass;
+
+public:
+	Detection_IllegalConVar() : hClass()
+	{};
+	~Detection_IllegalConVar()
+	{};
+
+	virtual basic_string GetDetectionLogMessage();
+};
+
 class ConVarTester :
 	public BaseTesterSystem,
 	public OnTickListener,
@@ -156,6 +187,8 @@ class ConVarTester :
 	typedef PlayerDataStructHandler<CurrentConVarRequestT> playerdata_class;
 
 	friend Detection_ConVar;
+	friend Detection_ConVarRequestTimedOut;
+	friend Detection_IllegalConVar;
 
 private:
 	ConVarRulesListT m_convars_rules;

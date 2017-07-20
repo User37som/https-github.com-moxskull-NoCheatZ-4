@@ -90,6 +90,8 @@ void HOOKFN_INT PlayerRunCommandHookListener::RT_nPlayerRunCommand ( void* This,
 	if( ph > SlotStatus::PLAYER_CONNECTING )
 	{
 		SourceSdk::CUserCmd_csgo& old_cmd ( m_lastCUserCmd[ ph->GetIndex () ] );
+		SourceSdk::CUserCmd_csgo temp_cmd;
+		memcpy((char *)(&temp_cmd) + sizeof(void *), (char *)pCmd + sizeof(void *), sizeof(SourceSdk::CUserCmd_csgo) - sizeof(void *));
 
 		ListenersListT::elem_t* it ( m_listeners.GetFirst () );
 		while( it != nullptr )
@@ -106,7 +108,7 @@ void HOOKFN_INT PlayerRunCommandHookListener::RT_nPlayerRunCommand ( void* This,
 		//if( ret == PlayerRunCommandRet::CONTINUE ) // don't copy something we block or change ...
 		//{
 			// memcpy but skip the virtual table pointer : https://github.com/L-EARN/NoCheatZ-4/issues/16#issuecomment-226697469
-			memcpy ( ( char * ) ( &old_cmd ) + sizeof ( void * ), ( char * ) pCmd + sizeof ( void * ), sizeof ( SourceSdk::CUserCmd_csgo ) - sizeof ( void * ) );
+			memcpy ( ( char * ) ( &old_cmd ) + sizeof ( void * ), ( char * )&temp_cmd + sizeof ( void * ), sizeof ( SourceSdk::CUserCmd_csgo ) - sizeof ( void * ) );
 		//}
 	}
 

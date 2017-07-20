@@ -80,7 +80,7 @@ void* SourceSdk::CreateInterface ( char const * pName, int * pReturnCode )
 
 float Plat_FloatTime ()
 {
-	return ( GlobalTimer::GetInstance ()->GetCurrent () );
+	return ( GlobalTimer::GetInstance ()->GetCurrent () * 0.001f );
 }
 
 float HOOKFN_INT GetTickInterval(void * const preserve_me)
@@ -320,8 +320,6 @@ void CNoCheatZPlugin::Pause ( void )
 //---------------------------------------------------------------------------------
 void CNoCheatZPlugin::UnPause ( void )
 {
-	GlobalTimer::GetInstance ()->EnterSection ();
-
 	Logger::GetInstance ()->Msg<MSG_CONSOLE> ( "Unpausing ..." );
 	BaseSystem::InitSystems ();
 	BanRequest::GetInstance ()->Init ();
@@ -366,8 +364,6 @@ void CNoCheatZPlugin::LevelInit ( char const *pMapName )
 	Logger::GetInstance ()->Msg<MSG_LOG> ( Helpers::format ( "PLAYING ON A NEW MAP : %s", pMapName ) );
 
 	Logger::GetInstance ()->Flush ();
-	
-	GlobalTimer::GetInstance ()->EnterSection (); // reset timer
 	
 	NczPlayerManager::GetInstance ()->OnLevelInit ();
 

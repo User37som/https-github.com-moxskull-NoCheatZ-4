@@ -1,18 +1,12 @@
-version: r{build}
+version: v4-r{build}
 pull_requests:
   do_not_increment_build_number: true
-branches:
-  only:
-  - master
+skip_non_tags: true
 max_jobs: 2
 image: Visual Studio 2017
 configuration:
 - Debug
 - Release
-artifacts:
-  - path: Builds\out\$(configuration)-Windows.zip
-    name: ncz-$(version)-$(configuration)-Windows.zip
-    type: zip
 platform: Win32
 clone_folder: c:\github\NoCheatZ-4
 install:
@@ -40,19 +34,43 @@ build:
   project: nocheatz.sln
   parallel: true
   verbosity: minimal
- 
-before_deploy:
-  - ps: scripts\ci-before-deploy.ps1
-  
+after_build:
+- ps: >-
+    $ErrorActionPreference = 'SilentlyContinue'
+
+    $p0 = $env:configuration + "\*"
+
+    $p3 = $env:configuration + "-Windows.zip"
+
+    $p1 = "out\" + $p3
+
+    $p2 = "Builds\" + $p1
+
+    cd c:\github\NoCheatZ-4\Builds
+
+    Get-ChildItem -Include *.exp | Remove-Item -recurse
+
+    Get-ChildItem -Include *.ilk | Remove-Item -recurse
+
+    Get-ChildItem -Include *.lib | Remove-Item -recurse
+
+    Get-ChildItem -Include *.bsc | Remove-Item -recurse
+
+    Get-ChildItem -Include .gitignore | Remove-Item -recurse
+
+    New-Item -ItemType directory -Path out
+
+    Compress-Archive -Path $p0 -DestinationPath $p1
+
+    cd ..
+
+    Push-AppveyorArtifact $p2 -FileName $p3 -DeploymentName deploy-out
 deploy:
-  release: NoCheatZ-v4-r$(appveyor_build_version)
-  description: ''
-  provider: GitHub
+- provider: GitHub
+  tag: $(appveyor_repo_tag_name)
+  release: NoCheatZ $(appveyor_repo_tag_name)
   auth_token:
-    secure: Fq0z0kE14rIeOVfo5RcAEPMO57YOsEPigKUGbgV7ZiwfFu25w7Qi0ngdhyBYl09k
-  artifact: Builds\out\*
-  draft: false
-  prerelease: false
+    secure: cmeI5Mwc+kiqp/KVpsM++TVOdsmMhb1jIAnW9oeV27mxuQpiHD5uu1zlHCD9ttLA
+  artifact: deploy-out
   on:
-    branch: master
     appveyor_repo_tag: true
