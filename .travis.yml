@@ -3,7 +3,7 @@ compiler:
   - g++
 os: linux
 sudo: required
-dist: precise
+dist: trusty
 branches:
   only:
   - master
