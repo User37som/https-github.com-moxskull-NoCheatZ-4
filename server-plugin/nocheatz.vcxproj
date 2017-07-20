@@ -457,6 +457,7 @@ copy "$(TargetPath)" ..\..\..\game\bin\"$(TargetName)".pdb
     <ClInclude Include="Code\Misc\MathCache.h" />
     <ClInclude Include="Code\Misc\SigHandler.h" />
     <ClInclude Include="Code\Misc\StackWalker.h" />
+    <ClInclude Include="Code\Misc\SvClientsProvider.h" />
     <ClInclude Include="Code\Misc\temp_basiclist.h" />
     <ClInclude Include="Code\Misc\temp_basicstring.h" />
     <ClInclude Include="Code\Misc\temp_singleton.h" />
