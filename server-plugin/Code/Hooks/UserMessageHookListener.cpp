@@ -21,18 +21,15 @@ UserMessageHookListener::ListenersList_t UserMessageHookListener::m_listeners;
 bool UserMessageHookListener::bypass ( false );
 SourceSdk::bf_write* UserMessageHookListener::m_buffer ( nullptr );
 
+HookGuard<UserMessageHookListener> g_HookGuardUserMessageHookListener;
+
 UserMessageHookListener::UserMessageHookListener ()
 {
-	HookGuard<UserMessageHookListener>::Required ();
 }
 
 UserMessageHookListener::~UserMessageHookListener ()
 {
-	if( HookGuard<UserMessageHookListener>::IsCreated () )
-	{
-		HookGuard<UserMessageHookListener>::GetInstance ()->UnhookAll ();
-		HookGuard<UserMessageHookListener>::DestroyInstance ();
-	}
+	g_HookGuardUserMessageHookListener.UnhookAll ();
 }
 
 void UserMessageHookListener::HookUserMessage ()
@@ -45,9 +42,9 @@ void UserMessageHookListener::HookUserMessage ()
 	else
 	{
 		HookInfo usermessagebegin_info ( SourceSdk::InterfacesProxy::m_engineserver, 43, ( DWORD ) RT_nUserMessageBegin );
-		HookGuard<UserMessageHookListener>::GetInstance ()->VirtualTableHook ( usermessagebegin_info, "IVEngineserver::UserMessageBegin" );
+		g_HookGuardUserMessageHookListener.VirtualTableHook ( usermessagebegin_info, "IVEngineserver::UserMessageBegin" );
 		HookInfo messageend_info ( SourceSdk::InterfacesProxy::m_engineserver, 44, ( DWORD ) RT_nMessageEnd );
-		HookGuard<UserMessageHookListener>::GetInstance ()->VirtualTableHook ( messageend_info, "IVEngineserver::MessageEnd" );
+		g_HookGuardUserMessageHookListener.VirtualTableHook ( messageend_info, "IVEngineserver::MessageEnd" );
 	}
 }
 

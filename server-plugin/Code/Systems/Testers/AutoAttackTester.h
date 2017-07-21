@@ -73,10 +73,9 @@ class AutoAttackTester :
 	public BaseTesterSystem,
 	public PlayerDataStructHandler<AttackTriggerStats>,
 	public PlayerRunCommandHookListener,
-	public Singleton<AutoAttackTester>
+	public Singleton
 {
 	typedef PlayerDataStructHandler<AttackTriggerStats> playerdata_class;
-	typedef Singleton<AutoAttackTester> singleton_class;
 
 public:
 	AutoAttackTester ();
@@ -103,6 +102,8 @@ public:
 
 	void FindDetection ( PlayerHandler::iterator ph, tb_int* graph );
 };
+
+extern AutoAttackTester g_AutoAttackTester;
 
 /*
 	This is a temporary hack until I implement the html logs and xml detections

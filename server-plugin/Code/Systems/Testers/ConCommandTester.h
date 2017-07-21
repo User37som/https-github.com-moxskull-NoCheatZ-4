@@ -136,9 +136,8 @@ class ConCommandTester :
 	public BaseTesterSystem,
 	public ConCommandHookListener,
 	public PlayerDataStructHandler<LastPlayerCommandsT>,
-	public Singleton<ConCommandTester>
+	public Singleton
 {
-	typedef Singleton<ConCommandTester> singleton_class;
 	typedef PlayerDataStructHandler<LastPlayerCommandsT> playerdatahandler_class;
 
 private:
@@ -175,6 +174,8 @@ private:
 
 	static bool RT_HookEntCallback ( PlayerHandler::iterator ph, const void* const command, const SourceSdk::CCommand & args );
 };
+
+extern ConCommandTester g_ConCommandTester;
 
 class Detection_CmdFlood : public LogDetection<LastPlayerCommandsT>
 {

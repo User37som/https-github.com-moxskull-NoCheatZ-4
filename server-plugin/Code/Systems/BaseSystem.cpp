@@ -119,7 +119,7 @@ void BaseSystem::ncz_cmd_fn ( const SourceSdk::CCommand &args )
 				{
 					if( it->IsStatic () )
 					{
-						Logger::GetInstance ()->Msg<MSG_CMD_REPLY> ( Helpers::format ( "System %s is static and cannot be loaded or unloaded", it->GetName () ) );
+						g_Logger.Msg<MSG_CMD_REPLY> ( Helpers::format ( "System %s is static and cannot be loaded or unloaded", it->GetName () ) );
 					}
 					else
 					{
@@ -131,7 +131,7 @@ void BaseSystem::ncz_cmd_fn ( const SourceSdk::CCommand &args )
 				{
 					if( it->IsStatic () )
 					{
-						Logger::GetInstance ()->Msg<MSG_CMD_REPLY> ( Helpers::format ( "System %s is static and cannot be loaded or unloaded", it->GetName () ) );
+						g_Logger.Msg<MSG_CMD_REPLY> ( Helpers::format ( "System %s is static and cannot be loaded or unloaded", it->GetName () ) );
 					}
 					else
 					{
@@ -143,7 +143,7 @@ void BaseSystem::ncz_cmd_fn ( const SourceSdk::CCommand &args )
 				{
 					if( it->IsStatic () )
 					{
-						Logger::GetInstance ()->Msg<MSG_CMD_REPLY> ( Helpers::format ( "System %s is static and cannot be loaded or unloaded", it->GetName () ) );
+						g_Logger.Msg<MSG_CMD_REPLY> ( Helpers::format ( "System %s is static and cannot be loaded or unloaded", it->GetName () ) );
 					}
 					else
 					{
@@ -155,7 +155,7 @@ void BaseSystem::ncz_cmd_fn ( const SourceSdk::CCommand &args )
 				{
 					if( it->IsStatic () )
 					{
-						Logger::GetInstance ()->Msg<MSG_CMD_REPLY> ( Helpers::format ( "System %s is static and cannot be loaded or unloaded", it->GetName () ) );
+						g_Logger.Msg<MSG_CMD_REPLY> ( Helpers::format ( "System %s is static and cannot be loaded or unloaded", it->GetName () ) );
 					}
 					else
 					{
@@ -168,7 +168,7 @@ void BaseSystem::ncz_cmd_fn ( const SourceSdk::CCommand &args )
 					if( args.ArgC () > 2 )
 					{
 						it->m_verbose = atoi ( args.Arg ( 3 ) );
-						Logger::GetInstance ()->Msg<MSG_CMD_REPLY> ( Helpers::format ( "System %s verbose level is now %d", it->GetName (), it->m_verbose ) );
+						g_Logger.Msg<MSG_CMD_REPLY> ( Helpers::format ( "System %s verbose level is now %d", it->GetName (), it->m_verbose ) );
 					}
 					return;
 				}
@@ -184,18 +184,18 @@ void BaseSystem::ncz_cmd_fn ( const SourceSdk::CCommand &args )
 #endif
 				else if( !it->sys_cmd_fn ( args ) )
 				{
-					Logger::GetInstance ()->Msg<MSG_CMD_REPLY> ( Helpers::format ( "action %s not found.\nTry : %s", args.Arg ( 2 ), it->cmd_list () ) );
+					g_Logger.Msg<MSG_CMD_REPLY> ( Helpers::format ( "action %s not found.\nTry : %s", args.Arg ( 2 ), it->cmd_list () ) );
 				}
 
 				return;
 			}
 			GetNext ( it );
 		}
-		Logger::GetInstance ()->Msg<MSG_CMD_REPLY> ( Helpers::format ( "System %s not found.", args.Arg ( 1 ) ) );
+		g_Logger.Msg<MSG_CMD_REPLY> ( Helpers::format ( "System %s not found.", args.Arg ( 1 ) ) );
 	}
 	else
 	{
-		Logger::GetInstance ()->Msg<MSG_CMD_REPLY> ( "Usage: ncz system arg1 arg2 ...\nSystems list :\n");
+		g_Logger.Msg<MSG_CMD_REPLY> ( "Usage: ncz system arg1 arg2 ...\nSystems list :\n");
 
 		BaseSystem* it ( GetFirst () );
 		while( it != nullptr )
@@ -222,7 +222,7 @@ void BaseSystem::ncz_cmd_fn ( const SourceSdk::CCommand &args )
 				prepared_message.append ( " (Sleeping - Waiting for players)\n" );
 			}
 			prepared_message.append ( Helpers::format( "\tCommands : %s\n", it->cmd_list () ) );
-			Logger::GetInstance ()->Msg<MSG_CMD_REPLY> ( prepared_message.c_str () );
+			g_Logger.Msg<MSG_CMD_REPLY> ( prepared_message.c_str () );
 			GetNext ( it );
 		}		
 	}
@@ -265,7 +265,7 @@ void BaseDynamicSystem::SetActive ( bool active )
 				// Should load
 				if( this->GotJob () )
 				{
-					Logger::GetInstance ()->Msg<MSG_HINT> ( Helpers::format ( "Starting %s", GetName () ) );
+					g_Logger.Msg<MSG_HINT> ( Helpers::format ( "Starting %s", GetName () ) );
 					Load ();
 					m_isActive = true;
 				}
@@ -282,7 +282,7 @@ void BaseDynamicSystem::SetActive ( bool active )
 	}
 	else
 	{
-		Logger::GetInstance ()->Msg<MSG_HINT> ( Helpers::format ( "Stoping %s", GetName () ) );
+		g_Logger.Msg<MSG_HINT> ( Helpers::format ( "Stoping %s", GetName () ) );
 		m_isActive = false;
 		Unload ();
 	}
@@ -308,12 +308,12 @@ bool BaseTesterSystem::sys_cmd_fn(const SourceSdk::CCommand & args)
 			{
 				basic_string current_action;
 				GetAction(current_action);
-				Logger::GetInstance()->Msg<MSG_CMD_REPLY>(Helpers::format("Action on detection is %s", current_action.c_str()));
+				g_Logger.Msg<MSG_CMD_REPLY>(Helpers::format("Action on detection is %s", current_action.c_str()));
 				return true;
 			}
 			else
 			{
-				Logger::GetInstance()->Msg<MSG_CMD_REPLY>("SetAction Usage : BAN_ASYNC / BAN_NOW / KICK / LOG");
+				g_Logger.Msg<MSG_CMD_REPLY>("SetAction Usage : BAN_ASYNC / BAN_NOW / KICK / LOG");
 			}
 		}
 	}

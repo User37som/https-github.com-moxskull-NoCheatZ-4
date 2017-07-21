@@ -109,9 +109,8 @@ class EyeAnglesTester :
 	public BaseTesterSystem,
 	public PlayerDataStructHandler<EyeAngleInfoT>,
 	public PlayerRunCommandHookListener,
-	public Singleton<EyeAnglesTester>
+	public Singleton
 {
-	typedef Singleton<EyeAnglesTester> singleton_class;
 	typedef PlayerDataStructHandler<EyeAngleInfoT> playerdata_class;
 
 public:
@@ -129,5 +128,7 @@ private:
 
 	virtual PlayerRunCommandRet RT_PlayerRunCommandCallback ( PlayerHandler::iterator ph, void * const cmd, void * const old_cmd ) override final;
 };
+
+extern EyeAnglesTester g_EyeAnglesTester;
 
 #endif

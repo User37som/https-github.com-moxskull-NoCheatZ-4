@@ -29,7 +29,7 @@ AntiFlashbangBlocker::AntiFlashbangBlocker () :
 	IGameEventListener002 (),
 	playerdatahandler_class (),
 	SetTransmitHookListener (),
-	singleton_class ()
+	Singleton ()
 {
 	METRICS_ADD_TIMER ( "AntiFlashbangBlocker::SetTransmitCallback", 10.0 );
 	METRICS_ADD_TIMER ( "AntiFlashbangBlocker::FireGameEvent", 2.0 );
@@ -115,7 +115,7 @@ void AntiFlashbangBlocker::FireGameEvent ( SourceSdk::IGameEvent* ev ) // player
 {
 	METRICS_ENTER_SECTION ( "AntiFlashbangBlocker::FireGameEvent" );
 
-	PlayerHandler::iterator ph ( NczPlayerManager::GetInstance ()->GetPlayerHandlerByUserId ( ev->GetInt ( "userid", 0 ) ) );
+	PlayerHandler::iterator ph ( g_NczPlayerManager.GetPlayerHandlerByUserId ( ev->GetInt ( "userid", 0 ) ) );
 	if( !ph )
 	{
 		METRICS_LEAVE_SECTION ( "AntiFlashbangBlocker::FireGameEvent" );
@@ -125,8 +125,8 @@ void AntiFlashbangBlocker::FireGameEvent ( SourceSdk::IGameEvent* ev ) // player
 	if( ph >= SlotStatus::PLAYER_CONNECTED )
 	{
 		FlashInfoT* const pInfo ( GetPlayerDataStruct ( *ph ) );
-		const float flash_alpha ( *EntityProps::GetInstance ()->GetPropValue<float, PROP_FLASH_MAX_ALPHA> ( ph->GetEdict () ) );
-		const float flash_duration ( *EntityProps::GetInstance ()->GetPropValue<float, PROP_FLASH_DURATION> ( ph->GetEdict () ) );
+		const float flash_alpha ( *g_EntityProps.GetPropValue<float, PROP_FLASH_MAX_ALPHA> ( ph->GetEdict () ) );
+		const float flash_duration ( *g_EntityProps.GetPropValue<float, PROP_FLASH_DURATION> ( ph->GetEdict () ) );
 
 		DebugMessage ( Helpers::format ( "Player %s flash alpha %f, duration %f", ph->GetName(), flash_alpha, flash_duration ) );
 
@@ -168,3 +168,5 @@ void AntiFlashbangBlocker::RT_ProcessOnTick ( float const & curtime )
 		}
 	}
 }
+
+AntiFlashbangBlocker g_AntiFlashbangBlocker;

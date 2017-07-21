@@ -76,4 +76,6 @@ private:
 	
 };
 
+extern HookGuard<OnGroundHookListener> g_HookGuardOnGroundHookListener;
+
 #endif

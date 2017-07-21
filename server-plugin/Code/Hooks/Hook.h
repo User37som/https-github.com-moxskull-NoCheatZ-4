@@ -114,12 +114,12 @@ class HookGuard :
 	public Singleton< HookGuard < CallerTicket > >
 {
 private:
-	typedef Singleton< HookGuard < CallerTicket > > singleton_class;
+	typedef Singleton< HookGuard < CallerTicket > > Singleton;
 
 	hooked_list_t m_list;
 
 public:
-	HookGuard () : singleton_class ()
+	HookGuard () : Singleton ()
 	{}
 	virtual ~HookGuard () final
 	{};
@@ -136,7 +136,7 @@ public:
 		DWORD dwOld;
 		if( !VirtualProtect ( info.vf_entry, 2 * sizeof ( DWORD* ), PAGE_EXECUTE_READWRITE, &dwOld ) )
 		{
-			Logger::GetInstance ()->Msg<MSG_ERROR> ( Helpers::format( "VirtualTableHook %s: VirtualProtect error -> Cannot hook function", debugname ) );
+			g_Logger.Msg<MSG_ERROR> ( Helpers::format( "VirtualTableHook %s: VirtualProtect error -> Cannot hook function", debugname ) );
 			if (m_list.HasElement(info))
 				m_list.FindAndRemove(info);
 			return;
@@ -146,7 +146,7 @@ public:
 		void *p ( ( void * ) ( ( DWORD ) ( info.vf_entry ) & ~( psize - 1 ) ) );
 		if( mprotect ( p, ( ( 2 * sizeof ( void * ) ) + ( ( DWORD ) ( info.vf_entry ) & ( psize - 1 ) ) ), PROT_READ | PROT_WRITE | PROT_EXEC ) < 0 )
 		{
-			Logger::GetInstance ()->Msg<MSG_ERROR> ( Helpers::format( "VirtualTableHook %s: mprotect error -> Cannot hook function", debugname ) );
+			g_Logger.Msg<MSG_ERROR> ( Helpers::format( "VirtualTableHook %s: mprotect error -> Cannot hook function", debugname ) );
 			if (m_list.HasElement(info))
 				m_list.FindAndRemove(info);
 			return;
@@ -157,14 +157,14 @@ public:
 
 		if( info.oldFn && info.oldFn != SafePtrDeref(info.vf_entry) )
 		{
-			Logger::GetInstance ()->Msg<MSG_WARNING> ( Helpers::format ( "VirtualTableHook %s: Unexpected virtual table value in VirtualTableHook. Module %s might be in conflict.", debugname, GetModuleNameFromMemoryAddress (SafePtrDeref(info.vf_entry) ).c_str () ) );
+			g_Logger.Msg<MSG_WARNING> ( Helpers::format ( "VirtualTableHook %s: Unexpected virtual table value in VirtualTableHook. Module %s might be in conflict.", debugname, GetModuleNameFromMemoryAddress (SafePtrDeref(info.vf_entry) ).c_str () ) );
 			can_hook = force;
 		}
 		else if( info.newFn == *info.vf_entry )
 		{
 			if( !m_list.HasElement ( info ) )
 			{
-				Logger::GetInstance ()->Msg<MSG_WARNING> (Helpers::format("VirtualTableHook %s: Virtual function pointer 0x%X was the same but not registered as hooked ...", debugname, info.newFn ));
+				g_Logger.Msg<MSG_WARNING> (Helpers::format("VirtualTableHook %s: Virtual function pointer 0x%X was the same but not registered as hooked ...", debugname, info.newFn ));
 				info.ishooked = true;
 				info.debugname = debugname;
 				m_list.AddToTail ( info );

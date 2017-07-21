@@ -70,4 +70,6 @@ private:
 #endif
 };
 
+extern HookGuard<WeaponHookListener> g_HookGuardWeaponHookListener;
+
 #endif

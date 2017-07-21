@@ -213,7 +213,7 @@ public:
 		return (float)(ElapsedMilliseconds.QuadPart);
 #else
 		clock_gettime(CLOCK_MONOTONIC, &EndingTime);
-		ElapsedMilliseconds = (float)(EndingTime.tv_sec - StartingTime.tv_sec) * 1000.0f + (float)(EndingTime.tv_nsec - StartingTime.tv_nsec) * 0.000000001f;
+		ElapsedMilliseconds = (float)(EndingTime.tv_sec - StartingTime.tv_sec) * 1000.0f + (float)(EndingTime.tv_nsec - StartingTime.tv_nsec) * 0.000001f;
 		return ElapsedMilliseconds;
 #endif
 	}
@@ -448,7 +448,7 @@ public:
 
 #endif // NCZ_USE_METRICS
 
-typedef Singleton<MetricsTimer> GlobalTimer;
+extern MetricsTimer g_GlobalTimer;
 
 extern float Plat_FloatTime();
 

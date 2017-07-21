@@ -124,10 +124,9 @@ class WallhackBlocker :
 	private OnTickListener,
 	public PlayerDataStructHandler<ClientDataS>,
 	private SetTransmitHookListener,
-	public Singleton<WallhackBlocker>,
+	public Singleton,
 	private WeaponHookListener
 {
-	typedef Singleton<WallhackBlocker> singleton_class;
 	typedef PlayerDataStructHandler<ClientDataS> playerdatahandler_class;
 
 private:
@@ -178,5 +177,7 @@ private:
 	bool RT_IsVisible ( const SourceSdk::Vector& origin, const SourceSdk::Vector& target, const SourceSdk::Vector& mins, const SourceSdk::Vector& maxs, const SourceSdk::vec_t scale = 1.0 );
 
 };
+
+extern WallhackBlocker g_WallhackBlocker;
 
 #endif // WALLHACKBLOCKER_H

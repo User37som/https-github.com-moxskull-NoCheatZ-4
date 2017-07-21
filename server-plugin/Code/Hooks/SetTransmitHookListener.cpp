@@ -26,25 +26,17 @@
 
 SetTransmitHookListener::TransmitListenersListT SetTransmitHookListener::m_listeners;
 
+HookGuard<SetTransmitHookListener> g_HookGuardSetTransmitHookListener;
+HookGuard<SetTransmitHookListenerWeapon> g_HookGuardSetTransmitHookListenerWeapon;
+
 SetTransmitHookListener::SetTransmitHookListener ()
 {
-	HookGuard<SetTransmitHookListener>::Required ();
-	HookGuard<SetTransmitHookListenerWeapon>::Required();
 }
 
 SetTransmitHookListener::~SetTransmitHookListener ()
 {
-	if( HookGuard<SetTransmitHookListener>::IsCreated () )
-	{
-		HookGuard<SetTransmitHookListener>::GetInstance ()->UnhookAll ();
-		HookGuard<SetTransmitHookListener>::DestroyInstance ();
-	}
-
-	if (HookGuard<SetTransmitHookListenerWeapon>::IsCreated())
-	{
-		HookGuard<SetTransmitHookListenerWeapon>::GetInstance()->UnhookAll();
-		HookGuard<SetTransmitHookListenerWeapon>::DestroyInstance();
-	}
+	g_HookGuardSetTransmitHookListener.UnhookAll ();
+	g_HookGuardSetTransmitHookListenerWeapon.UnhookAll();
 }
 
 void SetTransmitHookListener::HookSetTransmit ( SourceSdk::edict_t const * const ent, bool isplayer )
@@ -54,13 +46,13 @@ void SetTransmitHookListener::HookSetTransmit ( SourceSdk::edict_t const * const
 
 	if (isplayer)
 	{
-		HookInfo info(unk, ConfigManager::GetInstance()->vfid_settransmit, (DWORD)RT_nSetTransmit);
-		HookGuard<SetTransmitHookListener>::GetInstance()->VirtualTableHook(info, "CBaseEntity::SetTransmit");
+		HookInfo info(unk, g_ConfigManager.vfid_settransmit, (DWORD)RT_nSetTransmit);
+		g_HookGuardSetTransmitHookListener.VirtualTableHook(info, "CBaseEntity::SetTransmit");
 	}
 	else
 	{
-		HookInfo info(unk, ConfigManager::GetInstance()->vfid_settransmit, (DWORD)RT_nSetTransmitWeapon);
-		HookGuard<SetTransmitHookListenerWeapon>::GetInstance()->VirtualTableHook(info, "CBaseEntity::SetTransmit (Weapon)");
+		HookInfo info(unk, g_ConfigManager.vfid_settransmit, (DWORD)RT_nSetTransmitWeapon);
+		g_HookGuardSetTransmitHookListenerWeapon.VirtualTableHook(info, "CBaseEntity::SetTransmit (Weapon)");
 	}
 }
 
@@ -75,8 +67,7 @@ void HOOKFN_INT SetTransmitHookListener::RT_nSetTransmit ( void * const This, vo
 
 	if( !bAlways && !( m_listeners.GetFirst () == nullptr ) && receiver_assumed_player > SlotStatus::PLAYER_CONNECTING )
 	{
-		NczPlayerManager const * const inst ( NczPlayerManager::GetInstance () );
-		PlayerHandler::iterator sender_assumed_client ( inst->GetPlayerHandlerByBasePlayer ( This ) );
+		PlayerHandler::iterator sender_assumed_client ( g_NczPlayerManager.GetPlayerHandlerByBasePlayer ( This ) );
 
 		if( sender_assumed_client != receiver_assumed_player && sender_assumed_client != SlotStatus::PLAYER_CONNECTING && sender_assumed_client >= SlotStatus::BOT )
 		{
@@ -93,7 +84,7 @@ void HOOKFN_INT SetTransmitHookListener::RT_nSetTransmit ( void * const This, vo
 		}
 	}
 
-	*(uint32_t*)&(gpOldFn) = HookGuard<SetTransmitHookListener>::GetInstance()->RT_GetOldFunction(This, ConfigManager::GetInstance()->vfid_settransmit);
+	*(uint32_t*)&(gpOldFn) = g_HookGuardSetTransmitHookListener.RT_GetOldFunction(This, g_ConfigManager.vfid_settransmit);
 	gpOldFn ( This, pInfo, bAlways );
 }
 
@@ -121,7 +112,7 @@ void HOOKFN_INT SetTransmitHookListener::RT_nSetTransmitWeapon(void * const This
 		}
 	}
 
-	*(uint32_t*)&(gpOldFn) = HookGuard<SetTransmitHookListenerWeapon>::GetInstance()->RT_GetOldFunction(This, ConfigManager::GetInstance()->vfid_settransmit);
+	*(uint32_t*)&(gpOldFn) = g_HookGuardSetTransmitHookListenerWeapon.RT_GetOldFunction(This, g_ConfigManager.vfid_settransmit);
 	gpOldFn(This, pInfo, bAlways);
 }
 

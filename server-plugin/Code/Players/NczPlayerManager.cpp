@@ -58,7 +58,7 @@ void NczPlayerManager::ResetRange()
 }
 
 NczPlayerManager::NczPlayerManager () :
-	singleton_class (),
+	Singleton (),
 	m_max_index ( 0 )
 {
 	PlayerHandler::invalid = FullHandlersList;
@@ -201,7 +201,7 @@ void NczPlayerManager::ClientDisconnect ( SourceSdk::edict_t* pEntity )
 
 	if (FullHandlersList[index].playerClass->GetDetected())
 	{
-		AutoTVRecord::GetInstance()->OnDetectedPlayerDisconnect();
+		g_AutoTVRecord.OnDetectedPlayerDisconnect();
 	}
 
 	FullHandlersList[ index ].Reset ();
@@ -248,13 +248,13 @@ bot_takeover
 		}
 
 		//ProcessFilter::HumanAtLeastConnected filter_class;
-		//if( GetPlayerCount ( &filter_class ) == 0 ) AutoTVRecord::GetInstance ()->StopRecord ();
+		//if( GetPlayerCount ( &filter_class ) == 0 ) g_AutoTVRecord.StopRecord ();
 
 		BaseSystem::ManageSystems ();
 
-		AutoTVRecord::GetInstance()->OnRoundStart();
+		g_AutoTVRecord.OnRoundStart();
 
-		Logger::GetInstance ()->Flush ();
+		g_Logger.Flush ();
 
 		return;
 	}
@@ -315,11 +315,11 @@ bot_takeover
 			if( SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive )
 			{
 				SourceSdk::IGameEvent_csgo* rev ( reinterpret_cast< SourceSdk::IGameEvent_csgo* >( ev ) );
-				Logger::GetInstance ()->Msg<MSG_LOG> ( Helpers::format ( "Player connect : %s [%s]", rev->GetString ( "name", "unknown-name" ), rev->GetString ( "networkid", "unknown-networkid" ) ) );
+				g_Logger.Msg<MSG_LOG> ( Helpers::format ( "Player connect : %s [%s]", rev->GetString ( "name", "unknown-name" ), rev->GetString ( "networkid", "unknown-networkid" ) ) );
 			}
 			else
 			{
-				Logger::GetInstance ()->Msg<MSG_LOG> ( Helpers::format ( "Player connect : %s [%s - %s]", ev->GetString ( "name", "unknown-name" ), ev->GetString ( "networkid", "unknown-networkid" ), ev->GetString ( "address", "unknown-address" ) ) );
+				g_Logger.Msg<MSG_LOG> ( Helpers::format ( "Player connect : %s [%s - %s]", ev->GetString ( "name", "unknown-name" ), ev->GetString ( "networkid", "unknown-networkid" ), ev->GetString ( "address", "unknown-address" ) ) );
 			}
 		}
 
@@ -334,12 +334,12 @@ bot_takeover
 				SourceSdk::IGameEvent_csgo* rev ( reinterpret_cast< SourceSdk::IGameEvent_csgo* >( ev ) );
 				if( !rev->IsEmpty ( "name" ) )
 				{
-					Logger::GetInstance ()->Msg<MSG_LOG> ( Helpers::format ( "Player disconnect : %s [%s] -> Reason : %s", rev->GetString ( "name", "unknown-name" ), rev->GetString ( "networkid", "unknown-networkid" ), rev->GetString ( "reason", "unknown-reason" ) ) );
+					g_Logger.Msg<MSG_LOG> ( Helpers::format ( "Player disconnect : %s [%s] -> Reason : %s", rev->GetString ( "name", "unknown-name" ), rev->GetString ( "networkid", "unknown-networkid" ), rev->GetString ( "reason", "unknown-reason" ) ) );
 				}
 			}
 			else
 			{
-				Logger::GetInstance ()->Msg<MSG_LOG> ( Helpers::format ( "Player disconnect : %s [%s - %s] -> Reason : %s", ev->GetString ( "name", "unknown-name" ), ev->GetString ( "networkid", "unknown-networkid" ), ev->GetString ( "address", "unknown-address" ), ev->GetString ( "reason", "unknown-reason" ) ) );
+				g_Logger.Msg<MSG_LOG> ( Helpers::format ( "Player disconnect : %s [%s - %s] -> Reason : %s", ev->GetString ( "name", "unknown-name" ), ev->GetString ( "networkid", "unknown-networkid" ), ev->GetString ( "address", "unknown-address" ), ev->GetString ( "reason", "unknown-reason" ) ) );
 			}
 		}
 
@@ -470,7 +470,7 @@ void NczPlayerManager::RT_Think ( float const & curtime )
 			++in_tests_count;
 		}
 	}
-	if( in_tests_count >= AutoTVRecord::GetInstance()->GetMinPlayers()) AutoTVRecord::GetInstance ()->StartRecord ();
+	if( in_tests_count >= g_AutoTVRecord.GetMinPlayers()) g_AutoTVRecord.StartRecord ();
 }
 
 PlayerHandler::iterator NczPlayerManager::GetPlayerHandlerByBasePlayer ( void * const BasePlayer ) const
@@ -532,3 +532,5 @@ short NczPlayerManager::GetPlayerCount ( BaseProcessFilter const * const filter 
 	}
 	return count;
 }
+
+NczPlayerManager g_NczPlayerManager;

@@ -75,10 +75,9 @@ class SpeedTester :
 	private OnTickListener,
 	public PlayerDataStructHandler<SpeedHolderT>,
 	private PlayerRunCommandHookListener,
-	public Singleton<SpeedTester>
+	public Singleton
 {
 	typedef PlayerDataStructHandler<SpeedHolderT> playerdata_class;
-	typedef Singleton<SpeedTester> singleton_class;
 
 public:
 	SpeedTester ();
@@ -97,5 +96,7 @@ private:
 
 	virtual PlayerRunCommandRet RT_PlayerRunCommandCallback ( PlayerHandler::iterator ph, void * const cmd, void * const old_cmd ) override final;
 };
+
+extern SpeedTester g_SpeedTester;
 
 #endif // SPEEDTESTER_H

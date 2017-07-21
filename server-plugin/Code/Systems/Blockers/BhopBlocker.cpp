@@ -25,7 +25,7 @@ BhopBlocker::BhopBlocker () :
 	BaseBlockerSystem( "BhopBlocker" ),
 	playerdatahandler_class (),
 	PlayerRunCommandHookListener (),
-	singleton_class (),
+	Singleton (),
 	convar_sv_enablebunnyhopping(nullptr),
 	convar_sv_autobunnyhopping(nullptr)
 {
@@ -45,7 +45,7 @@ void BhopBlocker::Init ()
 
 	if( convar_sv_enablebunnyhopping == nullptr )
 	{
-		Logger::GetInstance ()->Msg<MSG_WARNING> ( "JumpTester::Init : Unable to locate ConVar sv_enablebunnyhopping" );
+		g_Logger.Msg<MSG_WARNING> ( "JumpTester::Init : Unable to locate ConVar sv_enablebunnyhopping" );
 	}
 
 	if( SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive )
@@ -54,7 +54,7 @@ void BhopBlocker::Init ()
 
 		if( convar_sv_enablebunnyhopping == nullptr )
 		{
-			Logger::GetInstance ()->Msg<MSG_WARNING> ( "JumpTester::Init : Unable to locate ConVar sv_enablebunnyhopping" );
+			g_Logger.Msg<MSG_WARNING> ( "JumpTester::Init : Unable to locate ConVar sv_enablebunnyhopping" );
 		}
 	}
 }
@@ -239,3 +239,5 @@ void BhopBlocker::RT_m_hGroundEntityStateChangedCallback ( PlayerHandler::iterat
 		pdata->on_ground_tick = Helpers::GetGameTickCount ();
 	}
 }
+
+BhopBlocker g_BhopBlocker;

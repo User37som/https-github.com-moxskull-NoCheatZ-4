@@ -34,7 +34,7 @@ struct MathInfo
 };
 
 class MathCache :
-	public Singleton<MathCache>
+	public Singleton
 {
 private:
 	struct CacheInfo
@@ -64,5 +64,7 @@ inline void MathCache::RT_SetCacheExpired ()
 {
 	memset ( m_cache, 0, ( uint8_t* ) ( &m_cache[ 66 ] ) - ( uint8_t* ) ( m_cache ) );
 }
+
+extern MathCache g_MathCache;
 
 #endif

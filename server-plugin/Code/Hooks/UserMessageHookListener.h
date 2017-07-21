@@ -84,4 +84,6 @@ private:
 #endif
 };
 
+extern HookGuard<UserMessageHookListener> g_HookGuardUserMessageHookListener;
+
 #endif

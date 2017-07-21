@@ -128,7 +128,7 @@ typedef struct CurrentConVarRequest
 		else
 		{
 			status = ConVarRequestStatus::NOT_PROCESSING;
-			Logger::GetInstance ()->Msg<MSG_ERROR> ( "ConVarTester : StartQueryCvarValue returned InvalidQueryCvarCookie" );
+			g_Logger.Msg<MSG_ERROR> ( "ConVarTester : StartQueryCvarValue returned InvalidQueryCvarCookie" );
 		}
 	}
 } CurrentConVarRequestT;
@@ -181,9 +181,8 @@ class ConVarTester :
 	public BaseTesterSystem,
 	public OnTickListener,
 	public PlayerDataStructHandler<CurrentConVarRequestT>,
-	public Singleton<ConVarTester>
+	public Singleton
 {
-	typedef Singleton<ConVarTester> singleton_class;
 	typedef PlayerDataStructHandler<CurrentConVarRequestT> playerdata_class;
 
 	friend Detection_ConVar;
@@ -227,5 +226,7 @@ private:
 
 	PlayerHandler::iterator m_current_player;
 };
+
+extern ConVarTester g_ConVarTester;
 
 #endif // CONVARTESTER_H

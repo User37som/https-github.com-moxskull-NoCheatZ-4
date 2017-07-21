@@ -88,5 +88,7 @@ private:
 #endif
 };
 
+extern HookGuard<ConCommandHookListener> g_HookGuardConCommandHookListener;
+
 
 #endif // CONCOMMANDHOOKLISTENER

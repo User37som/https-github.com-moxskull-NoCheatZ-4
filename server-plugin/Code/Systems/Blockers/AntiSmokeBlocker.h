@@ -76,9 +76,8 @@ class AntiSmokeBlocker :
 	private OnTickListener,
 	public PlayerDataStructHandler<SmokeInfoT>,
 	private SetTransmitHookListener,
-	public Singleton<AntiSmokeBlocker>
+	public Singleton
 {
-	typedef Singleton<AntiSmokeBlocker> singleton_class;
 	typedef PlayerDataStructHandler<SmokeInfoT> playerdatahandler_class;
 
 private:
@@ -104,5 +103,7 @@ private:
 
 	virtual bool RT_SetTransmitCallback ( PlayerHandler::iterator sender, PlayerHandler::iterator receiver ) override final;
 };
+
+extern AntiSmokeBlocker g_AntiSmokeBlocker;
 
 #endif // ANTIFLASHBANGBLOCKER_H

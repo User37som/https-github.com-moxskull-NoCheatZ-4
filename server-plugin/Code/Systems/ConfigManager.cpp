@@ -73,22 +73,22 @@ bool GetIniAttributeValue ( std::ifstream & file, basic_string const & root, bas
 		}
 		else
 		{
-			Logger::GetInstance ()->Msg<MSG_ERROR> ( Helpers::format ( "ConfigManager::GetIniAttributeValue : Cannot find root %s", root.c_str ()) );
+			g_Logger.Msg<MSG_ERROR> ( Helpers::format ( "ConfigManager::GetIniAttributeValue : Cannot find root %s", root.c_str ()) );
 		}
 	}
 	else
 	{
-		Logger::GetInstance ()->Msg<MSG_ERROR> (  "ConfigManager::GetIniAttributeValue : Cannot read ini file" );
+		g_Logger.Msg<MSG_ERROR> (  "ConfigManager::GetIniAttributeValue : Cannot read ini file" );
 	}
 	value = "";
-	if(!first_chance) Logger::GetInstance ()->Msg<MSG_ERROR> ( Helpers::format("ConfigManager::GetIniAttributeValue : Cannot find attribute %s -> %s", root.c_str(), attrib.c_str() ));
+	if(!first_chance) g_Logger.Msg<MSG_ERROR> ( Helpers::format("ConfigManager::GetIniAttributeValue : Cannot find attribute %s -> %s", root.c_str(), attrib.c_str() ));
 	return false;
 }
 
 float ConfigManager::tickinterval(0.0f);
 
 ConfigManager::ConfigManager () :
-	singleton_class (),
+	Singleton (),
 	content_version ( 2 ),
 	m_playerdataclass ( "" ),
 	m_smoke_radius ( 0.0f ),
@@ -203,11 +203,11 @@ bool ConfigManager::LoadConfig ()
 						if (system)
 						{
 							system->SetDisabledByConfigIni();
-							Logger::GetInstance()->Msg<MSG_CONSOLE>(Helpers::format("ConfigManager : Disabled system %s", it->c_str()));
+							g_Logger.Msg<MSG_CONSOLE>(Helpers::format("ConfigManager : Disabled system %s", it->c_str()));
 						}
 						else
 						{
-							Logger::GetInstance()->Msg<MSG_ERROR>(Helpers::format("ConfigManager : Unable to disable system %s -> system not known", it->c_str()));
+							g_Logger.Msg<MSG_ERROR>(Helpers::format("ConfigManager : Unable to disable system %s -> system not known", it->c_str()));
 						}
 					}
 				}
@@ -226,11 +226,11 @@ bool ConfigManager::LoadConfig ()
 						if (system)
 						{
 							system->SetDisabledByConfigIni();
-							Logger::GetInstance()->Msg<MSG_CONSOLE>(Helpers::format("ConfigManager : Disabled system %s", it->c_str()));
+							g_Logger.Msg<MSG_CONSOLE>(Helpers::format("ConfigManager : Disabled system %s", it->c_str()));
 						}
 						else
 						{
-							Logger::GetInstance()->Msg<MSG_ERROR>(Helpers::format("ConfigManager : Unable to disable system %s -> system not known", it->c_str()));
+							g_Logger.Msg<MSG_ERROR>(Helpers::format("ConfigManager : Unable to disable system %s -> system not known", it->c_str()));
 						}
 					}
 				}
@@ -247,12 +247,12 @@ bool ConfigManager::LoadConfig ()
 		}
 		else
 		{
-			Logger::GetInstance ()->Msg<MSG_ERROR> (  "ConfigManager::LoadConfig : content_version mismatch"  );
+			g_Logger.Msg<MSG_ERROR> (  "ConfigManager::LoadConfig : content_version mismatch"  );
 		}
 	}
 	else
 	{
-		Logger::GetInstance ()->Msg<MSG_ERROR> ( "ConfigManager::LoadConfig : Cannot open config.ini"  );
+		g_Logger.Msg<MSG_ERROR> ( "ConfigManager::LoadConfig : Cannot open config.ini"  );
 	}
 
 	return false;
@@ -280,3 +280,5 @@ bool ConfigManager::IsAdmin(char const * steamid)
 		return false;
 	}
 }
+
+ConfigManager g_ConfigManager;

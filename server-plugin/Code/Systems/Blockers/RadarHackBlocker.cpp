@@ -27,7 +27,7 @@ RadarHackBlocker::RadarHackBlocker () :
 	BaseBlockerSystem( "RadarHackBlocker" ),
 	OnTickListener (),
 	playerdatahandler_class (),
-	singleton_class (),
+	Singleton (),
 	ThinkPostHookListener (),
 	UserMessageHookListener (),
 	m_players_spotted ( nullptr ),
@@ -60,8 +60,8 @@ void RadarHackBlocker::OnMapStart ()
 #undef GetClassName
 					if( basic_string ( "cs_player_manager" ).operator==( ent->GetClassName () ) )
 					{
-						m_players_spotted = EntityProps::GetInstance ()->GetPropValue<bool, PROP_PLAYER_SPOTTED> ( ent );
-						m_bomb_spotted = EntityProps::GetInstance ()->GetPropValue<bool, PROP_BOMB_SPOTTED> ( ent );
+						m_players_spotted = g_EntityProps.GetPropValue<bool, PROP_PLAYER_SPOTTED> ( ent );
+						m_bomb_spotted = g_EntityProps.GetPropValue<bool, PROP_BOMB_SPOTTED> ( ent );
 						ThinkPostHookListener::HookThinkPost ( ent );
 						break;
 					}
@@ -143,7 +143,7 @@ bool RadarHackBlocker::RT_UserMessageBeginCallback ( SourceSdk::IRecipientFilter
 
 void RadarHackBlocker::RT_SendApproximativeRadarUpdate ( MRecipientFilter & filter, ClientRadarData const * pData ) const
 {
-	MathInfo const & player_maths ( MathCache::GetInstance ()->RT_GetCachedMaths ( pData->m_origin_index ) );
+	MathInfo const & player_maths ( g_MathCache.RT_GetCachedMaths ( pData->m_origin_index ) );
 
 	if( SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive )
 	{
@@ -226,7 +226,7 @@ void RadarHackBlocker::RT_ProcessEntity ( SourceSdk::edict_t const * const pent 
 			Entity is spotted -> send approximative data to all players
 		*/
 
-		filter.AddAllPlayers ( NczPlayerManager::GetInstance ()->GetMaxIndex () );
+		filter.AddAllPlayers ( g_NczPlayerManager.GetMaxIndex () );
 
 		RT_SendApproximativeRadarUpdate ( filter, pData );
 	}
@@ -305,3 +305,5 @@ void RadarHackBlocker::RT_ProcessOnTick ( float const & curtime )
 		m_next_process = curtime + 2.0f;
 	}
 }
+
+RadarHackBlocker g_RadarHackBlocker;

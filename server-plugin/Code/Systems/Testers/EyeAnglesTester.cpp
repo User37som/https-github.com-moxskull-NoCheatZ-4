@@ -25,7 +25,7 @@ EyeAnglesTester::EyeAnglesTester ( void ) :
 	BaseTesterSystem ( "EyeAnglesTester" ),
 	playerdata_class (),
 	PlayerRunCommandHookListener (),
-	singleton_class ()
+	Singleton ()
 {}
 
 EyeAnglesTester::~EyeAnglesTester ( void )
@@ -65,7 +65,7 @@ bool EyeAnglesTester::GotJob () const
 
 PlayerRunCommandRet EyeAnglesTester::RT_PlayerRunCommandCallback ( PlayerHandler::iterator ph, void * const pCmd, void * const old_cmd )
 {
-	int const * const flags ( EntityProps::GetInstance ()->GetPropValue<int, PROP_FLAGS> ( ph->GetEdict () ) );
+	int const * const flags ( g_EntityProps.GetPropValue<int, PROP_FLAGS> ( ph->GetEdict () ) );
 
 	/*
 		FL_FROZEN			(1 << 5)
@@ -128,6 +128,8 @@ PlayerRunCommandRet EyeAnglesTester::RT_PlayerRunCommandCallback ( PlayerHandler
 
 	return drop_cmd;
 }
+
+EyeAnglesTester g_EyeAnglesTester;
 
 basic_string Detection_EyeAngle::GetDataDump ()
 {

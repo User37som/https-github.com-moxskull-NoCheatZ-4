@@ -106,13 +106,15 @@ basic_string const & EntityProps::PropIdToString<PROP_LERP_TIME> ()
 	return v;
 }
 
+EntityProps g_EntityProps;
+
 SourceSdk::datamap_t* GetDataDescMap ( SourceSdk::edict_t* const pEntity )
 {
 	SourceSdk::CBaseEntity* const baseEnt ( pEntity->GetUnknown ()->GetBaseEntity () );
 	const DWORD* pdwInterface ( IFACE_PTR ( baseEnt ) );
 
 	GetDataDescMap_t fn;
-	*( DWORD* )&( fn ) = pdwInterface[ ConfigManager::GetInstance ()->vfid_getdatadescmap ];
+	*( DWORD* )&( fn ) = pdwInterface[ g_ConfigManager.vfid_getdatadescmap ];
 
 	return fn ( baseEnt );
 }

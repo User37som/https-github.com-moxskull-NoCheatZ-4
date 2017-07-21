@@ -73,4 +73,6 @@ private:
 #endif
 };
 
+extern HookGuard<PlayerRunCommandHookListener> g_HookGuardPlayerRunCommandHookListener;
+
 #endif

@@ -23,7 +23,7 @@ BadUserCmdTester::BadUserCmdTester() :
 	BaseTesterSystem ( "BadUserCmdTester" ),
 	playerdatahandler_class (),
 	PlayerRunCommandHookListener (),
-	singleton_class ()
+	Singleton ()
 {
 }
 
@@ -183,6 +183,8 @@ PlayerRunCommandRet BadUserCmdTester::RT_PlayerRunCommandCallback ( PlayerHandle
 
 	return PlayerRunCommandRet::CONTINUE;
 }
+
+BadUserCmdTester g_BadUserCmdTester;
 
 basic_string Detection_BadUserCmd::GetDataDump()
 {

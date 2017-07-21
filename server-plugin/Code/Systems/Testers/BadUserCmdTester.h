@@ -87,9 +87,8 @@ class BadUserCmdTester :
 	public BaseTesterSystem,
 	public PlayerDataStructHandler<UserCmdInfo>,
 	public PlayerRunCommandHookListener,
-	public Singleton<BadUserCmdTester>
+	public Singleton
 {
-	typedef Singleton<BadUserCmdTester> singleton_class;
 	typedef PlayerDataStructHandler<UserCmdInfo> playerdatahandler_class;
 
 public:
@@ -106,5 +105,7 @@ public:
 
 	virtual PlayerRunCommandRet RT_PlayerRunCommandCallback ( PlayerHandler::iterator ph, void * const cmd, void * const old_cmd ) override final;
 };
+
+extern BadUserCmdTester g_BadUserCmdTester;
 
 #endif // BADUSERCMDBLOCKER_H
