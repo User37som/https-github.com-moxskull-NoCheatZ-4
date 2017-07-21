@@ -95,7 +95,7 @@ ConfigManager::ConfigManager () :
 	m_innersmoke_radius_sqr ( 0.0f ),
 	m_smoke_timetobang ( 0.0f ),
 	m_smoke_time ( 0.0f ),
-	tickrate_override(0),
+	tickrate_override(0.0f),
 	vfid_getdatadescmap ( 0 ),
 	vfid_settransmit ( 0 ),
 	vfid_mhgroundentity ( 0 ),
@@ -161,8 +161,8 @@ bool ConfigManager::LoadConfig ()
 
 			if (!GetIniAttributeValue(file, "CONFIG", "tickrate_override", value))
 				if (!GetIniAttributeValue(file, gamename, "tickrate_override", value, false)) return false;
-			tickrate_override = atoi(value.c_str());
-			if (tickrate_override == 0) return false;
+			tickrate_override = atof(value.c_str());
+			if (tickrate_override == 0.0f) return false;
 			tickinterval = 1.0f / tickrate_override;
 
 			// load some strings
