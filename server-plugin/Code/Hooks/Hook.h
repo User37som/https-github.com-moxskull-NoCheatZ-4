@@ -328,7 +328,7 @@ class HookListenersList
 {
 	typedef SortedListener<C> inner_type;
 public:
-	struct alignas(8) elem_t :
+	struct elem_t :
 		HeapMemoryManager::OverrideNew<8>
 	{
 		elem_t ()

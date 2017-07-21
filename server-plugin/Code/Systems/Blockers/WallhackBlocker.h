@@ -54,7 +54,7 @@ struct ClientDataS
 	};
 };
 
-struct alignas(4) VisInfo
+struct VisInfo
 {
 	bool m_visible;
 	bool m_valid;

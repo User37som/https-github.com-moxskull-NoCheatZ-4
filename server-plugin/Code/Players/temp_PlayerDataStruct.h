@@ -22,7 +22,7 @@
 #include "Misc/Helpers.h"
 
 template <typename DataT>
-class alignas(16) PlayerDataStructHandler :
+class PlayerDataStructHandler :
 	public BaseDataStructHandler<DataT, MAX_PLAYERS>
 {
 	typedef BaseDataStructHandler<DataT, MAX_PLAYERS> BaseClass;

@@ -40,7 +40,7 @@ enum class PlayerRunCommandRet : short
 	BLOCK
 };
 
-class alignas(8) PlayerRunCommandHookListener
+class PlayerRunCommandHookListener
 {
 	typedef HookListenersList<PlayerRunCommandHookListener> ListenersListT;
 

@@ -32,7 +32,7 @@ enum WpnShotType
 
 class NczPlayerManager;
 
-class alignas(16) NczPlayer :
+class NczPlayer :
 	public HeapMemoryManager::OverrideNew<16>,
 	private NoCopy
 {

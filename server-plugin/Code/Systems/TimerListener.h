@@ -27,7 +27,7 @@
 
 class TimerListener;
 
-struct alignas(4) TimerInfo
+struct TimerInfo
 {
 	char m_name[ TIMERINFO_CHARCOUNT ];
 	float m_period_seconds;

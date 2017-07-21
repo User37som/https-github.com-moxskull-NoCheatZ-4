@@ -33,7 +33,7 @@
 
 class NczPlayerManager;
 
-class alignas(16) PlayerHandler :
+class PlayerHandler :
 	protected NoCopy,
 	protected NoMove
 {
@@ -47,7 +47,7 @@ public:
 	/*
 		Wrapper of the PlayerHandler (pointer) type.
 	*/
-	class alignas(4) iterator
+	class iterator
 	{
 		friend NczPlayerManager;
 

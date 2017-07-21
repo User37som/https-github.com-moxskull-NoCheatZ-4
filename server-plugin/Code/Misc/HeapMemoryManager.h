@@ -32,7 +32,7 @@ limitations under the License.
 
 namespace HeapMemoryManager
 {
-	struct alignas(4) FreeMemoryHolder
+	struct FreeMemoryHolder
 	{
 		void * m_ptr;
 		size_t m_capacity;
