@@ -208,9 +208,8 @@ public:
 		QueryPerformanceCounter(&EndingTime);
 		ElapsedMilliseconds.QuadPart = EndingTime.QuadPart - StartingTime.QuadPart;
 		ElapsedMilliseconds.QuadPart *= 1000;
-		ElapsedMilliseconds.QuadPart /= Frequency.QuadPart;
 
-		return (float)(ElapsedMilliseconds.QuadPart);
+		return (float)(ElapsedMilliseconds.QuadPart) / (float)(Frequency.QuadPart);
 #else
 		clock_gettime(CLOCK_MONOTONIC, &EndingTime);
 		ElapsedMilliseconds = (float)(EndingTime.tv_sec - StartingTime.tv_sec) * 1000.0f + (float)(EndingTime.tv_nsec - StartingTime.tv_nsec) * 0.000001f;
