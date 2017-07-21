@@ -107,6 +107,8 @@ private:
 
 	virtual bool RT_UserMessageBeginCallback ( SourceSdk::IRecipientFilter const * const, int const ) override final;
 
+	virtual void RT_MessageEndCallback(SourceSdk::IRecipientFilter const * const, int const, SourceSdk::bf_write* buffer) override final;
+
 public:
 	void OnMapStart ();
 

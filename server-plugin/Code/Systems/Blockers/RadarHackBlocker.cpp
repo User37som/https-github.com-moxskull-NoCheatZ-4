@@ -141,6 +141,11 @@ bool RadarHackBlocker::RT_UserMessageBeginCallback ( SourceSdk::IRecipientFilter
 	return ( message_id == UpdateRadar );
 }
 
+void RadarHackBlocker::RT_MessageEndCallback(SourceSdk::IRecipientFilter const * const, int const, SourceSdk::bf_write * buffer)
+{
+	
+}
+
 void RadarHackBlocker::RT_SendApproximativeRadarUpdate ( MRecipientFilter & filter, ClientRadarData const * pData ) const
 {
 	MathInfo const & player_maths ( g_MathCache.RT_GetCachedMaths ( pData->m_origin_index ) );
