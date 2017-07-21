@@ -581,9 +581,6 @@
     <ClInclude Include="Code\Systems\Testers\BadUserCmdTester.h">
       <Filter>Code\Systems\Testers</Filter>
     </ClInclude>
-    <ClInclude Include="Code\Misc\SvClientsProvider.h">
-      <Filter>Code\Misc</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Library Include="SourceSdk\libs\libprotobuf-debug.lib">
