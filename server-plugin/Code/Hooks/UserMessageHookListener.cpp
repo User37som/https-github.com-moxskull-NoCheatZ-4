@@ -20,6 +20,8 @@ limitations under the License.
 UserMessageHookListener::ListenersList_t UserMessageHookListener::m_listeners;
 bool UserMessageHookListener::bypass ( false );
 SourceSdk::bf_write* UserMessageHookListener::m_buffer ( nullptr );
+SourceSdk::IRecipientFilter * UserMessageHookListener::m_filter;
+int UserMessageHookListener::m_message_id(0);
 
 HookGuard<UserMessageHookListener> g_HookGuardUserMessageHookListener;
 
@@ -109,7 +111,10 @@ SourceSdk::bf_write* HOOKFN_INT UserMessageHookListener::RT_nUserMessageBegin ( 
 	}
 	else
 	{
-		return SourceSdk::InterfacesProxy::Call_UserMessageBegin ( const_cast< SourceSdk::IRecipientFilter* >( filter ), message_id );
+		m_filter = const_cast< SourceSdk::IRecipientFilter* >(filter);
+		m_message_id = message_id;
+		m_buffer = SourceSdk::InterfacesProxy::Call_UserMessageBegin(m_filter, m_message_id);
+		return m_buffer;
 	}
 }
 
@@ -131,6 +136,14 @@ void HOOKFN_INT UserMessageHookListener::RT_nMessageEnd ( void * const thisptr, 
 	}
 	else
 	{
+		ListenersList_t::elem_t* it(m_listeners.GetFirst());
+		while (it != nullptr)
+		{
+			it->m_value.listener->RT_MessageEndCallback(m_filter, m_message_id, m_buffer);
+
+			it = it->m_next;
+		}
+
 		SourceSdk::InterfacesProxy::Call_MessageEnd ();
 	}
 }
