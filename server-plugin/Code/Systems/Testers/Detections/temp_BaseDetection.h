@@ -143,16 +143,16 @@ inline void ProcessDetectionAndTakeAction(LogDetection<playerDataStructT> && inf
 	}
 	else if (pSystem->GetAction() == BaseTesterSystem::DetectionAction_t::BAN_ASYNC)
 	{
-		BanRequest::GetInstance()->AddAsyncBan(*player, 0, kick_message.c_str());
+		g_BanRequest.AddAsyncBan(*player, 0, kick_message.c_str());
 	}
 	else if (pSystem->GetAction() == BaseTesterSystem::DetectionAction_t::BAN_NOW)
 	{
-		BanRequest::GetInstance()->BanNow(*player, 0, kick_message.c_str());
+		g_BanRequest.BanNow(*player, 0, kick_message.c_str());
 	}
 	else
 	{
 		kick_message = Helpers::format("Kicked by NoCheatZ 4 : %s detection with %s", info.GetDetectionLogMessage().c_str(), pSystem->GetName());
-		BanRequest::GetInstance()->KickNow(*player, kick_message.c_str());
+		g_BanRequest.KickNow(*player, kick_message.c_str());
 	}
 }
 

@@ -31,7 +31,7 @@
 #	define EVENT_DEBUG_ID_SHUTDOWN 13
 #endif
 
-#define GET_PLUGIN_COMMAND_INDEX() CNoCheatZPlugin::GetInstance()->GetCommandIndex()+1
+#define GET_PLUGIN_COMMAND_INDEX() g_CNoCheatZPlugin.GetCommandIndex()+1
 #define PLUGIN_MIN_COMMAND_INDEX   1
 #define PLUGIN_MAX_COMMAND_INDEX   64
 #define FIRST_PLAYER_ENT_INDEX		1

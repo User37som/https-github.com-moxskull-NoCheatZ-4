@@ -24,7 +24,7 @@
 
 OnGroundHookListener::OnGroundListenersListT OnGroundHookListener::m_listeners;
 
-HookGuard<OnGroundHookListener> local_HookGuardOnGroundHookListener;
+HookGuard<OnGroundHookListener> g_HookGuardOnGroundHookListener;
 
 OnGroundHookListener::OnGroundHookListener ()
 {
@@ -32,7 +32,7 @@ OnGroundHookListener::OnGroundHookListener ()
 
 OnGroundHookListener::~OnGroundHookListener ()
 {
-	local_HookGuardOnGroundHookListener.UnhookAll ();
+	g_HookGuardOnGroundHookListener.UnhookAll ();
 }
 
 void OnGroundHookListener::HookOnGround ( PlayerHandler::iterator ph )
@@ -41,7 +41,7 @@ void OnGroundHookListener::HookOnGround ( PlayerHandler::iterator ph )
 	void* unk ( ph->GetEdict ()->m_pUnk );
 
 	HookInfo info ( unk, g_ConfigManager.vfid_mhgroundentity, ( DWORD ) RT_nNetworkStateChanged_m_hGroundEntity );
-	local_HookGuardOnGroundHookListener.VirtualTableHook ( info, "CBasePlayer::NetworkStateChanged_m_hGroundEntity" );
+	g_HookGuardOnGroundHookListener.VirtualTableHook ( info, "CBasePlayer::NetworkStateChanged_m_hGroundEntity" );
 }
 
 /*void OnGroundHookListener::UnhookOnGround()
@@ -76,7 +76,7 @@ void HOOKFN_INT OnGroundHookListener::RT_nNetworkStateChanged_m_hGroundEntity ( 
 	}
 
 	ST_W_STATIC GroundEntity_t gpOldFn;
-	*( DWORD* )&( gpOldFn ) = local_HookGuardOnGroundHookListener.RT_GetOldFunction ( basePlayer, g_ConfigManager.vfid_mhgroundentity );
+	*( DWORD* )&( gpOldFn ) = g_HookGuardOnGroundHookListener.RT_GetOldFunction ( basePlayer, g_ConfigManager.vfid_mhgroundentity );
 	gpOldFn ( basePlayer, new_m_hGroundEntity );
 }
 

@@ -558,3 +558,5 @@ void CNoCheatZPlugin::OnEdictFreed ( const SourceSdk::edict_t *edict )
 {
 	//printf("OnEdictFreed(%x)\n", edict);
 }
+
+CNoCheatZPlugin g_CNoCheatZPlugin;

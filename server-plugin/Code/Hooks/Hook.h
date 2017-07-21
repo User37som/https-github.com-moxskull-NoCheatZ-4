@@ -111,11 +111,9 @@ extern int HookCompare ( HookInfo const * a, HookInfo const * b );
 
 template <class CallerTicket>
 class HookGuard :
-	public Singleton< HookGuard < CallerTicket > >
+	public Singleton
 {
 private:
-	typedef Singleton< HookGuard < CallerTicket > > Singleton;
-
 	hooked_list_t m_list;
 
 public:
