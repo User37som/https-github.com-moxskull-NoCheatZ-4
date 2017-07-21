@@ -48,15 +48,15 @@ after_build:
 
     cd c:\github\NoCheatZ-4\Builds
 
-    Get-ChildItem -Include *.exp | Remove-Item -recurse
+    Get-ChildItem c:\github\NoCheatZ-4\Builds -Include *.exp | foreach ($_) {Remove-Item $_.fullname}
 
-    Get-ChildItem -Include *.ilk | Remove-Item -recurse
+    Get-ChildItem c:\github\NoCheatZ-4\Builds -Include *.ilk | foreach ($_) {Remove-Item $_.fullname}
 
-    Get-ChildItem -Include *.lib | Remove-Item -recurse
+    Get-ChildItem c:\github\NoCheatZ-4\Builds -Include *.lib | foreach ($_) {Remove-Item $_.fullname}
 
-    Get-ChildItem -Include *.bsc | Remove-Item -recurse
+    Get-ChildItem c:\github\NoCheatZ-4\Builds -Include *.bsc | foreach ($_) {Remove-Item $_.fullname}
 
-    Get-ChildItem -Include .gitignore | Remove-Item -recurse
+    Get-ChildItem c:\github\NoCheatZ-4\Builds -Include .gitignore | foreach ($_) {Remove-Item $_.fullname}
 
     New-Item -ItemType directory -Path out
 
