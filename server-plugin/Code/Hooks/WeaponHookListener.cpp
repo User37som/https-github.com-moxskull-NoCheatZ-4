@@ -50,29 +50,35 @@ void WeaponHookListener::HookWeapon ( PlayerHandler::iterator ph )
 #ifdef GNUC
 void HOOKFN_INT WeaponHookListener::RT_nWeapon_Equip ( void * const basePlayer, void * const weapon )
 #else
-void HOOKFN_INT WeaponHookListener::RT_nWeapon_Equip ( void * const basePlayer, void * const, void * const weapon )
+void HOOKFN_INT WeaponHookListener::RT_nWeapon_Equip ( void * const basePlayer, void * const, void * weapon )
 #endif
 {
-	PlayerHandler::iterator ph ( g_NczPlayerManager.GetPlayerHandlerByBasePlayer ( basePlayer ) );
-
-	if( ph != SlotStatus::INVALID )
-	{
-		SourceSdk::edict_t const * const weapon_ent ( SourceSdk::InterfacesProxy::Call_BaseEntityToEdict ( weapon ) );
-
-		LoggerAssert ( Helpers::isValidEdict ( weapon_ent ) );
-
-		WeaponHookListenersListT::elem_t* it2 ( m_listeners.GetFirst () );
-		while( it2 != nullptr )
-		{
-			it2->m_value.listener->RT_WeaponEquipCallback ( ph, weapon_ent );
-
-			it2 = it2->m_next;
-		}
-	}
-
 	WeaponEquip_t gpOldFn;
 	*( DWORD* )&( gpOldFn ) = g_HookGuardWeaponHookListener.RT_GetOldFunction ( basePlayer, g_ConfigManager.vfid_weaponequip );
-	gpOldFn ( basePlayer, weapon );
+	if (gpOldFn)
+	{
+		gpOldFn(basePlayer, weapon);
+
+		PlayerHandler::iterator ph(g_NczPlayerManager.GetPlayerHandlerByBasePlayer(basePlayer));
+
+		if (ph != SlotStatus::INVALID)
+		{
+			SourceSdk::edict_t const * const weapon_ent(SourceSdk::InterfacesProxy::Call_BaseEntityToEdict(weapon));
+
+			if (Helpers::isValidEdict(weapon_ent))
+			{
+				//DebugMessage(Helpers::format("WeaponHookListener::RT_nWeapon_Equip : entity name %s", weapon_ent->GetClassName()));
+
+				WeaponHookListenersListT::elem_t* it2(m_listeners.GetFirst());
+				while (it2 != nullptr)
+				{
+					it2->m_value.listener->RT_WeaponEquipCallback(ph, weapon_ent);
+
+					it2 = it2->m_next;
+				}
+			}
+		}
+	}
 }
 
 #ifdef GNUC
