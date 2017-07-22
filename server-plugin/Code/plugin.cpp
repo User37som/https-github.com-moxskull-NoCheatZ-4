@@ -46,27 +46,28 @@
 #include "Systems/OnTickListener.h"
 #include "Systems/TimerListener.h"
 
+MetricsTimer g_GlobalTimer;
+
 static void* __CreatePlugin_interface ()
 {
 	static KxStackTrace g_KxStackTrace;
 
 	printf ( "__CreatePlugin_interface - HeapMemoryManager::InitPool()\n" );
 	HeapMemoryManager::InitPool ();
-	CNoCheatZPlugin::CreateInstance ();
 	printf ( "CNoCheatZPlugin interface created with CSGO callbacks ...\n" );
-	return CNoCheatZPlugin::GetInstance ();
+	return &g_CNoCheatZPlugin;
 }
 
 void* CreateInterfaceInternal ( char const *pName, int *pReturnCode )
 {
 	printf ( "NoCheatZ plugin.cpp : CreateInterfaceInternal - Game engine asking for %s\n", pName );
-	if( CNoCheatZPlugin::IsCreated () )
+	/*if( CNoCheatZPlugin::IsCreated () )
 	{
 		printf ( "NoCheatZ plugin.cpp : CreateInterfaceInternal - ERROR : Plugin already loaded\n" );
 		if( pReturnCode ) *pReturnCode = SourceSdk::IFACE_FAILED;
 		return nullptr;
 	}
-	else
+	else*/
 	{
 		if( pReturnCode ) *pReturnCode = SourceSdk::IFACE_OK;
 		return __CreatePlugin_interface ();
@@ -80,7 +81,7 @@ void* SourceSdk::CreateInterface ( char const * pName, int * pReturnCode )
 
 float Plat_FloatTime ()
 {
-	return ( GlobalTimer::GetInstance ()->GetCurrent () * 0.001f );
+	return ( g_GlobalTimer.GetCurrent () * 0.001f );
 }
 
 float HOOKFN_INT GetTickInterval(void * const preserve_me)
@@ -88,65 +89,8 @@ float HOOKFN_INT GetTickInterval(void * const preserve_me)
 	return ConfigManager::tickinterval;
 }
 
-void CNoCheatZPlugin::CreateSingletons ()
-{
-	SourceHookSafety::CreateInstance();
-	MathCache::CreateInstance ();
-	GlobalTimer::CreateInstance ();
-	Logger::CreateInstance ();
-	ConfigManager::CreateInstance ();
-	NczPlayerManager::CreateInstance ();
-	BanRequest::CreateInstance ();
-	EntityProps::CreateInstance ();
-
-	AntiFlashbangBlocker::CreateInstance ();
-	AntiSmokeBlocker::CreateInstance ();
-	BadUserCmdTester::CreateInstance ();
-	BhopBlocker::CreateInstance ();
-	WallhackBlocker::CreateInstance ();
-	ConCommandTester::CreateInstance ();
-	ConVarTester::CreateInstance ();
-	EyeAnglesTester::CreateInstance ();
-	JumpTester::CreateInstance ();
-	//ShotTester::CreateInstance ();
-	AutoAttackTester::CreateInstance ();
-	SpamChangeNameTester::CreateInstance ();
-	SpamConnectTester::CreateInstance ();
-	SpeedTester::CreateInstance ();
-	TVWatcher::CreateInstance();
-	AutoTVRecord::CreateInstance ();
-	RadarHackBlocker::CreateInstance ();
-}
-
 void CNoCheatZPlugin::DestroySingletons ()
 {
-	RadarHackBlocker::DestroyInstance ();
-	AutoTVRecord::DestroyInstance ();
-	TVWatcher::DestroyInstance();
-	SpeedTester::DestroyInstance ();
-	SpamConnectTester::DestroyInstance ();
-	SpamChangeNameTester::DestroyInstance ();
-	//ShotTester::DestroyInstance ();
-	AutoAttackTester::DestroyInstance ();
-	JumpTester::DestroyInstance ();
-	EyeAnglesTester::DestroyInstance ();
-	ConVarTester::DestroyInstance ();
-	ConCommandTester::DestroyInstance ();
-	WallhackBlocker::DestroyInstance ();
-	BhopBlocker::DestroyInstance ();
-	BadUserCmdTester::DestroyInstance ();
-	AntiSmokeBlocker::DestroyInstance ();
-	AntiFlashbangBlocker::DestroyInstance ();
-
-	EntityProps::DestroyInstance ();
-	BanRequest::DestroyInstance ();
-	NczPlayerManager::DestroyInstance ();
-	SourceHookSafety::DestroyInstance();
-	ConfigManager::DestroyInstance ();
-	Logger::DestroyInstance ();
-	GlobalTimer::DestroyInstance ();
-	MathCache::DestroyInstance ();
-
 	HeapMemoryManager::FreePool ();
 }
 
@@ -155,11 +99,10 @@ void CNoCheatZPlugin::DestroySingletons ()
 //---------------------------------------------------------------------------------
 CNoCheatZPlugin::CNoCheatZPlugin () :
 	SourceSdk::IServerPluginCallbacks (),
-	singleton_class (),
+	Singleton (),
 	m_iClientCommandIndex ( 0 ),
 	ncz_cmd_ptr ( nullptr )
 {
-	CreateSingletons ();
 }
 
 CNoCheatZPlugin::~CNoCheatZPlugin ()
@@ -184,19 +127,19 @@ void HookEntity ( SourceSdk::edict_t* ent )
 //---------------------------------------------------------------------------------
 bool CNoCheatZPlugin::Load ( SourceSdk::CreateInterfaceFn _interfaceFactory, SourceSdk::CreateInterfaceFn gameServerFactory )
 {
-	GlobalTimer::GetInstance ()->EnterSection ();
+	g_GlobalTimer.EnterSection ();
 
-	Logger::GetInstance ()->Msg<MSG_CONSOLE> ( "Loading ..." );
+	g_Logger.Msg<MSG_CONSOLE> ( "Loading ..." );
 
 	if( !SourceSdk::InterfacesProxy::Load ( gameServerFactory, _interfaceFactory ) )
 	{
-		Logger::GetInstance ()->Msg<MSG_ERROR> ( "SourceSdk::InterfacesProxy::Load failed" );
+		g_Logger.Msg<MSG_ERROR> ( "SourceSdk::InterfacesProxy::Load failed" );
 		return false;
 	}
 
-	if( !ConfigManager::GetInstance ()->LoadConfig () )
+	if( !g_ConfigManager.LoadConfig () )
 	{
-		Logger::GetInstance ()->Msg<MSG_ERROR> ( "ConfigManager::LoadConfig failed" );
+		g_Logger.Msg<MSG_ERROR> ( "ConfigManager::LoadConfig failed" );
 		return false;
 	}
 
@@ -218,7 +161,7 @@ bool CNoCheatZPlugin::Load ( SourceSdk::CreateInterfaceFn _interfaceFactory, Sou
 		break;
 	};
 
-	SourceHookSafety::GetInstance()->TryHookMMSourceHook();
+	g_SourceHookSafety.TryHookMMSourceHook();
 
 	if( SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive )
 	{
@@ -247,13 +190,13 @@ bool CNoCheatZPlugin::Load ( SourceSdk::CreateInterfaceFn _interfaceFactory, Sou
 	UserMessageHookListener::HookUserMessage ();
 
 	BaseSystem::InitSystems ();
-	BanRequest::GetInstance ()->Init ();
+	g_BanRequest.Init ();
 
-	NczPlayerManager::GetInstance ()->LoadPlayerManager (); // Mark any present player as PLAYER_CONNECTED
+	g_NczPlayerManager.LoadPlayerManager (); // Mark any present player as PLAYER_CONNECTED
 
 	SourceSdk::InterfacesProxy::Call_ServerExecute ();
 	SourceSdk::InterfacesProxy::Call_ServerCommand ( "exec nocheatz.cfg\n" );
-	SourceSdk::InterfacesProxy::Call_ServerCommand (Helpers::format("sv_mincmdrate %d\n", ConfigManager::GetInstance()->tickrate_override));
+	SourceSdk::InterfacesProxy::Call_ServerCommand (Helpers::format("sv_mincmdrate %d\n", g_ConfigManager.tickrate_override));
 	SourceSdk::InterfacesProxy::Call_ServerExecute ();
 
 	ProcessFilter::HumanAtLeastConnectedOrBot filter_class;
@@ -269,7 +212,7 @@ bool CNoCheatZPlugin::Load ( SourceSdk::CreateInterfaceFn _interfaceFactory, Sou
 	}
 	BaseSystem::ManageSystems ();
 
-	Logger::GetInstance ()->Msg<MSG_CHAT> ( "Loaded" );
+	g_Logger.Msg<MSG_CHAT> ( "Loaded" );
 
 	return true;
 }
@@ -279,7 +222,7 @@ bool CNoCheatZPlugin::Load ( SourceSdk::CreateInterfaceFn _interfaceFactory, Sou
 //---------------------------------------------------------------------------------
 void CNoCheatZPlugin::Unload ( void )
 {
-	BanRequest::GetInstance ()->WriteBansIfNeeded ();
+	g_BanRequest.WriteBansIfNeeded ();
 
 	/*PlayerRunCommandHookListener::UnhookPlayerRunCommand();
 	OnGroundHookListener::UnhookOnGround();
@@ -288,7 +231,7 @@ void CNoCheatZPlugin::Unload ( void )
 	WeaponHookListener::UnhookWeapon();
 	ConCommandHookListener::UnhookDispatch();*/
 
-	Logger::GetInstance ()->Flush ();
+	g_Logger.Flush ();
 
 	SourceSdk::ConVar_Unregister ();
 
@@ -310,9 +253,9 @@ void CNoCheatZPlugin::Unload ( void )
 void CNoCheatZPlugin::Pause ( void )
 {
 	BaseSystem::UnloadAllSystems ();
-	BanRequest::GetInstance ()->WriteBansIfNeeded ();
-	Logger::GetInstance ()->Msg<MSG_CHAT> ( "Plugin pause" );
-	Logger::GetInstance ()->Flush ();
+	g_BanRequest.WriteBansIfNeeded ();
+	g_Logger.Msg<MSG_CHAT> ( "Plugin pause" );
+	g_Logger.Flush ();
 }
 
 //---------------------------------------------------------------------------------
@@ -320,11 +263,11 @@ void CNoCheatZPlugin::Pause ( void )
 //---------------------------------------------------------------------------------
 void CNoCheatZPlugin::UnPause ( void )
 {
-	Logger::GetInstance ()->Msg<MSG_CONSOLE> ( "Unpausing ..." );
+	g_Logger.Msg<MSG_CONSOLE> ( "Unpausing ..." );
 	BaseSystem::InitSystems ();
-	BanRequest::GetInstance ()->Init ();
+	g_BanRequest.Init ();
 
-	NczPlayerManager::GetInstance ()->LoadPlayerManager (); // Mark any present player as PLAYER_CONNECTED
+	g_NczPlayerManager.LoadPlayerManager (); // Mark any present player as PLAYER_CONNECTED
 
 	SourceSdk::InterfacesProxy::Call_ServerExecute ();
 	SourceSdk::InterfacesProxy::Call_ServerCommand ( "exec nocheatz.cfg\n" );
@@ -343,7 +286,7 @@ void CNoCheatZPlugin::UnPause ( void )
 	}
 	BaseSystem::ManageSystems ();
 
-	Logger::GetInstance ()->Msg<MSG_CHAT> ( "Plugin unpaused" );
+	g_Logger.Msg<MSG_CHAT> ( "Plugin unpaused" );
 }
 
 //---------------------------------------------------------------------------------
@@ -359,15 +302,15 @@ const char *CNoCheatZPlugin::GetPluginDescription ( void )
 //---------------------------------------------------------------------------------
 void CNoCheatZPlugin::LevelInit ( char const *pMapName )
 {	
-	Logger::GetInstance()->OnLevelInit();
+	g_Logger.OnLevelInit();
 
-	Logger::GetInstance ()->Msg<MSG_LOG> ( Helpers::format ( "PLAYING ON A NEW MAP : %s", pMapName ) );
+	g_Logger.Msg<MSG_LOG> ( Helpers::format ( "PLAYING ON A NEW MAP : %s", pMapName ) );
 
-	Logger::GetInstance ()->Flush ();
+	g_Logger.Flush ();
 	
-	NczPlayerManager::GetInstance ()->OnLevelInit ();
+	g_NczPlayerManager.OnLevelInit ();
 
-	BanRequest::GetInstance ()->OnLevelInit ();
+	g_BanRequest.OnLevelInit ();
 
 }
 
@@ -384,12 +327,12 @@ void CNoCheatZPlugin::ServerActivate ( SourceSdk::edict_t *pEdictList, int edict
 	//Helpers::m_edictCount = edictCount;
 	//Helpers::m_clientMax = clientMax;
 
-	SourceHookSafety::GetInstance()->TryHookMMSourceHook();
+	g_SourceHookSafety.TryHookMMSourceHook();
 
-	NczPlayerManager::GetInstance ()->LoadPlayerManager ();
+	g_NczPlayerManager.LoadPlayerManager ();
 
-	RadarHackBlocker::GetInstance ()->OnMapStart ();
-	WallhackBlocker::GetInstance ()->OnMapStart ();
+	g_RadarHackBlocker.OnMapStart ();
+	g_WallhackBlocker.OnMapStart ();
 }
 
 //---------------------------------------------------------------------------------
@@ -403,16 +346,16 @@ void CNoCheatZPlugin::RT_GameFrame ( bool simulating )
 	{
 		float const curtime = Plat_FloatTime ();
 		/**************/
-		NczPlayerManager::GetInstance ()->RT_Think ( curtime ); /// ALWAYS FIRST
+		g_NczPlayerManager.RT_Think ( curtime ); /// ALWAYS FIRST
 		/**************/
 
-		MathCache::GetInstance ()->RT_SetCacheExpired ();
+		g_MathCache.RT_SetCacheExpired ();
 
 		OnTickListener::RT_OnTick ( curtime );
 
 		TimerListener::RT_OnTick ( curtime );
 
-		TVWatcher::GetInstance ()->RT_OnTick ();
+		g_TVWatcher.RT_OnTick ();
 	}
 }
 
@@ -423,10 +366,10 @@ void CNoCheatZPlugin::LevelShutdown ( void ) // !!!!this can get called multiple
 {
 	DebugMessage ( "CNoCheatZPlugin::LevelShutdown" );
 
-	BanRequest::GetInstance ()->WriteBansIfNeeded ();
+	g_BanRequest.WriteBansIfNeeded ();
 	BaseSystem::UnloadAllSystems ();
-	TVWatcher::GetInstance()->RecordEnded();
-	Logger::GetInstance ()->Flush ();
+	g_TVWatcher.RecordEnded();
+	g_Logger.Flush ();
 }
 
 //---------------------------------------------------------------------------------
@@ -434,9 +377,9 @@ void CNoCheatZPlugin::LevelShutdown ( void ) // !!!!this can get called multiple
 //---------------------------------------------------------------------------------
 void CNoCheatZPlugin::ClientActive ( SourceSdk::edict_t *pEntity )
 {
-	NczPlayerManager::GetInstance ()->ClientActive ( pEntity );
+	g_NczPlayerManager.ClientActive ( pEntity );
 
-	PlayerHandler::iterator ph ( NczPlayerManager::GetInstance ()->GetPlayerHandlerByEdict ( pEntity ) );
+	PlayerHandler::iterator ph ( g_NczPlayerManager.GetPlayerHandlerByEdict ( pEntity ) );
 
 	DebugMessage ( Helpers::format ( "CNoCheatZPlugin::ClientActive (pEntity:%p -> pEntity->classname:%s -> clientname:%s)", pEntity, pEntity->GetClassName (), ph->GetName() ) );
 
@@ -448,7 +391,7 @@ void CNoCheatZPlugin::ClientActive ( SourceSdk::edict_t *pEntity )
 	}
 
 	ProcessFilter::HumanAtLeastConnected filter_class;
-	if( NczPlayerManager::GetInstance ()->GetPlayerCount ( &filter_class ) == 1 ) AutoTVRecord::GetInstance ()->SpawnTV ();
+	if( g_NczPlayerManager.GetPlayerCount ( &filter_class ) == 1 ) g_AutoTVRecord.SpawnTV ();
 }
 
 //---------------------------------------------------------------------------------
@@ -458,8 +401,8 @@ void CNoCheatZPlugin::ClientDisconnect ( SourceSdk::edict_t *pEntity )
 {
 	DebugMessage ( Helpers::format("CNoCheatZPlugin::ClientDisconnect (pEntity:%p -> pEntity->classname:%s)", pEntity, pEntity->GetClassName () ));
 
-	WallhackBlocker::GetInstance ()->ClientDisconnect ( Helpers::IndexOfEdict ( pEntity ) );
-	NczPlayerManager::GetInstance ()->ClientDisconnect ( pEntity );
+	g_WallhackBlocker.ClientDisconnect ( Helpers::IndexOfEdict ( pEntity ) );
+	g_NczPlayerManager.ClientDisconnect ( pEntity );
 }
 
 //---------------------------------------------------------------------------------
@@ -468,7 +411,7 @@ void CNoCheatZPlugin::ClientDisconnect ( SourceSdk::edict_t *pEntity )
 void CNoCheatZPlugin::ClientPutInServer ( SourceSdk::edict_t *pEntity, char const *playername )
 {
 	/*
-	SlotStatus stat ( NczPlayerManager::GetInstance ()->GetPlayerHandlerByEdict ( pEntity ) );
+	SlotStatus stat ( g_NczPlayerManager.GetPlayerHandlerByEdict ( pEntity ) );
 	*/
 	DebugMessage ( Helpers::format ( "CNoCheatZPlugin::ClientPutInServer (pEntity:%p -> pEntity->classname:%s, playername:%s)", pEntity, pEntity->GetClassName (), playername ) );
 
@@ -495,56 +438,55 @@ SourceSdk::PLUGIN_RESULT CNoCheatZPlugin::ClientConnect ( bool *bAllowConnect, S
 {
 #define MAX_CHARS_NAME 32
 
-	NczPlayerManager::GetInstance ()->ClientConnect ( pEntity );
+	g_NczPlayerManager.ClientConnect ( pEntity );
 
-	*bAllowConnect = ! BanRequest::GetInstance ()->IsRejected ( pszAddress );
+	*bAllowConnect = ! g_BanRequest.IsRejected ( pszAddress );
 	if( ! bAllowConnect )
 	{
 		memcpy ( reject, "Please wait 20 minutes", 23 );
 
-		NczPlayerManager::GetInstance ()->ClientDisconnect ( pEntity );
+		g_NczPlayerManager.ClientDisconnect ( pEntity );
 
-		Logger::GetInstance ()->Msg<MSG_LOG> ( Helpers::format ( "CNoCheatZPlugin::ClientConnect : Rejected %s with reason %s", pszAddress, reject ) );
+		g_Logger.Msg<MSG_LOG> ( Helpers::format ( "CNoCheatZPlugin::ClientConnect : Rejected %s with reason %s", pszAddress, reject ) );
 		return SourceSdk::PLUGIN_OVERRIDE;
 	}
 
-	SpamConnectTester::GetInstance ()->ClientConnect ( bAllowConnect, pEntity, pszName, pszAddress, reject, maxrejectlen );
-	SpamChangeNameTester::GetInstance ()->ClientConnect ( bAllowConnect, pEntity, pszName, pszAddress, reject, maxrejectlen );
+	g_SpamConnectTester.ClientConnect ( bAllowConnect, pEntity, pszName, pszAddress, reject, maxrejectlen );
+	g_SpamChangeNameTester.ClientConnect ( bAllowConnect, pEntity, pszName, pszAddress, reject, maxrejectlen );
 
 	DebugMessage ( Helpers::format ( "CNoCheatZPlugin::ClientConnect (bAllowConnect:%s, pEntity:%p -> pEntity->classname:%s, pszName:%s, pszAddress:%s, reject:%s, maxrejectlen:%d", Helpers::boolToString ( *bAllowConnect ), pEntity, pEntity->GetClassName (), pszName, pszAddress, reject, maxrejectlen ) );
 
 	if( !*bAllowConnect )
 	{
-		if( BanRequest::GetInstance ()->CanKick () )
+		if( g_BanRequest.CanKick () )
 		{
-			NczPlayerManager::GetInstance ()->ClientDisconnect ( pEntity );
-			Logger::GetInstance ()->Msg<MSG_LOG> ( Helpers::format ( "CNoCheatZPlugin::ClientConnect : Rejected %s with reason %s", pszAddress, reject ) );
-			BanRequest::GetInstance ()->AddReject ( 1200, pszAddress );
+			g_NczPlayerManager.ClientDisconnect ( pEntity );
+			g_Logger.Msg<MSG_LOG> ( Helpers::format ( "CNoCheatZPlugin::ClientConnect : Rejected %s with reason %s", pszAddress, reject ) );
+			g_BanRequest.AddReject ( 1200, pszAddress );
 			return SourceSdk::PLUGIN_OVERRIDE;
 		}
 		else
 		{
-			Logger::GetInstance ()->Msg<MSG_LOG> ( Helpers::format ( "CNoCheatZPlugin::ClientConnect : Would have rejected access to player %s but plugin is set to not kick.", pszAddress ) );
+			g_Logger.Msg<MSG_LOG> ( Helpers::format ( "CNoCheatZPlugin::ClientConnect : Would have rejected access to player %s but plugin is set to not kick.", pszAddress ) );
 		}
 	}
 
 	{
-		NczPlayer* player ( *( NczPlayerManager::GetInstance ()->GetPlayerHandlerByEdict ( pEntity ) ) );
+		NczPlayer* player ( *( g_NczPlayerManager.GetPlayerHandlerByEdict ( pEntity ) ) );
 
-		JumpTester::GetInstance ()->ResetPlayerDataStruct ( player );
-		EyeAnglesTester::GetInstance ()->ResetPlayerDataStruct ( player );
-		ConVarTester::GetInstance ()->ResetPlayerDataStruct ( player );
-		//ShotTester::GetInstance ()->ResetPlayerDataStruct ( player );
-		AutoAttackTester::GetInstance ()->ResetPlayerDataStruct ( player );
-		SpeedTester::GetInstance ()->ResetPlayerDataStruct ( player );
-		ConCommandTester::GetInstance ()->ResetPlayerDataStruct ( player );
-		AntiFlashbangBlocker::GetInstance ()->ResetPlayerDataStruct ( player );
-		AntiSmokeBlocker::GetInstance ()->ResetPlayerDataStruct ( player );
-		BadUserCmdTester::GetInstance ()->ResetPlayerDataStruct ( player );
-		WallhackBlocker::GetInstance ()->ResetPlayerDataStruct ( player );
-		SpamChangeNameTester::GetInstance ()->ResetPlayerDataStruct ( player );
-		RadarHackBlocker::GetInstance ()->ResetPlayerDataStruct ( player );
-		BhopBlocker::GetInstance ()->ResetPlayerDataStruct ( player );
+		g_JumpTester.ResetPlayerDataStruct ( player );
+		g_EyeAnglesTester.ResetPlayerDataStruct ( player );
+		g_ConVarTester.ResetPlayerDataStruct ( player );
+		g_AutoAttackTester.ResetPlayerDataStruct ( player );
+		g_SpeedTester.ResetPlayerDataStruct ( player );
+		g_ConCommandTester.ResetPlayerDataStruct ( player );
+		g_AntiFlashbangBlocker.ResetPlayerDataStruct ( player );
+		g_AntiSmokeBlocker.ResetPlayerDataStruct ( player );
+		g_BadUserCmdTester.ResetPlayerDataStruct ( player );
+		g_WallhackBlocker.ResetPlayerDataStruct ( player );
+		g_SpamChangeNameTester.ResetPlayerDataStruct ( player );
+		g_RadarHackBlocker.ResetPlayerDataStruct ( player );
+		g_BhopBlocker.ResetPlayerDataStruct ( player );
 	}
 
 	return SourceSdk::PLUGIN_CONTINUE;
@@ -560,7 +502,7 @@ SourceSdk::PLUGIN_RESULT CNoCheatZPlugin::RT_ClientCommand ( SourceSdk::edict_t 
 		return SourceSdk::PLUGIN_CONTINUE;
 	}
 
-	PlayerHandler::iterator ph ( NczPlayerManager::GetInstance ()->GetPlayerHandlerByEdict ( pEntity ) );
+	PlayerHandler::iterator ph ( g_NczPlayerManager.GetPlayerHandlerByEdict ( pEntity ) );
 
 	/*if( stricmp ( args[ 0 ], "joingame" ) == 0 || stricmp ( args[ 0 ], "jointeam" ) == 0 || stricmp ( args[ 0 ], "joinclass" ) == 0 )
 	{
@@ -569,13 +511,13 @@ SourceSdk::PLUGIN_RESULT CNoCheatZPlugin::RT_ClientCommand ( SourceSdk::edict_t 
 	if( ph >= SlotStatus::PLAYER_CONNECTED )
 	{
 		DebugMessage ( Helpers::format ( "CNoCheatZPlugin::ClientCommand (pEntity:%p -> pEntity->classname:%s -> clientname:%s, args:%s)", pEntity, pEntity->GetClassName (), ph->GetName (), args.GetCommandString () ) );
-		if( ConCommandTester::GetInstance ()->RT_TestPlayerCommand ( ph, args.GetCommandString () ) )
+		if( g_ConCommandTester.RT_TestPlayerCommand ( ph, args.GetCommandString () ) )
 			return SourceSdk::PLUGIN_STOP;
 	}
 	else
 	{
-		//Logger::GetInstance()->Msg<MSG_WARNING> ( Helpers::format ( "CNoCheatZPlugin::ClientCommand (pEntity:%p -> pEntity->classname:%s -> clientname:%s, args:%s) : Dangerous SlotStatus %s", pEntity, pEntity->GetClassName (), "", args.GetCommandString () , SlotStatusToString( ph.operator SlotStatus() )));
-		if( ConCommandTester::GetInstance ()->RT_TestPlayerCommand_Anon ( ph, args.GetCommandString () ) )
+		//g_Logger.Msg<MSG_WARNING> ( Helpers::format ( "CNoCheatZPlugin::ClientCommand (pEntity:%p -> pEntity->classname:%s -> clientname:%s, args:%s) : Dangerous SlotStatus %s", pEntity, pEntity->GetClassName (), "", args.GetCommandString () , SlotStatusToString( ph.operator SlotStatus() )));
+		if( g_ConCommandTester.RT_TestPlayerCommand_Anon ( ph, args.GetCommandString () ) )
 			return SourceSdk::PLUGIN_STOP;
 	}
 
@@ -598,14 +540,14 @@ SourceSdk::PLUGIN_RESULT CNoCheatZPlugin::NetworkIDValidated ( const char *pszUs
 //---------------------------------------------------------------------------------
 void CNoCheatZPlugin::RT_OnQueryCvarValueFinished ( SourceSdk::QueryCvarCookie_t iCookie, SourceSdk::edict_t *pPlayerEntity, SourceSdk::EQueryCvarValueStatus eStatus, const char *pCvarName, const char *pCvarValue )
 {
-	PlayerHandler::iterator ph ( NczPlayerManager::GetInstance ()->GetPlayerHandlerByEdict ( pPlayerEntity ) );
+	PlayerHandler::iterator ph ( g_NczPlayerManager.GetPlayerHandlerByEdict ( pPlayerEntity ) );
 	if( !( ph >= SlotStatus::PLAYER_CONNECTING ) )
 	{
 		DebugMessage ( "RT_OnQueryCvarValueFinished : ConVarTester cannot process callback" );
 		return;
 	}
 
-	ConVarTester::GetInstance ()->RT_OnQueryCvarValueFinished ( ph, iCookie, eStatus, pCvarName, pCvarValue );
+	g_ConVarTester.RT_OnQueryCvarValueFinished ( ph, iCookie, eStatus, pCvarName, pCvarValue );
 }
 
 void CNoCheatZPlugin::OnEdictAllocated ( SourceSdk::edict_t *edict )
@@ -616,3 +558,5 @@ void CNoCheatZPlugin::OnEdictFreed ( const SourceSdk::edict_t *edict )
 {
 	//printf("OnEdictFreed(%x)\n", edict);
 }
+
+CNoCheatZPlugin g_CNoCheatZPlugin;

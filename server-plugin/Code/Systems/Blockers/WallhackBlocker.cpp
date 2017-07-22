@@ -30,7 +30,7 @@ WallhackBlocker::WallhackBlocker () :
 	OnTickListener (),
 	playerdatahandler_class (),
 	SetTransmitHookListener (),
-	singleton_class (),
+	Singleton (),
 	WeaponHookListener (),
 	m_weapon_owner (),
 	m_viscache (),
@@ -104,9 +104,9 @@ void WallhackBlocker::OnMapStart ()
 #undef GetClassName
 					if( basic_string ( "shadow_control" ).operator==( ent->GetClassName () ) )
 					{
-						m_disable_shadows = EntityProps::GetInstance ()->GetPropValue<bool, PROP_DISABLE_SHADOW> ( ent );
-						m_shadow_direction = EntityProps::GetInstance ()->GetPropValue<SourceSdk::Vector, PROP_SHADOW_DIRECTION> ( ent );
-						m_shadow_maxdist = EntityProps::GetInstance ()->GetPropValue<float, PROP_SHADOW_MAX_DIST> ( ent );
+						m_disable_shadows = g_EntityProps.GetPropValue<bool, PROP_DISABLE_SHADOW> ( ent );
+						m_shadow_direction = g_EntityProps.GetPropValue<SourceSdk::Vector, PROP_SHADOW_DIRECTION> ( ent );
+						m_shadow_maxdist = g_EntityProps.GetPropValue<float, PROP_SHADOW_MAX_DIST> ( ent );
 						break;
 					}
 				}
@@ -122,7 +122,7 @@ bool WallhackBlocker::RT_SetTransmitCallback ( PlayerHandler::iterator sender_pl
 		@receiver : could be PLAYER_CONNECTED or PLAYER_IN_TESTS.
 	*/
 
-	VisCache& cache ( WallhackBlocker::GetInstance ()->m_viscache );
+	VisCache& cache ( g_WallhackBlocker.m_viscache );
 
 	if( cache.IsValid ( sender_player.GetIndex (), receiver_player.GetIndex () ) )
 	{
@@ -147,10 +147,10 @@ bool WallhackBlocker::RT_SetTransmitCallback ( PlayerHandler::iterator sender_pl
 	}
 	else if( !pinfo_sender->IsDead () )
 	{
-		SpectatorMode const receiver_spec ( *EntityProps::GetInstance ()->GetPropValue<SpectatorMode, PROP_OBSERVER_MODE> ( receiver_player->GetEdict (), false ) );
+		SpectatorMode const receiver_spec ( *g_EntityProps.GetPropValue<SpectatorMode, PROP_OBSERVER_MODE> ( receiver_player->GetEdict (), false ) );
 		if( receiver_spec == OBS_MODE_IN_EYE )
 		{
-			SourceSdk::CBaseHandle const * const bh ( EntityProps::GetInstance ()->GetPropValue<SourceSdk::CBaseHandle, PROP_OBSERVER_TARGET> ( receiver_player->GetEdict (), false ) );
+			SourceSdk::CBaseHandle const * const bh ( g_EntityProps.GetPropValue<SourceSdk::CBaseHandle, PROP_OBSERVER_TARGET> ( receiver_player->GetEdict (), false ) );
 			if( bh->IsValid () )
 			{
 				/*
@@ -159,7 +159,7 @@ bool WallhackBlocker::RT_SetTransmitCallback ( PlayerHandler::iterator sender_pl
 				*/
 
 				int const bh_index ( bh->GetEntryIndex () );
-				if( bh_index > 0 && bh_index <= NczPlayerManager::GetInstance ()->GetMaxIndex () )
+				if( bh_index > 0 && bh_index <= g_NczPlayerManager.GetMaxIndex () )
 				{
 					PlayerHandler::iterator spec_player ( bh_index );
 
@@ -204,7 +204,7 @@ bool WallhackBlocker::RT_SetTransmitCallback ( PlayerHandler::iterator sender_pl
 bool WallhackBlocker::RT_SetTransmitWeaponCallback ( SourceSdk::edict_t const * const sender, PlayerHandler::iterator receiver )
 {
 	const int weapon_index ( Helpers::IndexOfEdict ( sender ) );
-	NczPlayer const * const owner_player ( WallhackBlocker::GetInstance ()->m_weapon_owner[ weapon_index ] );
+	NczPlayer const * const owner_player ( g_WallhackBlocker.m_weapon_owner[ weapon_index ] );
 	if( !owner_player ) return false;
 
 	if( owner_player == *receiver ) return false;
@@ -224,14 +224,14 @@ bool WallhackBlocker::RT_SetTransmitWeaponCallback ( SourceSdk::edict_t const * 
 void WallhackBlocker::RT_WeaponEquipCallback ( PlayerHandler::iterator ph, SourceSdk::edict_t const * const weapon )
 {
 	const int weapon_index ( Helpers::IndexOfEdict ( weapon ) );
-	WallhackBlocker::GetInstance ()->m_weapon_owner[ weapon_index ] = *ph;
+	g_WallhackBlocker.m_weapon_owner[ weapon_index ] = *ph;
 	SetTransmitHookListener::HookSetTransmit ( weapon, false );
 }
 
 void WallhackBlocker::RT_WeaponDropCallback ( PlayerHandler::iterator ph, SourceSdk::edict_t const * const weapon )
 {
 	const int weapon_index ( Helpers::IndexOfEdict ( weapon ) );
-	WallhackBlocker::GetInstance ()->m_weapon_owner[ weapon_index ] = nullptr;
+	g_WallhackBlocker.m_weapon_owner[ weapon_index ] = nullptr;
 }
 
 void WallhackBlocker::RT_ProcessOnTick ( float const & curtime )
@@ -269,7 +269,7 @@ void WallhackBlocker::RT_ProcessOnTick ( float const & curtime )
 			{
 				case SlotStatus::BOT: // predict without tracing hull
 					{
-						MathInfo const & player_maths ( MathCache::GetInstance ()->RT_GetCachedMaths ( ph.GetIndex () ) );
+						MathInfo const & player_maths ( g_MathCache.RT_GetCachedMaths ( ph.GetIndex () ) );
 
 						ClientDataS* const pData ( GetPlayerDataStructByIndex ( ph.GetIndex () ) );
 
@@ -320,7 +320,7 @@ void WallhackBlocker::RT_ProcessOnTick ( float const & curtime )
 						SourceSdk::INetChannelInfo* const netchan ( ph->GetChannelInfo () );
 						if( netchan != nullptr )
 						{
-							MathInfo const & player_maths ( MathCache::GetInstance ()->RT_GetCachedMaths ( ph.GetIndex () ) );
+							MathInfo const & player_maths ( g_MathCache.RT_GetCachedMaths ( ph.GetIndex () ) );
 
 							ClientDataS* const pData ( GetPlayerDataStructByIndex ( ph.GetIndex () ) );
 
@@ -337,7 +337,7 @@ void WallhackBlocker::RT_ProcessOnTick ( float const & curtime )
 							}
 
 
-							const int lerp_ticks ( ( int ) ( 0.5f + *EntityProps::GetInstance ()->GetPropValue<float, PROP_LERP_TIME> ( ph->GetEdict (), true ) / tick_interval ) );
+							const int lerp_ticks ( ( int ) ( 0.5f + *g_EntityProps.GetPropValue<float, PROP_LERP_TIME> ( ph->GetEdict (), true ) / tick_interval ) );
 							const float fCorrect ( netchan->GetLatency ( FLOW_OUTGOING ) + fmodf ( lerp_ticks * tick_interval, 1.0f ) );
 
 							int target_tick ( static_cast< SourceSdk::CUserCmd_csgo* >( PlayerRunCommandHookListener::RT_GetLastUserCmd ( ph ) )->tick_count - lerp_ticks );
@@ -540,15 +540,15 @@ bool WallhackBlocker::RT_IsAbleToSee ( PlayerHandler::iterator sender, PlayerHan
 	const SourceSdk::Vector& receiver_ear_pos ( receiver_data->ear_pos );
 	const SourceSdk::Vector& sender_origin ( sender_data->abs_origin );
 
-	if( RT_IsInFOV ( receiver_ear_pos, MathCache::GetInstance ()->RT_GetCachedMaths ( receiver.GetIndex () ).m_eyeangles, sender_origin ) )
+	if( RT_IsInFOV ( receiver_ear_pos, g_MathCache.RT_GetCachedMaths ( receiver.GetIndex () ).m_eyeangles, sender_origin ) )
 	{
 		if( RT_IsVisible ( receiver_ear_pos, sender_origin ) )
 			return true;
 
 		// Only test weapon tip if it's not in the wall
-		if( RT_IsVisible ( sender_data->ear_pos, MathCache::GetInstance ()->RT_GetCachedMaths ( sender->GetIndex () ).m_eyeangles, sender_data->ear_pos ) )
+		if( RT_IsVisible ( sender_data->ear_pos, g_MathCache.RT_GetCachedMaths ( sender->GetIndex () ).m_eyeangles, sender_data->ear_pos ) )
 		{
-			if( RT_IsVisible ( receiver_ear_pos, MathCache::GetInstance ()->RT_GetCachedMaths ( sender->GetIndex () ).m_eyeangles, sender_data->ear_pos ) )
+			if( RT_IsVisible ( receiver_ear_pos, g_MathCache.RT_GetCachedMaths ( sender->GetIndex () ).m_eyeangles, sender_data->ear_pos ) )
 				return true;
 		}
 
@@ -602,3 +602,5 @@ bool WallhackBlocker::RT_IsAbleToSee ( PlayerHandler::iterator sender, PlayerHan
 
 	return false;
 }
+
+WallhackBlocker g_WallhackBlocker;

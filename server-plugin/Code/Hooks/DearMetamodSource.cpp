@@ -13,19 +13,16 @@
 #	include "link.h"
 #endif
 
+HookGuard<SourceHookSafety> local_HookGuardSourceHookSafety;
+
 SourceHookSafety::SourceHookSafety() :
 	g_SourceHook(nullptr)
 {
-	HookGuard<SourceHookSafety>::Required();
 }
 
 SourceHookSafety::~SourceHookSafety()
 {
-	if (HookGuard<SourceHookSafety>::IsCreated())
-	{
-		HookGuard<SourceHookSafety>::GetInstance()->UnhookAll();
-		HookGuard<SourceHookSafety>::DestroyInstance();
-	}
+	local_HookGuardSourceHookSafety.UnhookAll();
 }
 
 void SourceHookSafety::TryHookMMSourceHook()
@@ -128,17 +125,17 @@ void SourceHookSafety::TryHookMMSourceHook()
 				HookInfo haddhook(g_SourceHook, 2, (DWORD)my_AddHook);
 				HookInfo hremovehook(g_SourceHook, 3, (DWORD)my_RemoveHook);
 
-				HookGuard<SourceHookSafety>::GetInstance()->VirtualTableHook(haddhook, "ISourceHook::AddHook");
-				HookGuard<SourceHookSafety>::GetInstance()->VirtualTableHook(hremovehook, "ISourceHook::RemoveHook");
+				local_HookGuardSourceHookSafety.VirtualTableHook(haddhook, "ISourceHook::AddHook");
+				local_HookGuardSourceHookSafety.VirtualTableHook(hremovehook, "ISourceHook::RemoveHook");
 			}
 			else
 			{
-				Logger::GetInstance()->Msg<MSG_ERROR>("Failed to get ISourceHook interface.");
+				g_Logger.Msg<MSG_ERROR>("Failed to get ISourceHook interface.");
 			}
 		}
 		else
 		{
-			Logger::GetInstance()->Msg<MSG_ERROR>("Sigscan failed for MetaFactory.");
+			g_Logger.Msg<MSG_ERROR>("Sigscan failed for MetaFactory.");
 		}
 	}
 	else
@@ -151,7 +148,7 @@ void SourceHookSafety::UnhookMMSourceHook()
 {
 	if (!g_SourceHook) return;
 
-	HookGuard<SourceHookSafety>::GetInstance()->UnhookAll();
+	local_HookGuardSourceHookSafety.UnhookAll();
 }
 
 #ifdef GNUC
@@ -164,67 +161,25 @@ int HOOKFN_INT SourceHookSafety::my_AddHook(void * isourcehook, void * weak, int
 	
 	DebugMessage(Helpers::format("Caught ISourceHook::AddHook for iface 0x%X", iface));
 
-	if (HookGuard<ConCommandHookListener>::IsCreated())
-	{
-		HookGuard<ConCommandHookListener>::GetInstance()->RevertAll();
-	}
-	if (HookGuard<OnGroundHookListener>::IsCreated())
-	{
-		HookGuard<OnGroundHookListener>::GetInstance()->RevertAll();
-	}
-	if (HookGuard<PlayerRunCommandHookListener>::IsCreated())
-	{
-		HookGuard<PlayerRunCommandHookListener>::GetInstance()->RevertAll();
-	}
-	if (HookGuard<SetTransmitHookListener>::IsCreated())
-	{
-		HookGuard<SetTransmitHookListener>::GetInstance()->RevertAll();
-	}
-	if (HookGuard<ThinkPostHookListener>::IsCreated())
-	{
-		HookGuard<ThinkPostHookListener>::GetInstance()->RevertAll();
-	}
-	if (HookGuard<UserMessageHookListener>::IsCreated())
-	{
-		HookGuard<UserMessageHookListener>::GetInstance()->RevertAll();
-	}
-	if (HookGuard<WeaponHookListener>::IsCreated())
-	{
-		HookGuard<WeaponHookListener>::GetInstance()->RevertAll();
-	}
+	g_HookGuardConCommandHookListener.RevertAll();
+	g_HookGuardOnGroundHookListener.RevertAll();
+	g_HookGuardPlayerRunCommandHookListener.RevertAll();
+	g_HookGuardSetTransmitHookListener.RevertAll();
+	g_HookGuardThinkPostHookListener.RevertAll();
+	g_HookGuardUserMessageHookListener.RevertAll();
+	g_HookGuardWeaponHookListener.RevertAll();
 
 	ST_W_STATIC AddHook_fn gpOldFn;
-	*(DWORD*)&(gpOldFn) = HookGuard<SourceHookSafety>::GetInstance()->RT_GetOldFunction(isourcehook, 2);
+	*(DWORD*)&(gpOldFn) = local_HookGuardSourceHookSafety.RT_GetOldFunction(isourcehook, 2);
 	int ret ( gpOldFn(isourcehook, plug, mode, iface, thisptr_offs, myHookMan, handler, post) );
 
-	if (HookGuard<ConCommandHookListener>::IsCreated())
-	{
-		HookGuard<ConCommandHookListener>::GetInstance()->RehookAll();
-	}
-	if (HookGuard<OnGroundHookListener>::IsCreated())
-	{
-		HookGuard<OnGroundHookListener>::GetInstance()->RehookAll();
-	}
-	if (HookGuard<PlayerRunCommandHookListener>::IsCreated())
-	{
-		HookGuard<PlayerRunCommandHookListener>::GetInstance()->RehookAll();
-	}
-	if (HookGuard<SetTransmitHookListener>::IsCreated())
-	{
-		HookGuard<SetTransmitHookListener>::GetInstance()->RehookAll();
-	}
-	if (HookGuard<ThinkPostHookListener>::IsCreated())
-	{
-		HookGuard<ThinkPostHookListener>::GetInstance()->RehookAll();
-	}
-	if (HookGuard<UserMessageHookListener>::IsCreated())
-	{
-		HookGuard<UserMessageHookListener>::GetInstance()->RehookAll();
-	}
-	if (HookGuard<WeaponHookListener>::IsCreated())
-	{
-		HookGuard<WeaponHookListener>::GetInstance()->RehookAll();
-	}
+	g_HookGuardConCommandHookListener.RehookAll();
+	g_HookGuardOnGroundHookListener.RehookAll();
+	g_HookGuardPlayerRunCommandHookListener.RehookAll();
+	g_HookGuardSetTransmitHookListener.RehookAll();
+	g_HookGuardThinkPostHookListener.RehookAll();
+	g_HookGuardUserMessageHookListener.RehookAll();
+	g_HookGuardWeaponHookListener.RehookAll();
 
 	return ret;
 }
@@ -239,67 +194,27 @@ bool HOOKFN_INT SourceHookSafety::my_RemoveHook(void * isourcehook, void * weak,
 
 	DebugMessage(Helpers::format("Caught ISourceHook::RemoveHook for iface 0x%X", iface));
 
-	if (HookGuard<ConCommandHookListener>::IsCreated())
-	{
-		HookGuard<ConCommandHookListener>::GetInstance()->RevertAll();
-	}
-	if (HookGuard<OnGroundHookListener>::IsCreated())
-	{
-		HookGuard<OnGroundHookListener>::GetInstance()->RevertAll();
-	}
-	if (HookGuard<PlayerRunCommandHookListener>::IsCreated())
-	{
-		HookGuard<PlayerRunCommandHookListener>::GetInstance()->RevertAll();
-	}
-	if (HookGuard<SetTransmitHookListener>::IsCreated())
-	{
-		HookGuard<SetTransmitHookListener>::GetInstance()->RevertAll();
-	}
-	if (HookGuard<ThinkPostHookListener>::IsCreated())
-	{
-		HookGuard<ThinkPostHookListener>::GetInstance()->RevertAll();
-	}
-	if (HookGuard<UserMessageHookListener>::IsCreated())
-	{
-		HookGuard<UserMessageHookListener>::GetInstance()->RevertAll();
-	}
-	if (HookGuard<WeaponHookListener>::IsCreated())
-	{
-		HookGuard<WeaponHookListener>::GetInstance()->RevertAll();
-	}
+	g_HookGuardConCommandHookListener.RevertAll();
+	g_HookGuardOnGroundHookListener.RevertAll();
+	g_HookGuardPlayerRunCommandHookListener.RevertAll();
+	g_HookGuardSetTransmitHookListener.RevertAll();
+	g_HookGuardThinkPostHookListener.RevertAll();
+	g_HookGuardUserMessageHookListener.RevertAll();
+	g_HookGuardWeaponHookListener.RevertAll();
 
 	ST_W_STATIC RemoveHook_fn gpOldFn;
-	*(DWORD*)&(gpOldFn) = HookGuard<SourceHookSafety>::GetInstance()->RT_GetOldFunction(isourcehook, 3);
+	*(DWORD*)&(gpOldFn) = local_HookGuardSourceHookSafety.RT_GetOldFunction(isourcehook, 3);
 	int ret( gpOldFn(isourcehook, plug, iface, thisptr_offs, myHookMan, handler, post));
 
-	if (HookGuard<ConCommandHookListener>::IsCreated())
-	{
-		HookGuard<ConCommandHookListener>::GetInstance()->RehookAll();
-	}
-	if (HookGuard<OnGroundHookListener>::IsCreated())
-	{
-		HookGuard<OnGroundHookListener>::GetInstance()->RehookAll();
-	}
-	if (HookGuard<PlayerRunCommandHookListener>::IsCreated())
-	{
-		HookGuard<PlayerRunCommandHookListener>::GetInstance()->RehookAll();
-	}
-	if (HookGuard<SetTransmitHookListener>::IsCreated())
-	{
-		HookGuard<SetTransmitHookListener>::GetInstance()->RehookAll();
-	}
-	if (HookGuard<ThinkPostHookListener>::IsCreated())
-	{
-		HookGuard<ThinkPostHookListener>::GetInstance()->RehookAll();
-	}
-	if (HookGuard<UserMessageHookListener>::IsCreated())
-	{
-		HookGuard<UserMessageHookListener>::GetInstance()->RehookAll();
-	}
-	if (HookGuard<WeaponHookListener>::IsCreated())
-	{
-		HookGuard<WeaponHookListener>::GetInstance()->RehookAll();
-	}
+	g_HookGuardConCommandHookListener.RehookAll();
+	g_HookGuardOnGroundHookListener.RehookAll();
+	g_HookGuardPlayerRunCommandHookListener.RehookAll();
+	g_HookGuardSetTransmitHookListener.RehookAll();
+	g_HookGuardThinkPostHookListener.RehookAll();
+	g_HookGuardUserMessageHookListener.RehookAll();
+	g_HookGuardWeaponHookListener.RehookAll();
 
 	return ret;
 }
+
+SourceHookSafety g_SourceHookSafety;

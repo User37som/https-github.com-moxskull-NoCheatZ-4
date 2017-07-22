@@ -28,7 +28,7 @@ SpamChangeNameTester::SpamChangeNameTester () :
 	SourceSdk::IGameEventListener002 (),
 	OnTickListener (),
 	playerdata_class (),
-	singleton_class ()
+	Singleton ()
 {}
 
 SpamChangeNameTester::~SpamChangeNameTester ()
@@ -100,7 +100,7 @@ bool IsNameValid ( const char* const o_name )
 
 void SpamChangeNameTester::FireGameEvent ( SourceSdk::IGameEvent* ev )
 {
-	PlayerHandler::iterator ph ( NczPlayerManager::GetInstance ()->GetPlayerHandlerByUserId ( ev->GetInt ( "userid", 0 ) ) );
+	PlayerHandler::iterator ph ( g_NczPlayerManager.GetPlayerHandlerByUserId ( ev->GetInt ( "userid", 0 ) ) );
 
 	if( ph < SlotStatus::PLAYER_CONNECTED ) return;
 
@@ -137,3 +137,5 @@ void SpamChangeNameTester::ClientConnect ( bool *bAllowConnect, SourceSdk::edict
 		strncpy ( reject, "Your name is not valid", 23 );
 	}
 }
+
+SpamChangeNameTester g_SpamChangeNameTester;

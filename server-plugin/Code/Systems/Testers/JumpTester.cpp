@@ -32,7 +32,7 @@ JumpTester::JumpTester () :
 	OnGroundHookListener (),
 	playerdata_class (),
 	PlayerRunCommandHookListener (),
-	singleton_class (),
+	Singleton (),
 	convar_sv_enablebunnyhopping ( nullptr ),
 	convar_sv_autobunnyhopping ( nullptr ),
 	detect_scripts(false)
@@ -51,7 +51,7 @@ void JumpTester::Init ()
 
 	if( convar_sv_enablebunnyhopping == nullptr )
 	{
-		Logger::GetInstance ()->Msg<MSG_WARNING> ( "JumpTester::Init : Unable to locate ConVar sv_enablebunnyhopping" );
+		g_Logger.Msg<MSG_WARNING> ( "JumpTester::Init : Unable to locate ConVar sv_enablebunnyhopping" );
 	}
 
 	if( SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive )
@@ -60,7 +60,7 @@ void JumpTester::Init ()
 
 		if( convar_sv_enablebunnyhopping == nullptr )
 		{
-			Logger::GetInstance ()->Msg<MSG_WARNING> ( "JumpTester::Init : Unable to locate ConVar sv_enablebunnyhopping" );
+			g_Logger.Msg<MSG_WARNING> ( "JumpTester::Init : Unable to locate ConVar sv_enablebunnyhopping" );
 		}
 	}
 }
@@ -76,18 +76,18 @@ bool JumpTester::sys_cmd_fn(const SourceSdk::CCommand & args)
 				if (stricmp(args.Arg(3), "yes") == 0)
 				{
 					detect_scripts = true;
-					Logger::GetInstance()->Msg<MSG_CMD_REPLY>("DetectScripts is Yes");
+					g_Logger.Msg<MSG_CMD_REPLY>("DetectScripts is Yes");
 					return true;
 				}
 				else if (stricmp(args.Arg(3), "no") == 0)
 				{
 					detect_scripts = false;
-					Logger::GetInstance()->Msg<MSG_CMD_REPLY>("DetectScripts is No");
+					g_Logger.Msg<MSG_CMD_REPLY>("DetectScripts is No");
 					return true;
 				}
 				else
 				{
-					Logger::GetInstance()->Msg<MSG_CMD_REPLY>("DetectScripts Usage : Yes / No");
+					g_Logger.Msg<MSG_CMD_REPLY>("DetectScripts Usage : Yes / No");
 					return false;
 				}
 			}
@@ -319,6 +319,8 @@ void JumpTester::OnPlayerJumpButtonUp ( PlayerHandler::iterator ph, int game_tic
 	playerData->jumpCmdHolder.JumpUp_Tick = game_tick;
 	playerData->jumpCmdHolder.lastJumpCmdState = false;
 }
+
+JumpTester g_JumpTester;
 
 const char * ConvertButton ( bool v )
 {

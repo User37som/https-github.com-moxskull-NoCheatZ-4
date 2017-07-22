@@ -104,11 +104,9 @@ typedef basic_slist<PlayerBanRequestT> BanRequestListT;
 
 class BanRequest :
 	public BaseStaticSystem,
-	public Singleton<BanRequest>,
+	public Singleton,
 	public TimerListener
 {
-	typedef Singleton<BanRequest> singleton_class;
-
 private:
 	float m_wait_time;
 	bool m_do_writeid;
@@ -165,5 +163,7 @@ public:
 		return m_can_kick && m_can_ban;
 	}
 };
+
+extern BanRequest g_BanRequest;
 
 #endif

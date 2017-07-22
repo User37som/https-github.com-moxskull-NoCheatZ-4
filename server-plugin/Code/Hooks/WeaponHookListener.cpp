@@ -25,18 +25,15 @@
 
 WeaponHookListener::WeaponHookListenersListT WeaponHookListener::m_listeners;
 
+HookGuard<WeaponHookListener> g_HookGuardWeaponHookListener;
+
 WeaponHookListener::WeaponHookListener ()
 {
-	HookGuard<WeaponHookListener>::Required ();
 }
 
 WeaponHookListener::~WeaponHookListener ()
 {
-	if( HookGuard<WeaponHookListener>::IsCreated () )
-	{
-		HookGuard<WeaponHookListener>::GetInstance ()->UnhookAll ();
-		HookGuard<WeaponHookListener>::DestroyInstance ();
-	}
+	g_HookGuardWeaponHookListener.UnhookAll ();
 }
 
 void WeaponHookListener::HookWeapon ( PlayerHandler::iterator ph )
@@ -44,10 +41,10 @@ void WeaponHookListener::HookWeapon ( PlayerHandler::iterator ph )
 	LoggerAssert ( Helpers::isValidEdict ( ph->GetEdict () ) );
 	void* unk ( ph->GetEdict ()->m_pUnk );
 
-	HookInfo info_equip ( unk, ConfigManager::GetInstance ()->vfid_weaponequip, ( DWORD ) RT_nWeapon_Equip );
-	HookInfo info_drop ( unk, ConfigManager::GetInstance ()->vfid_weapondrop, ( DWORD ) RT_nWeapon_Drop );
-	HookGuard<WeaponHookListener>::GetInstance ()->VirtualTableHook ( info_equip, "CBaseCombatPlayer::WeaponEquip" );
-	HookGuard<WeaponHookListener>::GetInstance ()->VirtualTableHook ( info_drop, "CBaseCombatPlayer::WeaponDrop");
+	HookInfo info_equip ( unk, g_ConfigManager.vfid_weaponequip, ( DWORD ) RT_nWeapon_Equip );
+	HookInfo info_drop ( unk, g_ConfigManager.vfid_weapondrop, ( DWORD ) RT_nWeapon_Drop );
+	g_HookGuardWeaponHookListener.VirtualTableHook ( info_equip, "CBaseCombatPlayer::WeaponEquip" );
+	g_HookGuardWeaponHookListener.VirtualTableHook ( info_drop, "CBaseCombatPlayer::WeaponDrop");
 }
 
 #ifdef GNUC
@@ -56,7 +53,7 @@ void HOOKFN_INT WeaponHookListener::RT_nWeapon_Equip ( void * const basePlayer, 
 void HOOKFN_INT WeaponHookListener::RT_nWeapon_Equip ( void * const basePlayer, void * const, void * const weapon )
 #endif
 {
-	PlayerHandler::iterator ph ( NczPlayerManager::GetInstance ()->GetPlayerHandlerByBasePlayer ( basePlayer ) );
+	PlayerHandler::iterator ph ( g_NczPlayerManager.GetPlayerHandlerByBasePlayer ( basePlayer ) );
 
 	if( ph != SlotStatus::INVALID )
 	{
@@ -74,7 +71,7 @@ void HOOKFN_INT WeaponHookListener::RT_nWeapon_Equip ( void * const basePlayer, 
 	}
 
 	WeaponEquip_t gpOldFn;
-	*( DWORD* )&( gpOldFn ) = HookGuard<WeaponHookListener>::GetInstance ()->RT_GetOldFunction ( basePlayer, ConfigManager::GetInstance ()->vfid_weaponequip );
+	*( DWORD* )&( gpOldFn ) = g_HookGuardWeaponHookListener.RT_GetOldFunction ( basePlayer, g_ConfigManager.vfid_weaponequip );
 	gpOldFn ( basePlayer, weapon );
 }
 
@@ -84,7 +81,7 @@ void HOOKFN_INT WeaponHookListener::RT_nWeapon_Drop ( void * const basePlayer, v
 void HOOKFN_INT WeaponHookListener::RT_nWeapon_Drop ( void * const basePlayer, void * const, void * const weapon, SourceSdk::Vector const * const targetVec, SourceSdk::Vector const * const velocity )
 #endif
 {
-	PlayerHandler::iterator ph ( NczPlayerManager::GetInstance ()->GetPlayerHandlerByBasePlayer ( basePlayer ) );
+	PlayerHandler::iterator ph ( g_NczPlayerManager.GetPlayerHandlerByBasePlayer ( basePlayer ) );
 
 	if( ph != SlotStatus::INVALID && weapon != nullptr )
 	{
@@ -102,7 +99,7 @@ void HOOKFN_INT WeaponHookListener::RT_nWeapon_Drop ( void * const basePlayer, v
 	}
 
 	WeaponDrop_t gpOldFn;
-	*( DWORD* )&( gpOldFn ) = HookGuard<WeaponHookListener>::GetInstance ()->RT_GetOldFunction ( basePlayer, ConfigManager::GetInstance ()->vfid_weapondrop );
+	*( DWORD* )&( gpOldFn ) = g_HookGuardWeaponHookListener.RT_GetOldFunction ( basePlayer, g_ConfigManager.vfid_weapondrop );
 	gpOldFn ( basePlayer, weapon, targetVec, velocity );
 }
 

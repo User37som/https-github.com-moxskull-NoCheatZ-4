@@ -25,7 +25,8 @@ EyeAnglesTester::EyeAnglesTester ( void ) :
 	BaseTesterSystem ( "EyeAnglesTester" ),
 	playerdata_class (),
 	PlayerRunCommandHookListener (),
-	singleton_class ()
+	UserMessageHookListener (),
+	Singleton ()
 {}
 
 EyeAnglesTester::~EyeAnglesTester ( void )
@@ -46,11 +47,13 @@ void EyeAnglesTester::Load ()
 	}
 
 	PlayerRunCommandHookListener::RegisterPlayerRunCommandHookListener ( this, SystemPriority::EyeAnglesTester );
+	UserMessageHookListener::RegisterUserMessageHookListener(this);
 }
 
 void EyeAnglesTester::Unload ()
 {
 	PlayerRunCommandHookListener::RemovePlayerRunCommandHookListener ( this );
+	UserMessageHookListener::RemoveUserMessageHookListener(this);
 }
 
 bool EyeAnglesTester::GotJob () const
@@ -65,69 +68,89 @@ bool EyeAnglesTester::GotJob () const
 
 PlayerRunCommandRet EyeAnglesTester::RT_PlayerRunCommandCallback ( PlayerHandler::iterator ph, void * const pCmd, void * const old_cmd )
 {
-	int const * const flags ( EntityProps::GetInstance ()->GetPropValue<int, PROP_FLAGS> ( ph->GetEdict () ) );
+	int const * const flags ( g_EntityProps.GetPropValue<int, PROP_FLAGS> ( ph->GetEdict () ) );
+	EyeAngleInfoT* playerData(GetPlayerDataStructByIndex(ph.GetIndex()));
+	playerData->x.abs_value = fabs(playerData->x.value = static_cast<SourceSdk::CUserCmd_csgo*>(pCmd)->viewangles.x);
+	playerData->y.abs_value = fabs(playerData->y.value = static_cast<SourceSdk::CUserCmd_csgo*>(pCmd)->viewangles.y);
+	playerData->z.abs_value = fabs(playerData->z.value = static_cast<SourceSdk::CUserCmd_csgo*>(pCmd)->viewangles.z);
 
 	/*
 		FL_FROZEN			(1 << 5)
 		FL_ATCONTROLS		(1 << 6)
 	*/
-	if( *flags & ( 3 << 5 ) ) return PlayerRunCommandRet::CONTINUE;
 
-	PlayerRunCommandRet drop_cmd ( PlayerRunCommandRet::CONTINUE );
-
-	EyeAngleInfoT* playerData ( GetPlayerDataStructByIndex ( ph.GetIndex () ) );
-	playerData->x.abs_value = fabs ( playerData->x.value = static_cast< SourceSdk::CUserCmd_csgo* >( pCmd )->viewangles.x );
-	playerData->y.abs_value = fabs ( playerData->y.value = static_cast< SourceSdk::CUserCmd_csgo* >( pCmd )->viewangles.y );
-	playerData->z.abs_value = fabs ( playerData->z.value = static_cast< SourceSdk::CUserCmd_csgo* >( pCmd )->viewangles.z );
-	playerData->past_x.abs_value = fabs(playerData->past_x.value = static_cast< SourceSdk::CUserCmd_csgo* >(old_cmd)->viewangles.x);
-	playerData->past_y.abs_value = fabs(playerData->past_x.value = static_cast< SourceSdk::CUserCmd_csgo* >(old_cmd)->viewangles.y);
-	playerData->past_z.abs_value = fabs(playerData->past_x.value = static_cast< SourceSdk::CUserCmd_csgo* >(old_cmd)->viewangles.z);
-
-	if( playerData->x.abs_value > 89.0f && playerData->past_x.abs_value > 89.0f && playerData->x.value != playerData->past_x.value )
-	{
-		++playerData->x.detectionsCount;
-		//drop_cmd = PlayerRunCommandRet::INERT;
-		if( playerData->x.lastDetectionPrintTime + ANTIFLOOD_LOGGING_TIME < Plat_FloatTime () )
+	if ((*flags & (3 << 5))==0)
+	{	
+		if (playerData->x.abs_value > 89.0f && playerData->past_x.abs_value > 89.0f && playerData->x.value != playerData->past_x.value)
 		{
-			playerData->x.lastDetectionPrintTime = Plat_FloatTime ();
-
-			if (playerData->x.detectionsCount > 5)
+			++playerData->x.detectionsCount;
+			//drop_cmd = PlayerRunCommandRet::INERT;
+			if (playerData->x.lastDetectionPrintTime + ANTIFLOOD_LOGGING_TIME < Plat_FloatTime())
 			{
-				ProcessDetectionAndTakeAction<Detection_EyeAngleX::data_type>(Detection_EyeAngleX(), playerData, ph, this);
+				playerData->x.lastDetectionPrintTime = Plat_FloatTime();
+
+				if (playerData->x.detectionsCount > 5)
+				{
+					ProcessDetectionAndTakeAction<Detection_EyeAngleX::data_type>(Detection_EyeAngleX(), playerData, ph, this);
+				}
 			}
 		}
-	}
-	if( playerData->y.abs_value > 180.0f && playerData->past_y.abs_value > 180.0f && playerData->y.value != playerData->past_y.value )
-	{
-		++playerData->y.detectionsCount;
-		//drop_cmd = PlayerRunCommandRet::INERT;
-		if( playerData->y.lastDetectionPrintTime + ANTIFLOOD_LOGGING_TIME < Plat_FloatTime () )
+		if (playerData->y.abs_value > 180.0f && playerData->past_y.abs_value > 180.0f && playerData->y.value != playerData->past_y.value)
 		{
-			playerData->y.lastDetectionPrintTime = Plat_FloatTime ();
-
-			if (playerData->y.detectionsCount > 5)
+			++playerData->y.detectionsCount;
+			//drop_cmd = PlayerRunCommandRet::INERT;
+			if (playerData->y.lastDetectionPrintTime + ANTIFLOOD_LOGGING_TIME < Plat_FloatTime())
 			{
-				ProcessDetectionAndTakeAction<Detection_EyeAngleY::data_type>(Detection_EyeAngleY(), playerData, ph, this);
+				playerData->y.lastDetectionPrintTime = Plat_FloatTime();
+
+				if (playerData->y.detectionsCount > 5)
+				{
+					ProcessDetectionAndTakeAction<Detection_EyeAngleY::data_type>(Detection_EyeAngleY(), playerData, ph, this);
+				}
 			}
 		}
-	}
-	if (playerData->z.abs_value > 0.5f && playerData->past_z.abs_value > 0.5f  && playerData->z.value != playerData->past_z.value)
-	{
-		++playerData->z.detectionsCount;
-		//drop_cmd = PlayerRunCommandRet::INERT;
-		if (playerData->z.lastDetectionPrintTime + ANTIFLOOD_LOGGING_TIME < Plat_FloatTime())
+		if (playerData->z.abs_value > 0.5f && playerData->past_z.abs_value > 0.5f  && playerData->z.value != playerData->past_z.value)
 		{
-			playerData->z.lastDetectionPrintTime = Plat_FloatTime();
-
-			if (playerData->z.detectionsCount > 5)
+			++playerData->z.detectionsCount;
+			//drop_cmd = PlayerRunCommandRet::INERT;
+			if (playerData->z.lastDetectionPrintTime + ANTIFLOOD_LOGGING_TIME < Plat_FloatTime())
 			{
-				ProcessDetectionAndTakeAction<Detection_EyeAngleZ::data_type>(Detection_EyeAngleZ(), playerData, ph, this);
+				playerData->z.lastDetectionPrintTime = Plat_FloatTime();
+
+				if (playerData->z.detectionsCount > 5)
+				{
+					ProcessDetectionAndTakeAction<Detection_EyeAngleZ::data_type>(Detection_EyeAngleZ(), playerData, ph, this);
+				}
 			}
 		}
 	}
 
-	return drop_cmd;
+	playerData->past_x = playerData->x;
+	playerData->past_y = playerData->y;
+	playerData->past_z = playerData->z;
+
+	return PlayerRunCommandRet::CONTINUE;
 }
+
+bool EyeAnglesTester::RT_SendUserMessageCallback(SourceSdk::IRecipientFilter const & filter, int const message_id, google::protobuf::Message const & buffer)
+{
+	DebugMessage(Helpers::format("EyeAnglesTester::RT_SendUserMessageCallback : %d, %s", message_id, buffer.DebugString().c_str()));
+
+	return false;
+}
+
+bool EyeAnglesTester::RT_UserMessageBeginCallback(SourceSdk::IRecipientFilter const * const filter, int const message_id)
+{
+	return false;
+}
+
+void EyeAnglesTester::RT_MessageEndCallback(SourceSdk::IRecipientFilter const * const filter, int const message_id, SourceSdk::bf_write* buffer)
+{
+
+}
+
+
+EyeAnglesTester g_EyeAnglesTester;
 
 basic_string Detection_EyeAngle::GetDataDump ()
 {

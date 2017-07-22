@@ -5,7 +5,7 @@ AimTester::AimTester() :
 	SourceSdk::IGameEventListener002(),
 	PlayerDataStructHandler<data_throwback_t>(),
 	PlayerRunCommandHookListener(),
-	singleton_class()
+	Singleton()
 {
 
 }

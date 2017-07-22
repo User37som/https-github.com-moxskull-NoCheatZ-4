@@ -66,10 +66,8 @@ typedef enum logger_chat : size_t
 
 class Logger :
 	public BaseStaticSystem,
-	public Singleton<Logger>
+	public Singleton
 {
-	typedef Singleton<Logger> singleton_class;
-
 	typedef void ( *MsgFunc_t ) ( const char* pMsg, ... );
 
 private:
@@ -87,7 +85,7 @@ private:
 public:
 	Logger () :
 		BaseStaticSystem ( "Logger", "Verbose - AlwaysFlush - AllowChat" ),
-		singleton_class (),
+		Singleton (),
 		m_msg (),
 		chat_prolog ( basic_string("\x01[\x04NoCheatZ ").append(NCZ_VERSION_GIT_SHORT).append("\x01] ") ),
 		log_prolog(basic_string("[NoCheatZ ").append(NCZ_VERSION_GIT_SHORT).append("] ")),
@@ -139,12 +137,14 @@ inline bool Logger::IsConsoleConnected () const
 	return m_msg_func != nullptr;
 }
 
-#define SystemVerbose1(x) if( this->m_verbose >= 1 ) Logger::GetInstance()->Msg<MSG_VERBOSE1>(x, 1)
-#define SystemVerbose2(x) if( this->m_verbose >= 2 ) Logger::GetInstance()->Msg<MSG_VERBOSE2>(x, 2)
+extern Logger g_Logger;
+
+#define SystemVerbose1(x) if( this->m_verbose >= 1 ) g_Logger.Msg<MSG_VERBOSE1>(x, 1)
+#define SystemVerbose2(x) if( this->m_verbose >= 2 ) g_Logger.Msg<MSG_VERBOSE2>(x, 2)
 
 #ifndef NO_LOGGER_ASSERT
 #	ifdef DEBUG
-#		define DebugMessage(x) Logger::GetInstance()->Msg<MSG_DEBUG>(x, 3)
+#		define DebugMessage(x) g_Logger.Msg<MSG_DEBUG>(x, 3)
 #		define LoggerAssert(expression) if( (! (!!(expression))) ) Logger::SpewAssert(#expression, __FILE__, __LINE__); Assert(expression)
 #	else
 #		define DebugMessage(x)

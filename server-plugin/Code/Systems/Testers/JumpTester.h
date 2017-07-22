@@ -122,9 +122,8 @@ class JumpTester :
 	public OnGroundHookListener,
 	public PlayerDataStructHandler<JumpInfoT>,
 	public PlayerRunCommandHookListener,
-	public Singleton<JumpTester>
+	public Singleton
 {
-	typedef Singleton<JumpTester> singleton_class;
 	typedef PlayerDataStructHandler<JumpInfoT> playerdata_class;
 
 private:
@@ -158,5 +157,7 @@ public:
 
 	void OnPlayerJumpButtonUp ( PlayerHandler::iterator ph, int game_tick );
 };
+
+extern JumpTester g_JumpTester;
 
 #endif // JUMPTESTER_H

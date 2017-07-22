@@ -25,10 +25,8 @@
 
 class CNoCheatZPlugin :
 	public SourceSdk::IServerPluginCallbacks,
-	public Singleton<CNoCheatZPlugin>
+	public Singleton
 {
-	typedef Singleton<CNoCheatZPlugin> singleton_class;
-
 public:
 	// IServerPluginCallbacks methods
 	virtual bool			Load ( SourceSdk::CreateInterfaceFn interfaceFactory, SourceSdk::CreateInterfaceFn gameServerFactory ) final;
@@ -61,7 +59,6 @@ public:
 		return m_iClientCommandIndex;
 	}
 
-	static void CreateSingletons ();
 	static void DestroySingletons ();
 
 	CNoCheatZPlugin ();
@@ -73,5 +70,7 @@ private:
 public:
 	void * ncz_cmd_ptr;
 };
+
+extern CNoCheatZPlugin g_CNoCheatZPlugin;
 
 #endif

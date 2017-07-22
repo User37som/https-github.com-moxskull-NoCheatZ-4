@@ -45,9 +45,8 @@ class BhopBlocker :
 	public PlayerDataStructHandler<JmpInfo>,
 	public PlayerRunCommandHookListener,
 	public OnGroundHookListener,
-	public Singleton<BhopBlocker>
+	public Singleton
 {
-	typedef Singleton<BhopBlocker> singleton_class;
 	typedef PlayerDataStructHandler<JmpInfo> playerdatahandler_class;
 
 private:
@@ -70,5 +69,7 @@ public:
 
 	virtual void RT_m_hGroundEntityStateChangedCallback ( PlayerHandler::iterator ph, bool const new_isOnGround ) override final;
 };
+
+extern BhopBlocker g_BhopBlocker;
 
 #endif // BHOPBLOCKER_H

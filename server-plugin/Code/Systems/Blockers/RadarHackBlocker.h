@@ -71,11 +71,10 @@ class RadarHackBlocker :
 	public BaseBlockerSystem,
 	public OnTickListener,
 	public PlayerDataStructHandler<ClientRadarData>,
-	public Singleton<RadarHackBlocker>,
+	public Singleton,
 	public ThinkPostHookListener,
 	public UserMessageHookListener
 {
-	typedef Singleton<RadarHackBlocker> singleton_class;
 	typedef PlayerDataStructHandler<ClientRadarData> playerdatahandler_class;
 
 private:
@@ -108,6 +107,8 @@ private:
 
 	virtual bool RT_UserMessageBeginCallback ( SourceSdk::IRecipientFilter const * const, int const ) override final;
 
+	virtual void RT_MessageEndCallback(SourceSdk::IRecipientFilter const * const, int const, SourceSdk::bf_write* buffer) override final;
+
 public:
 	void OnMapStart ();
 
@@ -120,5 +121,7 @@ private:
 
 	void RT_UpdatePlayerData ( NczPlayer* player );
 };
+
+extern RadarHackBlocker g_RadarHackBlocker;
 
 #endif // RADARHACKBLOCKER_H

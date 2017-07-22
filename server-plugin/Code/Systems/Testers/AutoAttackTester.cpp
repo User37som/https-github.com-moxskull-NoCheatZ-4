@@ -25,7 +25,7 @@ AutoAttackTester::AutoAttackTester ( void ) :
 	BaseTesterSystem( "AutoAttackTester" ),
 	playerdata_class (),
 	PlayerRunCommandHookListener (),
-	singleton_class ()
+	Singleton ()
 {}
 
 AutoAttackTester::~AutoAttackTester ( void )
@@ -237,6 +237,8 @@ void AutoAttackTester::FindDetection ( PlayerHandler::iterator ph, tb_int* graph
 		}
 	}
 }
+
+AutoAttackTester g_AutoAttackTester;
 
 basic_string Detection_AutoAttack::GetDataDump ()
 {

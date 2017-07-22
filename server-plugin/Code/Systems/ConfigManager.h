@@ -8,10 +8,8 @@
 #include "Players/NczPlayerManager.h"
 
 class ConfigManager :
-	public Singleton<ConfigManager>
+	public Singleton
 {
-	typedef Singleton<ConfigManager> singleton_class;
-
 private:
 
 	int const content_version; // Backward compatible if we ever change the layout of the config file
@@ -27,7 +25,7 @@ public:
 	float m_smoke_timetobang;
 	float m_smoke_time;
 	static float tickinterval;
-	int tickrate_override;
+	float tickrate_override;
 
 	// virtual functions
 	int vfid_getdatadescmap;
@@ -41,7 +39,7 @@ public:
 
 public:
 	ConfigManager ();
-	virtual ~ConfigManager () override final;
+	virtual ~ConfigManager () ;
 
 	/*
 		Load the config file containing configuration. Returns false if error parsing the config file.
@@ -52,5 +50,7 @@ public:
 
 	bool IsAdmin(char const * steamid);
 };
+
+extern ConfigManager g_ConfigManager;
 
 #endif // CONFIGMANAGER_H

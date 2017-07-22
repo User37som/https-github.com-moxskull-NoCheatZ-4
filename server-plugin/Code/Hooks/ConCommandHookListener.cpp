@@ -23,24 +23,21 @@
 
 ConCommandHookListener::ConCommandListenersListT ConCommandHookListener::m_listeners;
 
+HookGuard<ConCommandHookListener> g_HookGuardConCommandHookListener;
+
 ConCommandHookListener::ConCommandHookListener ()
 {
-	HookGuard<ConCommandHookListener>::Required ();
 }
 
 ConCommandHookListener::~ConCommandHookListener ()
 {
-	if( HookGuard<ConCommandHookListener>::IsCreated() )
-	{
-		HookGuard<ConCommandHookListener>::GetInstance ()->UnhookAll ();
-		HookGuard<ConCommandHookListener>::DestroyInstance ();
-	}
+	g_HookGuardConCommandHookListener.UnhookAll ();
 }
 
 void ConCommandHookListener::HookDispatch ( void* cmd )
 {
-	HookInfo info ( cmd, ConfigManager::GetInstance ()->vfid_dispatch, ( DWORD ) RT_nDispatch );
-	HookGuard<ConCommandHookListener>::GetInstance ()->VirtualTableHook ( info, "ConCommand::Dispatch" );
+	HookInfo info ( cmd, g_ConfigManager.vfid_dispatch, ( DWORD ) RT_nDispatch );
+	g_HookGuardConCommandHookListener.VirtualTableHook ( info, "ConCommand::Dispatch" );
 }
 
 #ifdef GNUC
@@ -53,9 +50,9 @@ void HOOKFN_INT ConCommandHookListener::RT_nDispatch ( void* cmd, void*, SourceS
 	bool bypass ( false );
 	if( index >= PLUGIN_MIN_COMMAND_INDEX && index <= PLUGIN_MAX_COMMAND_INDEX )
 	{
-		if( index <= NczPlayerManager::GetInstance ()->GetMaxIndex () ) // https://github.com/L-EARN/NoCheatZ-4/issues/59#issuecomment-230506264
+		if( index <= g_NczPlayerManager.GetMaxIndex () ) // https://github.com/L-EARN/NoCheatZ-4/issues/59#issuecomment-230506264
 		{
-			PlayerHandler::iterator ph = NczPlayerManager::GetInstance ()->GetPlayerHandlerByIndex ( index );
+			PlayerHandler::iterator ph = g_NczPlayerManager.GetPlayerHandlerByIndex ( index );
 
 			if( ph > SlotStatus::INVALID )
 			{
@@ -73,7 +70,8 @@ void HOOKFN_INT ConCommandHookListener::RT_nDispatch ( void* cmd, void*, SourceS
 					it = it->m_next;
 				}
 
-				DebugMessage ( Helpers::format ( "Bypassed ConCommand %s of %s\n", SourceSdk::InterfacesProxy::ConCommand_GetName ( cmd ), ph->GetName () ) );
+				if(bypass)
+					DebugMessage ( Helpers::format ( "Bypassed ConCommand %s of %s\n", SourceSdk::InterfacesProxy::ConCommand_GetName ( cmd ), ph->GetName () ) );
 			}
 		}
 	}
@@ -98,7 +96,7 @@ void HOOKFN_INT ConCommandHookListener::RT_nDispatch ( void* cmd, void*, SourceS
 		//Assert(it != nullptr);
 
 		ST_W_STATIC Dispatch_t gpOldFn;
-		*( DWORD* )&( gpOldFn ) = HookGuard<ConCommandHookListener>::GetInstance ()->RT_GetOldFunction ( cmd, ConfigManager::GetInstance ()->vfid_dispatch );
+		*( DWORD* )&( gpOldFn ) = g_HookGuardConCommandHookListener.RT_GetOldFunction ( cmd, g_ConfigManager.vfid_dispatch );
 		gpOldFn ( cmd, args );
 	}
 	else

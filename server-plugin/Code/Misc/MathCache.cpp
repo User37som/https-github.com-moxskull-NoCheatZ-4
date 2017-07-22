@@ -58,7 +58,7 @@ MathInfo& MathCache::RT_GetCachedMaths ( int const player_index, bool const forc
 			{
 				ph->GetEyeAngles ( info.m_eyeangles );
 			}
-			SourceSdk::VectorCopy ( *EntityProps::GetInstance ()->GetPropValue<SourceSdk::Vector, PROP_ABS_VELOCITY> ( ph->GetEdict (), true ), info.m_velocity );
+			SourceSdk::VectorCopy ( *g_EntityProps.GetPropValue<SourceSdk::Vector, PROP_ABS_VELOCITY> ( ph->GetEdict (), true ), info.m_velocity );
 			SourceSdk::VectorMultiply ( info.m_velocity, 0.01f );
 			SourceSdk::VectorAbs ( info.m_velocity, info.m_abs_velocity );
 			SourceSdk::VectorCopy ( playerinfo->GetPlayerMins (), info.m_mins );
@@ -71,3 +71,5 @@ MathInfo& MathCache::RT_GetCachedMaths ( int const player_index, bool const forc
 	}
 	return info;
 }
+
+MathCache g_MathCache;

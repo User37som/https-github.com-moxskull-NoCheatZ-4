@@ -24,18 +24,15 @@
 
 OnGroundHookListener::OnGroundListenersListT OnGroundHookListener::m_listeners;
 
+HookGuard<OnGroundHookListener> g_HookGuardOnGroundHookListener;
+
 OnGroundHookListener::OnGroundHookListener ()
 {
-	HookGuard<OnGroundHookListener>::Required ();
 }
 
 OnGroundHookListener::~OnGroundHookListener ()
 {
-	if( HookGuard<OnGroundHookListener>::IsCreated () )
-	{
-		HookGuard<OnGroundHookListener>::GetInstance ()->UnhookAll ();
-		HookGuard<OnGroundHookListener>::DestroyInstance ();
-	}
+	g_HookGuardOnGroundHookListener.UnhookAll ();
 }
 
 void OnGroundHookListener::HookOnGround ( PlayerHandler::iterator ph )
@@ -43,15 +40,15 @@ void OnGroundHookListener::HookOnGround ( PlayerHandler::iterator ph )
 	LoggerAssert ( Helpers::isValidEdict ( ph->GetEdict () ) );
 	void* unk ( ph->GetEdict ()->m_pUnk );
 
-	HookInfo info ( unk, ConfigManager::GetInstance ()->vfid_mhgroundentity, ( DWORD ) RT_nNetworkStateChanged_m_hGroundEntity );
-	HookGuard<OnGroundHookListener>::GetInstance ()->VirtualTableHook ( info, "CBasePlayer::NetworkStateChanged_m_hGroundEntity" );
+	HookInfo info ( unk, g_ConfigManager.vfid_mhgroundentity, ( DWORD ) RT_nNetworkStateChanged_m_hGroundEntity );
+	g_HookGuardOnGroundHookListener.VirtualTableHook ( info, "CBasePlayer::NetworkStateChanged_m_hGroundEntity" );
 }
 
 /*void OnGroundHookListener::UnhookOnGround()
 {
 	if(pdwInterface && gpOldGroundFn)
 	{
-		VirtualTableHook(pdwInterface, ConfigManager::GetInstance()->GetVirtualFunctionId("mhgroundentity"), (DWORD)gpOldGroundFn, (DWORD)nNetworkStateChanged_m_hGroundEntity);
+		VirtualTableHook(pdwInterface, g_ConfigManager.GetVirtualFunctionId("mhgroundentity"), (DWORD)gpOldGroundFn, (DWORD)nNetworkStateChanged_m_hGroundEntity);
 		pdwInterface = nullptr;
 		gpOldGroundFn = nullptr;
 	}
@@ -63,7 +60,7 @@ void HOOKFN_INT OnGroundHookListener::RT_nNetworkStateChanged_m_hGroundEntity ( 
 void HOOKFN_INT OnGroundHookListener::RT_nNetworkStateChanged_m_hGroundEntity ( void * const basePlayer, void * const, int const * const new_m_hGroundEntity )
 #endif
 {
-	PlayerHandler::iterator  ph ( NczPlayerManager::GetInstance ()->GetPlayerHandlerByBasePlayer ( basePlayer ) );
+	PlayerHandler::iterator  ph ( g_NczPlayerManager.GetPlayerHandlerByBasePlayer ( basePlayer ) );
 	bool new_isOnground ( true );
 
 	if( ph >= SlotStatus::PLAYER_CONNECTED )
@@ -79,7 +76,7 @@ void HOOKFN_INT OnGroundHookListener::RT_nNetworkStateChanged_m_hGroundEntity ( 
 	}
 
 	ST_W_STATIC GroundEntity_t gpOldFn;
-	*( DWORD* )&( gpOldFn ) = HookGuard<OnGroundHookListener>::GetInstance ()->RT_GetOldFunction ( basePlayer, ConfigManager::GetInstance ()->vfid_mhgroundentity );
+	*( DWORD* )&( gpOldFn ) = g_HookGuardOnGroundHookListener.RT_GetOldFunction ( basePlayer, g_ConfigManager.vfid_mhgroundentity );
 	gpOldFn ( basePlayer, new_m_hGroundEntity );
 }
 

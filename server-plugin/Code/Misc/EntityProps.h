@@ -80,7 +80,7 @@ SourceSdk::datamap_t* GetDataDescMap ( SourceSdk::edict_t* const pEntity );
 #undef GetProp
 
 class EntityProps :
-	public Singleton<EntityProps>
+	public Singleton
 {
 private:
 	/* I believe offsets are consistents so don't need to reset the cache during runtime */
@@ -251,5 +251,7 @@ public:
 		return reinterpret_cast< T * >( reinterpret_cast< uint8_t * >( pBase ) + offset );
 	};
 };
+
+extern EntityProps g_EntityProps;
 
 #endif

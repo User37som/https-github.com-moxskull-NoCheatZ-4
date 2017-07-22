@@ -28,7 +28,7 @@ ConVarTester::ConVarTester () :
 	BaseTesterSystem ( "ConVarTester", "Enable - Disable - Verbose - SetAction - AddRule - RemoveRule - ResetRules" ),
 	OnTickListener (),
 	playerdata_class (),
-	singleton_class (),
+	Singleton (),
 	var_sv_cheats ( nullptr )
 {}
 
@@ -110,7 +110,7 @@ void ConVarTester::RT_ProcessPlayerTest ( PlayerHandler::iterator ph, float cons
 					}
 					else
 					{
-						Logger::GetInstance ()->Msg<MSG_WARNING> ( Helpers::format ( "ConVarTester : ConVar request timed out for %s (%s) : %d attempts.", ph->GetName (), m_convars_rules[ req->ruleset ].name, req->attempts) );
+						g_Logger.Msg<MSG_WARNING> ( Helpers::format ( "ConVarTester : ConVar request timed out for %s (%s) : %d attempts.", ph->GetName (), m_convars_rules[ req->ruleset ].name, req->attempts) );
 						++req->attempts;
 						req->SendCurrentRequest ( ph, curtime, m_convars_rules ); // Send the request again
 					}
@@ -169,12 +169,12 @@ bool ConVarTester::sys_cmd_fn ( const SourceSdk::CCommand &args )
 					}
 					else
 					{
-						Logger::GetInstance()->Msg<MSG_CMD_REPLY>("INRANGE expects 2 values");
+						g_Logger.Msg<MSG_CMD_REPLY>("INRANGE expects 2 values");
 					}
 				}*/
 				else
 				{
-					Logger::GetInstance()->Msg<MSG_CMD_REPLY>(Helpers::format("Arg %s not found.", args.Arg(5)));
+					g_Logger.Msg<MSG_CMD_REPLY>(Helpers::format("Arg %s not found.", args.Arg(5)));
 					return true;
 				}
 
@@ -195,12 +195,12 @@ bool ConVarTester::sys_cmd_fn ( const SourceSdk::CCommand &args )
 				}
 
 				AddConvarRuleset(args.Arg(3), args.Arg(4), rule, false);
-				Logger::GetInstance()->Msg<MSG_CMD_REPLY>("Added convar test rule.");
+				g_Logger.Msg<MSG_CMD_REPLY>("Added convar test rule.");
 				return true;
 			}
 			else
 			{
-				Logger::GetInstance()->Msg<MSG_CMD_REPLY>("ncz ConVarTester AddRule [ConVar] [value] [TestType]\nTestType : NO_VALUE - SAME - SAME_FLOAT - SAME_AS_SERVER - SAME_FLOAT_AS_SERVER - LOWER - HIGHER");
+				g_Logger.Msg<MSG_CMD_REPLY>("ncz ConVarTester AddRule [ConVar] [value] [TestType]\nTestType : NO_VALUE - SAME - SAME_FLOAT - SAME_AS_SERVER - SAME_FLOAT_AS_SERVER - LOWER - HIGHER");
 				return true;
 			}
 		}
@@ -217,7 +217,7 @@ bool ConVarTester::sys_cmd_fn ( const SourceSdk::CCommand &args )
 				}
 				++pos;
 			}
-			Logger::GetInstance()->Msg<MSG_CMD_REPLY>("Can't find such convar to remove.");
+			g_Logger.Msg<MSG_CMD_REPLY>("Can't find such convar to remove.");
 			return false;
 		}
 		else if (stricmp("ResetRules", args.Arg(2)) == 0)
@@ -245,7 +245,7 @@ void ConVarTester::AddConvarRuleset ( const char * name, const char * value, Con
 		}
 		else
 		{
-			Logger::GetInstance ()->Msg<MSG_ERROR> ( Helpers::format ( "ConVarTester : Failed to link the server convar %s (Not found server-side)", name ) );
+			g_Logger.Msg<MSG_ERROR> ( Helpers::format ( "ConVarTester : Failed to link the server convar %s (Not found server-side)", name ) );
 		}
 	}
 	else
@@ -269,7 +269,7 @@ void ConVarTester::RT_OnQueryCvarValueFinished ( PlayerHandler::iterator ph, Sou
 			 We will send the same request another time. */
 			req->status = ConVarRequestStatus::NOT_PROCESSING;
 
-			//Logger::GetInstance ()->Msg<MSG_WARNING> ( Helpers::format ( "ConVarTester : Cannot process RT_OnQueryCvarValueFinished because server-side sv_cheats is not 0", ph->GetName ()) );
+			//g_Logger.Msg<MSG_WARNING> ( Helpers::format ( "ConVarTester : Cannot process RT_OnQueryCvarValueFinished because server-side sv_cheats is not 0", ph->GetName ()) );
 			return;
 		}
 
@@ -346,7 +346,7 @@ void ConVarTester::RT_OnQueryCvarValueFinished ( PlayerHandler::iterator ph, Sou
 			}
 
 			default:
-				Logger::GetInstance()->Msg<MSG_ERROR>(Helpers::format("ConVarTester : Unknown code, server memory is crashed.", ph->GetName()));
+				g_Logger.Msg<MSG_ERROR>(Helpers::format("ConVarTester : Unknown code, server memory is crashed.", ph->GetName()));
 				break;
 
 			}
@@ -380,7 +380,7 @@ void ConVarTester::RT_OnQueryCvarValueFinished ( PlayerHandler::iterator ph, Sou
 
 		default:
 		{
-			Logger::GetInstance()->Msg<MSG_LOG>("ConVarTester : The following player is banned because of an unknown ConVar Request Answer code.");
+			g_Logger.Msg<MSG_LOG>("ConVarTester : The following player is banned because of an unknown ConVar Request Answer code.");
 			req->answer_status = "NO STATUS";
 			req->answer = "NO VALUE - UNKNOWN eQueryCvarValueStatus ";
 			goto unexpected2;
@@ -517,6 +517,8 @@ void ConVarTester::Unload ()
 	//m_convars_rules.RemoveAll ();
 }
 
+ConVarTester g_ConVarTester;
+
 const char* ConvertRule ( ConVarRule rule )
 {
 	switch( rule )
@@ -556,24 +558,24 @@ basic_string Detection_ConVar::GetDataDump ()
 	return Helpers::format ( ":::: CurrentConVarRequest {\n:::::::: Request Status : %s,\n:::::::: Request Sent At : %f,\n:::::::: ConVarInfo {\n:::::::::::: ConVar Name : %s,\n:::::::::::: Expected Value : %s,\n:::::::::::: Got Value : %s,\n:::::::::::: Answer Status : %s,\n:::::::::::: Comparison Rule : %s\n::::::::}\n::::}",
 							 ConvertRequestStatus ( GetDataStruct ()->status ),
 							 GetDataStruct ()->timeStart,
-							 ConVarTester::GetInstance ()->m_convars_rules[ GetDataStruct ()->ruleset ].name,
-							 ConVarTester::GetInstance ()->m_convars_rules[ GetDataStruct ()->ruleset ].value,
+							 g_ConVarTester.m_convars_rules[ GetDataStruct ()->ruleset ].name,
+							 g_ConVarTester.m_convars_rules[ GetDataStruct ()->ruleset ].value,
 							 GetDataStruct ()->answer.c_str (),
 							 GetDataStruct ()->answer_status.c_str (),
-							 ConvertRule ( ConVarTester::GetInstance ()->m_convars_rules[ GetDataStruct ()->ruleset ].rule ) );
+							 ConvertRule ( g_ConVarTester.m_convars_rules[ GetDataStruct ()->ruleset ].rule ) );
 }
 
 basic_string Detection_ConVar::GetDetectionLogMessage ()
 {
-	return Helpers::format ( "%s ConVar Bypasser", ConVarTester::GetInstance ()->m_convars_rules[ GetDataStruct ()->ruleset ].name );
+	return Helpers::format ( "%s ConVar Bypasser", g_ConVarTester.m_convars_rules[ GetDataStruct ()->ruleset ].name );
 }
 
 basic_string Detection_ConVarRequestTimedOut::GetDetectionLogMessage()
 {
-	return Helpers::format("%s ConVar request time out", ConVarTester::GetInstance()->m_convars_rules[GetDataStruct()->ruleset].name);
+	return Helpers::format("%s ConVar request time out", g_ConVarTester.m_convars_rules[GetDataStruct()->ruleset].name);
 }
 
 basic_string Detection_IllegalConVar::GetDetectionLogMessage()
 {
-	return Helpers::format("%s illegal ConVar", ConVarTester::GetInstance()->m_convars_rules[GetDataStruct()->ruleset].name);
+	return Helpers::format("%s illegal ConVar", g_ConVarTester.m_convars_rules[GetDataStruct()->ruleset].name);
 }

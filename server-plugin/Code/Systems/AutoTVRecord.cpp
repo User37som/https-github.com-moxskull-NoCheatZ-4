@@ -22,7 +22,7 @@ limitations under the License.
 
 AutoTVRecord::AutoTVRecord () :
 	BaseDynamicSystem ( "AutoTVRecord", "Enable - Disable - Verbose - SetDemoPrefix - SetMinPlayers - SplitDemoBy" ),
-	singleton_class (),
+	Singleton (),
 	m_prefix ( "NoCheatZ-autorecords/" ),
 	m_waitfortv_time ( 0.0f ),
 	m_minplayers ( 1 ),
@@ -71,10 +71,10 @@ bool AutoTVRecord::sys_cmd_fn(const SourceSdk::CCommand & args)
 			/// TODO : Test if we can write a test-file with this prefix before validating the user input
 			/// TODO : Eventually move all the sanitize stuff inside SetRecordPrefix
 			SetRecordPrefix(prefix);
-			Logger::GetInstance()->Msg<MSG_CMD_REPLY>(Helpers::format("Prefix is \"%s\"", prefix.c_str()));
+			g_Logger.Msg<MSG_CMD_REPLY>(Helpers::format("Prefix is \"%s\"", prefix.c_str()));
 			return true;
 		}
-		Logger::GetInstance()->Msg<MSG_CMD_REPLY>(Helpers::format("Unable to set prefix. Current prefix is \"%s\"", m_prefix.c_str()));
+		g_Logger.Msg<MSG_CMD_REPLY>(Helpers::format("Unable to set prefix. Current prefix is \"%s\"", m_prefix.c_str()));
 		return false;
 	}
 	else if (stricmp("setminplayers", args.Arg(2)) == 0)
@@ -85,11 +85,11 @@ bool AutoTVRecord::sys_cmd_fn(const SourceSdk::CCommand & args)
 			if (min > 0)
 			{
 				SetMinPlayers(min);
-				Logger::GetInstance()->Msg<MSG_CMD_REPLY>(Helpers::format("MinPlayers is \"%d\"", m_minplayers));
+				g_Logger.Msg<MSG_CMD_REPLY>(Helpers::format("MinPlayers is \"%d\"", m_minplayers));
 				return true;
 			}
 		}
-		Logger::GetInstance()->Msg<MSG_CMD_REPLY>(Helpers::format("Missing agrument. Current minimum human players required to start a record is \"%d\"", m_minplayers));
+		g_Logger.Msg<MSG_CMD_REPLY>(Helpers::format("Missing agrument. Current minimum human players required to start a record is \"%d\"", m_minplayers));
 		return false;
 	}
 	else if (stricmp("splitdemoby", args.Arg(2)) == 0)
@@ -99,7 +99,7 @@ bool AutoTVRecord::sys_cmd_fn(const SourceSdk::CCommand & args)
 			if (stricmp("map", args.Arg(3)) == 0)
 			{
 				m_splitrule = demo_split_t::SPLIT_BY_MAP;
-				Logger::GetInstance()->Msg<MSG_CMD_REPLY>("Will split demos by map");
+				g_Logger.Msg<MSG_CMD_REPLY>("Will split demos by map");
 				RemoveTimer("autotv");
 				TimerListener::RemoveTimerListener(this);
 				return true;
@@ -118,11 +118,11 @@ bool AutoTVRecord::sys_cmd_fn(const SourceSdk::CCommand & args)
 				}
 				if (m_max_rounds > 1)
 				{
-					Logger::GetInstance()->Msg<MSG_CMD_REPLY>(Helpers::format("Will split demos every %d rounds", m_max_rounds));
+					g_Logger.Msg<MSG_CMD_REPLY>(Helpers::format("Will split demos every %d rounds", m_max_rounds));
 				}
 				else
 				{
-					Logger::GetInstance()->Msg<MSG_CMD_REPLY>("Will split demos every round");
+					g_Logger.Msg<MSG_CMD_REPLY>("Will split demos every round");
 				}
 				m_round_id = 0;
 				RemoveTimer("autotv");
@@ -138,11 +138,11 @@ bool AutoTVRecord::sys_cmd_fn(const SourceSdk::CCommand & args)
 				}
 				else
 				{
-					Logger::GetInstance()->Msg<MSG_CMD_REPLY>("Missing float argument");
+					g_Logger.Msg<MSG_CMD_REPLY>("Missing float argument");
 					return false;
 				}
 				m_splitrule = demo_split_t::SPLIT_BY_TIMER_SECONDS;
-				Logger::GetInstance()->Msg<MSG_CMD_REPLY>(Helpers::format("Will split demos every %f seconds", m_splittimer_seconds));
+				g_Logger.Msg<MSG_CMD_REPLY>(Helpers::format("Will split demos every %f seconds", m_splittimer_seconds));
 				RemoveTimer("autotv");
 				TimerListener::AddTimerListener(this);
 				AddTimer(m_splittimer_seconds, "autotv");
@@ -151,7 +151,7 @@ bool AutoTVRecord::sys_cmd_fn(const SourceSdk::CCommand & args)
 			else if (stricmp("detection", args.Arg(3)) == 0)
 			{
 				m_splitrule = demo_split_t::SPLIT_BY_DETECTION;
-				Logger::GetInstance()->Msg<MSG_CMD_REPLY>(Helpers::format("Will record only when at least one detected player is in game", m_splittimer_seconds));
+				g_Logger.Msg<MSG_CMD_REPLY>(Helpers::format("Will record only when at least one detected player is in game", m_splittimer_seconds));
 				RemoveTimer("autotv");
 				TimerListener::RemoveTimerListener(this);
 				if (m_current_detected_players)
@@ -161,7 +161,7 @@ bool AutoTVRecord::sys_cmd_fn(const SourceSdk::CCommand & args)
 				return true;
 			}
 		}
-		Logger::GetInstance()->Msg<MSG_CMD_REPLY>("SplitDemoBy Usage : Map / Detection / Rounds [optional number] / Time [seconds]");
+		g_Logger.Msg<MSG_CMD_REPLY>("SplitDemoBy Usage : Map / Detection / Rounds [optional number] / Time [seconds]");
 		return false;
 	}
 	return false;
@@ -202,9 +202,9 @@ void AutoTVRecord::RT_TimerCallback(char const * const timer_name)
 
 void AutoTVRecord::StartRecord ()
 {
-	if( TVWatcher::GetInstance()->IsRecording() ) return;
+	if( g_TVWatcher.IsRecording() ) return;
 
-	if( TVWatcher::GetInstance()->IsTVPresent () && IsActive())
+	if( g_TVWatcher.IsTVPresent () && IsActive())
 	{
 		basic_string mapname;
 		if( SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive )
@@ -232,7 +232,7 @@ void AutoTVRecord::StartRecord ()
 
 void AutoTVRecord::StopRecord ()
 {
-	if( !TVWatcher::GetInstance()->IsRecording() || ! IsActive()) return;
+	if( !g_TVWatcher.IsRecording() || ! IsActive()) return;
 
 	SourceSdk::InterfacesProxy::Call_ServerExecute ();
 
@@ -259,11 +259,11 @@ void AutoTVRecord::SpawnTV ()
 		SourceSdk::InterfacesProxy::Call_ServerCommand("tv_autorecord 0\n");
 		SourceSdk::InterfacesProxy::Call_ServerCommand("tv_enable 1\n");
 
-		if (!TVWatcher::GetInstance()->IsTVPresent())
+		if (!g_TVWatcher.IsTVPresent())
 		{
 			if (m_spawn_once)
 			{
-				Logger::GetInstance()->Msg<MSG_LOG>("TV not detected. Reloading the map ...");
+				g_Logger.Msg<MSG_LOG>("TV not detected. Reloading the map ...");
 
 				basic_string mapname;
 				if (SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive)
@@ -283,11 +283,13 @@ void AutoTVRecord::SpawnTV ()
 			}
 			else
 			{
-				Logger::GetInstance()->Msg<MSG_ERROR>("Was unable to spawn the TV.");
+				g_Logger.Msg<MSG_ERROR>("Was unable to spawn the TV.");
 			}
 		}
 	}
 }
+
+AutoTVRecord g_AutoTVRecord;
 
 
 /////////////////////////////////////////
@@ -295,7 +297,7 @@ void AutoTVRecord::SpawnTV ()
 TVWatcher::TVWatcher() :
 	BaseStaticSystem("TVWatcher"),
 	ConCommandHookListener(),
-	singleton_class(),
+	Singleton(),
 	m_demofile(""),
 	m_recordtickcount(0),
 	m_recording(false)
@@ -342,7 +344,7 @@ void TVWatcher::RecordStarted(SourceSdk::CCommand const & args)
 			m_recording = true;
 			m_recordtickcount = 0;
 
-			Logger::GetInstance()->Msg<MSG_LOG>(Helpers::format("Starting to record the game in %s", m_demofile.c_str()));
+			g_Logger.Msg<MSG_LOG>(Helpers::format("Starting to record the game in %s", m_demofile.c_str()));
 		}
 	}
 }
@@ -351,7 +353,7 @@ void TVWatcher::RecordEnded()
 {
 	if (IsRecording())
 	{
-		Logger::GetInstance()->Msg<MSG_LOG>(Helpers::format("TV record ended in %s with %u ticks (%f seconds)", m_demofile.c_str(), m_recordtickcount, m_recordtickcount * SourceSdk::InterfacesProxy::Call_GetTickInterval()));
+		g_Logger.Msg<MSG_LOG>(Helpers::format("TV record ended in %s with %u ticks (%f seconds)", m_demofile.c_str(), m_recordtickcount, m_recordtickcount * SourceSdk::InterfacesProxy::Call_GetTickInterval()));
 		m_demofile = "";
 		m_recording = false;
 	}
@@ -391,3 +393,5 @@ void TVWatcher::SendTVChatMessage(basic_string const & msg)
 		Helpers::tell(it->GetEdict(), msg);
 	}
 }
+
+TVWatcher g_TVWatcher;

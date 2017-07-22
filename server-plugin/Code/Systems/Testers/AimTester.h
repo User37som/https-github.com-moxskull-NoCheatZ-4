@@ -72,9 +72,8 @@ class AimTester :
 	public SourceSdk::IGameEventListener002,
 	public PlayerDataStructHandler<data_throwback_t>,
 	public PlayerRunCommandHookListener,
-	public Singleton<AimTester>
+	public Singleton
 {
-	typedef Singleton<AimTester> singleton_class;
 	typedef PlayerDataStructHandler<data_throwback_t> playerdata_class;
 
 public:

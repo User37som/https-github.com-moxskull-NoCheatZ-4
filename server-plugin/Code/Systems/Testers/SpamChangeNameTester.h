@@ -45,9 +45,8 @@ class SpamChangeNameTester :
 	public SourceSdk::IGameEventListener002,
 	public OnTickListener,
 	public PlayerDataStructHandler<ChangeNameInfo>,
-	public Singleton<SpamChangeNameTester>
+	public Singleton
 {
-	typedef Singleton<SpamChangeNameTester> singleton_class;
 	typedef PlayerDataStructHandler<ChangeNameInfo> playerdata_class;
 
 public:
@@ -69,5 +68,7 @@ public:
 
 	void ClientConnect ( bool *bAllowConnect, SourceSdk::edict_t const * const pEntity, const char *pszName, const char *pszAddress, char *reject, int maxrejectlen );
 };
+
+extern SpamChangeNameTester g_SpamChangeNameTester;
 
 #endif

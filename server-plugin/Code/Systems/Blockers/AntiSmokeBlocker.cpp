@@ -30,7 +30,7 @@ AntiSmokeBlocker::AntiSmokeBlocker () :
 	OnTickListener (),
 	playerdatahandler_class (),
 	SetTransmitHookListener (),
-	singleton_class ()
+	Singleton ()
 {
 	METRICS_ADD_TIMER ( "AntiSmokeBlocker::OnFrame", 10.0 );
 }
@@ -90,7 +90,7 @@ void AntiSmokeBlocker::RT_ProcessOnTick ( float const & curtime )
 	// remove old smokes
 	while( it != nullptr )
 	{
-		if( curtime - ( it->m_value.bang_time + ConfigManager::GetInstance ()->m_smoke_time ) > 0.0f )
+		if( curtime - ( it->m_value.bang_time + g_ConfigManager.m_smoke_time ) > 0.0f )
 			it = m_smokes.Remove ( it );
 		else it = it->m_next;
 	}
@@ -108,35 +108,35 @@ void AntiSmokeBlocker::RT_ProcessOnTick ( float const & curtime )
 	{
 		SourceSdk::Vector delta, other_delta;
 
-		MathInfo const & x_math ( MathCache::GetInstance ()->RT_GetCachedMaths ( ph.GetIndex () ) );
+		MathInfo const & x_math ( g_MathCache.RT_GetCachedMaths ( ph.GetIndex () ) );
 
 		do // At this stage, m_smokes ! empty
 		{
-			if( curtime - it->m_value.bang_time > ConfigManager::GetInstance ()->m_smoke_timetobang )
+			if( curtime - it->m_value.bang_time > g_ConfigManager.m_smoke_timetobang )
 			{
 				SourceSdk::vec_t dst;
 				SourceSdk::VectorDistanceSqr ( x_math.m_eyepos, it->m_value.pos, delta, dst );
-				if( dst < ConfigManager::GetInstance ()->m_innersmoke_radius_sqr )
+				if( dst < g_ConfigManager.m_innersmoke_radius_sqr )
 				{
 					GetPlayerDataStructByIndex ( ph.GetIndex () )->is_in_smoke = true;
 				}
 
 				/* Players can't see eachother if they are behind a smoke */
 
-				const SourceSdk::vec_t ang_smoke ( tanf ( ConfigManager::GetInstance ()->m_smoke_radius / sqrtf ( dst ) ) );
+				const SourceSdk::vec_t ang_smoke ( tanf ( g_ConfigManager.m_smoke_radius / sqrtf ( dst ) ) );
 				SourceSdk::VectorNorm ( delta );
 
 				for( PlayerHandler::iterator other_ph ( &l2_filter ); other_ph != PlayerHandler::end (); other_ph+=&l2_filter )
 				{
 					if( ph == other_ph ) continue;
 
-					MathInfo const & y_math ( MathCache::GetInstance ()->RT_GetCachedMaths ( other_ph.GetIndex () ) );
+					MathInfo const & y_math ( g_MathCache.RT_GetCachedMaths ( other_ph.GetIndex () ) );
 
 					// Is he behind the smoke against us ?
 
 					SourceSdk::vec_t other_dst;
 					SourceSdk::VectorDistanceSqr ( x_math.m_eyepos, y_math.m_abs_origin, other_delta, other_dst );
-					if( dst + ConfigManager::GetInstance ()->m_smoke_radius < other_dst )
+					if( dst + g_ConfigManager.m_smoke_radius < other_dst )
 					{
 						// Hidden by the hull of the smoke ?
 
@@ -204,3 +204,5 @@ void AntiSmokeBlocker::FireGameEvent ( SourceSdk::IGameEvent * ev )
 		it = m_smokes.Remove ( it );
 	}
 }
+
+AntiSmokeBlocker g_AntiSmokeBlocker;

@@ -104,12 +104,12 @@ void Logger::Push ( const char * msg )
 		server_tick = static_cast< SourceSdk::CGlobalVars* >( SourceSdk::InterfacesProxy::Call_GetGlobalVars () )->tickcount;
 	}
 
-	if( TVWatcher::IsCreated() && TVWatcher::GetInstance ()->IsRecording () )
+	if( g_TVWatcher.IsRecording () )
 	{
 		basic_string move_msg;
 		move_msg.reserve ( 255 );
 		move_msg.append ( Helpers::getStrDateTime ( "%x %X " ) );
-		move_msg.append ( Helpers::format ( "[ Server Tick #%d, SourceTV:%s.dem : Tick #%d ] ", server_tick, TVWatcher::GetInstance ()->GetRecordFilename ().c_str (), TVWatcher::GetInstance ()->GetRecordTick () ) );
+		move_msg.append ( Helpers::format ( "[ Server Tick #%d, SourceTV:%s.dem : Tick #%d ] ", server_tick, g_TVWatcher.GetRecordFilename ().c_str (), g_TVWatcher.GetRecordTick () ) );
 		move_msg.append ( copy_msg );
 		m_current_memory_used += move_msg.capacity ();
 		m_msg.AddToTail ( std::move( move_msg ) );
@@ -133,7 +133,7 @@ void Logger::Push ( const char * msg )
 	{
 		ProcessFilter::HumanAtLeastConnected filter_class;
 
-		if( NczPlayerManager::GetInstance ()->GetPlayerCount ( &filter_class ) == 0 )
+		if( g_NczPlayerManager.GetPlayerCount ( &filter_class ) == 0 )
 		{
 			// We can flush right now.
 
@@ -200,7 +200,7 @@ void Logger::Msg<MSG_CHAT_ADMIN>(const char * msg, int verbose /*= 0*/)
 
 			if (player)
 			{
-				if (player->IsConnected() && ConfigManager::GetInstance()->IsAdmin(player->GetNetworkIDString()))
+				if (player->IsConnected() && g_ConfigManager.IsAdmin(player->GetNetworkIDString()))
 				{
 					Helpers::tell(ent_id, m);
 				}
@@ -394,18 +394,13 @@ void Logger::OnLevelInit()
 void Logger::SpewAssert ( char const * expr, char const * file, unsigned int line )
 {
 	char const * msg ( Helpers::format ( "ASSERTION FAILED in %s:%u : %s", file, line, expr ) );
-	if( Logger::IsCreated () )
-	{
-		Logger::GetInstance()->Msg<MSG_ERROR> ( msg, 3 );
-		Logger::GetInstance ()->Flush ();
-	}
-	else
-	{
-		SourceSdk::InterfacesProxy::Call_LogPrint ( msg );
-	}
+	g_Logger.Msg<MSG_ERROR> ( msg, 3 );
+	g_Logger.Flush ();
 }
 
 void Helpers::writeToLogfile ( const basic_string &text )
 {
-	Logger::GetInstance ()->Push ( text.c_str () );
+	g_Logger.Push ( text.c_str () );
 }
+
+Logger g_Logger;

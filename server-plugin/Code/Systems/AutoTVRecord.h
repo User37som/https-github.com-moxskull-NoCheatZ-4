@@ -32,10 +32,8 @@ limitations under the License.
 class AutoTVRecord :
 	private BaseDynamicSystem,
 	private TimerListener,
-	public Singleton<AutoTVRecord>
+	public Singleton
 {
-	typedef Singleton<AutoTVRecord> singleton_class;
-
 public:
 	typedef enum demo_split : size_t
 	{
@@ -127,12 +125,13 @@ inline int AutoTVRecord::GetMinPlayers()
 	return m_minplayers;
 }
 
+extern AutoTVRecord g_AutoTVRecord;
+
 class TVWatcher :
 	private BaseStaticSystem,
 	private ConCommandHookListener,
-	public Singleton<TVWatcher>
+	public Singleton
 {
-	typedef Singleton<TVWatcher> singleton_class;
 
 private:
 	basic_string m_demofile;
@@ -167,5 +166,7 @@ public:
 	// Send a chat message to the TV and to all viewers.
 	void SendTVChatMessage(basic_string const & msg);
 };
+
+extern TVWatcher g_TVWatcher;
 
 #endif

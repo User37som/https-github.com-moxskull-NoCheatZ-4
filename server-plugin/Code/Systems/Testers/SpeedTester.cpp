@@ -22,7 +22,7 @@ SpeedTester::SpeedTester () :
 	OnTickListener (),
 	playerdata_class (),
 	PlayerRunCommandHookListener (),
-	singleton_class ()
+	Singleton ()
 {}
 
 SpeedTester::~SpeedTester ()
@@ -114,6 +114,8 @@ PlayerRunCommandRet SpeedTester::RT_PlayerRunCommandCallback ( PlayerHandler::it
 
 	return PlayerRunCommandRet::CONTINUE;
 }
+
+SpeedTester g_SpeedTester;
 
 basic_string Detection_SpeedHack::GetDataDump ()
 {

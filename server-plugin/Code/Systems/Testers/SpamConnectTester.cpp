@@ -22,7 +22,7 @@
 
 SpamConnectTester::SpamConnectTester () :
 	BaseDynamicSystem ( "SpamConnectTester" ),
-	singleton_class ()
+	Singleton ()
 {}
 
 SpamConnectTester::~SpamConnectTester ()
@@ -81,3 +81,5 @@ void SpamConnectTester::ClientConnect ( bool *bAllowConnect, SourceSdk::edict_t 
 
 	v.OnConnect ();
 }
+
+SpamConnectTester g_SpamConnectTester;

@@ -60,4 +60,6 @@ private:
 #endif
 };
 
+extern HookGuard<ThinkPostHookListener> g_HookGuardThinkPostHookListener;
+
 #endif // THINKPOSTHOOKLISTENER_H

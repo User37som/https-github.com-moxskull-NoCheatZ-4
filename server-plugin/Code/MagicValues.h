@@ -31,7 +31,7 @@
 #	define EVENT_DEBUG_ID_SHUTDOWN 13
 #endif
 
-#define GET_PLUGIN_COMMAND_INDEX() CNoCheatZPlugin::GetInstance()->GetCommandIndex()+1
+#define GET_PLUGIN_COMMAND_INDEX() g_CNoCheatZPlugin.GetCommandIndex()+1
 #define PLUGIN_MIN_COMMAND_INDEX   1
 #define PLUGIN_MAX_COMMAND_INDEX   64
 #define FIRST_PLAYER_ENT_INDEX		1
@@ -55,10 +55,10 @@
 
 namespace SystemPriority
 {
-	size_t const constexpr BadUserCmdTester(0);
+	size_t const constexpr EyeAnglesTester(0);
+	size_t const constexpr BadUserCmdTester(EyeAnglesTester + 1);
 	size_t const constexpr SpeedTester(BadUserCmdTester + 1);
-	size_t const constexpr EyeAnglesTester(SpeedTester + 1);
-	size_t const constexpr AutoAttackTester(EyeAnglesTester + 1);
+	size_t const constexpr AutoAttackTester(SpeedTester + 1);
 	size_t const constexpr AimTester(AutoAttackTester + 1);
 	size_t const constexpr JumpTester(AimTester + 1);
 	size_t const constexpr BhopBlocker(JumpTester + 1);

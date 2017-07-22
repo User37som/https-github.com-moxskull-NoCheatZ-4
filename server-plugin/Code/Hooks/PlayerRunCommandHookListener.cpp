@@ -33,20 +33,17 @@
 PlayerRunCommandHookListener::ListenersListT PlayerRunCommandHookListener::m_listeners;
 SourceSdk::CUserCmd_csgo PlayerRunCommandHookListener::m_lastCUserCmd[ MAX_PLAYERS ];
 
+HookGuard<PlayerRunCommandHookListener> g_HookGuardPlayerRunCommandHookListener;
+
 PlayerRunCommandHookListener::PlayerRunCommandHookListener ()
 {
 	//for(int x = 1; x < MAX_PLAYERS; ++x) m_lastCUserCmd[x] = SourceSdk::CUserCmd();
 	std::srand ( ( unsigned int ) ( std::time ( 0 ) ) );
-	HookGuard<PlayerRunCommandHookListener>::Required ();
 }
 
 PlayerRunCommandHookListener::~PlayerRunCommandHookListener ()
 {
-	if( HookGuard<PlayerRunCommandHookListener>::IsCreated () )
-	{
-		HookGuard<PlayerRunCommandHookListener>::GetInstance ()->UnhookAll ();
-		HookGuard<PlayerRunCommandHookListener>::DestroyInstance ();
-	}
+	g_HookGuardPlayerRunCommandHookListener.UnhookAll ();
 }
 
 void* PlayerRunCommandHookListener::RT_GetLastUserCmd ( PlayerHandler::iterator ph )
@@ -64,15 +61,15 @@ void PlayerRunCommandHookListener::HookPlayerRunCommand ( PlayerHandler::iterato
 	LoggerAssert ( Helpers::isValidEdict ( ph->GetEdict () ) );
 	SourceSdk::IServerUnknown* unk ( ph->GetEdict ()->m_pUnk );
 
-	HookInfo info ( unk, ConfigManager::GetInstance ()->vfid_playerruncommand, ( DWORD ) RT_nPlayerRunCommand );
-	HookGuard<PlayerRunCommandHookListener>::GetInstance ()->VirtualTableHook ( info, "CBasePlayer::PlayerRunCommand" );
+	HookInfo info ( unk, g_ConfigManager.vfid_playerruncommand, ( DWORD ) RT_nPlayerRunCommand );
+	g_HookGuardPlayerRunCommandHookListener.VirtualTableHook ( info, "CBasePlayer::PlayerRunCommand" );
 }
 
 /*void PlayerRunCommandHookListener::UnhookPlayerRunCommand()
 {
 	if(pdwInterface && gpOldPlayerRunCommand)
 	{
-		VirtualTableHook(pdwInterface, ConfigManager::GetInstance()->GetVirtualFunctionId("playerruncommand"), (DWORD)gpOldPlayerRunCommand, (DWORD)nPlayerRunCommand);
+		VirtualTableHook(pdwInterface, g_ConfigManager.GetVirtualFunctionId("playerruncommand"), (DWORD)gpOldPlayerRunCommand, (DWORD)nPlayerRunCommand);
 		pdwInterface = nullptr;
 		gpOldPlayerRunCommand = nullptr;
 	}
@@ -84,7 +81,7 @@ void PlayerRunCommandHookListener::RT_nPlayerRunCommand ( void * const This, voi
 void HOOKFN_INT PlayerRunCommandHookListener::RT_nPlayerRunCommand ( void* This, void*, void * const pCmd, IMoveHelper const * const pMoveHelper )
 #endif
 {
-	PlayerHandler::iterator ph ( NczPlayerManager::GetInstance ()->GetPlayerHandlerByBasePlayer ( This ) );
+	PlayerHandler::iterator ph ( g_NczPlayerManager.GetPlayerHandlerByBasePlayer ( This ) );
 	PlayerRunCommandRet ret ( PlayerRunCommandRet::CONTINUE );
 
 	if( ph > SlotStatus::PLAYER_CONNECTING )
@@ -126,7 +123,7 @@ void HOOKFN_INT PlayerRunCommandHookListener::RT_nPlayerRunCommand ( void* This,
 		}
 
 		ST_W_STATIC PlayerRunCommand_t gpOldFn;
-		*( DWORD* )&( gpOldFn ) = HookGuard<PlayerRunCommandHookListener>::GetInstance ()->RT_GetOldFunction ( This, ConfigManager::GetInstance ()->vfid_playerruncommand );
+		*( DWORD* )&( gpOldFn ) = g_HookGuardPlayerRunCommandHookListener.RT_GetOldFunction ( This, g_ConfigManager.vfid_playerruncommand );
 		gpOldFn ( This, pCmd, pMoveHelper );
 	}
 	else

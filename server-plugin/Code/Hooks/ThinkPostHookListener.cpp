@@ -21,24 +21,21 @@ limitations under the License.
 
 ThinkPostHookListener::ListenersList_t ThinkPostHookListener::m_listeners;
 
+HookGuard<ThinkPostHookListener> g_HookGuardThinkPostHookListener;
+
 ThinkPostHookListener::ThinkPostHookListener ()
 {
-	HookGuard<ThinkPostHookListener>::Required ();
 }
 
 ThinkPostHookListener::~ThinkPostHookListener ()
 {
-	if( HookGuard<ThinkPostHookListener>::IsCreated () )
-	{
-		HookGuard<ThinkPostHookListener>::GetInstance ()->UnhookAll ();
-		HookGuard<ThinkPostHookListener>::DestroyInstance ();
-	}
+	g_HookGuardThinkPostHookListener.UnhookAll ();
 }
 
 void ThinkPostHookListener::HookThinkPost ( SourceSdk::edict_t const * const entity )
 {
-	HookInfo info ( entity->m_pUnk, ConfigManager::GetInstance ()->vfid_thinkpost, ( DWORD ) RT_nThinkPost );
-	HookGuard<ThinkPostHookListener>::GetInstance ()->VirtualTableHook ( info, "CBaseEntity::Think", true );
+	HookInfo info ( entity->m_pUnk, g_ConfigManager.vfid_thinkpost, ( DWORD ) RT_nThinkPost );
+	g_HookGuardThinkPostHookListener.VirtualTableHook ( info, "CBaseEntity::Think", true );
 }
 
 void ThinkPostHookListener::RegisterThinkPostHookListener ( ThinkPostHookListener const * const listener )
@@ -58,7 +55,7 @@ void HOOKFN_INT ThinkPostHookListener::RT_nThinkPost ( void * const baseentity, 
 #endif
 {
 	PostThink_t gpOldFn;
-	*( DWORD* ) &gpOldFn = HookGuard<ThinkPostHookListener>::GetInstance ()->RT_GetOldFunction ( baseentity, ConfigManager::GetInstance ()->vfid_thinkpost );
+	*( DWORD* ) &gpOldFn = g_HookGuardThinkPostHookListener.RT_GetOldFunction ( baseentity, g_ConfigManager.vfid_thinkpost );
 	gpOldFn ( baseentity );
 
 	ListenersList_t::elem_t const * it ( m_listeners.GetFirst () );

@@ -328,7 +328,7 @@ int const NczPlayer::aimingAt ()
 	SourceSdk::edict_t* edict ( GetEdict () );
 	if( !edict ) return -1;
 
-	MathInfo const & player_maths ( MathCache::GetInstance ()->RT_GetCachedMaths ( GetIndex () ) );
+	MathInfo const & player_maths ( g_MathCache.RT_GetCachedMaths ( GetIndex () ) );
 
 	SourceSdk::Vector eyePos;
 	GetAbsEyePos ( eyePos );
@@ -390,24 +390,24 @@ void NczPlayer::OnConnect ()
 
 void NczPlayer::Kick ( const char * msg )
 {
-	if( BanRequest::GetInstance ()->CanKick () )
+	if( g_BanRequest.CanKick () )
 	{
 		Helpers::writeToLogfile ( Helpers::format (
 			"Kicked %s with reason : %s\n", this->GetReadableIdentity ().c_str (), msg ) );
 
-		BanRequest::GetInstance ()->KickNow ( this, msg );
+		g_BanRequest.KickNow ( this, msg );
 	}
 }
 
 void NczPlayer::Ban ( const char * msg, int minutes )
 {
-	if( BanRequest::GetInstance ()->CanBan () )
+	if( g_BanRequest.CanBan () )
 	{
 		Helpers::writeToLogfile ( Helpers::format (	"Banned %s with reason : %s\n", this->GetReadableIdentity ().c_str (), msg ) );
 
-		BanRequest::GetInstance ()->BanNow ( this, minutes, msg );
+		g_BanRequest.BanNow ( this, minutes, msg );
 	}
-	else if( BanRequest::GetInstance ()->CanKick () )
+	else if( g_BanRequest.CanKick () )
 	{
 		Kick ( msg );
 	}
@@ -429,7 +429,7 @@ void NczPlayer::GetAbsOrigin ( SourceSdk::Vector & out )
 
 void NczPlayer::GetRelEyePos ( SourceSdk::Vector & out ) const
 {
-	SourceSdk::VectorCopy ( EntityProps::GetInstance ()->GetPropValue<SourceSdk::Vector, PROP_VIEW_OFFSET> ( m_edict ), &out );
+	SourceSdk::VectorCopy ( g_EntityProps.GetPropValue<SourceSdk::Vector, PROP_VIEW_OFFSET> ( m_edict ), &out );
 }
 
 void NczPlayer::GetAbsEyePos ( SourceSdk::Vector & out )

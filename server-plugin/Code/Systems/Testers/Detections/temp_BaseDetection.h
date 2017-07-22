@@ -102,8 +102,8 @@ public:
 	virtual void Log ()
 	{
 		basic_string msg ( Helpers::format ( "%s triggered a detection : %s is using a %s.", this->m_testerName, this->m_playerIdentity.c_str (), this->GetDetectionLogMessage ().c_str () ) );
-		Logger::GetInstance()->Msg<MSG_LOG>(msg.c_str());
-		Logger::GetInstance()->Msg<MSG_CHAT>(msg.c_str());
+		g_Logger.Msg<MSG_LOG>(msg.c_str());
+		g_Logger.Msg<MSG_CHAT>(msg.c_str());
 
 		Helpers::writeToLogfile ( NCZ_VERSION_GIT );
 		Helpers::writeToLogfile ( this->GetDataDump () );
@@ -127,7 +127,7 @@ inline void ProcessDetectionAndTakeAction(LogDetection<playerDataStructT> && inf
 {
 	player->SetDetected(true);
 
-	AutoTVRecord::GetInstance()->DeclareDetectedPlayer();
+	g_AutoTVRecord.DeclareDetectedPlayer();
 
 	info.PrepareDetectionData(pData);
 	info.PrepareDetectionLog(*player, pSystem);
@@ -143,16 +143,16 @@ inline void ProcessDetectionAndTakeAction(LogDetection<playerDataStructT> && inf
 	}
 	else if (pSystem->GetAction() == BaseTesterSystem::DetectionAction_t::BAN_ASYNC)
 	{
-		BanRequest::GetInstance()->AddAsyncBan(*player, 0, kick_message.c_str());
+		g_BanRequest.AddAsyncBan(*player, 0, kick_message.c_str());
 	}
 	else if (pSystem->GetAction() == BaseTesterSystem::DetectionAction_t::BAN_NOW)
 	{
-		BanRequest::GetInstance()->BanNow(*player, 0, kick_message.c_str());
+		g_BanRequest.BanNow(*player, 0, kick_message.c_str());
 	}
 	else
 	{
 		kick_message = Helpers::format("Kicked by NoCheatZ 4 : %s detection with %s", info.GetDetectionLogMessage().c_str(), pSystem->GetName());
-		BanRequest::GetInstance()->KickNow(*player, kick_message.c_str());
+		g_BanRequest.KickNow(*player, kick_message.c_str());
 	}
 }
 

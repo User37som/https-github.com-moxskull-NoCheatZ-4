@@ -18,6 +18,7 @@
 
 #include "Systems/BaseSystem.h"
 #include "Hooks/PlayerRunCommandHookListener.h"
+#include "Hooks/UserMessageHookListener.h"
 #include "Players/temp_PlayerDataStruct.h"
 #include "Interfaces/IGameEventManager/IGameEventManager.h"
 #include "Systems/Testers/Detections/temp_BaseDetection.h"
@@ -109,9 +110,9 @@ class EyeAnglesTester :
 	public BaseTesterSystem,
 	public PlayerDataStructHandler<EyeAngleInfoT>,
 	public PlayerRunCommandHookListener,
-	public Singleton<EyeAnglesTester>
+	public UserMessageHookListener,
+	public Singleton
 {
-	typedef Singleton<EyeAnglesTester> singleton_class;
 	typedef PlayerDataStructHandler<EyeAngleInfoT> playerdata_class;
 
 public:
@@ -128,6 +129,14 @@ private:
 	virtual bool GotJob () const override final;
 
 	virtual PlayerRunCommandRet RT_PlayerRunCommandCallback ( PlayerHandler::iterator ph, void * const cmd, void * const old_cmd ) override final;
+
+	virtual bool RT_SendUserMessageCallback(SourceSdk::IRecipientFilter const &, int const, google::protobuf::Message const &);
+
+	virtual bool RT_UserMessageBeginCallback(SourceSdk::IRecipientFilter const * const, int const);
+
+	virtual void RT_MessageEndCallback(SourceSdk::IRecipientFilter const * const, int const, SourceSdk::bf_write* buffer);
 };
+
+extern EyeAnglesTester g_EyeAnglesTester;
 
 #endif

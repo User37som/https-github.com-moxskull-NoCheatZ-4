@@ -67,4 +67,7 @@ class Fool
 
 typedef Fool SetTransmitHookListenerWeapon;
 
+extern HookGuard<SetTransmitHookListener> g_HookGuardSetTransmitHookListener;
+extern HookGuard<SetTransmitHookListenerWeapon> g_HookGuardSetTransmitHookListenerWeapon;
+
 #endif // SETTRANSMITHOOKLISTENER

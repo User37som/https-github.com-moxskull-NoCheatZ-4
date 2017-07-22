@@ -33,7 +33,7 @@
 
 class NczPlayerManager;
 
-class alignas(16) PlayerHandler :
+class PlayerHandler :
 	protected NoCopy,
 	protected NoMove
 {
@@ -47,7 +47,7 @@ public:
 	/*
 		Wrapper of the PlayerHandler (pointer) type.
 	*/
-	class alignas(4) iterator
+	class iterator
 	{
 		friend NczPlayerManager;
 
@@ -351,9 +351,8 @@ class CCSPlayer;
 /* Distribue et met à jour l'état des slots du serveur */
 class NczPlayerManager :
 	public SourceSdk::IGameEventListener002,
-	public Singleton<NczPlayerManager>
+	public Singleton
 {
-	typedef  Singleton<NczPlayerManager> singleton_class;
 	friend PlayerHandler;
 
 private:
@@ -419,6 +418,8 @@ inline PlayerHandler::iterator NczPlayerManager::GetPlayerHandlerByEdict ( Sourc
 {
 	return Helpers::IndexOfEdict ( pEdict );
 }
+
+extern NczPlayerManager g_NczPlayerManager;
 
 /* Utilisé en interne pour initialiser le tableau, des petites fonctions
   Ajout d'une case supplémentaire à FullHandlersList pour pouvoir quitter proprement la boucle PLAYERS_LOOP_RUNTIME */

@@ -71,7 +71,7 @@ public:
 };
 
 class SourceHookSafety :
-	public Singleton<SourceHookSafety>
+	public Singleton
 {
 private:
 	ISourceHook_Skeleton * g_SourceHook;
@@ -91,5 +91,7 @@ public:
 	static bool HOOKFN_INT my_RemoveHook(void* isourcehook, void* weak, int plug, void *iface, int thisptr_offs, ISourceHook_Skeleton::HookManagerPubFunc myHookMan, void *handler, bool post);
 #endif
 };
+
+extern SourceHookSafety g_SourceHookSafety;
 
 #endif // DEARMETAMOD_H

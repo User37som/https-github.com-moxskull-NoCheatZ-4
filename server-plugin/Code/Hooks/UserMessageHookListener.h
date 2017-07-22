@@ -49,6 +49,8 @@ private:
 	// Bypass current usermessage and incoming messageend based on what is the answer of listener.
 	static bool bypass;
 	static SourceSdk::bf_write* m_buffer;
+	static SourceSdk::IRecipientFilter * m_filter;
+	static int m_message_id;
 
 public:
 	UserMessageHookListener ();
@@ -70,6 +72,7 @@ protected:
 
 	virtual bool RT_SendUserMessageCallback ( SourceSdk::IRecipientFilter const &, int const, google::protobuf::Message const & ) = 0;
 	virtual bool RT_UserMessageBeginCallback ( SourceSdk::IRecipientFilter const * const, int const ) = 0;
+	virtual void RT_MessageEndCallback(SourceSdk::IRecipientFilter const * const, int const, SourceSdk::bf_write* buffer) = 0;
 
 private:
 
@@ -83,5 +86,7 @@ private:
 	static void HOOKFN_INT RT_nMessageEnd ( void * const thisptr, void * const );
 #endif
 };
+
+extern HookGuard<UserMessageHookListener> g_HookGuardUserMessageHookListener;
 
 #endif

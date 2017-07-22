@@ -42,9 +42,8 @@ class AntiFlashbangBlocker :
 	private OnTickListener,
 	public PlayerDataStructHandler<FlashInfoT>,
 	private SetTransmitHookListener,
-	public Singleton<AntiFlashbangBlocker>
+	public Singleton
 {
-	typedef Singleton<AntiFlashbangBlocker> singleton_class;
 	typedef PlayerDataStructHandler<FlashInfoT> playerdatahandler_class;
 
 public:
@@ -68,5 +67,7 @@ private:
 	virtual bool RT_SetTransmitCallback ( PlayerHandler::iterator sender, PlayerHandler::iterator receiver ) override final;
 
 };
+
+extern AntiFlashbangBlocker g_AntiFlashbangBlocker;
 
 #endif // ANTIFLASHBANGBLOCKER_H

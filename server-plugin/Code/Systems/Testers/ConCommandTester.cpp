@@ -23,7 +23,7 @@ ConCommandTester::ConCommandTester () :
 	BaseTesterSystem ( "ConCommandTester" ),
 	ConCommandHookListener (),
 	playerdatahandler_class (),
-	singleton_class (),
+	Singleton (),
 	m_commands_list ()
 {}
 
@@ -204,7 +204,7 @@ bool ConCommandTester::RT_TestPlayerCommand ( PlayerHandler::iterator ph, const 
 		//}
 		//else
 		//{
-		//	Logger::GetInstance ()->Msg<MSG_LOG> ( Helpers::format("Dropped invalid command from %s", ph->GetName () ));
+		//	g_Logger.Msg<MSG_LOG> ( Helpers::format("Dropped invalid command from %s", ph->GetName () ));
 		//	ph->Kick ( "Invalid ConCommand" );
 		//	return true;
 		//}
@@ -249,7 +249,7 @@ bool ConCommandTester::RT_TestPlayerCommand_Anon ( PlayerHandler::iterator ph, c
 		//}
 		//else
 		//{
-			//Logger::GetInstance ()->Msg<MSG_LOG> ( Helpers::format ( "Dropped invalid command from %s", ph->GetName () ) );
+			//g_Logger.Msg<MSG_LOG> ( Helpers::format ( "Dropped invalid command from %s", ph->GetName () ) );
 			//ph->Kick ( "Invalid ConCommand" );
 		//	return true;
 		//}
@@ -267,8 +267,8 @@ bool ConCommandTester::RT_HookEntCallback ( PlayerHandler::iterator ph, const vo
 
 	if( cmd_len > 500 )
 	{
-		ConCommandTester::GetInstance ()->RT_AddPlayerCommand ( ph, command_name );
-		ProcessDetectionAndTakeAction<Detection_CmdViolation::data_type>(Detection_CmdViolation(), ConCommandTester::GetInstance()->GetPlayerDataStructByIndex(ph.GetIndex()), ph, ConCommandTester::GetInstance());
+		g_ConCommandTester.RT_AddPlayerCommand ( ph, command_name );
+		ProcessDetectionAndTakeAction<Detection_CmdViolation::data_type>(Detection_CmdViolation(), g_ConCommandTester.GetPlayerDataStructByIndex(ph.GetIndex()), ph, &g_ConCommandTester);
 		return true;
 	}
 
@@ -276,61 +276,61 @@ bool ConCommandTester::RT_HookEntCallback ( PlayerHandler::iterator ph, const vo
 	{
 		if( StriCmpOffset ( cmd_str, "point_", x ) )
 		{
-			ConCommandTester::GetInstance ()->RT_AddPlayerCommand ( ph, command_name );
-			ProcessDetectionAndTakeAction<Detection_CmdViolation::data_type>(Detection_CmdViolation(), ConCommandTester::GetInstance()->GetPlayerDataStructByIndex(ph.GetIndex()), ph, ConCommandTester::GetInstance());
+			g_ConCommandTester.RT_AddPlayerCommand ( ph, command_name );
+			ProcessDetectionAndTakeAction<Detection_CmdViolation::data_type>(Detection_CmdViolation(), g_ConCommandTester.GetPlayerDataStructByIndex(ph.GetIndex()), ph, &g_ConCommandTester);
 			return true;
 		}
 		if( StriCmpOffset ( cmd_str, "quit", x ) )
 		{
-			ConCommandTester::GetInstance ()->RT_AddPlayerCommand ( ph, command_name );
-			ProcessDetectionAndTakeAction<Detection_CmdViolation::data_type>(Detection_CmdViolation(), ConCommandTester::GetInstance()->GetPlayerDataStructByIndex(ph.GetIndex()), ph, ConCommandTester::GetInstance());
+			g_ConCommandTester.RT_AddPlayerCommand ( ph, command_name );
+			ProcessDetectionAndTakeAction<Detection_CmdViolation::data_type>(Detection_CmdViolation(), g_ConCommandTester.GetPlayerDataStructByIndex(ph.GetIndex()), ph, &g_ConCommandTester);
 			return true;
 		}
 		if( StriCmpOffset ( cmd_str, "exit", x ) )
 		{
-			ConCommandTester::GetInstance ()->RT_AddPlayerCommand ( ph, command_name );
-			ProcessDetectionAndTakeAction<Detection_CmdViolation::data_type>(Detection_CmdViolation(), ConCommandTester::GetInstance()->GetPlayerDataStructByIndex(ph.GetIndex()), ph, ConCommandTester::GetInstance());
+			g_ConCommandTester.RT_AddPlayerCommand ( ph, command_name );
+			ProcessDetectionAndTakeAction<Detection_CmdViolation::data_type>(Detection_CmdViolation(), g_ConCommandTester.GetPlayerDataStructByIndex(ph.GetIndex()), ph, &g_ConCommandTester);
 			return true;
 		}
 		if( StriCmpOffset ( cmd_str, "restart", x ) )
 		{
-			ConCommandTester::GetInstance ()->RT_AddPlayerCommand ( ph, command_name );
-			ProcessDetectionAndTakeAction<Detection_CmdViolation::data_type>(Detection_CmdViolation(), ConCommandTester::GetInstance()->GetPlayerDataStructByIndex(ph.GetIndex()), ph, ConCommandTester::GetInstance());
+			g_ConCommandTester.RT_AddPlayerCommand ( ph, command_name );
+			ProcessDetectionAndTakeAction<Detection_CmdViolation::data_type>(Detection_CmdViolation(), g_ConCommandTester.GetPlayerDataStructByIndex(ph.GetIndex()), ph, &g_ConCommandTester);
 			return true;
 		}
 		if( StriCmpOffset ( cmd_str, "rcon", x ) )
 		{
-			ConCommandTester::GetInstance ()->RT_AddPlayerCommand ( ph, command_name );
-			ProcessDetectionAndTakeAction<Detection_CmdViolation::data_type>(Detection_CmdViolation(), ConCommandTester::GetInstance()->GetPlayerDataStructByIndex(ph.GetIndex()), ph, ConCommandTester::GetInstance());
+			g_ConCommandTester.RT_AddPlayerCommand ( ph, command_name );
+			ProcessDetectionAndTakeAction<Detection_CmdViolation::data_type>(Detection_CmdViolation(), g_ConCommandTester.GetPlayerDataStructByIndex(ph.GetIndex()), ph, &g_ConCommandTester);
 			return true;
 		}
 		if( StriCmpOffset ( cmd_str, "mp_", x ) )
 		{
-			ConCommandTester::GetInstance ()->RT_AddPlayerCommand ( ph, command_name );
-			ProcessDetectionAndTakeAction<Detection_CmdViolation::data_type>(Detection_CmdViolation(), ConCommandTester::GetInstance()->GetPlayerDataStructByIndex(ph.GetIndex()), ph, ConCommandTester::GetInstance());
+			g_ConCommandTester.RT_AddPlayerCommand ( ph, command_name );
+			ProcessDetectionAndTakeAction<Detection_CmdViolation::data_type>(Detection_CmdViolation(), g_ConCommandTester.GetPlayerDataStructByIndex(ph.GetIndex()), ph, &g_ConCommandTester);
 			return true;
 		}
 		if( StriCmpOffset ( cmd_str, "taketimer", x ) )
 		{
-			ConCommandTester::GetInstance ()->RT_AddPlayerCommand ( ph, command_name );
-			ProcessDetectionAndTakeAction<Detection_CmdViolation::data_type>(Detection_CmdViolation(), ConCommandTester::GetInstance()->GetPlayerDataStructByIndex(ph.GetIndex()), ph, ConCommandTester::GetInstance());
+			g_ConCommandTester.RT_AddPlayerCommand ( ph, command_name );
+			ProcessDetectionAndTakeAction<Detection_CmdViolation::data_type>(Detection_CmdViolation(), g_ConCommandTester.GetPlayerDataStructByIndex(ph.GetIndex()), ph, &g_ConCommandTester);
 			return true;
 		}
 		if( StriCmpOffset ( cmd_str, "logic_", x ) )
 		{
-			ConCommandTester::GetInstance ()->RT_AddPlayerCommand ( ph, command_name );
-			ProcessDetectionAndTakeAction<Detection_CmdViolation::data_type>(Detection_CmdViolation(), ConCommandTester::GetInstance()->GetPlayerDataStructByIndex(ph.GetIndex()), ph, ConCommandTester::GetInstance());
+			g_ConCommandTester.RT_AddPlayerCommand ( ph, command_name );
+			ProcessDetectionAndTakeAction<Detection_CmdViolation::data_type>(Detection_CmdViolation(), g_ConCommandTester.GetPlayerDataStructByIndex(ph.GetIndex()), ph, &g_ConCommandTester);
 			return true;
 		}
 		if( StriCmpOffset ( cmd_str, "sv_", x ) )
 		{
-			ConCommandTester::GetInstance ()->RT_AddPlayerCommand ( ph, command_name );
-			ProcessDetectionAndTakeAction<Detection_CmdViolation::data_type>(Detection_CmdViolation(), ConCommandTester::GetInstance()->GetPlayerDataStructByIndex(ph.GetIndex()), ph, ConCommandTester::GetInstance());
+			g_ConCommandTester.RT_AddPlayerCommand ( ph, command_name );
+			ProcessDetectionAndTakeAction<Detection_CmdViolation::data_type>(Detection_CmdViolation(), g_ConCommandTester.GetPlayerDataStructByIndex(ph.GetIndex()), ph, &g_ConCommandTester);
 			return true;
 		}
 	}
 
-	ConCommandTester::GetInstance ()->RT_AddPlayerCommand ( ph, cmd_str );
+	g_ConCommandTester.RT_AddPlayerCommand ( ph, cmd_str );
 	return false;
 }
 
@@ -344,8 +344,8 @@ bool ConCommandTester::RT_HookSayCallback ( PlayerHandler::iterator ph, const vo
 
 	if( cmd_len > 250 )
 	{
-		ConCommandTester::GetInstance ()->RT_AddPlayerCommand ( ph, command_name );
-		ProcessDetectionAndTakeAction<Detection_CmdViolation::data_type>(Detection_CmdViolation(), ConCommandTester::GetInstance()->GetPlayerDataStructByIndex(ph.GetIndex()), ph, ConCommandTester::GetInstance());
+		g_ConCommandTester.RT_AddPlayerCommand ( ph, command_name );
+		ProcessDetectionAndTakeAction<Detection_CmdViolation::data_type>(Detection_CmdViolation(), g_ConCommandTester.GetPlayerDataStructByIndex(ph.GetIndex()), ph, &g_ConCommandTester);
 		return true;
 	}
 
@@ -359,26 +359,28 @@ bool ConCommandTester::RT_HookSayCallback ( PlayerHandler::iterator ph, const vo
 		{
 			if( ++spacenum > 64 )
 			{
-				ConCommandTester::GetInstance ()->RT_AddPlayerCommand ( ph, command_name );
-				ProcessDetectionAndTakeAction<Detection_CmdViolation::data_type>(Detection_CmdViolation(), ConCommandTester::GetInstance()->GetPlayerDataStructByIndex(ph.GetIndex()), ph, ConCommandTester::GetInstance());
+				g_ConCommandTester.RT_AddPlayerCommand ( ph, command_name );
+				ProcessDetectionAndTakeAction<Detection_CmdViolation::data_type>(Detection_CmdViolation(), g_ConCommandTester.GetPlayerDataStructByIndex(ph.GetIndex()), ph, &g_ConCommandTester);
 				return true;
 			}
 		}
 		if( k < 0x20 && !( Helpers::GetUTF8Bytes ( &k ) > 1 ) )
 		{
-			ConCommandTester::GetInstance ()->RT_AddPlayerCommand ( ph, command_name );
-			ProcessDetectionAndTakeAction<Detection_CmdViolation::data_type>(Detection_CmdViolation(), ConCommandTester::GetInstance()->GetPlayerDataStructByIndex(ph.GetIndex()), ph, ConCommandTester::GetInstance());
+			g_ConCommandTester.RT_AddPlayerCommand ( ph, command_name );
+			ProcessDetectionAndTakeAction<Detection_CmdViolation::data_type>(Detection_CmdViolation(), g_ConCommandTester.GetPlayerDataStructByIndex(ph.GetIndex()), ph, &g_ConCommandTester);
 			return true;
 		}
 	}
 
-	ConCommandTester::GetInstance ()->RT_AddPlayerCommand ( ph, cmd_str );
+	g_ConCommandTester.RT_AddPlayerCommand ( ph, cmd_str );
 	return false;
 }
 
 bool ConCommandTester::RT_ConCommandCallback ( PlayerHandler::iterator ph, void* cmd, const SourceSdk::CCommand & args )
 {
 	char const * const command_name ( SourceSdk::InterfacesProxy::ConCommand_GetName ( cmd ) );
+
+	if (!IsActive()) return false;
 
 	if( ph != SlotStatus::INVALID ) /// https://github.com/L-EARN/NoCheatZ-4/issues/16#issuecomment-225543330
 	{
@@ -401,10 +403,12 @@ bool ConCommandTester::RT_ConCommandCallback ( PlayerHandler::iterator ph, void*
 	}
 	else
 	{
-		Logger::GetInstance ()->Msg<MSG_ERROR> ( Helpers::format ( "ConCommandTester::ConCommandCallback : Intercepted a ConCommand because player class is not ready. Command name : %s\n", command_name ) );
+		g_Logger.Msg<MSG_ERROR> ( Helpers::format ( "ConCommandTester::ConCommandCallback : Intercepted a ConCommand because player class is not ready. Command name : %s\n", command_name ) );
 		return true; // Always block the command if the plugin is not ready to test this player (player class not already created)
 	}
 }
+
+ConCommandTester g_ConCommandTester;
 
 basic_string Detection_CmdFlood::GetDataDump ()
 {

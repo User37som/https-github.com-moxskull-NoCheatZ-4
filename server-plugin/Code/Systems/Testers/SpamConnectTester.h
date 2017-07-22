@@ -60,10 +60,8 @@ struct ConnectInfo
 
 class SpamConnectTester :
 	private BaseDynamicSystem,
-	public Singleton<SpamConnectTester>
+	public Singleton
 {
-	typedef Singleton<SpamConnectTester> singleton_class;
-
 private:
 	typedef CUtlVector<ConnectInfo> ConnectListT;
 	ConnectListT m_connect_list;
@@ -84,5 +82,7 @@ private:
 public:
 	void ClientConnect ( bool *bAllowConnect, SourceSdk::edict_t const * const pEntity, const char *pszName, const char *pszAddress, char *reject, int maxrejectlen );
 };
+
+extern SpamConnectTester g_SpamConnectTester;
 
 #endif
