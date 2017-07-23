@@ -109,6 +109,7 @@ class BanRequest :
 {
 private:
 	float m_wait_time;
+	int m_ban_time;
 	bool m_do_writeid;
 	bool m_can_kick;
 	bool m_can_ban;
