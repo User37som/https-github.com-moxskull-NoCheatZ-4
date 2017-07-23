@@ -161,7 +161,7 @@ bool ConfigManager::LoadConfig ()
 
 			if (!GetIniAttributeValue(file, "CONFIG", "tickrate_override", value))
 				if (!GetIniAttributeValue(file, gamename, "tickrate_override", value, false)) return false;
-			tickrate_override = atof(value.c_str());
+			tickrate_override = (float)atof(value.c_str());
 			if (tickrate_override == 0.0f) return false;
 			tickinterval = 1.0f / tickrate_override;
 
