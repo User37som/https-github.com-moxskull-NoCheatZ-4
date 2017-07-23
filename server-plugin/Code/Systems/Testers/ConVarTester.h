@@ -126,7 +126,7 @@ typedef struct CurrentConVarRequest
 		{
 			status = ConVarRequestStatus::SENT;
 			timeStart = curtime;
-			timeEnd = timeStart + 60.0f;
+			timeEnd = timeStart + 10.0f;
 		}
 		else
 		{
@@ -194,6 +194,8 @@ class ConVarTester :
 
 private:
 	ConVarRulesListT m_convars_rules;
+
+	SourceSdk::QueryCvarCookie_t * m_engine_cvar_cookie;
 
 	void* var_sv_cheats;
 

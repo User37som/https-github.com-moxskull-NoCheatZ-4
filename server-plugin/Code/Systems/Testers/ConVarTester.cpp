@@ -19,6 +19,7 @@
 
 #include "Systems/BanRequest.h"
 #include "Systems/Logger.h"
+#include "Hooks/SigScan.h"
 
 /////////////////////////////////////////////////////////////////////////
 // ConVarTester
@@ -41,6 +42,221 @@ void ConVarTester::Init ()
 {
 	InitDataStruct ();
 	LoadDefaultRules ();
+
+	/*
+	Sig g_iQueryCvarCookie
+		"StartQueryCvarValue: not a client"
+
+		CSGO
+			dll :
+			VEngineServer::StartQueryCvarValue
+
+			55
+			8B EC
+			83 E4 F8
+			83 EC 3C
+			56
+			8B 75 08
+			28 35 ?D4 ?12 ?7B ?10
+			C1 FE 04
+			83 FE 01
+			7C 08
+			8B 35 ?98 ?11 ?7B ?10
+			68 ?B0 ?39 ?4A ?10
+			E8 ?63 ?0B ?06 ?00
+			83 C4 04
+			A1 ?8C ?11 ?7B ?10
+			8D 4C 24 08
+			8B 74 B0 FC
+			8D 46 04
+			F7 DE
+			1B F6
+			23 F0
+			E8 15 4F EF FF
+			A1 TT TT TT TT
+			8B C8
+
+			so :
+			Engine.SendCvarValueQueryToClient
+
+			55
+			89 E5
+			57
+			56
+			53
+			83 EC 5C
+			C7 45 C0 ?68 ?8A ?54 ?00
+			0F B6 45 10
+			89 34 24
+			8B 7D 0C
+			88 45 B7
+			E8 ?0B ?4B ?F6 ?FF
+			8B 15 TT TT TT TT
+			C6 45 DC 01
+		CSS:
+			dll:
+			Engine.SendCvarValueQueryToClient
+
+			55
+			8B EC
+			81 EC 18 01 00 00
+			A1 TT TT TT TT
+			8B 8C
+			40
+			C6 85 EC FE FF FF 01
+			80 7D 10 00
+			?A3 ?7C ?2A ?3C ?10
+			8B 45 0C
+			C7 ?85 ?F0 ?FE ?FF ?FF ?00 ?00 ?00 ?00
+			89 8D F8 FE FF FF
+			89 85 FC FE FF FF
+
+			so:
+			Engine.SendCvarValueQueryToClient
+
+			55
+			89 E5
+			81 EC 38 01 00
+			A1 TT TT TT TT
+			C6 85 DC FE FF FF 01
+			C7 E5 E0 FE FF FF 00 00 00 00
+			80 7D 10 00
+			C7 85 FE FF FF ?68 ?2E ?23 ?00
+			8B 55 08
+			8D 48 01
+			89 85 E8 FE FF FF
+			89 0D TT TT TT TT
+	*/
+
+	if (m_engine_cvar_cookie) return;
+
+	DebugMessage("Trying to get g_iQueryCvarCookie ...");
+
+	basic_string modulename("engine");
+
+#ifdef GNUC
+	if (SourceSdk::InterfacesProxy::m_game != SourceSdk::CounterStrikeGlobalOffensive)
+	{
+		modulename.append("_srv");
+	}
+#endif
+
+#ifdef WIN32
+	modulename.append(".dll");
+
+	HMODULE engine_module_handle(GetModuleHandleA(modulename.c_str()));
+	if (engine_module_handle != NULL)
+	{
+		DebugMessage("Trying to hook game engine ...");
+
+		mem_byte *sig_code;
+
+		if (SourceSdk::InterfacesProxy::m_game != SourceSdk::CounterStrikeGlobalOffensive)
+		{
+			mem_byte sig_code[] =
+			{
+				0x55,
+				0x8B, 0xEC,
+				0x83, 0xE4, 0xF8,
+				0x83, 0xEC, 0x3C,
+				0x56,
+				0x8B, 0x75, 0x08,
+				0x28, 0x35, 0xD4, 0x12, 0x7B, 0x10,
+				0xC1, 0xFE, 0x04,
+				0x83, 0xFE, 0x01,
+				0x7C, 0x08,
+				0x8B, 0x35, 0x98, 0x11, 0x7B, 0x10,
+				0x68, 0xB0, 0x39, 0x4A, 0x10,
+				0xE8, 0x63, 0x0B, 0x06, 0x00,
+				0x83, 0xC4, 0x04,
+				0xA1,0x8C,0x11, 0x7B, 0x10,
+				0x8D, 0x4C, 0x24, 0x08,
+				0x8B, 0x74, 0xB0, 0xFC,
+				0x8D, 0x46, 0x04,
+				0xF7, 0xDE,
+				0x1B, 0xF6,
+				0x23, 0xF0,
+				0xE8, 0x15, 0x4F, 0xEF, 0xFF,
+				0xA1, 0xTT, 0xTT, 0xTT, 0xTT,
+				0x8B, 0xC8
+			};
+		}
+		else
+		{
+
+		}
+
+		sig_ctx ctx(metafactory_sig_code, metafactory_sig_mask, 45, 0x67);
+
+#else
+	modulename.append(".so");
+
+	basic_string relpath(Helpers::format("./bin/%s", modulename.c_str()));
+
+	void ** modinfo = (void **)dlopen(relpath.c_str(), RTLD_NOW | RTLD_NOLOAD);
+	void * mm_module_handle = nullptr;
+	if (modinfo != NULL)
+	{
+		DebugMessage("Trying to hook engine ...");
+
+		//mm_module_handle = dlsym(modinfo, ".init_proc");
+		// FIXME : Use link_map to get memory bounds of the module
+		engine_module_handle = *modinfo;
+		dlclose(modinfo);
+	}
+	if (engine_module_handle)
+	{
+		mem_byte const metafactory_sig_code[48] = {
+			0x55, 0x53, 0x57, 0x56, 0x83, 0xEC, 0x2C, 0x8B,
+			0x44, 0x24, 0x4C, 0x8B, 0x5C, 0x24, 0x44, 0x85,
+			0xC0, 0x74, 0x06, 0xC7, 0x00, 0x00, 0x00, 0x00,
+			0x00, 0x31, 0xC0, 0x85, 0xDB, 0x0F, 0x84, 0x3D,
+			0x01, 0x00, 0x00, 0x8B, 0x74, 0x24, 0x48, 0x89,
+			0x1C, 0x24, 0xC7, 0x44, 0x24, 0x04, 0x3A, 0xFC
+		};
+
+		mem_byte const metafactory_sig_mask[48] = {
+			0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+			0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+			0xFF, 0xFF, 0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+			0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00,
+			0x00, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+			0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00
+		};
+
+		sig_ctx ctx(metafactory_sig_code, metafactory_sig_mask, 45, 0x89);
+
+#endif
+
+		ScanMemoryRegion(reinterpret_cast<mem_byte *>(mm_module_handle), reinterpret_cast<mem_byte *>(mm_module_handle) + 0x30000, &ctx);
+
+		if (ctx.m_out != nullptr)
+		{
+			g_SourceHook = reinterpret_cast<ISourceHook_Skeleton *>(*(reinterpret_cast<size_t**>(ctx.m_out)));
+
+			if (g_SourceHook != nullptr)
+			{
+				DebugMessage(Helpers::format("g_SourceHook is at 0x%X (Interface Version %d, Impl Version %d)", g_SourceHook, g_SourceHook->GetIfaceVersion(), g_SourceHook->GetImplVersion()));
+				HookInfo haddhook(g_SourceHook, 2, (DWORD)my_AddHook);
+				HookInfo hremovehook(g_SourceHook, 3, (DWORD)my_RemoveHook);
+
+				local_HookGuardSourceHookSafety.VirtualTableHook(haddhook, "ISourceHook::AddHook");
+				local_HookGuardSourceHookSafety.VirtualTableHook(hremovehook, "ISourceHook::RemoveHook");
+			}
+			else
+			{
+				g_Logger.Msg<MSG_ERROR>("Failed to get ISourceHook interface.");
+			}
+		}
+		else
+		{
+			g_Logger.Msg<MSG_ERROR>("Sigscan failed for MetaFactory.");
+		}
+	}
+	else
+	{
+		DebugMessage("metamod module not found.");
+	}
 }
 
 bool ConVarTester::GotJob () const
