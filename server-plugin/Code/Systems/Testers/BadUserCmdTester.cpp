@@ -112,9 +112,12 @@ PlayerRunCommandRet BadUserCmdTester::RT_PlayerRunCommandCallback ( PlayerHandle
 		return PlayerRunCommandRet::CONTINUE;
 	}
 	
-	if( pInfo->prev_cmd == k_newcmd->command_number ) // Server is repeating commands, We will ignore here.
+	if (SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive)
 	{
-		return PlayerRunCommandRet::CONTINUE; 
+		if( pInfo->prev_cmd == k_newcmd->command_number ) // Server is repeating commands, We will ignore here.
+		{
+			return PlayerRunCommandRet::CONTINUE; 
+		}
 	}
 	
 	if( pInfo->prev_cmd > k_newcmd->command_number ) // Current command is less than previous command.
