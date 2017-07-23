@@ -15,6 +15,9 @@
 
 HookGuard<SourceHookSafety> local_HookGuardSourceHookSafety;
 
+class CNoCheatZPlugin;
+extern HookGuard<CNoCheatZPlugin> g_HookGuardCNoCheatZPlugin;
+
 SourceHookSafety::SourceHookSafety() :
 	g_SourceHook(nullptr)
 {
@@ -168,6 +171,7 @@ int HOOKFN_INT SourceHookSafety::my_AddHook(void * isourcehook, void * weak, int
 	g_HookGuardThinkPostHookListener.RevertAll();
 	g_HookGuardUserMessageHookListener.RevertAll();
 	g_HookGuardWeaponHookListener.RevertAll();
+	g_HookGuardCNoCheatZPlugin.RevertAll();
 
 	ST_W_STATIC AddHook_fn gpOldFn;
 	*(DWORD*)&(gpOldFn) = local_HookGuardSourceHookSafety.RT_GetOldFunction(isourcehook, 2);
@@ -180,6 +184,7 @@ int HOOKFN_INT SourceHookSafety::my_AddHook(void * isourcehook, void * weak, int
 	g_HookGuardThinkPostHookListener.RehookAll();
 	g_HookGuardUserMessageHookListener.RehookAll();
 	g_HookGuardWeaponHookListener.RehookAll();
+	g_HookGuardCNoCheatZPlugin.RehookAll();
 
 	return ret;
 }
@@ -201,6 +206,7 @@ bool HOOKFN_INT SourceHookSafety::my_RemoveHook(void * isourcehook, void * weak,
 	g_HookGuardThinkPostHookListener.RevertAll();
 	g_HookGuardUserMessageHookListener.RevertAll();
 	g_HookGuardWeaponHookListener.RevertAll();
+	g_HookGuardCNoCheatZPlugin.RevertAll();
 
 	ST_W_STATIC RemoveHook_fn gpOldFn;
 	*(DWORD*)&(gpOldFn) = local_HookGuardSourceHookSafety.RT_GetOldFunction(isourcehook, 3);
@@ -213,6 +219,7 @@ bool HOOKFN_INT SourceHookSafety::my_RemoveHook(void * isourcehook, void * weak,
 	g_HookGuardThinkPostHookListener.RehookAll();
 	g_HookGuardUserMessageHookListener.RehookAll();
 	g_HookGuardWeaponHookListener.RehookAll();
+	g_HookGuardCNoCheatZPlugin.RehookAll();
 
 	return ret;
 }

@@ -118,7 +118,10 @@ typedef struct CurrentConVarRequest
 
 	void SendCurrentRequest ( PlayerHandler::iterator ph, float const curtime, ConVarRulesListT const & rules )
 	{
-		cookie = SourceSdk::InterfacesProxy::GetServerPluginHelpers ()->StartQueryCvarValue ( ph->GetEdict (), rules[ ruleset ].name );
+		SourceSdk::edict_t* pedict(ph->GetEdict());
+		char const * var(rules[ruleset].name);
+		SourceSdk::IServerPluginHelpers001* inst(SourceSdk::InterfacesProxy::GetServerPluginHelpers());
+		cookie = inst->StartQueryCvarValue (pedict, var);
 		if( cookie != InvalidQueryCvarCookie )
 		{
 			status = ConVarRequestStatus::SENT;
