@@ -108,12 +108,9 @@ void ConVarTester::RT_ProcessPlayerTest ( PlayerHandler::iterator ph, float cons
 						pDetection.Log ();
 						ph->Kick ( "ConVar request timed out" );
 					}
-					else
-					{
-						g_Logger.Msg<MSG_WARNING> ( Helpers::format ( "ConVarTester : ConVar request timed out for %s (%s) : %d attempts.", ph->GetName (), m_convars_rules[ req->ruleset ].name, req->attempts) );
-						++req->attempts;
-						req->SendCurrentRequest ( ph, curtime, m_convars_rules ); // Send the request again
-					}
+					g_Logger.Msg<MSG_WARNING> ( Helpers::format ( "ConVarTester : ConVar request timed out for %s (%s) : %d attempts.", ph->GetName (), m_convars_rules[ req->ruleset ].name, req->attempts+1) );
+					++req->attempts;
+					req->SendCurrentRequest ( ph, curtime, m_convars_rules ); // Send the request again
 				}
 				// else wait ...
 				break;
@@ -555,14 +552,27 @@ const char* ConvertRequestStatus ( ConVarRequestStatus status )
 
 basic_string Detection_ConVar::GetDataDump ()
 {
-	return Helpers::format ( ":::: CurrentConVarRequest {\n:::::::: Request Status : %s,\n:::::::: Request Sent At : %f,\n:::::::: ConVarInfo {\n:::::::::::: ConVar Name : %s,\n:::::::::::: Expected Value : %s,\n:::::::::::: Got Value : %s,\n:::::::::::: Answer Status : %s,\n:::::::::::: Comparison Rule : %s\n::::::::}\n::::}",
-							 ConvertRequestStatus ( GetDataStruct ()->status ),
-							 GetDataStruct ()->timeStart,
-							 g_ConVarTester.m_convars_rules[ GetDataStruct ()->ruleset ].name,
-							 g_ConVarTester.m_convars_rules[ GetDataStruct ()->ruleset ].value,
-							 GetDataStruct ()->answer.c_str (),
-							 GetDataStruct ()->answer_status.c_str (),
-							 ConvertRule ( g_ConVarTester.m_convars_rules[ GetDataStruct ()->ruleset ].rule ) );
+	return Helpers::format(
+		":::: CurrentConVarRequest {\n"
+		":::::::: Request Status : %s,\n"
+		":::::::: Request Sent At : %f,\n"
+		":::::::: Attempts : %d,\n"
+		":::::::: ConVarInfo {\n"
+		":::::::::::: ConVar Name : %s,\n"
+		":::::::::::: Expected Value : %s,\n"
+		":::::::::::: Got Value : %s,\n"
+		":::::::::::: Answer Status : %s,\n"
+		":::::::::::: Comparison Rule : %s\n"
+		"::::::::}\n"
+		"::::}",
+		ConvertRequestStatus(GetDataStruct()->status),
+		GetDataStruct()->timeStart,
+		GetDataStruct()->attempts+1,
+		g_ConVarTester.m_convars_rules[GetDataStruct()->ruleset].name,
+		g_ConVarTester.m_convars_rules[GetDataStruct()->ruleset].value,
+		GetDataStruct()->answer.c_str(),
+		GetDataStruct()->answer_status.c_str(),
+		ConvertRule(g_ConVarTester.m_convars_rules[GetDataStruct()->ruleset].rule));
 }
 
 basic_string Detection_ConVar::GetDetectionLogMessage ()
