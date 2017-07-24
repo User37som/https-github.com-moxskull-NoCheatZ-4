@@ -86,6 +86,11 @@ void Logger::ConnectToServerConsole ()
 	}
 }
 
+void Logger::DisconnectFromServerConsole()
+{
+	m_msg_func = nullptr;
+}
+
 void Logger::Push ( const char * msg )
 {
 	/*
