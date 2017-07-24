@@ -126,7 +126,7 @@ void ConVarTester::Init ()
 			8D 48 01
 			89 85 E8 FE FF FF
 			89 0D TT TT TT TT
-	*/
+	
 
 	if (m_engine_cvar_cookie) return;
 
@@ -256,7 +256,7 @@ void ConVarTester::Init ()
 	else
 	{
 		DebugMessage("metamod module not found.");
-	}
+	}*/
 }
 
 bool ConVarTester::GotJob () const
