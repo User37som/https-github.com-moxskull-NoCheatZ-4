@@ -116,6 +116,8 @@ public:
 
 	void ConnectToServerConsole ();
 
+	void DisconnectFromServerConsole();
+
 	static void SpewAssert ( char const * expr, char const * file, unsigned int line );
 
 	inline bool IsConsoleConnected () const;

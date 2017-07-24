@@ -162,6 +162,8 @@ int HOOKFN_INT SourceHookSafety::my_AddHook(void * isourcehook, void * weak, int
 {
 	typedef int (HOOKFN_EXT *AddHook_fn)(void* isourcehook, int plug, ISourceHook_Skeleton::AddHookMode mode, void *iface, int thisptr_offs, ISourceHook_Skeleton::HookManagerPubFunc myHookMan, void *handler, bool post);
 	
+	g_Logger.DisconnectFromServerConsole();
+
 	DebugMessage(Helpers::format("Caught ISourceHook::AddHook for iface 0x%X", iface));
 
 	g_HookGuardConCommandHookListener.RevertAll();
@@ -186,6 +188,8 @@ int HOOKFN_INT SourceHookSafety::my_AddHook(void * isourcehook, void * weak, int
 	g_HookGuardWeaponHookListener.RehookAll();
 	g_HookGuardCNoCheatZPlugin.RehookAll();
 
+	g_Logger.ConnectToServerConsole();
+
 	return ret;
 }
 
@@ -196,6 +200,8 @@ bool HOOKFN_INT SourceHookSafety::my_RemoveHook(void * isourcehook, void * weak,
 #endif
 {
 	typedef int (HOOKFN_EXT *RemoveHook_fn)(void* isourcehook, int plug, void *iface, int thisptr_offs, ISourceHook_Skeleton::HookManagerPubFunc myHookMan, void *handler, bool post);
+
+	g_Logger.DisconnectFromServerConsole();
 
 	DebugMessage(Helpers::format("Caught ISourceHook::RemoveHook for iface 0x%X", iface));
 
@@ -220,6 +226,8 @@ bool HOOKFN_INT SourceHookSafety::my_RemoveHook(void * isourcehook, void * weak,
 	g_HookGuardUserMessageHookListener.RehookAll();
 	g_HookGuardWeaponHookListener.RehookAll();
 	g_HookGuardCNoCheatZPlugin.RehookAll();
+
+	g_Logger.ConnectToServerConsole();
 
 	return ret;
 }
