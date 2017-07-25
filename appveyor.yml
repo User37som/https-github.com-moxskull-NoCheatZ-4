@@ -57,7 +57,7 @@ after_build:
 
     Get-ChildItem c:\github\NoCheatZ-4\Builds -Include *.lib -Recurse | foreach ($_) {Remove-Item $_.fullname}
 
-    Get-ChildItem c:\github\NoCheatZ-4\Builds -Include *.bsc -Recurse | foreach ($_) {Remove-Item $_.fullname
+    Get-ChildItem c:\github\NoCheatZ-4\Builds -Include *.bsc -Recurse | foreach ($_) {Remove-Item $_.fullname}
 
     Get-ChildItem c:\github\NoCheatZ-4\Builds -Include .gitignore -Recurse | foreach ($_) {Remove-Item $_.fullname}
 
