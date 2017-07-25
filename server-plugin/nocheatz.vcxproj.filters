@@ -258,6 +258,9 @@
     <ClCompile Include="Code\Systems\Testers\BadUserCmdTester.cpp">
       <Filter>Code\Systems\Testers</Filter>
     </ClCompile>
+    <ClCompile Include="Code\Systems\Testers\MouseTester.cpp">
+      <Filter>Code\Systems\Testers</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Code\plugin.h">
@@ -579,6 +582,9 @@
       <Filter>Code</Filter>
     </ClInclude>
     <ClInclude Include="Code\Systems\Testers\BadUserCmdTester.h">
+      <Filter>Code\Systems\Testers</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Systems\Testers\MouseTester.h">
       <Filter>Code\Systems\Testers</Filter>
     </ClInclude>
   </ItemGroup>
