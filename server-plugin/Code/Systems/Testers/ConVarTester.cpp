@@ -714,16 +714,12 @@ void ConVarTester::RT_ProcessOnTick ( float const & curtime )
 		SystemVerbose2 (  "ConVarTester : Not processing any player this tick" );
 #endif
 	}*/
-	/*m_current_player = PlayerHandler::end ();
+	m_current_player = PlayerHandler::end ();
 	m_current_player += &filter_class;
 	for( ; m_current_player != PlayerHandler::end (); m_current_player += &filter_class )
 	{
 		RT_ProcessPlayerTest ( m_current_player, curtime );
-	}*/
-
-	m_current_player += &filter_class;
-	if(m_current_player)
-		RT_ProcessPlayerTest(m_current_player, curtime);
+	}
 }
 
 void ConVarTester::RT_ProcessPlayerTest ( PlayerHandler::iterator ph, float const & curtime )
