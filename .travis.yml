@@ -18,7 +18,7 @@ before_script:
   - git tag
   - cd scripts
   - python version.py
-  - cd server-plugin
+  - cd ../server-plugin
   - sh ../scripts/make-protobuf.sh
 script:
   - cppcheck --force --quiet --inline-suppr --enable=all -DGNUC -UWIN32 -UNCZ_USE_METRICS --std=c++11 -j6 --platform=unix32 -i SourceSdk -i SourceSdk/Interfaces/Protobuf -i SourceSdk/Interfaces/Protobuf/protobuf-2.5.0/src Code
