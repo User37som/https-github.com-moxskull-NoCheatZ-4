@@ -24,26 +24,13 @@ limitations under the License.
 
 struct MouseInfo
 {
-	int prev_mdx;
-	int prev_mdy;
-	int mdx;
-	int mdy;
+	float m_mouse_yaw; // m_yaw convar
+	float m_mouse_pitch; // m_pitch convar
 
-	MouseInfo() :
-		prev_mdx(0),
-		prev_mdy(0),
-		mdx(0),
-		mdy(0)
-	{
-	}
+	float m_prev_yaw_angle;
+	float m_prev_pitch_angle;
 
-	MouseInfo(const MouseInfo& other) :
-		prev_mdx(other.prev_mdx),
-		prev_mdy(other.prev_mdy),
-		mdx(other.mdx),
-		mdy(other.mdy)
-	{
-	}
+	bool m_prev_set;
 };
 
 class Detection_MouseMismatch :
@@ -81,6 +68,8 @@ public:
 	virtual bool GotJob() const override final;
 
 	virtual PlayerRunCommandRet RT_PlayerRunCommandCallback(PlayerHandler::iterator ph, void * const cmd, void * const old_cmd) override final;
+
+	void OnClientSettingsChanged(PlayerHandler::iterator ph);
 };
 
 extern MouseTester g_MouseTester;
