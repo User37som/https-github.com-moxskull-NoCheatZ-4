@@ -84,26 +84,6 @@ float Plat_FloatTime ()
 	return ( g_GlobalTimer.GetCurrent () * 0.001f );
 }
 
-HookGuard<CNoCheatZPlugin> g_HookGuardCNoCheatZPlugin;
-typedef void (HOOKFN_EXT *OnQueryCvarValueFinished_t)(void * const, SourceSdk::QueryCvarCookie_t, SourceSdk::edict_t *, SourceSdk::EQueryCvarValueStatus, const char *, const char *);
-
-#ifdef GNUC
-void HOOKFN_INT n_GameDLL_OnQueryCvarValueFinished(void * servergamedll, SourceSdk::QueryCvarCookie_t iCookie, SourceSdk::edict_t *pPlayerEntity, SourceSdk::EQueryCvarValueStatus eStatus, const char *pCvarName, const char *pCvarValue)
-#else
-void HOOKFN_INT n_GameDLL_OnQueryCvarValueFinished(void * servergamedll, void* const, SourceSdk::QueryCvarCookie_t iCookie, SourceSdk::edict_t *pPlayerEntity, SourceSdk::EQueryCvarValueStatus eStatus, const char *pCvarName, const char *pCvarValue)
-#endif
-{
-	OnQueryCvarValueFinished_t gpOldFn;
-	*(DWORD *)&(gpOldFn) = g_HookGuardCNoCheatZPlugin.RT_GetOldFunctionByInstance(servergamedll);
-
-	if (iCookie < InvalidQueryCvarCookie)
-	{
-		g_CNoCheatZPlugin.RT_OnQueryCvarValueFinished(iCookie, pPlayerEntity, eStatus, pCvarName, pCvarValue);
-	}
-
-	gpOldFn(servergamedll, iCookie, pPlayerEntity, eStatus, pCvarName, pCvarValue);
-}
-
 float HOOKFN_INT GetTickInterval(void * const preserve_me)
 {
 	return ConfigManager::tickinterval;
@@ -127,7 +107,6 @@ CNoCheatZPlugin::CNoCheatZPlugin () :
 
 CNoCheatZPlugin::~CNoCheatZPlugin ()
 {
-	g_HookGuardCNoCheatZPlugin.UnhookAll();
 	DestroySingletons ();
 }
 
@@ -164,38 +143,20 @@ bool CNoCheatZPlugin::Load ( SourceSdk::CreateInterfaceFn _interfaceFactory, Sou
 		return false;
 	}
 
-	// replace tickinterval & onquerycvarvaluefinished
+	// replace tickinterval
 
 	switch (SourceSdk::InterfacesProxy::m_servergamedll_version)
 	{
 	case 5:
-	{
-		ReplaceVirtualFunctionByFakeVirtual((DWORD)GetTickInterval, &(IFACE_PTR(SourceSdk::InterfacesProxy::m_servergamedll)[9]));
-		SourceSdk::InterfacesProxy::_vfptr_GetTickInterval = (SourceSdk::InterfacesProxy::GetTickInterval_t)GetTickInterval;
-
-		HookInfo info(SourceSdk::InterfacesProxy::m_servergamedll, 34, (DWORD)n_GameDLL_OnQueryCvarValueFinished);
-		g_HookGuardCNoCheatZPlugin.VirtualTableHook(info, "CServerGameDLL::OnQueryCvarValueFinished");
-		break;
-	}
 	case 6:
-	{
 		ReplaceVirtualFunctionByFakeVirtual((DWORD)GetTickInterval, &(IFACE_PTR(SourceSdk::InterfacesProxy::m_servergamedll)[9]));
 		SourceSdk::InterfacesProxy::_vfptr_GetTickInterval = (SourceSdk::InterfacesProxy::GetTickInterval_t)GetTickInterval;
-
-		HookInfo info(SourceSdk::InterfacesProxy::m_servergamedll, 32, (DWORD)n_GameDLL_OnQueryCvarValueFinished);
-		g_HookGuardCNoCheatZPlugin.VirtualTableHook(info, "CServerGameDLL::OnQueryCvarValueFinished");
 		break;
-	}
 	case 9:
 	case 10:
-	{
 		ReplaceVirtualFunctionByFakeVirtual((DWORD)GetTickInterval, &(IFACE_PTR(SourceSdk::InterfacesProxy::m_servergamedll)[10]));
 		SourceSdk::InterfacesProxy::_vfptr_GetTickInterval = (SourceSdk::InterfacesProxy::GetTickInterval_t)GetTickInterval;
-
-		HookInfo info(SourceSdk::InterfacesProxy::m_servergamedll, 35, (DWORD)n_GameDLL_OnQueryCvarValueFinished);
-		g_HookGuardCNoCheatZPlugin.VirtualTableHook(info, "CServerGameDLL::OnQueryCvarValueFinished");
 		break;
-	}
 	default:
 		break;
 	};
