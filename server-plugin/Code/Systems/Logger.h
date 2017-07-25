@@ -81,6 +81,7 @@ private:
 	MsgFunc_t m_msg_func;
 
 	bool m_always_flush;
+	bool m_bypass_msg;
 
 public:
 	Logger () :
@@ -93,7 +94,8 @@ public:
 		m_current_memory_used ( 0 ),
 		m_sm_chat(nullptr),
 		m_msg_func(nullptr),
-		m_always_flush(false)
+		m_always_flush(false),
+		m_bypass_msg(false)
 	{
 		ConnectToServerConsole ();
 	};
@@ -116,7 +118,7 @@ public:
 
 	void ConnectToServerConsole ();
 
-	void DisconnectFromServerConsole();
+	void SetBypassServerConsoleMsg(bool b);
 
 	static void SpewAssert ( char const * expr, char const * file, unsigned int line );
 
