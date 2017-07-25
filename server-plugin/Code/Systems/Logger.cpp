@@ -82,7 +82,7 @@ void Logger::ConnectToServerConsole ()
 	}
 	else
 	{
-		std::cout << "Connected to console.\n";
+		//std::cout << "Connected to console.\n";
 	}
 }
 

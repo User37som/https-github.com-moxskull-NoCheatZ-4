@@ -46,19 +46,20 @@ bool BanRequest::sys_cmd_fn ( const SourceSdk::CCommand &args )
 		{
 			m_can_kick = true;
 			g_Logger.Msg<MSG_CMD_REPLY> ( Helpers::format ( "NoCheatZ is: Able to kick (%s), Able to ban (%s)", Helpers::boolToString ( m_can_kick ), Helpers::boolToString ( m_can_ban ) ) );
-			return true;
 		}
 		else if (stricmp ( "No", args.Arg ( 3 )) == 0 )
 		{
 			m_can_kick = false;
 			m_can_ban = false;
 			g_Logger.Msg<MSG_CMD_REPLY> ( Helpers::format ( "NoCheatZ is: Able to kick (%s), Able to ban (%s)", Helpers::boolToString ( m_can_kick ), Helpers::boolToString ( m_can_ban ) ) );
-			return true;
 		}
 		else
 		{
 			g_Logger.Msg<MSG_CMD_REPLY> ( Helpers::format ( "Available arguments for \"ncz BanRequest CanKick\" : Yes - No" ) );
 		}
+
+		g_Logger.Msg<MSG_CMD_REPLY>(Helpers::format("NoCheatZ is: Able to kick (%s), Able to ban (%s)", Helpers::boolToString(m_can_kick), Helpers::boolToString(m_can_ban)));
+		return true;
 	}
 	else if( stricmp ( "CanBan", args.Arg ( 2 ) ) == 0 )
 	{
@@ -67,42 +68,35 @@ bool BanRequest::sys_cmd_fn ( const SourceSdk::CCommand &args )
 			m_can_kick = true;
 			m_can_ban = true;
 			g_Logger.Msg<MSG_CMD_REPLY> ( Helpers::format ( "NoCheatZ is: Able to kick (%s), Able to ban (%s)", Helpers::boolToString ( m_can_kick ), Helpers::boolToString ( m_can_ban ) ) );
-			return true;
 		}
 		else if( stricmp ( "No", args.Arg ( 3 ) ) == 0 )
 		{
 			m_can_ban = false;
 			g_Logger.Msg<MSG_CMD_REPLY> ( Helpers::format ( "NoCheatZ is: Able to kick (%s), Able to ban (%s)", Helpers::boolToString ( m_can_kick ), Helpers::boolToString ( m_can_ban ) ) );
-			return true;
 		}
 		else
 		{
 			g_Logger.Msg<MSG_CMD_REPLY> ( "Available arguments for \"ncz BanRequest CanBan\" : Yes - No" );
 		}
+		g_Logger.Msg<MSG_CMD_REPLY>(Helpers::format("NoCheatZ is: Able to kick (%s), Able to ban (%s)", Helpers::boolToString(m_can_kick), Helpers::boolToString(m_can_ban)));
+		return true;
 	}
-	else if (stricmp("AllowWriteBans", args.Arg(2)) == 0)
+	else if (stricmp("SetBanTime", args.Arg(2)) == 0)
 	{
-		if (stricmp("Yes", args.Arg(3)) == 0)
+		if (args.ArgC() >= 4)
 		{
-			m_can_write_ids = true;
-			g_Logger.Msg<MSG_CMD_REPLY>("AllowWriteBans is Yes");
-			return true;
-		}
-		else if (stricmp("No", args.Arg(3)) == 0)
-		{
-			m_can_write_ids = false;
-			g_Logger.Msg<MSG_CMD_REPLY>("AllowWriteBans is No");
-			return true;
+			m_ban_time = atoi(args.Arg(3));
 		}
 		else
 		{
-			g_Logger.Msg<MSG_CMD_REPLY>("Available arguments for \"ncz BanRequest AllowWriteBans\" : Yes - No");
+			g_Logger.Msg<MSG_CMD_REPLY>("SetBanTime expected int argument (ban time minutes - 0 = permanent)");
 		}
+		return true;
 	}
-
-	g_Logger.Msg<MSG_CMD_REPLY> ( Helpers::format ( "NoCheatZ is: Able to kick (%s), Able to ban (%s)", Helpers::boolToString ( m_can_kick ), Helpers::boolToString ( m_can_ban ) ) );
-
-	return false;
+	else
+	{
+		return false;
+	}
 }
 
 void BanRequest::Init ()
@@ -166,11 +160,11 @@ void BanRequest::BanInternal ( int ban_time, char const * steam_id, int userid, 
 			{
 				g_Logger.Msg<MSG_WARNING> ( "BanRequest::BanInternal : Bad userid -> Cannot forward to sm_ban command." );
 				g_Logger.Msg<MSG_HINT> ( "BanRequest::BanInternal : Using sm_addban ..." );
-				SourceSdk::InterfacesProxy::Call_ServerCommand ( Helpers::format ( "sm_addban %d \"%s\" \"%s\"\n", ban_time, steam_id, kick_message ) );
+				SourceSdk::InterfacesProxy::Call_ServerCommand ( Helpers::format ( "sm_addban %d \"%s\" \"%s\"\n", m_ban_time, steam_id, kick_message ) );
 			}
 			else
 			{
-				SourceSdk::InterfacesProxy::Call_ServerCommand ( Helpers::format ( "sm_ban #%d %d \"%s\"\n", userid, ban_time, kick_message ) );
+				SourceSdk::InterfacesProxy::Call_ServerCommand ( Helpers::format ( "sm_ban #%d %d \"%s\"\n", userid, m_ban_time, kick_message ) );
 			}
 		}
 		/*
@@ -184,7 +178,7 @@ void BanRequest::BanInternal ( int ban_time, char const * steam_id, int userid, 
 		KickNow ( userid, kick_message );
 		if( SteamGameServer_BSecure () && steam_id != nullptr )
 		{
-			SourceSdk::InterfacesProxy::Call_ServerCommand ( Helpers::format ( "banid %d %s\n", ban_time, steam_id ) );
+			SourceSdk::InterfacesProxy::Call_ServerCommand ( Helpers::format ( "banid %d %s\n", m_ban_time, steam_id ) );
 		}
 
 		basic_string ip_stripped ( ip );

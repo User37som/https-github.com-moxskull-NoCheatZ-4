@@ -5,6 +5,13 @@
 
 #include "Misc/ClassSpecifications.h"
 
+#ifdef WIN32
+#	include <Windows.h>
+#	include <Psapi.h>
+#else
+
+#endif
+
 typedef unsigned char mem_byte;
 typedef unsigned int mem_dword;
 
