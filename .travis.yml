@@ -12,11 +12,13 @@ before_install:
   - sudo rm /etc/apt/sources.list.d/google-chrome.list
   - sudo dpkg --add-architecture i386
   - sudo apt-get -qq update
-  - sudo apt-get -qq install -y curl build-essential lib32z1 lib32ncurses5 lib32bz2-1.0 gcc-multilib g++-multilib g++-4.8 g++-4.8-multilib lib32gcc1 libc6-i386 libc6-dev-i386 autotools-dev autoconf libtool cppcheck
+  - sudo apt-get -qq install -y build-essential cppcheck g++-4.8 g++-multilib linux-libc-dev libc6-dev-i386 lib32z1-dev lib32stdc++6
 before_script:
   - git fetch --tags
   - git tag
-  - cd server-plugin
+  - cd scripts
+  - python version.py
+  - cd ../server-plugin
   - sh ../scripts/make-protobuf.sh
 script:
   - cppcheck --force --quiet --inline-suppr --enable=all -DGNUC -UWIN32 -UNCZ_USE_METRICS --std=c++11 -j6 --platform=unix32 -i SourceSdk -i SourceSdk/Interfaces/Protobuf -i SourceSdk/Interfaces/Protobuf/protobuf-2.5.0/src Code

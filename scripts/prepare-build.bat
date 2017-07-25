@@ -7,18 +7,3 @@ xcopy ..\.gitignore ..\Builds\%1\NoCheatZ-autorecords /F /Y
 xcopy ..\server-plugin\Res\nocheatz.cfg ..\Builds\%1\cfg /F /Y
 xcopy ..\server-plugin\Res\nocheatz.vdf ..\Builds\%1\addons\ /F /Y
 xcopy ..\server-plugin\Res\config.ini ..\Builds\%1\addons\NoCheatZ /F /Y
-
-if defined CI (
-	cmd /C del Code\version.cpp
-	git describe --tags --always --dirty > gitvtmp.txt
-	git describe --tags --abbrev=0 > gitvshorttmp.txt
-	set /p gitvout=<gitvtmp.txt
-	set /p gitvshortout=<gitvshorttmp.txt
-	(
-	echo #include ^"version.h^"
-	echo char const * const NCZ_VERSION_GIT = ^"%gitvout%^";
-	echo char const * const NCZ_VERSION_GIT_SHORT = ^"%gitvshortout%^";
-	) > Code\version.cpp
-	del gitvtmp.txt
-	del gitvshorttmp.txt
-)
