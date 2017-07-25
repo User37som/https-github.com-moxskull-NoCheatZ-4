@@ -51,15 +51,15 @@ after_build:
 
     cd c:\github\NoCheatZ-4\Builds
 
-    Get-ChildItem c:\github\NoCheatZ-4\Builds -Include *.exp -Recurse | foreach ($_) {Remove-Item $_.fullname -WhatIf}
+    Get-ChildItem c:\github\NoCheatZ-4\Builds -Include *.exp -Recurse | foreach ($_) {Remove-Item $_.fullname}
 
-    Get-ChildItem c:\github\NoCheatZ-4\Builds -Include *.ilk -Recurse | foreach ($_) {Remove-Item $_.fullname -WhatIf}
+    Get-ChildItem c:\github\NoCheatZ-4\Builds -Include *.ilk -Recurse | foreach ($_) {Remove-Item $_.fullname}
 
-    Get-ChildItem c:\github\NoCheatZ-4\Builds -Include *.lib -Recurse | foreach ($_) {Remove-Item $_.fullname -WhatIf}
+    Get-ChildItem c:\github\NoCheatZ-4\Builds -Include *.lib -Recurse | foreach ($_) {Remove-Item $_.fullname}
 
-    Get-ChildItem c:\github\NoCheatZ-4\Builds -Include *.bsc -Recurse | foreach ($_) {Remove-Item $_.fullname -WhatIf}
+    Get-ChildItem c:\github\NoCheatZ-4\Builds -Include *.bsc -Recurse | foreach ($_) {Remove-Item $_.fullname}
 
-    Get-ChildItem c:\github\NoCheatZ-4\Builds -Include .gitignore -Recurse | foreach ($_) {Remove-Item $_.fullname -WhatIf}
+    Get-ChildItem c:\github\NoCheatZ-4\Builds -Include .gitignore -Recurse | foreach ($_) {Remove-Item $_.fullname}
 
     New-Item -ItemType directory -Path out
 

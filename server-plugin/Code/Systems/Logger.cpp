@@ -86,9 +86,9 @@ void Logger::ConnectToServerConsole ()
 	}
 }
 
-void Logger::DisconnectFromServerConsole()
+void Logger::SetBypassServerConsoleMsg(bool b)
 {
-	m_msg_func = nullptr;
+	m_bypass_msg = b;
 }
 
 void Logger::Push ( const char * msg )
@@ -150,35 +150,41 @@ void Logger::Push ( const char * msg )
 template <>
 void Logger::Msg<MSG_CONSOLE> ( const char * msg, int verbose /*= 0*/ )
 {
-	if( this->IsConsoleConnected () )
+	if (!m_bypass_msg)
 	{
-		m_msg_func ( "%s%f %s\n", log_prolog.c_str (), Plat_FloatTime (), msg );
-	}
-	else
-	{
-		std::cout << log_prolog.c_str () << Plat_FloatTime () << ' ' << msg << '\n';
+		if (this->IsConsoleConnected())
+		{
+			m_msg_func("%s%f %s\n", log_prolog.c_str(), Plat_FloatTime(), msg);
+		}
+		else
+		{
+			std::cout << log_prolog.c_str() << Plat_FloatTime() << ' ' << msg << '\n';
 #ifdef WIN32
-		OutputDebugStringA ( log_prolog.c_str () );
-		OutputDebugStringA ( msg );
-		OutputDebugStringA ( "\n" );
+			OutputDebugStringA(log_prolog.c_str());
+			OutputDebugStringA(msg);
+			OutputDebugStringA("\n");
 #endif
+		}
 	}
 }
 
 template <>
 void Logger::Msg<MSG_CMD_REPLY> ( const char * msg, int verbose /*= 0*/ )
 {
-	if( this->IsConsoleConnected () )
+	if (!m_bypass_msg)
 	{
-		m_msg_func ( "%s\n", msg );
-	}
-	else
-	{
-		std::cout << msg << '\n';
+		if (this->IsConsoleConnected())
+		{
+			m_msg_func("%s\n", msg);
+		}
+		else
+		{
+			std::cout << msg << '\n';
 #ifdef WIN32
-		OutputDebugStringA ( msg );
-		OutputDebugStringA ( "\n" );
+			OutputDebugStringA(msg);
+			OutputDebugStringA("\n");
 #endif
+		}
 	}
 }
 
