@@ -2,7 +2,7 @@ language: cpp
 compiler:
   - g++
 os: linux
-sudo: false
+sudo: required
 dist: trusty
 branches:
   only:
