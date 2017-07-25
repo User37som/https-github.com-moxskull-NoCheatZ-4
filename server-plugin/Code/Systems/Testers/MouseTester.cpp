@@ -1,7 +1,7 @@
 #include "MouseTester.h"
 
 MouseTester::MouseTester() :
-	BaseTesterSystem ("MouseTester"),
+	BaseTesterSystem ("MouseTester_BETA"),
 	PlayerDataStructHandler<MouseInfo>(),
 	PlayerRunCommandHookListener(),
 	Singleton()
@@ -20,7 +20,7 @@ void MouseTester::Init()
 
 void MouseTester::Load()
 {
-	PlayerRunCommandHookListener::RegisterPlayerRunCommandHookListener(this, SystemPriority::MouseTester);
+	PlayerRunCommandHookListener::RegisterPlayerRunCommandHookListener(this, SystemPriority::MouseTester, SlotStatus::PLAYER_CONNECTING);
 }
 
 void MouseTester::Unload()
@@ -56,67 +56,31 @@ PlayerRunCommandRet MouseTester::RT_PlayerRunCommandCallback(PlayerHandler::iter
 	MouseInfo * const pInfo(GetPlayerDataStructByIndex(ph.GetIndex()));
 	SourceSdk::QAngle const * userangles(&(reinterpret_cast<SourceSdk::CUserCmd*>(cmd)->viewangles));
 
-	if (pInfo->m_prev_set)
+	if (pInfo->m_prev_set && ph == SlotStatus::PLAYER_IN_TESTS)
 	{
+		/// PITCH
 
-		/// Almost fully reverse MouseMove.
-		// This is simple actually.
-		// All we have to do is to backward-calc MouseMove and the result should be equal to previous angles. If not, detect.
+		float pitch_delta = userangles->x - pInfo->m_prev_pitch_angle;
 
-		/* We start by an engine error ...
-
-		CInput::ApplyMouse   cmd->mousedx = (int)mouse_x; cmd->mousedy = (int)mouse_y; // truncated, already introducing 0/+1 error range. Thanks valve.
-
-		*/
-		
-		SourceSdk::QAngle expect_angle_min;
-		SourceSdk::QAngle expect_angle_max;
-
-		float mdx_min = md[0];
-		float mdx_max = (float)md[0] + copysign(1.01f, mdx_min);
-		float mdy_min = md[1];
-		float mdy_max = (float)md[1] + copysign(1.01f, mdy_min);
-
-		// CInput::ApplyMouse viewangles[PITCH] += m_pitch->GetFloat() * mouse_y;
-
-		float pitch_min = pInfo->m_prev_pitch_angle + pInfo->m_mouse_pitch * mdy_min;
-		float pitch_max = pInfo->m_prev_pitch_angle + pInfo->m_mouse_pitch * mdy_max;
-		//float pitch_delta = fabsf(userangles->x - pInfo->m_prev_pitch_angle);
-
-		if (signbit(mdx_min))
+		if (signbit(pitch_delta) != signbit((float)md[1]) && pitch_delta != 0.0f && md[1] != 0)
 		{
-			std::swap(pitch_min, pitch_max);
+			// frozen mouse move false detection
+			// inverted mouse false detection
+			DebugMessage("DETECTED");
+		}
+		else if (md[1] == 0 && fabs(pitch_delta) > 0.044f * fabs(pInfo->m_prev_mdy) + 0.044f)
+		{
+			// sniper scope false detection
+ 			DebugMessage("DETECTED");
 		}
 
-		if (userangles->x < pitch_min)
-		{
-			DebugMessage(Helpers::format("PITCH DETECTED MIN %f", (pitch_min - userangles->x) / 0.022f));
-		}
-
-		if (userangles->x > pitch_max)
-		{
-			DebugMessage(Helpers::format("PITCH DETECTED MAX %f", (userangles->x - pitch_max) / 0.022f));
-		}
-
-		// CInput::ApplyMouse  viewangles[YAW] -= m_yaw.GetFloat() * mouse_x;
-
-		expect_angle_min.y = userangles->y + pInfo->m_mouse_yaw * mdx_min;
-		expect_angle_max.y = userangles->y + pInfo->m_mouse_yaw * mdx_max;
-
-		fmodf(expect_angle_min.y, 180.0f);
-		fmodf(expect_angle_max.y, 180.0f);
-
-		float y_delta = userangles->y - pInfo->m_prev_yaw_angle;
-		float expect_delta_min = userangles->y - expect_angle_min.y;
-		float expect_delta_max = userangles->y - expect_angle_max.y;
-		if (y_delta >= expect_delta_max || y_delta < expect_delta_min)
-		{
-			//DebugMessage("YAW DETECTED");
-		}
+		/// YAW
 	}
 
 	pInfo->m_prev_pitch_angle = userangles->x;
 	pInfo->m_prev_yaw_angle = userangles->y;
+	pInfo->m_prev_mdx = md[0];
+	pInfo->m_prev_mdy = md[1];
 	pInfo->m_prev_set = true;
 
 	return PlayerRunCommandRet::CONTINUE;
