@@ -116,24 +116,7 @@ typedef struct CurrentConVarRequest
 		attempts = 0;
 	}
 
-	void SendCurrentRequest ( PlayerHandler::iterator ph, float const curtime, ConVarRulesListT const & rules )
-	{
-		SourceSdk::edict_t* pedict(ph->GetEdict());
-		char const * var(rules[ruleset].name);
-		SourceSdk::IServerPluginHelpers001* inst(SourceSdk::InterfacesProxy::GetServerPluginHelpers());
-		cookie = inst->StartQueryCvarValue (pedict, var);
-		if( cookie != InvalidQueryCvarCookie )
-		{
-			status = ConVarRequestStatus::SENT;
-			timeStart = curtime;
-			timeEnd = timeStart + 10.0f;
-		}
-		else
-		{
-			status = ConVarRequestStatus::NOT_PROCESSING;
-			g_Logger.Msg<MSG_ERROR> ( "ConVarTester : StartQueryCvarValue returned InvalidQueryCvarCookie" );
-		}
-	}
+	inline void SendCurrentRequest(PlayerHandler::iterator ph, float const curtime, ConVarRulesListT const & rules);
 } CurrentConVarRequestT;
 
 class ConVarTester;
@@ -195,9 +178,9 @@ class ConVarTester :
 private:
 	ConVarRulesListT m_convars_rules;
 
-	SourceSdk::QueryCvarCookie_t * m_engine_cvar_cookie;
-
 	void* var_sv_cheats;
+
+	SourceSdk::QueryCvarCookie_t * m_engine_cvar_cookie;
 
 public:
 	ConVarTester ();
@@ -220,6 +203,8 @@ private:
 public:
 	void RT_OnQueryCvarValueFinished ( PlayerHandler::iterator ph, SourceSdk::QueryCvarCookie_t cookie, SourceSdk::EQueryCvarValueStatus eStatus, const char *pCvarName, const char *pCvarValue );
 
+	void FixQueryCvarCookie();
+
 private:
 	void RT_ProcessPlayerTest ( PlayerHandler::iterator ph, float const & curtime );
 
@@ -233,5 +218,27 @@ private:
 };
 
 extern ConVarTester g_ConVarTester;
+
+inline void CurrentConVarRequest::SendCurrentRequest(PlayerHandler::iterator ph, float const curtime, ConVarRulesListT const & rules)
+{
+	SourceSdk::edict_t* pedict(ph->GetEdict());
+	char const * var(rules[ruleset].name);
+	SourceSdk::IServerPluginHelpers001* inst(SourceSdk::InterfacesProxy::GetServerPluginHelpers());
+
+	g_ConVarTester.FixQueryCvarCookie();
+
+	cookie = inst->StartQueryCvarValue(pedict, var);
+	if (cookie != InvalidQueryCvarCookie)
+	{
+		status = ConVarRequestStatus::SENT;
+		timeStart = curtime;
+		timeEnd = timeStart + 10.0f;
+	}
+	else
+	{
+		status = ConVarRequestStatus::NOT_PROCESSING;
+		g_Logger.Msg<MSG_ERROR>("ConVarTester : StartQueryCvarValue returned InvalidQueryCvarCookie");
+	}
+}
 
 #endif // CONVARTESTER_H
