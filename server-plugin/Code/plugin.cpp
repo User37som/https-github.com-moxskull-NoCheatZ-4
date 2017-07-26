@@ -31,6 +31,7 @@
 #include "Systems/Blockers/AntiFlashbangBlocker.h"
 #include "Systems/Blockers/AntiSmokeBlocker.h"
 #include "Systems/Testers/BadUserCmdTester.h"
+#include "Systems/Testers/MouseTester.h"
 #include "Systems/Blockers/WallhackBlocker.h"
 #include "Systems/Blockers/RadarHackBlocker.h"
 #include "Systems/Blockers/BhopBlocker.h"
@@ -162,6 +163,7 @@ bool CNoCheatZPlugin::Load ( SourceSdk::CreateInterfaceFn _interfaceFactory, Sou
 	};
 
 	g_SourceHookSafety.TryHookMMSourceHook();
+	g_QueryCvarProvider.Init();
 
 	if( SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive )
 	{
@@ -311,7 +313,6 @@ void CNoCheatZPlugin::LevelInit ( char const *pMapName )
 	g_NczPlayerManager.OnLevelInit ();
 
 	g_BanRequest.OnLevelInit ();
-
 }
 
 //---------------------------------------------------------------------------------
@@ -429,7 +430,9 @@ void CNoCheatZPlugin::SetCommandClient ( int index )
 // Purpose: called on level start
 //---------------------------------------------------------------------------------
 void CNoCheatZPlugin::ClientSettingsChanged ( SourceSdk::edict_t *pEdict )
-{}
+{
+	DebugMessage("CNoCheatZPlugin::ClientSettingsChanged");
+}
 
 //---------------------------------------------------------------------------------
 // Purpose: called when a client joins a server
@@ -487,6 +490,7 @@ SourceSdk::PLUGIN_RESULT CNoCheatZPlugin::ClientConnect ( bool *bAllowConnect, S
 		g_SpamChangeNameTester.ResetPlayerDataStruct ( player );
 		g_RadarHackBlocker.ResetPlayerDataStruct ( player );
 		g_BhopBlocker.ResetPlayerDataStruct ( player );
+		g_MouseTester.ResetPlayerDataStruct(player);
 	}
 
 	return SourceSdk::PLUGIN_CONTINUE;
@@ -545,6 +549,11 @@ void CNoCheatZPlugin::RT_OnQueryCvarValueFinished ( SourceSdk::QueryCvarCookie_t
 	{
 		DebugMessage ( "RT_OnQueryCvarValueFinished : ConVarTester cannot process callback" );
 		return;
+	}
+
+	if (stricmp(pCvarName, "m_pitch") == 0)
+	{
+		g_MouseTester.ProcessPitchConVar(ph, pCvarValue);
 	}
 
 	g_ConVarTester.RT_OnQueryCvarValueFinished ( ph, iCookie, eStatus, pCvarName, pCvarValue );

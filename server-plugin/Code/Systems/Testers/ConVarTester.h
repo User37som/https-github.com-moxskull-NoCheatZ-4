@@ -24,6 +24,7 @@
 #include "Players/temp_PlayerDataStruct.h"
 #include "Systems/OnTickListener.h"
 #include "Misc/temp_singleton.h"
+#include "Misc/QueryCvarProvider.h"
 
 /////////////////////////////////////////////////////////////////////////
 // ConVarTester
@@ -180,8 +181,6 @@ private:
 
 	void* var_sv_cheats;
 
-	SourceSdk::QueryCvarCookie_t * m_engine_cvar_cookie;
-
 public:
 	ConVarTester ();
 	virtual ~ConVarTester () final;
@@ -203,8 +202,6 @@ private:
 public:
 	void RT_OnQueryCvarValueFinished ( PlayerHandler::iterator ph, SourceSdk::QueryCvarCookie_t cookie, SourceSdk::EQueryCvarValueStatus eStatus, const char *pCvarName, const char *pCvarValue );
 
-	void FixQueryCvarCookie();
-
 private:
 	void RT_ProcessPlayerTest ( PlayerHandler::iterator ph, float const & curtime );
 
@@ -223,11 +220,8 @@ inline void CurrentConVarRequest::SendCurrentRequest(PlayerHandler::iterator ph,
 {
 	SourceSdk::edict_t* pedict(ph->GetEdict());
 	char const * var(rules[ruleset].name);
-	SourceSdk::IServerPluginHelpers001* inst(SourceSdk::InterfacesProxy::GetServerPluginHelpers());
 
-	g_ConVarTester.FixQueryCvarCookie();
-
-	cookie = inst->StartQueryCvarValue(pedict, var);
+	cookie = g_QueryCvarProvider.StartQueryCvarValue(pedict, var);
 	if (cookie != InvalidQueryCvarCookie)
 	{
 		status = ConVarRequestStatus::SENT;

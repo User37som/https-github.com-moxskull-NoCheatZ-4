@@ -24,37 +24,67 @@ limitations under the License.
 
 struct MouseInfo
 {
-	int prev_mdx;
-	int prev_mdy;
-	int mdx;
-	int mdy;
+	float m_prev_yaw_angle;
+	float m_prev_pitch_angle;
+
+	int m_pitch_dir_detect_row;
+	int m_yaw_dir_detect_row;
+
+	bool m_prev_set;
+	bool m_pitch_set;
+	bool m_asked_m_pitch;
+	bool m_mouse_pitch_inverted;
 
 	MouseInfo() :
-		prev_mdx(0),
-		prev_mdy(0),
-		mdx(0),
-		mdy(0)
-	{
-	}
+		m_prev_yaw_angle(0.0f),
+		m_prev_pitch_angle(0.0f),
+		m_pitch_dir_detect_row(0),
+		m_yaw_dir_detect_row(0),
+		m_prev_set(false),
+		m_pitch_set(false),
+		m_mouse_pitch_inverted(false)
+	{}
+};
 
-	MouseInfo(const MouseInfo& other) :
-		prev_mdx(other.prev_mdx),
-		prev_mdy(other.prev_mdy),
-		mdx(other.mdx),
-		mdy(other.mdy)
-	{
-	}
+struct MouseDetectInfo
+{
+	float m_prev_pitch_angle;
+	float m_cur_pitch_angle;
+	float m_pitch_delta;
+	int m_mouse_pitch_inverted;
+	short m_mouse_delta_y;
+	float m_prev_yaw_angle;
+	float m_cur_yaw_angle;
+	float m_yaw_delta;
+	short m_mouse_delta_x;
+	int m_buttons;
+
+	MouseDetectInfo()
+	{}
+
+	MouseDetectInfo(MouseInfo const & other, short const * md, int const * buttons, SourceSdk::QAngle const * cur_angles, float pitch_delta, float yaw_delta) :
+		m_prev_pitch_angle(other.m_prev_pitch_angle),
+		m_cur_pitch_angle(cur_angles->x),
+		m_pitch_delta(pitch_delta),
+		m_mouse_pitch_inverted(other.m_mouse_pitch_inverted),
+		m_mouse_delta_y(md[1]),
+		m_prev_yaw_angle(other.m_prev_yaw_angle),
+		m_cur_yaw_angle(cur_angles->y),
+		m_yaw_delta(yaw_delta),
+		m_mouse_delta_x(md[0]),
+		m_buttons(*buttons)
+	{}
 };
 
 class Detection_MouseMismatch :
-	public LogDetection<MouseInfo>
+	public LogDetection<MouseDetectInfo>
 {
-	typedef LogDetection<MouseInfo> hClass;
+	typedef LogDetection<MouseDetectInfo> hClass;
 
 public:
 	virtual basic_string GetDetectionLogMessage() override final
 	{
-		return "mouse aimbot";
+		return "aimbot";
 	};
 
 	virtual basic_string GetDataDump() override final;
@@ -81,6 +111,8 @@ public:
 	virtual bool GotJob() const override final;
 
 	virtual PlayerRunCommandRet RT_PlayerRunCommandCallback(PlayerHandler::iterator ph, void * const cmd, void * const old_cmd) override final;
+
+	void ProcessPitchConVar(PlayerHandler::iterator ph, char const * val);
 };
 
 extern MouseTester g_MouseTester;

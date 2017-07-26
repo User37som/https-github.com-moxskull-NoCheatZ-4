@@ -388,6 +388,7 @@ copy "$(TargetPath)" ..\..\..\game\bin\"$(TargetName)".pdb
     <ClCompile Include="Code\Hooks\UserMessageHookListener.cpp" />
     <ClCompile Include="Code\Misc\HeapMemoryManager.cpp" />
     <ClCompile Include="Code\Misc\MathCache.cpp" />
+    <ClCompile Include="Code\Misc\QueryCvarProvider.cpp" />
     <ClCompile Include="Code\Misc\SigHandler.cpp" />
     <ClCompile Include="Code\Misc\StackWalker.cpp" />
     <ClCompile Include="Code\Systems\AutoTVRecord.cpp" />
@@ -402,8 +403,8 @@ copy "$(TargetPath)" ..\..\..\game\bin\"$(TargetName)".pdb
     <ClCompile Include="Code\Systems\Testers\AutoAttackTester.cpp" />
     <ClCompile Include="Code\Systems\Testers\BadUserCmdTester.cpp" />
     <ClCompile Include="Code\Systems\Testers\MouseTester.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="Code\version.cpp" />
     <ClCompile Include="Code\vtabledumphelper.cpp" />
@@ -459,6 +460,7 @@ copy "$(TargetPath)" ..\..\..\game\bin\"$(TargetName)".pdb
     <ClInclude Include="Code\Misc\ClassSpecifications.h" />
     <ClInclude Include="Code\Misc\HeapMemoryManager.h" />
     <ClInclude Include="Code\Misc\MathCache.h" />
+    <ClInclude Include="Code\Misc\QueryCvarProvider.h" />
     <ClInclude Include="Code\Misc\SigHandler.h" />
     <ClInclude Include="Code\Misc\StackWalker.h" />
     <ClInclude Include="Code\Misc\temp_basiclist.h" />

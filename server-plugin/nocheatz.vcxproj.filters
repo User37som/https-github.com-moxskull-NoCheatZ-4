@@ -261,6 +261,9 @@
     <ClCompile Include="Code\Systems\Testers\MouseTester.cpp">
       <Filter>Code\Systems\Testers</Filter>
     </ClCompile>
+    <ClCompile Include="Code\Misc\QueryCvarProvider.cpp">
+      <Filter>Code\Misc</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Code\plugin.h">
@@ -586,6 +589,9 @@
     </ClInclude>
     <ClInclude Include="Code\Systems\Testers\MouseTester.h">
       <Filter>Code\Systems\Testers</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Misc\QueryCvarProvider.h">
+      <Filter>Code\Misc</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

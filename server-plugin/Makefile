@@ -89,7 +89,6 @@ SRC =   $(wildcard Code/*.cpp) \
 
 SRC := $(filter-out Code/Hooks/RayTraceCache.cpp, $(SRC)) 
 SRC := $(filter-out Code/Misc/StackWalker.cpp, $(SRC)) 
-SRC := $(filter-out Code/Systems/Testers/MouseTester.cpp, $(SRC)) 
 
 INCLUDE =       -I$(SRC_DIR) \
 		-I$(SDK_DIR) \
