@@ -15,6 +15,8 @@ limitations under the License.
 
 #include "MouseTester.h"
 
+#include <cmath> // signbit
+
 #include "Misc/EntityProps.h"
 #include "Misc/QueryCvarProvider.h"
 
