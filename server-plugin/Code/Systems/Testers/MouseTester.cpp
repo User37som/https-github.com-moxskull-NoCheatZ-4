@@ -33,12 +33,25 @@ void MouseTester::Unload()
 bool MouseTester::GotJob() const
 {
 	// Create a filter
-	ProcessFilter::HumanAtLeastConnected const filter_class;
+	ProcessFilter::HumanAtLeastConnecting const filter_class;
 	// Initiate the iterator at the first match in the filter
 	PlayerHandler::iterator it(&filter_class);
 	// Return if we have job to do or not ...
 	return it != PlayerHandler::end();
 }
+
+float AngleDistance(float next, float cur)
+{
+	float delta = next - cur;
+
+	if (delta < -180.0f)
+		delta += 360.0f;
+	else if (delta > 180.0f)
+		delta -= 360.0f;
+
+	return delta;
+}
+
 
 PlayerRunCommandRet MouseTester::RT_PlayerRunCommandCallback(PlayerHandler::iterator ph, void * const cmd, void * const old_cmd)
 {
@@ -85,12 +98,12 @@ PlayerRunCommandRet MouseTester::RT_PlayerRunCommandCallback(PlayerHandler::iter
 
 			if ((*buttons & 3 << 7) == 0) // IN_LEFT | IN_RIGHT
 			{
-				float yaw_delta = (fabs(userangles->y)) - (fabs(pInfo->m_prev_yaw_angle)); // FIXME : It's time to kiss quaternions
-				/*if (signbit(yaw_delta) != signbit((float)md[0]) && yaw_delta != 0.0f && md[0] != 0)
+				float yaw_delta = AngleDistance(userangles->y, pInfo->m_prev_yaw_angle); 
+				if (signbit(yaw_delta) == signbit((float)md[0]) && yaw_delta != 0.0f && md[0] != 0)
 				{
 					DebugMessage("Yaw direction mismatch");
 				}
-				else */if (md[0] == 0 && fabs(yaw_delta) > 0.044f * fabs(pInfo->m_prev_mdx) + 0.044f)
+				else if (md[0] == 0 && fabs(yaw_delta) > 0.044f * fabs(pInfo->m_prev_mdx) + 0.044f)
 				{
 					// sniper scope false detection
 					DebugMessage("Yaw angle moved without mouse");
