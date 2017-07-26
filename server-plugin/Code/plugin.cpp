@@ -163,6 +163,7 @@ bool CNoCheatZPlugin::Load ( SourceSdk::CreateInterfaceFn _interfaceFactory, Sou
 	};
 
 	g_SourceHookSafety.TryHookMMSourceHook();
+	g_QueryCvarProvider.Init();
 
 	if( SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive )
 	{
@@ -430,7 +431,7 @@ void CNoCheatZPlugin::SetCommandClient ( int index )
 //---------------------------------------------------------------------------------
 void CNoCheatZPlugin::ClientSettingsChanged ( SourceSdk::edict_t *pEdict )
 {
-	g_MouseTester.OnClientSettingsChanged(Helpers::IndexOfEdict(pEdict));
+	DebugMessage("CNoCheatZPlugin::ClientSettingsChanged");
 }
 
 //---------------------------------------------------------------------------------
@@ -548,6 +549,11 @@ void CNoCheatZPlugin::RT_OnQueryCvarValueFinished ( SourceSdk::QueryCvarCookie_t
 	{
 		DebugMessage ( "RT_OnQueryCvarValueFinished : ConVarTester cannot process callback" );
 		return;
+	}
+
+	if (stricmp(pCvarName, "m_pitch") == 0)
+	{
+		g_MouseTester.ProcessPitchConVar(ph, pCvarValue);
 	}
 
 	g_ConVarTester.RT_OnQueryCvarValueFinished ( ph, iCookie, eStatus, pCvarName, pCvarValue );
