@@ -388,6 +388,7 @@ copy "$(TargetPath)" ..\..\..\game\bin\"$(TargetName)".pdb
     <ClCompile Include="Code\Hooks\UserMessageHookListener.cpp" />
     <ClCompile Include="Code\Misc\HeapMemoryManager.cpp" />
     <ClCompile Include="Code\Misc\MathCache.cpp" />
+    <ClCompile Include="Code\Misc\QueryCvarProvider.cpp" />
     <ClCompile Include="Code\Misc\SigHandler.cpp" />
     <ClCompile Include="Code\Misc\StackWalker.cpp" />
     <ClCompile Include="Code\Systems\AutoTVRecord.cpp" />
@@ -459,6 +460,7 @@ copy "$(TargetPath)" ..\..\..\game\bin\"$(TargetName)".pdb
     <ClInclude Include="Code\Misc\ClassSpecifications.h" />
     <ClInclude Include="Code\Misc\HeapMemoryManager.h" />
     <ClInclude Include="Code\Misc\MathCache.h" />
+    <ClInclude Include="Code\Misc\QueryCvarProvider.h" />
     <ClInclude Include="Code\Misc\SigHandler.h" />
     <ClInclude Include="Code\Misc\StackWalker.h" />
     <ClInclude Include="Code\Misc\temp_basiclist.h" />

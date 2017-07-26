@@ -101,7 +101,7 @@ PlayerRunCommandRet MouseTester::RT_PlayerRunCommandCallback(PlayerHandler::iter
 
 			if (pInfo->m_pitch_set && md[1] != 0 && ((signbit(pitch_delta) == (signbit((float)md[1]))) ^ !pInfo->m_mouse_pitch_inverted) && pitch_delta != 0.0f)
 			{
-				if (++(pInfo->m_pitch_dir_detect_row) > 3)
+				if (++(pInfo->m_pitch_dir_detect_row) > 1)
 				{
 					MouseDetectInfo detect(*pInfo, md, buttons, userangles, pitch_delta, yaw_delta);
 					ProcessDetectionAndTakeAction<MouseDetectInfo>(Detection_MouseMismatch(), &detect, ph, this);
@@ -148,7 +148,7 @@ PlayerRunCommandRet MouseTester::RT_PlayerRunCommandCallback(PlayerHandler::iter
 			{
 				if (signbit(yaw_delta) == signbit((float)md[0]) && yaw_delta != 0.0f)
 				{
-					if (++(pInfo->m_yaw_dir_detect_row) > 3)
+					if (++(pInfo->m_yaw_dir_detect_row) > 1)
 					{
 						MouseDetectInfo detect(*pInfo, md, buttons, userangles, pitch_delta, yaw_delta);
 						ProcessDetectionAndTakeAction<MouseDetectInfo>(Detection_MouseMismatch(), &detect, ph, this);
@@ -185,7 +185,7 @@ void MouseTester::ProcessPitchConVar(PlayerHandler::iterator ph, char const * va
 	pInfo->m_mouse_pitch_inverted = signbit(m_pitch_val);
 	pInfo->m_prev_set = false;
 	pInfo->m_pitch_set = true;
-	g_QueryCvarProvider.StartQueryCvarValue(ph->GetEdict(), "m_pitch");
+	//g_QueryCvarProvider.StartQueryCvarValue(ph->GetEdict(), "m_pitch");
 }
 
 MouseTester g_MouseTester;
