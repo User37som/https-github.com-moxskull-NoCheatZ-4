@@ -101,7 +101,7 @@ PlayerRunCommandRet MouseTester::RT_PlayerRunCommandCallback(PlayerHandler::iter
 			float const pitch_delta = AngleDistance(userangles->x, pInfo->m_prev_pitch_angle);
 			float const yaw_delta = AngleDistance(userangles->y, pInfo->m_prev_yaw_angle);
 
-			if (pInfo->m_pitch_set && md[1] != 0 && ((signbit(pitch_delta) == (signbit((float)md[1]))) ^ !pInfo->m_mouse_pitch_inverted) && pitch_delta != 0.0f)
+			if (pInfo->m_pitch_set && md[1] != 0 && ((std::signbit(pitch_delta) == (std::signbit((float)md[1]))) ^ !pInfo->m_mouse_pitch_inverted) && pitch_delta != 0.0f)
 			{
 				if (++(pInfo->m_pitch_dir_detect_row) > 1)
 				{
@@ -148,7 +148,7 @@ PlayerRunCommandRet MouseTester::RT_PlayerRunCommandCallback(PlayerHandler::iter
 
 			if (md[0] != 0 && ((*buttons & 3 << 7) == 0)) // IN_LEFT | IN_RIGHT
 			{
-				if (signbit(yaw_delta) == signbit((float)md[0]) && yaw_delta != 0.0f)
+				if (std::signbit(yaw_delta) == std::signbit((float)md[0]) && yaw_delta != 0.0f)
 				{
 					if (++(pInfo->m_yaw_dir_detect_row) > 1)
 					{
@@ -184,7 +184,7 @@ void MouseTester::ProcessPitchConVar(PlayerHandler::iterator ph, char const * va
 	MouseInfo * const pInfo(GetPlayerDataStructByIndex(ph.GetIndex()));
 
 	double m_pitch_val = atof(val);
-	pInfo->m_mouse_pitch_inverted = signbit(m_pitch_val);
+	pInfo->m_mouse_pitch_inverted = std::signbit(m_pitch_val);
 	pInfo->m_prev_set = false;
 	pInfo->m_pitch_set = true;
 	//g_QueryCvarProvider.StartQueryCvarValue(ph->GetEdict(), "m_pitch");
