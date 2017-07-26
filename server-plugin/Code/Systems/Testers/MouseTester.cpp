@@ -81,17 +81,34 @@ PlayerRunCommandRet MouseTester::RT_PlayerRunCommandCallback(PlayerHandler::iter
 		{
 			/// PITCH
 
+			DebugMessage(Helpers::format("md={%d, %d} prev={%f, %f}", md[0], md[1], pInfo->m_prev_mdx, pInfo->m_prev_mdy));
+
 			float pitch_delta = userangles->x - pInfo->m_prev_pitch_angle;
 
-			if (signbit(pitch_delta) != signbit((float)md[1]) && pitch_delta != 0.0f && md[1] != 0)
+			if (md[1] != 0)
 			{
-				// inverted mouse false detection
-				DebugMessage("Pitch direction mismatch");
+				if (signbit(pitch_delta) != signbit((float)md[1]) && pitch_delta != 0.0f)
+				{
+					if (++(pInfo->m_pitch_dir_detect_row) > 3)
+					{
+						// inverted mouse false detection
+						DebugMessage("Pitch direction mismatch");
+					}
+				}
+				else
+				{
+					pInfo->m_pitch_dir_detect_row = 0;
+				}
 			}
-			else if (md[1] == 0 && fabs(pitch_delta) > 0.044f * fabs(pInfo->m_prev_mdy) + 0.044f)
+			else
 			{
-				// sniper scope false detection
-				DebugMessage("Pitch angle moved without mouse");
+				pInfo->m_pitch_dir_detect_row = 0;
+
+				if (fabs(pitch_delta) > 0.044f * fabs(pInfo->m_prev_mdy) + 0.044f)
+				{
+					// sniper scope false detection
+					DebugMessage("Pitch angle moved without mouse");
+				}
 			}
 
 			/// YAW
@@ -114,8 +131,8 @@ PlayerRunCommandRet MouseTester::RT_PlayerRunCommandCallback(PlayerHandler::iter
 
 	pInfo->m_prev_pitch_angle = userangles->x;
 	pInfo->m_prev_yaw_angle = userangles->y;
-	pInfo->m_prev_mdx = ((float)md[0] + pInfo->m_prev_mdx) / 2.0f;
-	pInfo->m_prev_mdy = ((float)md[1] + pInfo->m_prev_mdy) / 2.0f;
+	pInfo->m_prev_mdx = ((float)md[0] + pInfo->m_prev_mdx) / 1.0625f; // average for multiple frames
+	pInfo->m_prev_mdy = ((float)md[1] + pInfo->m_prev_mdy) / 1.0625f;
 	pInfo->m_prev_set = true;
 
 	return PlayerRunCommandRet::CONTINUE;
@@ -128,6 +145,7 @@ void MouseTester::OnClientSettingsChanged(PlayerHandler::iterator ph)
 	pInfo->m_mouse_pitch = 0.022f;
 	pInfo->m_mouse_yaw = 0.022f;
 	pInfo->m_prev_set = false;
+	pInfo->m_pitch_dir_detect_row = 0;
 }
 
 MouseTester g_MouseTester;

@@ -32,6 +32,8 @@ struct MouseInfo
 
 	float m_prev_mdy;
 	float m_prev_mdx;
+
+	unsigned int m_pitch_dir_detect_row;
 	bool m_prev_set;
 };
 
