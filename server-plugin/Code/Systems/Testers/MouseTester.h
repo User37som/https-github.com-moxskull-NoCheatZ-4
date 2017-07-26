@@ -30,8 +30,8 @@ struct MouseInfo
 	float m_prev_yaw_angle;
 	float m_prev_pitch_angle;
 
-	short m_prev_mdy;
-	short m_prev_mdx;
+	float m_prev_mdy;
+	float m_prev_mdx;
 	bool m_prev_set;
 };
 

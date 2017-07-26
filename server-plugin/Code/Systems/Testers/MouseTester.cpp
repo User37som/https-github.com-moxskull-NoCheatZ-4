@@ -1,5 +1,7 @@
 #include "MouseTester.h"
 
+#include "Misc/EntityProps.h"
+
 MouseTester::MouseTester() :
 	BaseTesterSystem ("MouseTester_BETA"),
 	PlayerDataStructHandler<MouseInfo>(),
@@ -44,13 +46,16 @@ PlayerRunCommandRet MouseTester::RT_PlayerRunCommandCallback(PlayerHandler::iter
 		return PlayerRunCommandRet::CONTINUE;
 
 	short * md(nullptr);
+	int* buttons(nullptr);
 	if (SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive)
 	{
 		md = &(reinterpret_cast<SourceSdk::CUserCmd_csgo*>(cmd)->mousedx);
+		buttons = &(reinterpret_cast<SourceSdk::CUserCmd_csgo*>(cmd)->buttons);
 	}
 	else
 	{
 		md = &(reinterpret_cast<SourceSdk::CUserCmd*>(cmd)->mousedx);
+		buttons = &(reinterpret_cast<SourceSdk::CUserCmd*>(cmd)->buttons);
 	}
 
 	MouseInfo * const pInfo(GetPlayerDataStructByIndex(ph.GetIndex()));
@@ -58,29 +63,46 @@ PlayerRunCommandRet MouseTester::RT_PlayerRunCommandCallback(PlayerHandler::iter
 
 	if (pInfo->m_prev_set && ph == SlotStatus::PLAYER_IN_TESTS)
 	{
-		/// PITCH
-
-		float pitch_delta = userangles->x - pInfo->m_prev_pitch_angle;
-
-		if (signbit(pitch_delta) != signbit((float)md[1]) && pitch_delta != 0.0f && md[1] != 0)
+		int const * const flags(g_EntityProps.GetPropValue<int, PROP_FLAGS>(ph->GetEdict()));
+		if ((*flags & (3 << 5)) == 0)
 		{
-			// frozen mouse move false detection
-			// inverted mouse false detection
-			DebugMessage("DETECTED");
-		}
-		else if (md[1] == 0 && fabs(pitch_delta) > 0.044f * fabs(pInfo->m_prev_mdy) + 0.044f)
-		{
-			// sniper scope false detection
- 			DebugMessage("DETECTED");
-		}
+			/// PITCH
 
-		/// YAW
+			float pitch_delta = userangles->x - pInfo->m_prev_pitch_angle;
+
+			if (signbit(pitch_delta) != signbit((float)md[1]) && pitch_delta != 0.0f && md[1] != 0)
+			{
+				// inverted mouse false detection
+				DebugMessage("Pitch direction mismatch");
+			}
+			else if (md[1] == 0 && fabs(pitch_delta) > 0.044f * fabs(pInfo->m_prev_mdy) + 0.044f)
+			{
+				// sniper scope false detection
+				DebugMessage("Pitch angle moved without mouse");
+			}
+
+			/// YAW
+
+			if ((*buttons & 3 << 7) == 0) // IN_LEFT | IN_RIGHT
+			{
+				float yaw_delta = (fabs(userangles->y)) - (fabs(pInfo->m_prev_yaw_angle)); // FIXME : It's time to kiss quaternions
+				/*if (signbit(yaw_delta) != signbit((float)md[0]) && yaw_delta != 0.0f && md[0] != 0)
+				{
+					DebugMessage("Yaw direction mismatch");
+				}
+				else */if (md[0] == 0 && fabs(yaw_delta) > 0.044f * fabs(pInfo->m_prev_mdx) + 0.044f)
+				{
+					// sniper scope false detection
+					DebugMessage("Yaw angle moved without mouse");
+				}
+			}
+		}
 	}
 
 	pInfo->m_prev_pitch_angle = userangles->x;
 	pInfo->m_prev_yaw_angle = userangles->y;
-	pInfo->m_prev_mdx = md[0];
-	pInfo->m_prev_mdy = md[1];
+	pInfo->m_prev_mdx = ((float)md[0] + pInfo->m_prev_mdx) / 2.0f;
+	pInfo->m_prev_mdy = ((float)md[1] + pInfo->m_prev_mdy) / 2.0f;
 	pInfo->m_prev_set = true;
 
 	return PlayerRunCommandRet::CONTINUE;
