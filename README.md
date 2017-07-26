@@ -92,7 +92,8 @@ ___
 * AutoAttackTester : Detects robotic shot button spam.
 * SpamChangeNameTester : Detects when a players changes his name too often (_Is now fixed internally by the Source Engine_)
 * SpamConnectTester : Detects when a client is flooding the connection (Trying to connect and disconnect too much)
-* SpeedTester : Detects SpeedHacks using CUserCmd and tickrate ratio.
+* SpeedTester : Detect SpeedHacks using CUserCmd and tickrate ratio.
+* MouseTester : Detect almost any type of injected aimbots
 
 <a name="blocking-systems"></a> 
 ### Blocking Systems
