@@ -47,7 +47,7 @@ namespace Tier0
 	{
 #ifdef WIN32
 		*(void **)&Msg = GetProcAddress(GetModuleHandleA("tier0.dll"), "Msg");
-		*(void **)&Msg = GetProcAddress(GetModuleHandleA("tier0.dll"), "Plat_FloatTime");
+		*(void **)&Plat_FloatTime = GetProcAddress(GetModuleHandleA("tier0.dll"), "Plat_FloatTime");
 
 #else
 		void* pmodule(GetModuleHandle("libtier0_srv.so"));
