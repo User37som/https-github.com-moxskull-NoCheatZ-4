@@ -30,14 +30,14 @@ typedef struct PlayerConCommandS
 {
 	basic_string cmd;
 	bool isSpamIgnored;
-	float time;
+	double time;
 
 	PlayerConCommandS () : cmd ()
 	{
 		isSpamIgnored = false;
 		time = 0.0;
 	};
-	PlayerConCommandS ( const basic_string& command, bool ignore_spam, float cmd_time ) : cmd ()
+	PlayerConCommandS ( const basic_string& command, bool ignore_spam, double cmd_time ) : cmd ()
 	{
 		cmd = command;
 		isSpamIgnored = ignore_spam;
@@ -72,7 +72,7 @@ typedef struct LastPlayerCommandsS
 	// Remove commands that are older than 1 second from now
 	void Clean ()
 	{
-		const float now = Plat_FloatTime ();
+		const double now = Tier0::Plat_FloatTime ();
 		while( !commands.IsEmpty () )
 		{
 			if( fabs ( now ) - fabs ( commands[ 0 ].time ) >= 1.0 ) commands.Remove ( 0 );
@@ -84,7 +84,7 @@ typedef struct LastPlayerCommandsS
 	{
 		Clean ();
 
-		commands.AddToTail ( PlayerConCommandS ( command, ignore_spam, Plat_FloatTime () ) );
+		commands.AddToTail ( PlayerConCommandS ( command, ignore_spam, Tier0::Plat_FloatTime () ) );
 	};
 
 	size_t GetSpamCmdCount ()

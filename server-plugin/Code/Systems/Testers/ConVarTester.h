@@ -80,8 +80,8 @@ enum class ConVarRequestStatus : unsigned int
 typedef struct CurrentConVarRequest
 {
 	ConVarRequestStatus status;
-	float timeStart;
-	float timeEnd;
+	double timeStart;
+	double timeEnd;
 	int ruleset;
 	SourceSdk::QueryCvarCookie_t cookie;
 	int attempts;
@@ -117,7 +117,7 @@ typedef struct CurrentConVarRequest
 		attempts = 0;
 	}
 
-	inline void SendCurrentRequest(PlayerHandler::iterator ph, float const curtime, ConVarRulesListT const & rules);
+	inline void SendCurrentRequest(PlayerHandler::iterator ph, double const curtime, ConVarRulesListT const & rules);
 } CurrentConVarRequestT;
 
 class ConVarTester;
@@ -197,13 +197,13 @@ private:
 	virtual bool sys_cmd_fn ( SourceSdk::CCommand const &args );
 
 	/* Nouvelle version de la fonction qui va faire en sorte de ne tester qu'un seul joueur par frame */
-	virtual void RT_ProcessOnTick ( float const & curtime ) override final;
+	virtual void RT_ProcessOnTick (double const & curtime ) override final;
 
 public:
 	void RT_OnQueryCvarValueFinished ( PlayerHandler::iterator ph, SourceSdk::QueryCvarCookie_t cookie, SourceSdk::EQueryCvarValueStatus eStatus, const char *pCvarName, const char *pCvarValue );
 
 private:
-	void RT_ProcessPlayerTest ( PlayerHandler::iterator ph, float const & curtime );
+	void RT_ProcessPlayerTest ( PlayerHandler::iterator ph, double const & curtime );
 
 	void AddConvarRuleset ( const char * name, const char * value, ConVarRuleT rule, bool safe = true );
 
@@ -218,7 +218,7 @@ extern ConVarTester g_ConVarTester;
 
 static bool err_log_once = true;
 
-inline void CurrentConVarRequest::SendCurrentRequest(PlayerHandler::iterator ph, float const curtime, ConVarRulesListT const & rules)
+inline void CurrentConVarRequest::SendCurrentRequest(PlayerHandler::iterator ph, double const curtime, ConVarRulesListT const & rules)
 {
 	SourceSdk::edict_t* pedict(ph->GetEdict());
 	char const * var(rules[ruleset].name);
@@ -240,7 +240,7 @@ inline void CurrentConVarRequest::SendCurrentRequest(PlayerHandler::iterator ph,
 	{
 		status = ConVarRequestStatus::SENT;
 		timeStart = curtime;
-		timeEnd = timeStart + 10.0f;
+		timeEnd = timeStart + 10.0;
 	}
 	
 }

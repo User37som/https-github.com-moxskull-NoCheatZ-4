@@ -47,8 +47,6 @@
 #include "Systems/OnTickListener.h"
 #include "Systems/TimerListener.h"
 
-MetricsTimer g_GlobalTimer;
-
 static void* __CreatePlugin_interface ()
 {
 	static KxStackTrace g_KxStackTrace;
@@ -80,11 +78,6 @@ void* SourceSdk::CreateInterface ( char const * pName, int * pReturnCode )
 	return CreateInterfaceInternal ( pName, pReturnCode );
 }
 
-float Plat_FloatTime ()
-{
-	return ( g_GlobalTimer.GetCurrent () * 0.001f );
-}
-
 float HOOKFN_INT GetTickInterval(void * const preserve_me)
 {
 	return ConfigManager::tickinterval;
@@ -104,6 +97,7 @@ CNoCheatZPlugin::CNoCheatZPlugin () :
 	m_iClientCommandIndex ( 0 ),
 	ncz_cmd_ptr ( nullptr )
 {
+	Tier0::LinkTier0Functions();
 }
 
 CNoCheatZPlugin::~CNoCheatZPlugin ()
@@ -128,8 +122,6 @@ void HookEntity ( SourceSdk::edict_t* ent )
 //---------------------------------------------------------------------------------
 bool CNoCheatZPlugin::Load ( SourceSdk::CreateInterfaceFn _interfaceFactory, SourceSdk::CreateInterfaceFn gameServerFactory )
 {
-	g_GlobalTimer.EnterSection ();
-
 	g_Logger.Msg<MSG_CONSOLE> ( "Loading ..." );
 
 	if( !SourceSdk::InterfacesProxy::Load ( gameServerFactory, _interfaceFactory ) )
@@ -345,7 +337,7 @@ void CNoCheatZPlugin::RT_GameFrame ( bool simulating )
 
 	if( simulating )
 	{
-		float const curtime = Plat_FloatTime ();
+		double const curtime = Tier0::Plat_FloatTime ();
 		/**************/
 		g_NczPlayerManager.RT_Think ( curtime ); /// ALWAYS FIRST
 		/**************/

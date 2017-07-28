@@ -17,6 +17,7 @@ limitations under the License.
 
 #include "Hooks/SigScan.h"
 #include "Systems/Logger.h"
+#include "Misc/Helpers.h"
 
 QueryCvarProvider::QueryCvarProvider() :
 	m_engine_cvar_cookie(nullptr)

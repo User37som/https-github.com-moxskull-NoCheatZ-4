@@ -64,7 +64,7 @@ public:
 
 	virtual void FireGameEvent ( SourceSdk::IGameEvent* ev ) override final;
 
-	virtual void RT_ProcessOnTick ( float const & curtime ) override final;
+	virtual void RT_ProcessOnTick (double const & curtime ) override final;
 
 	void ClientConnect ( bool *bAllowConnect, SourceSdk::edict_t const * const pEntity, const char *pszName, const char *pszAddress, char *reject, int maxrejectlen );
 };

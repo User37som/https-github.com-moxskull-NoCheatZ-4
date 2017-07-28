@@ -29,7 +29,7 @@
 typedef struct SmokeEntityS
 {
 	SourceSdk::Vector pos;
-	float bang_time;
+	double bang_time;
 
 	SmokeEntityS ()
 	{
@@ -42,7 +42,7 @@ typedef struct SmokeEntityS
 	SmokeEntityS ( const SourceSdk::Vector& opos )
 	{
 		SourceSdk::VectorCopy ( opos, pos );
-		bang_time = Plat_FloatTime ();
+		bang_time = Tier0::Plat_FloatTime ();
 	};
 
 	bool operator== ( const SmokeEntityS& other )
@@ -99,7 +99,7 @@ private:
 
 	virtual void FireGameEvent ( SourceSdk::IGameEvent* ev ) override final;
 
-	virtual void RT_ProcessOnTick ( float const & curtime ) override final;
+	virtual void RT_ProcessOnTick (double const & curtime ) override final;
 
 	virtual bool RT_SetTransmitCallback ( PlayerHandler::iterator sender, PlayerHandler::iterator receiver ) override final;
 };

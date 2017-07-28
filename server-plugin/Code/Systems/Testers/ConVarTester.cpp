@@ -54,7 +54,7 @@ bool ConVarTester::GotJob () const
 	return it != PlayerHandler::end ();
 }
 
-void ConVarTester::RT_ProcessOnTick ( float const & curtime )
+void ConVarTester::RT_ProcessOnTick (double const & curtime )
 {
 	if( m_convars_rules.IsEmpty () ) return;
 	if( !IsActive () ) return;
@@ -86,7 +86,7 @@ void ConVarTester::RT_ProcessOnTick ( float const & curtime )
 	}
 }
 
-void ConVarTester::RT_ProcessPlayerTest ( PlayerHandler::iterator ph, float const & curtime )
+void ConVarTester::RT_ProcessPlayerTest ( PlayerHandler::iterator ph, double const & curtime )
 {
 	CurrentConVarRequestT* const req ( GetPlayerDataStructByIndex ( ph.GetIndex () ) );
 

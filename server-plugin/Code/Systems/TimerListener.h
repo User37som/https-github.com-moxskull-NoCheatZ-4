@@ -21,7 +21,7 @@
 
 #include "../Preprocessors.h"
 #include "../Misc/Helpers.h"
-#include "Misc/temp_Metrics.h"
+#include "Misc/Tier0Linker.h"
 
 #define TIMERINFO_CHARCOUNT 55
 
@@ -30,8 +30,8 @@ class TimerListener;
 struct TimerInfo
 {
 	char m_name[ TIMERINFO_CHARCOUNT ];
-	float m_period_seconds;
-	float m_last_exec;
+	double m_period_seconds;
+	double m_last_exec;
 	bool m_once;
 
 	TimerInfo ()
@@ -47,12 +47,12 @@ struct TimerInfo
 		strncpy ( m_name, name, TIMERINFO_CHARCOUNT - 1 );
 		m_name[ TIMERINFO_CHARCOUNT - 1 ] = '\0';
 	}
-	TimerInfo ( char const * const name, float period, bool once )
+	TimerInfo ( char const * const name, double period, bool once )
 	{
 		strncpy ( m_name, name, TIMERINFO_CHARCOUNT - 1 );
 		m_name[ TIMERINFO_CHARCOUNT - 1 ] = '\0';
 		m_period_seconds = period;
-		m_last_exec = Plat_FloatTime ();
+		m_last_exec = Tier0::Plat_FloatTime ();
 		m_once = once;
 	}
 
@@ -81,7 +81,7 @@ protected:
 	TimerListener ();
 	virtual ~TimerListener ();
 
-	void AddTimer ( float period_seconds, char const * const name, bool single_time = false );
+	void AddTimer ( double period_seconds, char const * const name, bool single_time = false );
 
 	void RemoveTimer ( char const * const name );
 
@@ -90,7 +90,7 @@ protected:
 	virtual void RT_TimerCallback ( char const * const timer_name /* Pointer can be invalid past the function */ ) = 0;
 
 public:
-	static void RT_OnTick (float const & curtime);
+	static void RT_OnTick (double const & curtime);
 
 };
 

@@ -87,7 +87,7 @@ PlayerRunCommandRet BadUserCmdTester::RT_PlayerRunCommandCallback ( PlayerHandle
 		isDead = player_info->IsDead ();
 	}
 
-	if( ( isDead | pInfo->m_prev_dead ) || Plat_FloatTime () <= pInfo->m_detected_time )
+	if( ( isDead | pInfo->m_prev_dead ) || Tier0::Plat_FloatTime () <= pInfo->m_detected_time )
 	{
 		pInfo->m_prev_dead = isDead;
 
@@ -129,7 +129,7 @@ PlayerRunCommandRet BadUserCmdTester::RT_PlayerRunCommandCallback ( PlayerHandle
 			return PlayerRunCommandRet::BLOCK;
 		}
 
-		pInfo->m_detected_time = Plat_FloatTime () + 10.0f;
+		pInfo->m_detected_time = Tier0::Plat_FloatTime () + 10.0f;
 
 		// Push detection
 
@@ -152,7 +152,7 @@ PlayerRunCommandRet BadUserCmdTester::RT_PlayerRunCommandCallback ( PlayerHandle
 		{
 			if (pInfo->prev_tick == k_newcmd->tick_count) // Previous tick is equal to current tick.
 			{
-				pInfo->m_detected_time = Plat_FloatTime() + 10.0f;
+				pInfo->m_detected_time = Tier0::Plat_FloatTime() + 10.0f;
 
 				// Push detection
 
@@ -166,7 +166,7 @@ PlayerRunCommandRet BadUserCmdTester::RT_PlayerRunCommandCallback ( PlayerHandle
 		{
 			if (k_oldcmd->tick_count + 1 != k_newcmd->tick_count)
 			{
-				pInfo->m_detected_time = Plat_FloatTime() + 10.0f;
+				pInfo->m_detected_time = Tier0::Plat_FloatTime() + 10.0f;
 
 				// Push detection
 

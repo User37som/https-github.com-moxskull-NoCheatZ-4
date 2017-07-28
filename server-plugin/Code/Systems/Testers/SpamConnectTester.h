@@ -19,10 +19,13 @@
 
 #include "Misc/temp_basicstring.h"
 
+#include <ctime>
+
 #include "Misc/temp_basiclist.h"
 #include "Preprocessors.h"
 #include "Systems/BaseSystem.h"
 #include "Misc/temp_singleton.h"
+#include "Misc/Helpers.h"
 
 struct ConnectInfo
 {

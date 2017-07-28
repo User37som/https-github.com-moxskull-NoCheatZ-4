@@ -18,7 +18,7 @@
 #include "Interfaces/InterfacesProxy.h"
 
 #include "Misc/Helpers.h"
-#include "Misc/temp_Metrics.h"
+
 #include "Players/NczPlayerManager.h"
 
 
@@ -133,7 +133,7 @@ void BanRequest::AddAsyncBan ( NczPlayer* player, int ban_time, const char * kic
 		if( m_requests.Find ( req ) == nullptr )
 		{
 			req.ban_time = ban_time;
-			req.request_time = Plat_FloatTime ();
+			req.request_time = Tier0::Plat_FloatTime ();
 			req.kick_message = kick_message;
 			strcpy_s ( req.player_name, 24, player->GetName () );
 			strcpy_s ( req.steamid, 24, player->GetSteamID () );
@@ -305,7 +305,7 @@ void BanRequest::BanNow ( NczPlayer * const player, int ban_time, const char * k
 void BanRequest::RT_TimerCallback ( char const * const timer_name )
 {
 	BanRequestListT::elem_t* it ( m_requests.GetFirst () );
-	float const curtime ( Plat_FloatTime () );
+	double const curtime (Tier0::Plat_FloatTime () );
 	while( it != nullptr )
 	{
 		PlayerBanRequestT const & v ( it->m_value );
