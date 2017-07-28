@@ -62,7 +62,7 @@ bool SpeedTester::GotJob () const
 	return it != PlayerHandler::end ();
 }
 
-void SpeedTester::RT_ProcessOnTick ( float const & curtime )
+void SpeedTester::RT_ProcessOnTick (double const & curtime )
 {
 	ProcessFilter::InTestsNoBot filter_class;
 
@@ -70,7 +70,7 @@ void SpeedTester::RT_ProcessOnTick ( float const & curtime )
 	{
 		SpeedHolderT* const pInfo ( this->GetPlayerDataStructByIndex ( ph.GetIndex () ) );
 		float const tick_interval ( SourceSdk::InterfacesProxy::Call_GetTickInterval () );
-		const float newTicks ( ceil ( ( curtime - pInfo->lastTest ) / tick_interval ) );
+		const double newTicks ( ceil ( ( curtime - pInfo->lastTest ) / tick_interval ) );
 		SourceSdk::INetChannelInfo* const netchan ( ph->GetChannelInfo () );
 		//if( netchan == nullptr ) return;
 
@@ -94,7 +94,7 @@ void SpeedTester::RT_ProcessOnTick ( float const & curtime )
 		}
 
 		float const vtest = ceil ( ( 1.0f / tick_interval * 2.0f ) );
-		if( ( pInfo->ticksLeft += newTicks ) > vtest )
+		if( ( pInfo->ticksLeft += (float)newTicks ) > vtest )
 		{
 			pInfo->ticksLeft = vtest;
 		}

@@ -52,7 +52,7 @@ public:
 	{
 		static_assert ( std::is_copy_assignable<playerDataStructT>::value, "Data must be copy-assignable" );
 
-		this->m_timestamp = Plat_FloatTime ();
+		this->m_timestamp = Tier0::Plat_FloatTime ();
 		if( SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive )
 		{
 			this->m_tick = static_cast< SourceSdk::CGlobalVars_csgo* >( SourceSdk::InterfacesProxy::Call_GetGlobalVars () )->tickcount;
@@ -75,7 +75,7 @@ public:
 	};
 
 protected:
-	float m_timestamp;
+	double m_timestamp;
 	int m_tick;
 	playerDataStructT m_dataStruct;
 };

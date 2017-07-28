@@ -25,7 +25,7 @@
 
 typedef struct FlashInfoS
 {
-	float flash_end_time;
+	double flash_end_time;
 
 	FlashInfoS () :
 		flash_end_time ( 0.0 )
@@ -62,7 +62,7 @@ private:
 
 	virtual void FireGameEvent ( SourceSdk::IGameEvent* ev ) override final;
 
-	virtual void RT_ProcessOnTick ( float const & curtime ) override final;
+	virtual void RT_ProcessOnTick (double const & curtime ) override final;
 
 	virtual bool RT_SetTransmitCallback ( PlayerHandler::iterator sender, PlayerHandler::iterator receiver ) override final;
 

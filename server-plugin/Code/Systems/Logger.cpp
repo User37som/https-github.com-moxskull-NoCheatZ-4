@@ -20,71 +20,10 @@
 
 #include "Misc/include_windows_headers.h"
 #include "Misc/Helpers.h"
-#include "Misc/temp_Metrics.h"
+
 #include "Players/NczPlayerManager.h"
 #include "Systems/AutoTVRecord.h"
 #include "Systems/ConfigManager.h"
-
-#ifdef GNUC
-
-#include <dlfcn.h>
-#include <execinfo.h>
-
-void * GetModuleHandle ( const char *name )
-{
-	void *handle ( dlopen ( name, RTLD_NOW ) );
-
-	if( handle == nullptr )
-	{
-		return nullptr;
-	}
-
-	dlclose ( handle );
-	return handle;
-}
-
-#endif
-
-void Logger::ConnectToServerConsole ()
-{
-	/* Too lazy to compile with tier0, now pay the price ... */
-
-#ifdef WIN32
-	*(void **)&m_msg_func = GetProcAddress ( GetModuleHandleA ( "tier0.dll" ), "Msg" );
-
-#else
-
-	void* module ( GetModuleHandle ( "libtier0_srv.so" ) );
-	if( module == nullptr )
-	{
-		module = GetModuleHandle ( "tier0_srv.so" );
-	}
-	if( module == nullptr )
-	{
-		module = GetModuleHandle ( "libtier0.so" );
-	}
-	if( module == nullptr )
-	{
-		module = GetModuleHandle ( "tier0.so" );
-	}
-	if( module == nullptr )
-	{
-		std::cout << "Unable to locate any tier0 shared library.\n" ;
-		return;
-	}
-
-	*( void ** ) &m_msg_func = dlsym ( module, "Msg" );
-#endif
-
-	if( m_msg_func == nullptr )
-	{
-		std::cout << "Unable to locate tier0.Msg function.\n";
-	}
-	else
-	{
-		//std::cout << "Connected to console.\n";
-	}
-}
 
 void Logger::SetBypassServerConsoleMsg(bool b)
 {
@@ -152,19 +91,7 @@ void Logger::Msg<MSG_CONSOLE> ( const char * msg, int verbose /*= 0*/ )
 {
 	if (!m_bypass_msg)
 	{
-		if (this->IsConsoleConnected())
-		{
-			m_msg_func("%s%f %s\n", log_prolog.c_str(), Plat_FloatTime(), msg);
-		}
-		else
-		{
-			std::cout << log_prolog.c_str() << Plat_FloatTime() << ' ' << msg << '\n';
-#ifdef WIN32
-			OutputDebugStringA(log_prolog.c_str());
-			OutputDebugStringA(msg);
-			OutputDebugStringA("\n");
-#endif
-		}
+		Tier0::Msg("%s%f %s\n", log_prolog.c_str(), Tier0::Plat_FloatTime(), msg);
 	}
 }
 
@@ -173,18 +100,7 @@ void Logger::Msg<MSG_CMD_REPLY> ( const char * msg, int verbose /*= 0*/ )
 {
 	if (!m_bypass_msg)
 	{
-		if (this->IsConsoleConnected())
-		{
-			m_msg_func("%s\n", msg);
-		}
-		else
-		{
-			std::cout << msg << '\n';
-#ifdef WIN32
-			OutputDebugStringA(msg);
-			OutputDebugStringA("\n");
-#endif
-		}
+		Tier0::Msg("%s\n", msg);
 	}
 }
 

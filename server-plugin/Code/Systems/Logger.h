@@ -25,6 +25,8 @@
 #include "Containers/utlvector.h"
 #include "Systems/BaseSystem.h"
 
+#include "Misc/Tier0Linker.h"
+
 /*
 	Messages to be written on the plugin's logfile.
 
@@ -68,7 +70,7 @@ class Logger :
 	public BaseStaticSystem,
 	public Singleton
 {
-	typedef void ( *MsgFunc_t ) ( const char* pMsg, ... );
+	
 
 private:
 	CUtlVector<basic_string> m_msg;
@@ -77,8 +79,6 @@ private:
 	logger_chat_t m_allow_chat;
 	size_t m_current_memory_used;
 	void * m_sm_chat;
-
-	MsgFunc_t m_msg_func;
 
 	bool m_always_flush;
 	bool m_bypass_msg;
@@ -93,15 +93,12 @@ public:
 		m_allow_chat(logger_chat_t::ON),
 		m_current_memory_used ( 0 ),
 		m_sm_chat(nullptr),
-		m_msg_func(nullptr),
 		m_always_flush(false),
 		m_bypass_msg(false)
 	{
-		ConnectToServerConsole ();
 	};
 	virtual ~Logger () override final
 	{
-		m_msg_func = nullptr;
 	};
 
 	virtual void Init () override final
@@ -116,13 +113,9 @@ public:
 		m_always_flush = v;
 	}
 
-	void ConnectToServerConsole ();
-
 	void SetBypassServerConsoleMsg(bool b);
 
 	static void SpewAssert ( char const * expr, char const * file, unsigned int line );
-
-	inline bool IsConsoleConnected () const;
 
 	logger_chat_t GetAllowChat() const
 	{
@@ -135,11 +128,6 @@ public:
 	template <msg_type type = MSG_CONSOLE>
 	void Msg ( const char * msg, int verbose = 0 );
 };
-
-inline bool Logger::IsConsoleConnected () const
-{
-	return m_msg_func != nullptr;
-}
 
 extern Logger g_Logger;
 

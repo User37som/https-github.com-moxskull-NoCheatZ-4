@@ -31,8 +31,6 @@ AntiFlashbangBlocker::AntiFlashbangBlocker () :
 	SetTransmitHookListener (),
 	Singleton ()
 {
-	METRICS_ADD_TIMER ( "AntiFlashbangBlocker::SetTransmitCallback", 10.0 );
-	METRICS_ADD_TIMER ( "AntiFlashbangBlocker::FireGameEvent", 2.0 );
 }
 
 AntiFlashbangBlocker::~AntiFlashbangBlocker ()
@@ -76,11 +74,8 @@ bool AntiFlashbangBlocker::GotJob () const
 
 bool AntiFlashbangBlocker::RT_SetTransmitCallback ( PlayerHandler::iterator sender, PlayerHandler::iterator receiver )
 {
-	METRICS_ENTER_SECTION ( "AntiFlashbangBlocker::SetTransmitCallback" );
-
 	if( !receiver )
 	{
-		METRICS_LEAVE_SECTION ( "AntiFlashbangBlocker::SetTransmitCallback" );
 		return false;
 	}
 
@@ -89,7 +84,6 @@ bool AntiFlashbangBlocker::RT_SetTransmitCallback ( PlayerHandler::iterator send
 
 	if( player_info->IsFakeClient () )
 	{
-		METRICS_LEAVE_SECTION ( "AntiFlashbangBlocker::SetTransmitCallback" );
 		return false;
 	}
 
@@ -97,9 +91,8 @@ bool AntiFlashbangBlocker::RT_SetTransmitCallback ( PlayerHandler::iterator send
 
 	if( pInfo->flash_end_time != 0.0 )
 	{
-		if( pInfo->flash_end_time > Plat_FloatTime () )
+		if( pInfo->flash_end_time > Tier0::Plat_FloatTime () )
 		{
-			METRICS_LEAVE_SECTION ( "AntiFlashbangBlocker::SetTransmitCallback" );
 			return true;
 		}
 
@@ -107,18 +100,14 @@ bool AntiFlashbangBlocker::RT_SetTransmitCallback ( PlayerHandler::iterator send
 		ResetPlayerDataStruct ( *receiver );
 	}
 
-	METRICS_LEAVE_SECTION ( "AntiFlashbangBlocker::SetTransmitCallback" );
 	return false;
 }
 
 void AntiFlashbangBlocker::FireGameEvent ( SourceSdk::IGameEvent* ev ) // player_blind
 {
-	METRICS_ENTER_SECTION ( "AntiFlashbangBlocker::FireGameEvent" );
-
 	PlayerHandler::iterator ph ( g_NczPlayerManager.GetPlayerHandlerByUserId ( ev->GetInt ( "userid", 0 ) ) );
 	if( !ph )
 	{
-		METRICS_LEAVE_SECTION ( "AntiFlashbangBlocker::FireGameEvent" );
 		return;
 	}
 
@@ -134,25 +123,23 @@ void AntiFlashbangBlocker::FireGameEvent ( SourceSdk::IGameEvent* ev ) // player
 		{
 			Helpers::FadeUser ( ph->GetEdict (), 0 );
 			ResetPlayerDataStruct ( *ph );
-			METRICS_LEAVE_SECTION ( "AntiFlashbangBlocker::FireGameEvent" );
 			return;
 		}
 
 		if( flash_duration > 2.9f )
 		{
-			pInfo->flash_end_time = Plat_FloatTime () + flash_duration - 2.9f;
+			pInfo->flash_end_time = Tier0::Plat_FloatTime () + flash_duration - 2.9f;
 		}
 		else
 		{
-			pInfo->flash_end_time = Plat_FloatTime () + flash_duration / 10.0f;
+			pInfo->flash_end_time = Tier0::Plat_FloatTime () + flash_duration / 10.0f;
 		}
 
 		Helpers::FadeUser ( ph->GetEdict (), ( short ) floorf ( flash_duration * 1000.0f ) );
 	}
-	METRICS_LEAVE_SECTION ( "AntiFlashbangBlocker::FireGameEvent" );
 }
 
-void AntiFlashbangBlocker::RT_ProcessOnTick ( float const & curtime )
+void AntiFlashbangBlocker::RT_ProcessOnTick (double const & curtime )
 {
 	ProcessFilter::HumanAtLeastConnected filter_class;
 	for( PlayerHandler::iterator ph ( &filter_class ); ph != PlayerHandler::end (); ph += &filter_class )
@@ -161,7 +148,7 @@ void AntiFlashbangBlocker::RT_ProcessOnTick ( float const & curtime )
 
 		if( pInfo->flash_end_time != 0.0 )
 		{
-			if( pInfo->flash_end_time > Plat_FloatTime () )
+			if( pInfo->flash_end_time > Tier0::Plat_FloatTime () )
 			{
 				Helpers::FadeUser ( ph->GetEdict (), 0 );
 			}

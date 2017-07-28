@@ -57,7 +57,7 @@ def main():
 			print("The binaries work with the given glibc %s." %
 				format_version(given_glibc))
 		else:
-			print("WARN : The binaries do not work with the given glibc %s. "
+			print("ERROR : The binaries do not work with the given glibc %s. "
 				"Minimum is: %s" % (format_version(given_glibc), format_version(wanted_glibc)))
 	
 	ok2 = given_glibcxx >= wanted_glibcxx
@@ -70,7 +70,7 @@ def main():
 			print("ERROR : The binaries do not work with the given glibcxx %s. "
 				"Minimum is: %s" % (format_version(given_glibcxx), format_version(wanted_glibcxx)))
 				
-	return ok2
+	return ok2 and ok
 
 
 if __name__ == '__main__':

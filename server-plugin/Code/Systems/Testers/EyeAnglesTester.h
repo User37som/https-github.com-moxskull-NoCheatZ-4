@@ -29,7 +29,7 @@ typedef struct EyeAngle
 	float value; // Raw value of the angle
 	float abs_value; // Abs value so it's easier to test
 
-	float lastDetectionPrintTime;
+	double lastDetectionPrintTime;
 	unsigned int detectionsCount;
 
 	EyeAngle ()

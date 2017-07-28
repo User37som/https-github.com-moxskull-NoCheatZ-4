@@ -274,7 +274,7 @@ bot_takeover
 					if( pinfo->GetTeamIndex () > 1 )
 					{
 						DebugMessage(Helpers::format("Players %s : Will enter in status PLAYER_IN_TESTS in 1 second", ph.playerClass->GetName()));
-						ph.in_tests_time = Plat_FloatTime () + 1.0f;
+						ph.in_tests_time = Tier0::Plat_FloatTime () + 1.0f;
 					}
 					else
 					{
@@ -357,7 +357,7 @@ bot_takeover
 				{
 					DebugMessage(Helpers::format("Players %s : Will enter in status PLAYER_IN_TESTS in 3 seconds", ph->GetName()));
 					ph.GetHandler ()->status = SlotStatus::PLAYER_CONNECTED;
-					ph.GetHandler ()->in_tests_time = Plat_FloatTime () + 3.0f;
+					ph.GetHandler ()->in_tests_time = Tier0::Plat_FloatTime () + 3.0f;
 				}
 				else
 				{
@@ -389,7 +389,7 @@ bot_takeover
 			{
 				DebugMessage(Helpers::format("Players %s : Will enter in status PLAYER_IN_TESTS in 3 seconds", ph->GetName()));
 				ph.GetHandler ()->status = SlotStatus::PLAYER_CONNECTED;
-				ph.GetHandler ()->in_tests_time = Plat_FloatTime () + 3.0f;
+				ph.GetHandler ()->in_tests_time = Tier0::Plat_FloatTime () + 3.0f;
 			}
 			else
 			{
@@ -439,7 +439,7 @@ void NczPlayerManager::DeclareKickedPlayer ( int const slot )
 	FullHandlersList[ slot ].status = SlotStatus::KICK;
 }
 
-void NczPlayerManager::RT_Think ( float const & curtime )
+void NczPlayerManager::RT_Think (double const & curtime )
 {
 	ResetRange();
 

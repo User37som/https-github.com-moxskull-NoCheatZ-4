@@ -280,7 +280,7 @@ void RadarHackBlocker::RT_UpdatePlayerData ( NczPlayer* pPlayer )
 	pData->m_team = playerinfo->GetTeamIndex ();
 }
 
-void RadarHackBlocker::RT_ProcessOnTick ( float const & curtime )
+void RadarHackBlocker::RT_ProcessOnTick (double const & curtime )
 {
 	ProcessFilter::HumanAtLeastConnectedOrBot const filter_class;
 
@@ -307,7 +307,7 @@ void RadarHackBlocker::RT_ProcessOnTick ( float const & curtime )
 
 	if( curtime > m_next_process )
 	{
-		m_next_process = curtime + 2.0f;
+		m_next_process = curtime + 2.0;
 	}
 }
 

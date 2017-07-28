@@ -38,11 +38,6 @@ WallhackBlocker::WallhackBlocker () :
 	m_shadow_direction ( nullptr ),
 	m_shadow_maxdist ( nullptr )
 {
-	METRICS_ADD_TIMER ( "WallhackBlocker::SetTransmitCallback", 1.0 );
-	METRICS_ADD_TIMER ( "WallhackBlocker::OnFrame", 10.0 );
-	METRICS_ADD_TIMER ( "WallhackBlocker TraceRay Call", 2.0 );
-	METRICS_ADD_TIMER ( "WallhackBlocker TraceHull Call", 2.0 );
-	METRICS_ADD_COUNTER ( "WallhackBlocker TraceRay Count Per Tick", 1024 );
 }
 
 WallhackBlocker::~WallhackBlocker ()
@@ -234,11 +229,8 @@ void WallhackBlocker::RT_WeaponDropCallback ( PlayerHandler::iterator ph, Source
 	g_WallhackBlocker.m_weapon_owner[ weapon_index ] = nullptr;
 }
 
-void WallhackBlocker::RT_ProcessOnTick ( float const & curtime )
+void WallhackBlocker::RT_ProcessOnTick (double const & curtime )
 {
-	METRICS_LEAVE_SECTION ( "WallhackBlocker TraceRay Count Per Tick" );
-	METRICS_ENTER_SECTION ( "WallhackBlocker::OnFrame" );
-
 	m_viscache.Invalidate ();
 
 	int game_tick;
@@ -391,8 +383,6 @@ void WallhackBlocker::RT_ProcessOnTick ( float const & curtime )
 			}
 		}
 	}
-
-	METRICS_LEAVE_SECTION ( "WallhackBlocker::OnFrame" );
 }
 
 void WallhackBlocker::ClientDisconnect ( PlayerHandler::iterator ph )
