@@ -24,7 +24,7 @@ script:
   - make debug CXX=g++-4.8 -j 3
   - make release CXX=g++-4.8 -j 3
   - cd ../scripts
-  - python validate-libc-version.py 2.3.2 3.4.16 ../Builds/Debug/addons/NoCheatZ/nocheatzX.so ../Builds/Release/addons/NoCheatZ/nocheatzX.so
+  - python validate-libc-version.py 2.4.0 3.4.16 ../Builds/Debug/addons/NoCheatZ/nocheatzX.so ../Builds/Release/addons/NoCheatZ/nocheatzX.so
 before_deploy:
   - cd ..
   - sh scripts/ci-before-deploy.sh
