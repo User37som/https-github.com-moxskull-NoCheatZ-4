@@ -216,23 +216,33 @@ private:
 
 extern ConVarTester g_ConVarTester;
 
+static bool err_log_once = true;
+
 inline void CurrentConVarRequest::SendCurrentRequest(PlayerHandler::iterator ph, float const curtime, ConVarRulesListT const & rules)
 {
 	SourceSdk::edict_t* pedict(ph->GetEdict());
 	char const * var(rules[ruleset].name);
 
 	cookie = g_QueryCvarProvider.StartQueryCvarValue(pedict, var);
-	if (cookie != InvalidQueryCvarCookie)
+	
+	if (cookie == InvalidQueryCvarCookie)
+	{
+		status = ConVarRequestStatus::NOT_PROCESSING;
+		g_Logger.Msg<MSG_ERROR>("ConVarTester : StartQueryCvarValue returned InvalidQueryCvarCookie");
+	}
+	else if(cookie < InvalidQueryCvarCookie && err_log_once)
+	{
+		g_Logger.Msg<MSG_ERROR>("ConVarTester : StartQueryCvarValue returned negative cookie (Please report issue)");
+		err_log_once = false;
+		status = ConVarRequestStatus::NOT_PROCESSING;
+	}
+	else
 	{
 		status = ConVarRequestStatus::SENT;
 		timeStart = curtime;
 		timeEnd = timeStart + 10.0f;
 	}
-	else
-	{
-		status = ConVarRequestStatus::NOT_PROCESSING;
-		g_Logger.Msg<MSG_ERROR>("ConVarTester : StartQueryCvarValue returned InvalidQueryCvarCookie");
-	}
+	
 }
 
 #endif // CONVARTESTER_H

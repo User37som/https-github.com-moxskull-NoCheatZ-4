@@ -29,7 +29,7 @@ public:
 	QueryCvarProvider();
 	~QueryCvarProvider();
 		
-	void Init();
+	void InitCookie();
 
 	SourceSdk::QueryCvarCookie_t StartQueryCvarValue(SourceSdk::edict_t *pEntity, const char *pName);
 };

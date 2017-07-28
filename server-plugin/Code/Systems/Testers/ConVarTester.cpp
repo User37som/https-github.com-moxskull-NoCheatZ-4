@@ -96,7 +96,7 @@ void ConVarTester::RT_ProcessPlayerTest ( PlayerHandler::iterator ph, float cons
 			{
 				if( curtime >= req->timeEnd )
 				{
-					if( req->attempts >= 2 )
+					if( ++(req->attempts) > 4 )
 					{
 						req->answer = "NO ANSWER - TIMED OUT";
 						Detection_ConVarRequestTimedOut pDetection;
@@ -105,8 +105,7 @@ void ConVarTester::RT_ProcessPlayerTest ( PlayerHandler::iterator ph, float cons
 						pDetection.Log ();
 						ph->Kick ( "ConVar request timed out" );
 					}
-					g_Logger.Msg<MSG_WARNING> ( Helpers::format ( "ConVarTester : ConVar request timed out for %s (%s) : %d attempts.", ph->GetName (), m_convars_rules[ req->ruleset ].name, req->attempts+1) );
-					++req->attempts;
+					//g_Logger.Msg<MSG_WARNING> ( Helpers::format ( "ConVarTester : ConVar request timed out for %s (%s) : %d attempts (Cookie %d).", ph->GetName (), m_convars_rules[ req->ruleset ].name, req->attempts+1, req->cookie) );
 					req->SendCurrentRequest ( ph, curtime, m_convars_rules ); // Send the request again
 				}
 				// else wait ...
