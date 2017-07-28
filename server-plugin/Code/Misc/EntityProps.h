@@ -98,6 +98,8 @@ private:
 		size_t depth ( 0 );
 		const size_t MaxDepth ( paths.Size () - 1 );
 
+		*pOffset = 0;
+
 		SourceSdk::ServerClass * pClass = SourceSdk::InterfacesProxy::Call_GetAllServerClasses ();
 		do
 		{
@@ -116,6 +118,7 @@ private:
 						if( paths[ depth ].operator==( pProp->GetName () ) )
 						{
 							pTable = pProp->GetDataTable ();
+							*pOffset += pProp->GetOffset();
 							break;
 						}
 					}
@@ -125,6 +128,7 @@ private:
 						if( paths[ depth ].operator==( pProp->GetName () ) )
 						{
 							pTable = pProp->GetDataTable ();
+							*pOffset += pProp->GetOffset();
 							break;
 						}
 					}
@@ -139,7 +143,7 @@ private:
 					const SourceSdk::SendProp_csgo* const pProp ( static_cast< SourceSdk::SendProp_csgo* >( static_cast< SourceSdk::SendTable_csgo* >( pTable )->GetProp ( prop ) ) );
 					if( paths[ depth ].operator==( pProp->GetName () ) )
 					{
-						*pOffset = pProp->GetOffset ();
+						*pOffset += pProp->GetOffset ();
 						// Register in our cache
 						m_cache[ id ] = PropertyCacheS ( *pOffset );
 						// Return the offset
@@ -151,7 +155,7 @@ private:
 					const SourceSdk::SendProp* const pProp ( static_cast< SourceSdk::SendProp* >( static_cast< SourceSdk::SendTable* >( pTable )->GetProp ( prop ) ) );
 					if( paths[ depth ].operator==( pProp->GetName () ) )
 					{
-						*pOffset = pProp->GetOffset ();
+						*pOffset += pProp->GetOffset ();
 						// Register in our cache
 						m_cache[ id ] = PropertyCacheS ( *pOffset );
 						// Return the offset
