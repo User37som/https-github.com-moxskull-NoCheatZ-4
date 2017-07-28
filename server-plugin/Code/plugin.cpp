@@ -163,7 +163,7 @@ bool CNoCheatZPlugin::Load ( SourceSdk::CreateInterfaceFn _interfaceFactory, Sou
 	};
 
 	g_SourceHookSafety.TryHookMMSourceHook();
-	g_QueryCvarProvider.Init();
+	g_QueryCvarProvider.InitCookie();
 
 	if( SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive )
 	{
