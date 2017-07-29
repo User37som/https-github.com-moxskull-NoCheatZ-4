@@ -24,15 +24,14 @@
 #include "Players/NczPlayerManager.h"
 #include "Systems/ConfigManager.h"
 
-AntiSmokeBlocker::AntiSmokeBlocker () :
-	BaseBlockerSystem( "AntiSmokeBlocker" ),
-	IGameEventListener002 (),
-	OnTickListener (),
-	playerdatahandler_class (),
-	SetTransmitHookListener (),
-	Singleton ()
+AntiSmokeBlocker::AntiSmokeBlocker() :
+	BaseBlockerSystem("AntiSmokeBlocker"),
+	IGameEventListener002(),
+	OnTickListener(),
+	playerdatahandler_class(),
+	SetTransmitHookListener(),
+	Singleton()
 {
-	METRICS_ADD_TIMER ( "AntiSmokeBlocker::OnFrame", 10.0 );
 }
 
 AntiSmokeBlocker::~AntiSmokeBlocker ()
@@ -81,10 +80,8 @@ bool AntiSmokeBlocker::GotJob () const
 	return it != PlayerHandler::end ();
 }
 
-void AntiSmokeBlocker::RT_ProcessOnTick ( float const & curtime )
+void AntiSmokeBlocker::RT_ProcessOnTick (double const & curtime )
 {
-	METRICS_ENTER_SECTION ( "AntiSmokeBlocker::OnFrame" );
-
 	SmokeListT::elem_t* it ( m_smokes.GetFirst () );
 
 	// remove old smokes
@@ -158,8 +155,6 @@ void AntiSmokeBlocker::RT_ProcessOnTick ( float const & curtime )
 		while( it != nullptr );
 		it = m_smokes.GetFirst ();
 	}
-
-	METRICS_LEAVE_SECTION ( "AntiSmokeBlocker::OnFrame" );
 }
 
 bool AntiSmokeBlocker::RT_SetTransmitCallback ( PlayerHandler::iterator sender, PlayerHandler::iterator receiver )

@@ -20,7 +20,7 @@
 #include "Interfaces/InterfacesProxy.h"
 
 #include "Misc/Helpers.h" // PEntityOfEntIndex, ifaces
-#include "Misc/temp_Metrics.h"
+
 #include "Hooks/PlayerRunCommandHookListener.h"
 #include "Misc/MathCache.h"
 #include "Systems/BanRequest.h"
@@ -385,7 +385,7 @@ int const NczPlayer::aimingAt ()
 
 void NczPlayer::OnConnect ()
 {
-	m_time_connected = Plat_FloatTime ();
+	m_time_connected = Tier0::Plat_FloatTime ();
 }
 
 void NczPlayer::Kick ( const char * msg )

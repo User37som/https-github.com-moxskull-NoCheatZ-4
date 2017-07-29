@@ -27,7 +27,7 @@ typedef struct PlayerBanRequest
 {
 	int ban_time;
 	int userid;
-	float request_time;
+	double request_time;
 	basic_string kick_message;
 	char player_name[ 24 ];
 	char steamid[ 24 ];

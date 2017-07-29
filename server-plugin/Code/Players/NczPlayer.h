@@ -18,10 +18,11 @@
 
 #include "Interfaces/InterfacesProxy.h"
 
-#include "Misc/temp_Metrics.h"
+
 #include "Misc/Helpers.h"
 #include "Misc/temp_singleton.h"
 #include "Misc/temp_basicstring.h"
+#include "Misc/Tier0Linker.h"
 
 enum WpnShotType
 {
@@ -43,7 +44,7 @@ private:
 	SourceSdk::edict_t * const m_edict;
 	SourceSdk::INetChannelInfo* m_channelinfo;
 	SourceSdk::IPlayerInfo * m_playerinfo;
-	float m_time_connected;
+	double m_time_connected;
 	
 	bool m_is_detected; 
 
@@ -72,7 +73,7 @@ public:
 
 	inline basic_string const GetReadableIdentity () const;
 
-	inline float const GetTimeConnected () const;
+	inline double const GetTimeConnected () const;
 
 	inline bool const isValidEdict () const;
 
@@ -133,9 +134,9 @@ inline const char * NczPlayer::GetIPAddress () const
 	return GetChannelInfo ()->GetAddress ();
 }
 
-inline float const NczPlayer::GetTimeConnected () const
+inline double const NczPlayer::GetTimeConnected () const
 {
-	return Plat_FloatTime () - m_time_connected;
+	return Tier0::Plat_FloatTime () - m_time_connected;
 }
 
 inline basic_string const NczPlayer::GetReadableIdentity () const

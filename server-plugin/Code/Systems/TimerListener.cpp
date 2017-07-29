@@ -30,7 +30,7 @@ TimerListener::~TimerListener ()
 
 }
 
-void TimerListener::RT_OnTick (float const & curtime)
+void TimerListener::RT_OnTick (double const & curtime)
 {
 	m_undersample = !m_undersample;
 
@@ -80,7 +80,7 @@ void TimerListener::RemoveTimerListener ( TimerListener* listener )
 	m_listeners.Remove ( listener );
 }
 
-void TimerListener::AddTimer ( float period_seconds, char const * const name, bool single_time )
+void TimerListener::AddTimer (double period_seconds, char const * const name, bool single_time )
 {
 	Assert ( period_seconds >= 2.0 );
 

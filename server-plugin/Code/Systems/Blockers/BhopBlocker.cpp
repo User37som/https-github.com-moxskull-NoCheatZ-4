@@ -29,7 +29,6 @@ BhopBlocker::BhopBlocker () :
 	convar_sv_enablebunnyhopping(nullptr),
 	convar_sv_autobunnyhopping(nullptr)
 {
-	METRICS_ADD_TIMER ( "BhopBlocker::PlayerRunCommandCallback", 2.0 );
 }
 
 BhopBlocker::~BhopBlocker ()
@@ -103,8 +102,6 @@ bool BhopBlocker::GotJob () const
 
 PlayerRunCommandRet BhopBlocker::RT_PlayerRunCommandCallback ( PlayerHandler::iterator ph, void* pCmd, void* old_cmd )
 {
-	METRICS_ENTER_SECTION ( "BhopBlocker::PlayerRunCommandCallback" );
-
 	if( convar_sv_enablebunnyhopping != nullptr )
 	{
 		if( SourceSdk::InterfacesProxy::ConVar_GetBool ( convar_sv_enablebunnyhopping ) )
@@ -226,8 +223,6 @@ PlayerRunCommandRet BhopBlocker::RT_PlayerRunCommandCallback ( PlayerHandler::it
 			}
 		}
 	}
-
-	METRICS_LEAVE_SECTION ( "BhopBlocker::PlayerRunCommandCallback" );
 	return PlayerRunCommandRet::CONTINUE;
 }
 

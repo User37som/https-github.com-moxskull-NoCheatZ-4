@@ -35,9 +35,9 @@ typedef struct SpeedHolder
 {
 	float ticksLeft;
 	size_t detections;
-	float lastDetectionTime;
+	double lastDetectionTime;
 	float previousLatency;
-	float lastTest;
+	double lastTest;
 
 	SpeedHolder ()
 	{
@@ -46,7 +46,8 @@ typedef struct SpeedHolder
 		else
 			ticksLeft = 0;
 		detections = 0;
-		lastDetectionTime = previousLatency = lastTest = 0.0;
+		lastDetectionTime = lastTest = 0.0;
+		previousLatency = 0.0f;
 	};
 	SpeedHolder ( const SpeedHolder& other )
 	{
@@ -92,7 +93,7 @@ private:
 
 	virtual bool GotJob () const override final;
 
-	virtual void RT_ProcessOnTick ( float const & curtime ) override final;
+	virtual void RT_ProcessOnTick (double const & curtime ) override final;
 
 	virtual PlayerRunCommandRet RT_PlayerRunCommandCallback ( PlayerHandler::iterator ph, void * const cmd, void * const old_cmd ) override final;
 };

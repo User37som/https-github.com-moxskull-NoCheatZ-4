@@ -2,11 +2,12 @@ version: v4-r{build}
 pull_requests:
   do_not_increment_build_number: true
 max_jobs: 2
+skip_branch_with_pr: true
 image: Visual Studio 2017
 branches:
   only:
   - master
-  - /^v4-r\d+*$/
+  - /^v4-r\d+$/
 configuration:
 - Debug
 - Release

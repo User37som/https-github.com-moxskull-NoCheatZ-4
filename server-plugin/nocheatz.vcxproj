@@ -391,6 +391,7 @@ copy "$(TargetPath)" ..\..\..\game\bin\"$(TargetName)".pdb
     <ClCompile Include="Code\Misc\QueryCvarProvider.cpp" />
     <ClCompile Include="Code\Misc\SigHandler.cpp" />
     <ClCompile Include="Code\Misc\StackWalker.cpp" />
+    <ClCompile Include="Code\Misc\Tier0Linker.cpp" />
     <ClCompile Include="Code\Systems\AutoTVRecord.cpp" />
     <ClCompile Include="Code\Systems\Blockers\BhopBlocker.cpp" />
     <ClCompile Include="Code\Systems\Blockers\RadarHackBlocker.cpp" />
@@ -467,6 +468,7 @@ copy "$(TargetPath)" ..\..\..\game\bin\"$(TargetName)".pdb
     <ClInclude Include="Code\Misc\temp_basicstring.h" />
     <ClInclude Include="Code\Misc\temp_singleton.h" />
     <ClInclude Include="Code\Misc\temp_Throwback.h" />
+    <ClInclude Include="Code\Misc\Tier0Linker.h" />
     <ClInclude Include="Code\Players\ProcessFilter.h" />
     <ClInclude Include="Code\Systems\AutoTVRecord.h" />
     <ClInclude Include="Code\Systems\Blockers\BhopBlocker.h" />
@@ -537,7 +539,6 @@ copy "$(TargetPath)" ..\..\..\game\bin\"$(TargetName)".pdb
     <ClInclude Include="Code\Misc\EntityProps.h" />
     <ClInclude Include="Code\Misc\Helpers.h" />
     <ClInclude Include="Code\Misc\include_windows_headers.h" />
-    <ClInclude Include="Code\Misc\temp_Metrics.h" />
     <ClInclude Include="Code\Misc\MRecipientFilter.h" />
     <ClInclude Include="Code\Misc\temp_BaseDataStruct.h" />
     <ClInclude Include="Code\Misc\UserMsg.h" />

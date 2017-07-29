@@ -85,9 +85,9 @@ PlayerRunCommandRet EyeAnglesTester::RT_PlayerRunCommandCallback ( PlayerHandler
 		{
 			++playerData->x.detectionsCount;
 			//drop_cmd = PlayerRunCommandRet::INERT;
-			if (playerData->x.lastDetectionPrintTime + ANTIFLOOD_LOGGING_TIME < Plat_FloatTime())
+			if (playerData->x.lastDetectionPrintTime + ANTIFLOOD_LOGGING_TIME < Tier0::Plat_FloatTime())
 			{
-				playerData->x.lastDetectionPrintTime = Plat_FloatTime();
+				playerData->x.lastDetectionPrintTime = Tier0::Plat_FloatTime();
 
 				if (playerData->x.detectionsCount > 5)
 				{
@@ -99,9 +99,9 @@ PlayerRunCommandRet EyeAnglesTester::RT_PlayerRunCommandCallback ( PlayerHandler
 		{
 			++playerData->y.detectionsCount;
 			//drop_cmd = PlayerRunCommandRet::INERT;
-			if (playerData->y.lastDetectionPrintTime + ANTIFLOOD_LOGGING_TIME < Plat_FloatTime())
+			if (playerData->y.lastDetectionPrintTime + ANTIFLOOD_LOGGING_TIME < Tier0::Plat_FloatTime())
 			{
-				playerData->y.lastDetectionPrintTime = Plat_FloatTime();
+				playerData->y.lastDetectionPrintTime = Tier0::Plat_FloatTime();
 
 				if (playerData->y.detectionsCount > 5)
 				{
@@ -113,9 +113,9 @@ PlayerRunCommandRet EyeAnglesTester::RT_PlayerRunCommandCallback ( PlayerHandler
 		{
 			++playerData->z.detectionsCount;
 			//drop_cmd = PlayerRunCommandRet::INERT;
-			if (playerData->z.lastDetectionPrintTime + ANTIFLOOD_LOGGING_TIME < Plat_FloatTime())
+			if (playerData->z.lastDetectionPrintTime + ANTIFLOOD_LOGGING_TIME < Tier0::Plat_FloatTime())
 			{
-				playerData->z.lastDetectionPrintTime = Plat_FloatTime();
+				playerData->z.lastDetectionPrintTime = Tier0::Plat_FloatTime();
 
 				if (playerData->z.detectionsCount > 5)
 				{

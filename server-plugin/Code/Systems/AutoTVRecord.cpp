@@ -169,7 +169,7 @@ bool AutoTVRecord::sys_cmd_fn(const SourceSdk::CCommand & args)
 
 void AutoTVRecord::Load ()
 {
-	m_waitfortv_time = Plat_FloatTime () + 5.0f;
+	m_waitfortv_time = Tier0::Plat_FloatTime () + 5.0f;
 	m_round_id = 0;
 	if (m_splitrule == demo_split_t::SPLIT_BY_TIMER_SECONDS)
 	{

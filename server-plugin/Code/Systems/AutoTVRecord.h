@@ -45,7 +45,7 @@ public:
 
 private:
 	basic_string m_prefix;
-	float m_waitfortv_time;
+	double m_waitfortv_time;
 	int m_minplayers;
 	demo_split_t m_splitrule;
 	unsigned int m_round_id;

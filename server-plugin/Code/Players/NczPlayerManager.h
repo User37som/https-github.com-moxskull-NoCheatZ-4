@@ -178,7 +178,7 @@ private:
 
 	SlotStatus status;
 	NczPlayer* playerClass;
-	float in_tests_time;
+	double in_tests_time;
 
 	PlayerHandler () :
 		status ( SlotStatus::INVALID ),
@@ -385,7 +385,7 @@ public:
 	void FireGameEvent ( SourceSdk::IGameEvent* ev );
 	void DeclareKickedPlayer ( int const slot );
 
-	void RT_Think ( float const & curtime );
+	void RT_Think ( double const & curtime );
 
 	const int GetMaxIndex () const
 	{

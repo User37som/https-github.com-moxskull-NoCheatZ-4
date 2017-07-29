@@ -21,9 +21,10 @@ before_script:
   - cd ../server-plugin
   - sh ../scripts/make-protobuf.sh
 script:
-  - cppcheck --force --quiet --inline-suppr --enable=all -DGNUC -UWIN32 -UNCZ_USE_METRICS --std=c++11 -j6 --platform=unix32 -i SourceSdk -i SourceSdk/Interfaces/Protobuf -i SourceSdk/Interfaces/Protobuf/protobuf-2.5.0/src Code
-  - make debug CXX=g++-4.8
-  - make release CXX=g++-4.8
+  - make debug CXX=g++-4.8 -j 3
+  - make release CXX=g++-4.8 -j 3
+  - cd ../scripts
+  - python validate-libc-version.py 2.4.0 3.4.16 ../Builds/Debug/addons/NoCheatZ/nocheatzX.so ../Builds/Release/addons/NoCheatZ/nocheatzX.so
 before_deploy:
   - cd ..
   - sh scripts/ci-before-deploy.sh

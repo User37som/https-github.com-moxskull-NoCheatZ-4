@@ -33,7 +33,7 @@ struct UserCmdInfo
 {
 	TickStatus_t m_tick_status;
 	bool m_prev_dead;
-	float m_detected_time;
+	double m_detected_time;
 	int prev_cmd;
 	int prev_tick;
 	int cmd_offset;
