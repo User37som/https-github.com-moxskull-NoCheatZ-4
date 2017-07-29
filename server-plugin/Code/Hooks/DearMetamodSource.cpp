@@ -15,6 +15,8 @@
 
 HookGuard<SourceHookSafety> local_HookGuardSourceHookSafety;
 
+bool SourceHookSafety::m_reverted(false);
+
 SourceHookSafety::SourceHookSafety() :
 	g_SourceHook(nullptr)
 {
@@ -124,9 +126,11 @@ void SourceHookSafety::TryHookMMSourceHook()
 				DebugMessage(Helpers::format("g_SourceHook is at 0x%X (Interface Version %d, Impl Version %d)", g_SourceHook, g_SourceHook->GetIfaceVersion(), g_SourceHook->GetImplVersion()));
 				HookInfo haddhook(g_SourceHook, 2, (DWORD)my_AddHook);
 				HookInfo hremovehook(g_SourceHook, 3, (DWORD)my_RemoveHook);
+				HookInfo hremovehookid(g_SourceHook, 4, (DWORD)my_RemoveHookById);
 
 				local_HookGuardSourceHookSafety.VirtualTableHook(haddhook, "ISourceHook::AddHook");
 				local_HookGuardSourceHookSafety.VirtualTableHook(hremovehook, "ISourceHook::RemoveHook");
+				local_HookGuardSourceHookSafety.VirtualTableHook(hremovehookid, "ISourceHook::RemoveHookById");
 			}
 			else
 			{
@@ -151,6 +155,42 @@ void SourceHookSafety::UnhookMMSourceHook()
 	local_HookGuardSourceHookSafety.UnhookAll();
 }
 
+void SourceHookSafety::ProcessRevertAll()
+{
+	if (!m_reverted) // In case it gets called multiple times in stack
+	{
+		g_Logger.SetBypassServerConsoleMsg(true);
+
+		g_HookGuardConCommandHookListener.RevertAll();
+		g_HookGuardOnGroundHookListener.RevertAll();
+		g_HookGuardPlayerRunCommandHookListener.RevertAll();
+		g_HookGuardSetTransmitHookListener.RevertAll();
+		g_HookGuardThinkPostHookListener.RevertAll();
+		g_HookGuardUserMessageHookListener.RevertAll();
+		g_HookGuardWeaponHookListener.RevertAll();
+
+		m_reverted = true;
+	}
+}
+
+void SourceHookSafety::ProcessRehootAll()
+{
+	if (m_reverted)
+	{
+		g_HookGuardConCommandHookListener.RehookAll();
+		g_HookGuardOnGroundHookListener.RehookAll();
+		g_HookGuardPlayerRunCommandHookListener.RehookAll();
+		g_HookGuardSetTransmitHookListener.RehookAll();
+		g_HookGuardThinkPostHookListener.RehookAll();
+		g_HookGuardUserMessageHookListener.RehookAll();
+		g_HookGuardWeaponHookListener.RehookAll();
+
+		g_Logger.SetBypassServerConsoleMsg(false);
+
+		m_reverted = false;
+	}
+}
+
 #ifdef GNUC
 int HOOKFN_INT SourceHookSafety::my_AddHook(void * isourcehook, int plug, ISourceHook_Skeleton::AddHookMode mode, void * iface, int thisptr_offs, ISourceHook_Skeleton::HookManagerPubFunc myHookMan, void * handler, bool post)
 #else
@@ -159,31 +199,13 @@ int HOOKFN_INT SourceHookSafety::my_AddHook(void * isourcehook, void * weak, int
 {
 	typedef int (HOOKFN_EXT *AddHook_fn)(void* isourcehook, int plug, ISourceHook_Skeleton::AddHookMode mode, void *iface, int thisptr_offs, ISourceHook_Skeleton::HookManagerPubFunc myHookMan, void *handler, bool post);
 	
-	g_Logger.SetBypassServerConsoleMsg(true);
-
-	DebugMessage(Helpers::format("Caught ISourceHook::AddHook for iface 0x%X", iface));
-
-	g_HookGuardConCommandHookListener.RevertAll();
-	g_HookGuardOnGroundHookListener.RevertAll();
-	g_HookGuardPlayerRunCommandHookListener.RevertAll();
-	g_HookGuardSetTransmitHookListener.RevertAll();
-	g_HookGuardThinkPostHookListener.RevertAll();
-	g_HookGuardUserMessageHookListener.RevertAll();
-	g_HookGuardWeaponHookListener.RevertAll();
+	ProcessRevertAll();
 
 	ST_W_STATIC AddHook_fn gpOldFn;
 	*(DWORD*)&(gpOldFn) = local_HookGuardSourceHookSafety.RT_GetOldFunction(isourcehook, 2);
 	int ret ( gpOldFn(isourcehook, plug, mode, iface, thisptr_offs, myHookMan, handler, post) );
 
-	g_HookGuardConCommandHookListener.RehookAll();
-	g_HookGuardOnGroundHookListener.RehookAll();
-	g_HookGuardPlayerRunCommandHookListener.RehookAll();
-	g_HookGuardSetTransmitHookListener.RehookAll();
-	g_HookGuardThinkPostHookListener.RehookAll();
-	g_HookGuardUserMessageHookListener.RehookAll();
-	g_HookGuardWeaponHookListener.RehookAll();
-
-	g_Logger.SetBypassServerConsoleMsg(false);
+	ProcessRehootAll();
 
 	return ret;
 }
@@ -196,31 +218,32 @@ bool HOOKFN_INT SourceHookSafety::my_RemoveHook(void * isourcehook, void * weak,
 {
 	typedef int (HOOKFN_EXT *RemoveHook_fn)(void* isourcehook, int plug, void *iface, int thisptr_offs, ISourceHook_Skeleton::HookManagerPubFunc myHookMan, void *handler, bool post);
 
-	g_Logger.SetBypassServerConsoleMsg(true);
-
-	DebugMessage(Helpers::format("Caught ISourceHook::RemoveHook for iface 0x%X", iface));
-
-	g_HookGuardConCommandHookListener.RevertAll();
-	g_HookGuardOnGroundHookListener.RevertAll();
-	g_HookGuardPlayerRunCommandHookListener.RevertAll();
-	g_HookGuardSetTransmitHookListener.RevertAll();
-	g_HookGuardThinkPostHookListener.RevertAll();
-	g_HookGuardUserMessageHookListener.RevertAll();
-	g_HookGuardWeaponHookListener.RevertAll();
+	ProcessRevertAll();
 
 	ST_W_STATIC RemoveHook_fn gpOldFn;
 	*(DWORD*)&(gpOldFn) = local_HookGuardSourceHookSafety.RT_GetOldFunction(isourcehook, 3);
 	int ret( gpOldFn(isourcehook, plug, iface, thisptr_offs, myHookMan, handler, post));
 
-	g_HookGuardConCommandHookListener.RehookAll();
-	g_HookGuardOnGroundHookListener.RehookAll();
-	g_HookGuardPlayerRunCommandHookListener.RehookAll();
-	g_HookGuardSetTransmitHookListener.RehookAll();
-	g_HookGuardThinkPostHookListener.RehookAll();
-	g_HookGuardUserMessageHookListener.RehookAll();
-	g_HookGuardWeaponHookListener.RehookAll();
+	ProcessRehootAll();
 
-	g_Logger.SetBypassServerConsoleMsg(false);
+	return ret;
+}
+
+#ifdef GNUC
+bool HOOKFN_INT SourceHookSafety::my_RemoveHookById(void* isourcehook, int id)
+#else
+bool HOOKFN_INT SourceHookSafety::my_RemoveHookById(void* isourcehook, void* weak, int id)
+#endif
+{
+	typedef int (HOOKFN_EXT *RemoveHookById_fn)(void* isourcehook, int id);
+
+	ProcessRevertAll();
+
+	ST_W_STATIC RemoveHookById_fn gpOldFn;
+	*(DWORD*)&(gpOldFn) = local_HookGuardSourceHookSafety.RT_GetOldFunction(isourcehook, 4);
+	bool ret(gpOldFn(isourcehook, id));
+
+	ProcessRehootAll();
 
 	return ret;
 }

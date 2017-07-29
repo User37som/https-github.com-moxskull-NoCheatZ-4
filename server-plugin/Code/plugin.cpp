@@ -85,6 +85,8 @@ float HOOKFN_INT GetTickInterval(void * const preserve_me)
 
 void CNoCheatZPlugin::DestroySingletons ()
 {
+	g_SourceHookSafety.ProcessRevertAll();
+	g_Logger.SetBypassServerConsoleMsg(true);
 	HeapMemoryManager::FreePool ();
 }
 
