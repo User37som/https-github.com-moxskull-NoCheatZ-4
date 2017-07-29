@@ -43,7 +43,6 @@
 #include "Misc/MathCache.h"
 #include "Misc/SigHandler.h"
 #include "Hooks/DearMetamodSource.h"
-#include "Systems/Testers/AimTester.h"
 
 #include "Systems/OnTickListener.h"
 #include "Systems/TimerListener.h"
@@ -486,7 +485,6 @@ SourceSdk::PLUGIN_RESULT CNoCheatZPlugin::ClientConnect ( bool *bAllowConnect, S
 		g_RadarHackBlocker.ResetPlayerDataStruct ( player );
 		g_BhopBlocker.ResetPlayerDataStruct ( player );
 		g_MouseTester.ResetPlayerDataStruct(player);
-		g_AimTester.ResetPlayerDataStruct(player);
 	}
 
 	return SourceSdk::PLUGIN_CONTINUE;
