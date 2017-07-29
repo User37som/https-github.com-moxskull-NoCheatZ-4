@@ -75,6 +75,7 @@ class SourceHookSafety :
 {
 private:
 	ISourceHook_Skeleton * g_SourceHook;
+	static bool m_reverted;
 
 public:
 	SourceHookSafety();
@@ -83,12 +84,17 @@ public:
 	void TryHookMMSourceHook();
 	void UnhookMMSourceHook();
 
+	static void ProcessRevertAll();
+	static void ProcessRehootAll();
+
 #ifdef GNUC
 	static int HOOKFN_INT my_AddHook(void* isourcehook, int plug, ISourceHook_Skeleton::AddHookMode mode, void *iface, int thisptr_offs, ISourceHook_Skeleton::HookManagerPubFunc myHookMan, void *handler, bool post);
 	static bool HOOKFN_INT my_RemoveHook(void* isourcehook, int plug, void *iface, int thisptr_offs, ISourceHook_Skeleton::HookManagerPubFunc myHookMan, void *handler, bool post);
+	static bool HOOKFN_INT my_RemoveHookById(void* isourcehook, int id);
 #else
 	static int HOOKFN_INT my_AddHook(void* isourcehook, void* weak, int plug, ISourceHook_Skeleton::AddHookMode mode, void *iface, int thisptr_offs, ISourceHook_Skeleton::HookManagerPubFunc myHookMan, void *handler, bool post);
 	static bool HOOKFN_INT my_RemoveHook(void* isourcehook, void* weak, int plug, void *iface, int thisptr_offs, ISourceHook_Skeleton::HookManagerPubFunc myHookMan, void *handler, bool post);
+	static bool HOOKFN_INT my_RemoveHookById(void* isourcehook, void* weak, int id);
 #endif
 };
 
