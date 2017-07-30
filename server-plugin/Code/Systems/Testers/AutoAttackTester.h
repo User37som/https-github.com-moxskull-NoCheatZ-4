@@ -31,6 +31,7 @@ typedef Throwback_Arithmetic<int, int, TB_MAX_HISTORY> tb_int;
 
 struct AttackTriggerStats
 {
+	int prev_buttons;
 	int attack1_down_tick;
 	int attack2_down_tick;
 	int attack1_up_tick;
@@ -39,6 +40,7 @@ struct AttackTriggerStats
 	tb_int attack2_sustain_stats;
 
 	AttackTriggerStats () :
+		prev_buttons(0),
 		attack1_down_tick(0),
 		attack2_down_tick(0),
 		attack1_up_tick(0),
@@ -48,6 +50,7 @@ struct AttackTriggerStats
 	{
 	};
 	AttackTriggerStats ( const AttackTriggerStats& other ) :
+		prev_buttons(other.prev_buttons),
 		attack1_down_tick ( other.attack1_down_tick ),
 		attack2_down_tick ( other.attack2_down_tick ),
 		attack1_up_tick ( other.attack1_up_tick ),
@@ -56,17 +59,6 @@ struct AttackTriggerStats
 		attack2_sustain_stats ( other.attack2_sustain_stats )
 	{
 	};
-
-	AttackTriggerStats& operator=( const AttackTriggerStats& other )
-	{
-		LoggerAssert ( this != &other );
-
-		memcpy ( this, &other, sizeof ( int ) * 4 );
-		attack1_sustain_stats = other.attack1_sustain_stats;
-		attack2_sustain_stats = other.attack2_sustain_stats;
-
-		return *this;
-	}
 };
 
 class AutoAttackTester :
@@ -90,7 +82,7 @@ public:
 
 	virtual bool GotJob () const override final;
 
-	virtual PlayerRunCommandRet RT_PlayerRunCommandCallback ( PlayerHandler::iterator ph, void * const pCmd, void * const old_cmd ) override final;
+	virtual PlayerRunCommandRet RT_PlayerRunCommandCallback ( PlayerHandler::iterator ph, void * const pCmd, double const & curtime) override final;
 
 	void OnAttack1Up ( PlayerHandler::iterator ph, int game_tick );
 

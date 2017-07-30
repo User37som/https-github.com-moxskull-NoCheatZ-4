@@ -128,7 +128,7 @@ private:
 
 	virtual bool GotJob () const override final;
 
-	virtual PlayerRunCommandRet RT_PlayerRunCommandCallback ( PlayerHandler::iterator ph, void * const cmd, void * const old_cmd ) override final;
+	virtual PlayerRunCommandRet RT_PlayerRunCommandCallback ( PlayerHandler::iterator ph, void * const cmd, double const & curtime ) override final;
 
 	virtual bool RT_SendUserMessageCallback(SourceSdk::IRecipientFilter const &, int const, google::protobuf::Message const &);
 

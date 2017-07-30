@@ -70,7 +70,7 @@ float AngleDistance(float next, float cur)
 	return delta;
 }
 
-PlayerRunCommandRet MouseTester::RT_PlayerRunCommandCallback(PlayerHandler::iterator ph, void * const cmd, void * const old_cmd)
+PlayerRunCommandRet MouseTester::RT_PlayerRunCommandCallback(PlayerHandler::iterator ph, void * const cmd, double const & curtime)
 {
 	if (!IsActive())
 		return PlayerRunCommandRet::CONTINUE;

@@ -63,78 +63,51 @@ bool AutoAttackTester::GotJob () const
 	return it != PlayerHandler::end ();
 }
 
-PlayerRunCommandRet AutoAttackTester::RT_PlayerRunCommandCallback ( PlayerHandler::iterator ph, void* pCmd, void* lastcmd )
+PlayerRunCommandRet AutoAttackTester::RT_PlayerRunCommandCallback ( PlayerHandler::iterator ph, void* pCmd, double const & curtime )
 {
 	PlayerRunCommandRet const constexpr drop_cmd = PlayerRunCommandRet::CONTINUE;
 
-	if( SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive )
+	int * buttons;
+	if (SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive)
 	{
-		int const last_buttons ( static_cast< SourceSdk::CUserCmd_csgo* >( lastcmd )->buttons );
-		int const cur_buttons ( static_cast< SourceSdk::CUserCmd_csgo* >( pCmd )->buttons );
-
-		int const attack1_button_changed ( ( last_buttons ^ cur_buttons ) & ( IN_ATTACK ) );
-		int const attack2_button_changed ( ( last_buttons ^ cur_buttons ) & ( IN_ATTACK2 ) );
-
-		int const gtick ( Helpers::GetGameTickCount () );
-
-		if( attack1_button_changed )
-		{
-			if( (cur_buttons & IN_ATTACK ) != 0 )
-			{
-				OnAttack1Down ( ph, gtick );
-			}
-			else
-			{
-				OnAttack1Up ( ph, gtick );
-			}
-		}
-
-		if( attack2_button_changed )
-		{
-			if( (cur_buttons & IN_ATTACK2 ) != 0 )
-			{
-				OnAttack2Down ( ph, gtick );
-			}
-			else
-			{
-				OnAttack2Up ( ph, gtick );
-			}
-		}
+		buttons = &((((SourceSdk::CUserCmd_csgo * const)pCmd))->buttons);
 	}
 	else
 	{
-		int const last_buttons ( static_cast< SourceSdk::CUserCmd* >( lastcmd )->buttons );
-		int const cur_buttons ( static_cast< SourceSdk::CUserCmd* >( pCmd )->buttons );
+		buttons = &((((SourceSdk::CUserCmd * const)pCmd))->buttons);
+	}
+	AttackTriggerStats * const pdata(GetPlayerDataStructByIndex(ph.GetIndex()));
 
-		int const attack1_button_changed ( ( last_buttons ^ cur_buttons ) & ( IN_ATTACK ) );
-		int const attack2_button_changed ( ( last_buttons ^ cur_buttons ) & ( IN_ATTACK2 ) );
+	int const attack1_button_changed ( ( pdata->prev_buttons ^ *buttons ) & ( IN_ATTACK ) );
+	int const attack2_button_changed ( ( pdata->prev_buttons ^ *buttons ) & ( IN_ATTACK2 ) );
 
-		int const gtick ( Helpers::GetGameTickCount () );
+	int const gtick ( Helpers::GetGameTickCount () );
 
-		if( attack1_button_changed )
+	if( attack1_button_changed )
+	{
+		if( (*buttons & IN_ATTACK ) != 0 )
 		{
-			if( (cur_buttons & IN_ATTACK) != 0 )
-			{
-				OnAttack1Down ( ph, gtick );
-			}
-			else
-			{
-				OnAttack1Up ( ph, gtick );
-			}
+			OnAttack1Down ( ph, gtick );
 		}
-
-		if( attack2_button_changed )
+		else
 		{
-			if( (cur_buttons & IN_ATTACK2) != 0 )
-			{
-				OnAttack2Down ( ph, gtick );
-			}
-			else
-			{
-				OnAttack2Up ( ph, gtick );
-			}
+			OnAttack1Up ( ph, gtick );
 		}
 	}
+
+	if( attack2_button_changed )
+	{
+		if( (*buttons & IN_ATTACK2 ) != 0 )
+		{
+			OnAttack2Down ( ph, gtick );
+		}
+		else
+		{
+			OnAttack2Up ( ph, gtick );
+		}
+	}
+
+	pdata->prev_buttons = *buttons;
 
 	return drop_cmd;
 }

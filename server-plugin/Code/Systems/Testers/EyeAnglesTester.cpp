@@ -66,7 +66,7 @@ bool EyeAnglesTester::GotJob () const
 	return it != PlayerHandler::end ();
 }
 
-PlayerRunCommandRet EyeAnglesTester::RT_PlayerRunCommandCallback ( PlayerHandler::iterator ph, void * const pCmd, void * const old_cmd )
+PlayerRunCommandRet EyeAnglesTester::RT_PlayerRunCommandCallback ( PlayerHandler::iterator ph, void * const pCmd, double const & curtime)
 {
 	int const * const flags ( g_EntityProps.GetPropValue<int, PROP_FLAGS> ( ph->GetEdict () ) );
 	EyeAngleInfoT* playerData(GetPlayerDataStructByIndex(ph.GetIndex()));
@@ -85,9 +85,9 @@ PlayerRunCommandRet EyeAnglesTester::RT_PlayerRunCommandCallback ( PlayerHandler
 		{
 			++playerData->x.detectionsCount;
 			//drop_cmd = PlayerRunCommandRet::INERT;
-			if (playerData->x.lastDetectionPrintTime + ANTIFLOOD_LOGGING_TIME < Tier0::Plat_FloatTime())
+			if (playerData->x.lastDetectionPrintTime + ANTIFLOOD_LOGGING_TIME < curtime)
 			{
-				playerData->x.lastDetectionPrintTime = Tier0::Plat_FloatTime();
+				playerData->x.lastDetectionPrintTime = curtime;
 
 				if (playerData->x.detectionsCount > 5)
 				{
@@ -99,9 +99,9 @@ PlayerRunCommandRet EyeAnglesTester::RT_PlayerRunCommandCallback ( PlayerHandler
 		{
 			++playerData->y.detectionsCount;
 			//drop_cmd = PlayerRunCommandRet::INERT;
-			if (playerData->y.lastDetectionPrintTime + ANTIFLOOD_LOGGING_TIME < Tier0::Plat_FloatTime())
+			if (playerData->y.lastDetectionPrintTime + ANTIFLOOD_LOGGING_TIME < curtime)
 			{
-				playerData->y.lastDetectionPrintTime = Tier0::Plat_FloatTime();
+				playerData->y.lastDetectionPrintTime = curtime;
 
 				if (playerData->y.detectionsCount > 5)
 				{
@@ -113,9 +113,9 @@ PlayerRunCommandRet EyeAnglesTester::RT_PlayerRunCommandCallback ( PlayerHandler
 		{
 			++playerData->z.detectionsCount;
 			//drop_cmd = PlayerRunCommandRet::INERT;
-			if (playerData->z.lastDetectionPrintTime + ANTIFLOOD_LOGGING_TIME < Tier0::Plat_FloatTime())
+			if (playerData->z.lastDetectionPrintTime + ANTIFLOOD_LOGGING_TIME < curtime)
 			{
-				playerData->z.lastDetectionPrintTime = Tier0::Plat_FloatTime();
+				playerData->z.lastDetectionPrintTime = curtime;
 
 				if (playerData->z.detectionsCount > 5)
 				{

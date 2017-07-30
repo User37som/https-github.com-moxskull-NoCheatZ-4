@@ -45,7 +45,7 @@ void AimTester::FireGameEvent(SourceSdk::IGameEvent * ev)
 
 }
 
-PlayerRunCommandRet AimTester::RT_PlayerRunCommandCallback(PlayerHandler::iterator ph, void * const cmd, void * const old_cmd)
+PlayerRunCommandRet AimTester::RT_PlayerRunCommandCallback(PlayerHandler::iterator ph, void * const cmd, double const & curtime)
 {
 
 

@@ -148,7 +148,7 @@ void AntiFlashbangBlocker::RT_ProcessOnTick (double const & curtime )
 
 		if( pInfo->flash_end_time != 0.0 )
 		{
-			if( pInfo->flash_end_time > Tier0::Plat_FloatTime () )
+			if( pInfo->flash_end_time > curtime)
 			{
 				Helpers::FadeUser ( ph->GetEdict (), 0 );
 			}

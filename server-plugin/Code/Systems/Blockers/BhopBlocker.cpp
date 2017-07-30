@@ -100,7 +100,7 @@ bool BhopBlocker::GotJob () const
 	return it != PlayerHandler::end ();
 }
 
-PlayerRunCommandRet BhopBlocker::RT_PlayerRunCommandCallback ( PlayerHandler::iterator ph, void* pCmd, void* old_cmd )
+PlayerRunCommandRet BhopBlocker::RT_PlayerRunCommandCallback ( PlayerHandler::iterator ph, void* pCmd, double const & curtime)
 {
 	if( convar_sv_enablebunnyhopping != nullptr )
 	{
@@ -133,96 +133,58 @@ PlayerRunCommandRet BhopBlocker::RT_PlayerRunCommandCallback ( PlayerHandler::it
 
 	int const gtick ( Helpers::GetGameTickCount () );
 
-	if( SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive )
+	int * buttons;
+	if (SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive)
 	{
-		SourceSdk::CUserCmd_csgo const * const k_oldcmd ( ( SourceSdk::CUserCmd_csgo const * const )old_cmd );
-		SourceSdk::CUserCmd_csgo * const k_newcmd ( ( SourceSdk::CUserCmd_csgo * const )pCmd );
-
-		int const jmp_changed ( ( k_oldcmd->buttons ^ k_newcmd->buttons ) & IN_JUMP );
-
-		JmpInfo * pdata ( GetPlayerDataStructByIndex ( ph.GetIndex () ) );
-
-		if( jmp_changed )
-		{
-			int const new_jmp ( k_newcmd->buttons & IN_JUMP );
-
-			if( new_jmp != 0 )
-			{
-				// button down				
-
-				if( gtick - pdata->on_ground_tick < blocking_delay_ticks )
-				{
-					// block it
-
-					k_newcmd->buttons &= ~IN_JUMP;
-					pdata->has_been_blocked = true;
-				}
-				else
-				{
-					pdata->has_been_blocked = false;
-				}
-			}
-			else
-			{
-				pdata->has_been_blocked = false;
-			}
-		}
-		else if( pdata->has_been_blocked == true )
-		{
-			if( gtick - pdata->on_ground_tick >= blocking_delay_ticks )
-			{
-				// resend
-
-				k_newcmd->buttons |= IN_JUMP;
-				pdata->has_been_blocked = false;
-			}
-		}
+		buttons = &((((SourceSdk::CUserCmd_csgo * const)pCmd))->buttons);
 	}
 	else
 	{
-		SourceSdk::CUserCmd const * const k_oldcmd ( ( SourceSdk::CUserCmd const * const )old_cmd );
-		SourceSdk::CUserCmd * const k_newcmd ( ( SourceSdk::CUserCmd * const )pCmd );
+		buttons = &((((SourceSdk::CUserCmd * const)pCmd))->buttons);
+	}
 
-		int const jmp_changed ( ( k_oldcmd->buttons ^ k_newcmd->buttons ) & IN_JUMP );
+	JmpInfo * pdata(GetPlayerDataStructByIndex(ph.GetIndex()));
 
-		JmpInfo * pdata ( GetPlayerDataStructByIndex ( ph.GetIndex () ) );
+	int const jmp_changed ( ( *buttons ^ pdata->old_buttons ) & IN_JUMP );
 
-		if( jmp_changed )
+	if( jmp_changed )
+	{
+		int const new_jmp ( *buttons & IN_JUMP );
+
+		if( new_jmp != 0 )
 		{
-			int const new_jmp ( k_newcmd->buttons & IN_JUMP );
+			// button down				
 
-			if( new_jmp != 0 )
+			if( gtick - pdata->on_ground_tick < blocking_delay_ticks )
 			{
-				// button down				
+				// block it
 
-				if( gtick - pdata->on_ground_tick < blocking_delay_ticks )
-				{
-					// block it
-
-					k_newcmd->buttons &= ~IN_JUMP;
-					pdata->has_been_blocked = true;
-				}
-				else
-				{
-					pdata->has_been_blocked = false;
-				}
+				*buttons &= ~IN_JUMP;
+				pdata->has_been_blocked = true;
 			}
 			else
 			{
 				pdata->has_been_blocked = false;
 			}
 		}
-		else if( pdata->has_been_blocked == true )
+		else
 		{
-			if( gtick - pdata->on_ground_tick >= blocking_delay_ticks )
-			{
-				// resend
-
-				k_newcmd->buttons |= IN_JUMP;
-				pdata->has_been_blocked = false;
-			}
+			pdata->has_been_blocked = false;
 		}
 	}
+	else if( pdata->has_been_blocked == true )
+	{
+		if( gtick - pdata->on_ground_tick >= blocking_delay_ticks )
+		{
+			// resend
+
+			*buttons |= IN_JUMP;
+			pdata->has_been_blocked = false;
+		}
+	}
+
+	pdata->old_buttons = *buttons;
+
 	return PlayerRunCommandRet::CONTINUE;
 }
 

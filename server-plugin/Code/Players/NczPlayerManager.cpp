@@ -225,6 +225,7 @@ bot_takeover
 {
 	const char* event_name ( ev->GetName () + 6 );
 	const int maxcl ( m_max_index );
+	double const curtime(Tier0::Plat_FloatTime());
 
 	if( *event_name == 'e' ) // round_end
 	{
@@ -274,7 +275,7 @@ bot_takeover
 					if( pinfo->GetTeamIndex () > 1 )
 					{
 						DebugMessage(Helpers::format("Players %s : Will enter in status PLAYER_IN_TESTS in 1 second", ph.playerClass->GetName()));
-						ph.in_tests_time = Tier0::Plat_FloatTime () + 1.0f;
+						ph.in_tests_time = curtime + 1.0f;
 					}
 					else
 					{
@@ -357,7 +358,7 @@ bot_takeover
 				{
 					DebugMessage(Helpers::format("Players %s : Will enter in status PLAYER_IN_TESTS in 3 seconds", ph->GetName()));
 					ph.GetHandler ()->status = SlotStatus::PLAYER_CONNECTED;
-					ph.GetHandler ()->in_tests_time = Tier0::Plat_FloatTime () + 3.0f;
+					ph.GetHandler ()->in_tests_time = curtime + 3.0f;
 				}
 				else
 				{
@@ -389,7 +390,7 @@ bot_takeover
 			{
 				DebugMessage(Helpers::format("Players %s : Will enter in status PLAYER_IN_TESTS in 3 seconds", ph->GetName()));
 				ph.GetHandler ()->status = SlotStatus::PLAYER_CONNECTED;
-				ph.GetHandler ()->in_tests_time = Tier0::Plat_FloatTime () + 3.0f;
+				ph.GetHandler ()->in_tests_time = curtime + 3.0f;
 			}
 			else
 			{

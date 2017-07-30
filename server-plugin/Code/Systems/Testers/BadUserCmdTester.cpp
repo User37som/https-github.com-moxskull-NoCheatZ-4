@@ -64,7 +64,7 @@ bool BadUserCmdTester::GotJob () const
 	return true;
 }
 
-PlayerRunCommandRet BadUserCmdTester::RT_PlayerRunCommandCallback ( PlayerHandler::iterator ph, void* pCmd, void* old_cmd )
+PlayerRunCommandRet BadUserCmdTester::RT_PlayerRunCommandCallback ( PlayerHandler::iterator ph, void* pCmd, double const & curtime)
 {
 	SourceSdk::CUserCmd_csgo const * const k_newcmd ( ( SourceSdk::CUserCmd_csgo const * const )pCmd);
 
@@ -86,7 +86,7 @@ PlayerRunCommandRet BadUserCmdTester::RT_PlayerRunCommandCallback ( PlayerHandle
 		isDead = player_info->IsDead ();
 	}
 
-	if( ( isDead | pInfo->m_prev_dead ) || Tier0::Plat_FloatTime () <= pInfo->m_detected_time )
+	if( ( isDead | pInfo->m_prev_dead ) || curtime <= pInfo->m_detected_time )
 	{
 		pInfo->m_prev_dead = isDead;
 
@@ -120,7 +120,7 @@ PlayerRunCommandRet BadUserCmdTester::RT_PlayerRunCommandCallback ( PlayerHandle
 			return PlayerRunCommandRet::BLOCK;
 		}
 
-		pInfo->m_detected_time = Tier0::Plat_FloatTime () + 10.0f;
+		pInfo->m_detected_time = curtime + 10.0f;
 
 		// Push detection
 
@@ -142,7 +142,7 @@ PlayerRunCommandRet BadUserCmdTester::RT_PlayerRunCommandCallback ( PlayerHandle
 		bool const b2(pInfo->prev_tick + 1 != k_newcmd->tick_count);
 		if (b1 || b2)
 		{
-			pInfo->m_detected_time = Tier0::Plat_FloatTime() + 10.0f;
+			pInfo->m_detected_time = curtime + 10.0f;
 
 			// Push detection
 

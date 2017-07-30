@@ -26,16 +26,19 @@ limitations under the License.
 struct JmpInfo
 {
 	int on_ground_tick;
+	int old_buttons;
 	bool has_been_blocked;
 
 	JmpInfo ()
 	{
 		on_ground_tick = 0;
+		old_buttons = 0;
 		has_been_blocked = false;
 	};
 	JmpInfo ( const JmpInfo& other )
 	{
 		on_ground_tick = other.on_ground_tick;
+		old_buttons = other.old_buttons;
 		has_been_blocked = other.has_been_blocked;
 	};
 };
@@ -65,7 +68,7 @@ public:
 
 	virtual bool GotJob () const override final;
 
-	virtual PlayerRunCommandRet RT_PlayerRunCommandCallback ( PlayerHandler::iterator ph, void * const cmd, void * const old_cmd ) override final;
+	virtual PlayerRunCommandRet RT_PlayerRunCommandCallback ( PlayerHandler::iterator ph, void * const cmd, double const & curtime ) override final;
 
 	virtual void RT_m_hGroundEntityStateChangedCallback ( PlayerHandler::iterator ph, bool const new_isOnGround ) override final;
 };
