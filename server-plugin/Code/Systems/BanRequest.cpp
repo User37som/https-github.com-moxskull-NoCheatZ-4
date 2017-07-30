@@ -93,6 +93,26 @@ bool BanRequest::sys_cmd_fn ( const SourceSdk::CCommand &args )
 		}
 		return true;
 	}
+	else if (stricmp("AllowWriteBans", args.Arg(2)) == 0)
+	{
+		if (args.ArgC() >= 4)
+		{
+			if (stricmp("Yes", args.Arg(3)) == 0)
+			{
+				m_can_write_ids = true;
+				g_Logger.Msg<MSG_CMD_REPLY>("AllowWriteBans is Yes");
+				return true;
+			}
+			else if (stricmp("No", args.Arg(3)) == 0)
+			{
+				m_can_write_ids = false;
+				g_Logger.Msg<MSG_CMD_REPLY>("AllowWriteBans is No");
+				return true;
+			}
+		}
+		g_Logger.Msg<MSG_CMD_REPLY>("AllowWriteBans expected Yes or No");
+		return true;
+	}
 	else
 	{
 		return false;
@@ -109,8 +129,11 @@ void BanRequest::OnLevelInit ()
 	cmd_gb_ban = SourceSdk::InterfacesProxy::ICvar_FindCommand ( "gb_externalBanUser" );
 	cmd_sm_ban = SourceSdk::InterfacesProxy::ICvar_FindCommand ( "sm_ban" );
 
-	SourceSdk::InterfacesProxy::Call_ServerCommand ( "exec banned_user.cfg\n" );
-	SourceSdk::InterfacesProxy::Call_ServerCommand ( "exec banned_ip.cfg\n" );
+	if (m_can_write_ids)
+	{
+		SourceSdk::InterfacesProxy::Call_ServerCommand("exec banned_user.cfg\n");
+		SourceSdk::InterfacesProxy::Call_ServerCommand("exec banned_ip.cfg\n");
+	}
 }
 
 BanRequest::~BanRequest ()
