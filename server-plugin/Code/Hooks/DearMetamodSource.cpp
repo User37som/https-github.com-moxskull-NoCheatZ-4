@@ -33,118 +33,126 @@ void SourceHookSafety::TryHookMMSourceHook()
 
 	DebugMessage("Trying to locate metamod ...");
 
-	basic_string gamedir;
-	SourceSdk::InterfacesProxy::GetGameDir(gamedir);
+	if (SourceSdk::InterfacesProxy::ICvar_FindCommand("meta"))
+	{
+		DebugMessage("meta command found. Loading module address ...");
+		basic_string gamedir;
+		SourceSdk::InterfacesProxy::GetGameDir(gamedir);
 
-	basic_string modulename("metamod.2.");
-	
-	if (SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive)
-	{
-		modulename.append("csgo");
-	}
-	else
-	{
-		modulename.append("css");
-	}
+		basic_string modulename("metamod.2.");
+
+		if (SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive)
+		{
+			modulename.append("csgo");
+		}
+		else
+		{
+			modulename.append("css");
+		}
 
 #ifdef WIN32
-	modulename.append(".dll");
+		modulename.append(".dll");
 
-	HMODULE mm_module_handle(GetModuleHandleA(modulename.c_str()));
-	if (mm_module_handle != NULL)
-	{
-		DebugMessage("Trying to hook sourcehook ( badass ) ...");
+		HMODULE mm_module_handle(GetModuleHandleA(modulename.c_str()));
+		if (mm_module_handle != NULL)
+		{
+			DebugMessage("Trying to hook sourcehook ( badass ) ...");
 
-		mem_byte const metafactory_sig_code[48] = {
-			0x55, 0x8B, 0xEC, 0x8B, 0x45, 0x10, 0x83, 0xEC,
-			0x08, 0x85, 0xC0, 0x74, 0x06, 0xC7, 0x00, 0x00,
-			0x00, 0x00, 0x00, 0x53, 0x8B, 0x5D, 0x08, 0x85,
-			0xDB, 0x75, 0x09, 0x33, 0xC0, 0x5B, 0x8B, 0xE5,
-			0x5D, 0xC2, 0x0C, 0x00, 0xB9, 0x54, 0x43, 0x02,
-			0x10, 0x8B, 0xC3, 0xEB, 0x03, 0x00, 0x00, 0x00
-		};
+			mem_byte const metafactory_sig_code[48] = {
+				0x55, 0x8B, 0xEC, 0x8B, 0x45, 0x10, 0x83, 0xEC,
+				0x08, 0x85, 0xC0, 0x74, 0x06, 0xC7, 0x00, 0x00,
+				0x00, 0x00, 0x00, 0x53, 0x8B, 0x5D, 0x08, 0x85,
+				0xDB, 0x75, 0x09, 0x33, 0xC0, 0x5B, 0x8B, 0xE5,
+				0x5D, 0xC2, 0x0C, 0x00, 0xB9, 0x54, 0x43, 0x02,
+				0x10, 0x8B, 0xC3, 0xEB, 0x03, 0x00, 0x00, 0x00
+			};
 
-		mem_byte const metafactory_sig_mask[48] = {
-			0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-			0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0xFF, 0xFF, 0xFF,
-			0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-			0xFF, 0xFF, 0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-			0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00,
-			0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00
-		};
+			mem_byte const metafactory_sig_mask[48] = {
+				0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+				0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0xFF, 0xFF, 0xFF,
+				0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+				0xFF, 0xFF, 0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+				0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00,
+				0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00
+			};
 
-		sig_ctx ctx(metafactory_sig_code, metafactory_sig_mask, 45, 0x67);
+			sig_ctx ctx(metafactory_sig_code, metafactory_sig_mask, 45, 0x67);
 
 #else
-	modulename.append(".so");
-	
-	basic_string relpath(Helpers::format("./%s/addons/metamod/bin/%s", gamedir.c_str(), modulename.c_str()));
+		modulename.append(".so");
 
-	void ** modinfo = (void **)dlopen(relpath.c_str(), RTLD_NOW | RTLD_NOLOAD);
-	void * mm_module_handle = nullptr;
-	if (modinfo != NULL)
-	{
-		DebugMessage("Trying to hook sourcehook ( badass ) ...");
+		basic_string relpath(Helpers::format("./%s/addons/metamod/bin/%s", gamedir.c_str(), modulename.c_str()));
 
-		//mm_module_handle = dlsym(modinfo, ".init_proc");
-		// FIXME : Use link_map to get memory bounds of the module
-		mm_module_handle = *modinfo;
-		dlclose(modinfo);
-	}
-	if (mm_module_handle)
-	{
-		mem_byte const metafactory_sig_code[48] = {
-			0x55, 0x53, 0x57, 0x56, 0x83, 0xEC, 0x2C, 0x8B,
-			0x44, 0x24, 0x4C, 0x8B, 0x5C, 0x24, 0x44, 0x85,
-			0xC0, 0x74, 0x06, 0xC7, 0x00, 0x00, 0x00, 0x00,
-			0x00, 0x31, 0xC0, 0x85, 0xDB, 0x0F, 0x84, 0x3D,
-			0x01, 0x00, 0x00, 0x8B, 0x74, 0x24, 0x48, 0x89,
-			0x1C, 0x24, 0xC7, 0x44, 0x24, 0x04, 0x3A, 0xFC
-		};
+		void ** modinfo = (void **)dlopen(relpath.c_str(), RTLD_NOW | RTLD_NOLOAD);
+		void * mm_module_handle = nullptr;
+		if (modinfo != NULL)
+		{
+			DebugMessage("Trying to hook sourcehook ( badass ) ...");
 
-		mem_byte const metafactory_sig_mask[48] = {
-			0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-			0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-			0xFF, 0xFF, 0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-			0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00,
-			0x00, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-			0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00
-		};
+			//mm_module_handle = dlsym(modinfo, ".init_proc");
+			// FIXME : Use link_map to get memory bounds of the module
+			mm_module_handle = *modinfo;
+			dlclose(modinfo);
+		}
+		if (mm_module_handle)
+		{
+			mem_byte const metafactory_sig_code[48] = {
+				0x55, 0x53, 0x57, 0x56, 0x83, 0xEC, 0x2C, 0x8B,
+				0x44, 0x24, 0x4C, 0x8B, 0x5C, 0x24, 0x44, 0x85,
+				0xC0, 0x74, 0x06, 0xC7, 0x00, 0x00, 0x00, 0x00,
+				0x00, 0x31, 0xC0, 0x85, 0xDB, 0x0F, 0x84, 0x3D,
+				0x01, 0x00, 0x00, 0x8B, 0x74, 0x24, 0x48, 0x89,
+				0x1C, 0x24, 0xC7, 0x44, 0x24, 0x04, 0x3A, 0xFC
+			};
 
-		sig_ctx ctx(metafactory_sig_code, metafactory_sig_mask, 45, 0x89);
+			mem_byte const metafactory_sig_mask[48] = {
+				0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+				0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+				0xFF, 0xFF, 0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+				0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00,
+				0x00, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+				0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00
+			};
+
+			sig_ctx ctx(metafactory_sig_code, metafactory_sig_mask, 45, 0x89);
 
 #endif
 
-		ScanMemoryRegion(reinterpret_cast<mem_byte *>(mm_module_handle), reinterpret_cast<mem_byte *>(mm_module_handle) + 0x30000, &ctx);
+			ScanMemoryRegion(reinterpret_cast<mem_byte *>(mm_module_handle), reinterpret_cast<mem_byte *>(mm_module_handle) + 0x30000, &ctx);
 
-		if (ctx.m_out != nullptr)
-		{
-			g_SourceHook = reinterpret_cast<ISourceHook_Skeleton *>(*(reinterpret_cast<size_t**>(ctx.m_out)));
-
-			if (g_SourceHook != nullptr)
+			if (ctx.m_out != nullptr)
 			{
-				DebugMessage(Helpers::format("g_SourceHook is at 0x%X (Interface Version %d, Impl Version %d)", g_SourceHook, g_SourceHook->GetIfaceVersion(), g_SourceHook->GetImplVersion()));
-				HookInfo haddhook(g_SourceHook, 2, (DWORD)my_AddHook);
-				HookInfo hremovehook(g_SourceHook, 3, (DWORD)my_RemoveHook);
-				HookInfo hremovehookid(g_SourceHook, 4, (DWORD)my_RemoveHookById);
+				g_SourceHook = reinterpret_cast<ISourceHook_Skeleton *>(*(reinterpret_cast<size_t**>(ctx.m_out)));
 
-				local_HookGuardSourceHookSafety.VirtualTableHook(haddhook, "ISourceHook::AddHook");
-				local_HookGuardSourceHookSafety.VirtualTableHook(hremovehook, "ISourceHook::RemoveHook");
-				local_HookGuardSourceHookSafety.VirtualTableHook(hremovehookid, "ISourceHook::RemoveHookById");
+				if (g_SourceHook != nullptr)
+				{
+					DebugMessage(Helpers::format("g_SourceHook is at 0x%X (Interface Version %d, Impl Version %d)", g_SourceHook, g_SourceHook->GetIfaceVersion(), g_SourceHook->GetImplVersion()));
+					HookInfo haddhook(g_SourceHook, 2, (DWORD)my_AddHook);
+					HookInfo hremovehook(g_SourceHook, 3, (DWORD)my_RemoveHook);
+					HookInfo hremovehookid(g_SourceHook, 4, (DWORD)my_RemoveHookById);
+
+					local_HookGuardSourceHookSafety.VirtualTableHook(haddhook, "ISourceHook::AddHook");
+					local_HookGuardSourceHookSafety.VirtualTableHook(hremovehook, "ISourceHook::RemoveHook");
+					local_HookGuardSourceHookSafety.VirtualTableHook(hremovehookid, "ISourceHook::RemoveHookById");
+				}
+				else
+				{
+					g_Logger.Msg<MSG_ERROR>("Failed to get ISourceHook interface.");
+				}
 			}
 			else
 			{
-				g_Logger.Msg<MSG_ERROR>("Failed to get ISourceHook interface.");
+				g_Logger.Msg<MSG_ERROR>("Sigscan failed for MetaFactory.");
 			}
 		}
 		else
 		{
-			g_Logger.Msg<MSG_ERROR>("Sigscan failed for MetaFactory.");
+			g_Logger.Msg<MSG_ERROR>("metamod module address not found.");
 		}
 	}
 	else
 	{
-		DebugMessage("metamod module not found.");
+		DebugMessage("metamod module not loaded.");
 	}
 }
 
