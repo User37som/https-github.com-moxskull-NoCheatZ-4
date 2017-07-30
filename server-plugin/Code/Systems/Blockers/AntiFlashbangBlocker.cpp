@@ -134,8 +134,11 @@ void AntiFlashbangBlocker::FireGameEvent ( SourceSdk::IGameEvent* ev ) // player
 		{
 			pInfo->flash_end_time = Tier0::Plat_FloatTime () + flash_duration / 10.0f;
 		}
-
-		Helpers::FadeUser ( ph->GetEdict (), ( short ) floorf ( flash_duration * 1000.0f ) );
+		pInfo->flash_end_time -= 0.07;
+		if (pInfo->flash_end_time > 0.0)
+		{
+			Helpers::FadeUser(ph->GetEdict(), (short)floorf(flash_duration * 1000.0f));
+		}		
 	}
 }
 
