@@ -70,8 +70,10 @@ void HOOKFN_INT ConCommandHookListener::RT_nDispatch ( void* cmd, void*, SourceS
 					it = it->m_next;
 				}
 
+#ifdef DEBUG
 				if(bypass)
 					DebugMessage ( Helpers::format ( "Bypassed ConCommand %s of %s\n", SourceSdk::InterfacesProxy::ConCommand_GetName ( cmd ), ph->GetName () ) );
+#endif
 			}
 		}
 	}

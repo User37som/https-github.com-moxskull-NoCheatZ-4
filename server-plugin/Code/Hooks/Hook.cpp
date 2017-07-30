@@ -16,6 +16,67 @@
 #include "Hook.h"
 #include "Interfaces/InterfacesProxy.h"
 
+uint32_t RAII_MemoryProtectDword::m_pagesize(0);
+
+#ifdef GNUC
+void RAII_MemoryProtectDword::SetPagesize()
+{
+	if (m_pagesize == 0)
+	{
+		int32_t psize(sysconf(_SC_PAGESIZE));
+		if (psize < 0)
+		{
+			g_Logger.Msg<MSG_ERROR>(Helpers::format("sysconf error %X", errno));
+			*m_errored = true;
+			return;
+		}
+		m_pagesize = (uint32_t)psize;
+	}
+}
+#endif
+
+RAII_MemoryProtectDword::RAII_MemoryProtectDword(DWORD * addr, bool * err) :
+	m_addr(addr),
+	m_dwold(0),
+	m_errored(err),
+	a(nullptr),
+	b(0)
+{
+#ifdef WIN32
+	if (!VirtualProtect(addr, 2 * sizeof(DWORD*), PAGE_READWRITE, &m_dwold))
+	{
+		g_Logger.Msg<MSG_ERROR>(Helpers::format("VirtualProtect Error %X", GetLastError()));
+		*m_errored = true;
+		return;
+	}
+#else // LINUX
+	SetPagesize();
+	if (!*m_errored)
+	{
+		a = ((void *)((DWORD)(m_addr) & ~(m_pagesize - 1)));
+		b = ((DWORD)(m_addr) & (m_pagesize - 1)) + ((2 * sizeof(void *)));
+		if (mprotect(a, b, PROT_READ | PROT_WRITE) < 0)
+		{
+			g_Logger.Msg<MSG_ERROR>(Helpers::format("mprotect error %X", errno));
+			*m_errored = true;
+			return;
+		}
+	}
+#endif // WIN32
+}
+
+RAII_MemoryProtectDword::~RAII_MemoryProtectDword()
+{
+	if (!*m_errored)
+	{
+#ifdef WIN32
+		VirtualProtect(m_addr, 2 * sizeof(DWORD*), m_dwold, &m_dwold);
+#else // LINUX
+		mprotect(a, b, PROT_READ);
+#endif // WIN32
+	}
+}
+
 /*
 	This function will help in debugging error messages, and also helps finding what the plugin is doing in debug mode.
 */
@@ -65,50 +126,22 @@ int HookCompare ( HookInfo const * a, HookInfo const * b )
 
 void MoveVirtualFunction ( DWORD const * const from, DWORD * const to )
 {
-#ifdef WIN32
-	DWORD dwOld;
-	if( !VirtualProtect ( to, sizeof ( DWORD ), PAGE_EXECUTE_READWRITE, &dwOld ) )
+	bool err = false;
+	RAII_MemoryProtectDword z(to, &err);
+	if (!err)
 	{
-		return;
+		DebugMessage(Helpers::format("MoveVirtualFunction : function 0x%X replaced by 0x%X.", *to, *from));
+		*to = *from;
 	}
-#else // LINUX
-	uint32_t psize ( sysconf ( _SC_PAGESIZE ) );
-	void *p = ( void * ) ( ( DWORD ) ( to ) & ~( psize - 1 ) );
-	if( mprotect ( p, sizeof ( DWORD ) & ( psize - 1 ), PROT_READ | PROT_WRITE | PROT_EXEC ) < 0 )
-	{
-		return;
-	}
-#endif // WIN32
-	DebugMessage ( Helpers::format ( "MoveVirtualFunction : function 0x%X replaced by 0x%X.", *to, *from ) );
-	*to = *from;
-#ifdef WIN32
-	VirtualProtect ( to, sizeof ( DWORD ), dwOld, &dwOld );
-#else // LINUX
-	mprotect ( p, sizeof ( DWORD ) & ( psize - 1 ), PROT_READ | PROT_EXEC );
-#endif // WIN32
 }
 
 void ReplaceVirtualFunctionByFakeVirtual(DWORD const replace_by, DWORD * const replace_here)
 {
-#ifdef WIN32
-	DWORD dwOld;
-	if (!VirtualProtect(replace_here, sizeof(DWORD), PAGE_EXECUTE_READWRITE, &dwOld))
+	bool err = false;
+	RAII_MemoryProtectDword z(replace_here, &err);
+	if (!err)
 	{
-		return;
+		DebugMessage(Helpers::format("ReplaceVirtualFunctionByFakeVirtual : function 0x%X replaced by 0x%X.", replace_by, *replace_here));
+		*replace_here = replace_by;
 	}
-#else // LINUX
-	uint32_t psize(sysconf(_SC_PAGESIZE));
-	void *p = (void *)((DWORD)(replace_here) & ~(psize - 1));
-	if (mprotect(p, sizeof(DWORD) & (psize - 1), PROT_READ | PROT_WRITE | PROT_EXEC) < 0)
-	{
-		return;
-	}
-#endif // WIN32
-	DebugMessage(Helpers::format("ReplaceVirtualFunctionByFakeVirtual : function 0x%X replaced by 0x%X.", replace_by, *replace_here));
-	*replace_here = replace_by;
-#ifdef WIN32
-	VirtualProtect(replace_here, sizeof(DWORD), dwOld, &dwOld);
-#else // LINUX
-	mprotect(p, sizeof(DWORD) & (psize - 1), PROT_READ | PROT_EXEC);
-#endif // WIN32
 }

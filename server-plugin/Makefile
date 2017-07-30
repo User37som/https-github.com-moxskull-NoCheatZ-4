@@ -31,7 +31,7 @@ OTHER_PREPROCESSORS = -DGNUC -DPOSIX -DCOMPILER_GCC
 ifdef CXX
 d_CXX = $(CXX) -m32 -std=c++11
 else
-d_CXX = g++ -m32 -std=c++11
+d_CXX = g++-4.8 -m32 -std=c++11
 endif
 
 ARCH_CFLAGS =   -mtune=i486 -march=x86-64 -mmmx
@@ -140,12 +140,20 @@ $(BIN_DIR)/%.o: %.cpp
 all: $(OBJECTS)
 	@$(d_CXX) $(INCLUDE) $(CFLAGS) $(OBJECTS) $(LINK) -m32 -o $(BINARY_DIR)/$(BINARY_NAME)  2>&1 | tee "error_link.txt"
 
-release:
+release-ci:
 	@$(MAKE) unit-tests DEBUG=false COVERAGE=false
 	@$(MAKE) -j6 all DEBUG=false COVERAGE=false
 
-debug:
+debug-ci:
 	@$(MAKE) unit-tests DEBUG=true COVERAGE=false
+	@$(MAKE) -j6 all DEBUG=true COVERAGE=false
+
+release:
+	@$(MAKE) prepare-build DEBUG=false COVERAGE=false
+	@$(MAKE) -j6 all DEBUG=false COVERAGE=false
+
+debug:
+	@$(MAKE) prepare-build DEBUG=true COVERAGE=false
 	@$(MAKE) -j6 all DEBUG=true COVERAGE=false
 
 coverage:

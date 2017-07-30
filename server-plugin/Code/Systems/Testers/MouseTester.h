@@ -110,7 +110,7 @@ public:
 
 	virtual bool GotJob() const override final;
 
-	virtual PlayerRunCommandRet RT_PlayerRunCommandCallback(PlayerHandler::iterator ph, void * const cmd, void * const old_cmd) override final;
+	virtual PlayerRunCommandRet RT_PlayerRunCommandCallback(PlayerHandler::iterator ph, void * const cmd, double const & curtime) override final;
 
 	void ProcessPitchConVar(PlayerHandler::iterator ph, char const * val);
 };

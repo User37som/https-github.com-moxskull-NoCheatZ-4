@@ -44,6 +44,7 @@ private:
 	SourceSdk::edict_t * const m_edict;
 	SourceSdk::INetChannelInfo* m_channelinfo;
 	SourceSdk::IPlayerInfo * m_playerinfo;
+	SourceSdk::QAngle m_eyes;
 	double m_time_connected;
 	
 	bool m_is_detected; 
@@ -68,6 +69,8 @@ public:
 	void GetRelEyePos ( SourceSdk::Vector & out ) const;
 
 	void GetAbsEyePos ( SourceSdk::Vector & out );
+
+	void SetEyes(SourceSdk::QAngle const & in);
 
 	void GetEyeAngles ( SourceSdk::QAngle & out ) const;
 

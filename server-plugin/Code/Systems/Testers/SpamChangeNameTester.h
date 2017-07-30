@@ -25,7 +25,7 @@
 
 struct ChangeNameInfo
 {
-	float next_namechange_test;
+	double next_namechange_test;
 	size_t namechange_count;
 
 	ChangeNameInfo ()

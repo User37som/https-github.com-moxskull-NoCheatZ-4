@@ -36,6 +36,7 @@ NczPlayer::NczPlayer ( const int index ) :
 	m_edict ( Helpers::PEntityOfEntIndex ( index ) ),
 	m_channelinfo ( SourceSdk::InterfacesProxy::Call_GetPlayerNetInfo ( index ) ),
 	m_playerinfo ( nullptr ),
+	m_eyes(),
 	m_time_connected ( 0.0 ),
 	m_is_detected (false )
 {}
@@ -440,7 +441,12 @@ void NczPlayer::GetAbsEyePos ( SourceSdk::Vector & out )
 	SourceSdk::VectorAdd ( rel_eye_pos, out );
 }
 
+void NczPlayer::SetEyes(SourceSdk::QAngle const & in)
+{
+	SourceSdk::VectorCopy(in, m_eyes);
+}
+
 void NczPlayer::GetEyeAngles ( SourceSdk::QAngle & out ) const
 {
-	SourceSdk::VectorCopy ( static_cast< SourceSdk::CUserCmd const * >( PlayerRunCommandHookListener::RT_GetLastUserCmd ( m_index ) )->viewangles, out );
+	SourceSdk::VectorCopy(m_eyes, out);
 }

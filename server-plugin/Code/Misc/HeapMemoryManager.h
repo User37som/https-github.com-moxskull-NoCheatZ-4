@@ -42,6 +42,18 @@ namespace HeapMemoryManager
 			m_capacity(0)
 		{
 		}
+
+		void Copy(FreeMemoryHolder const * other)
+		{
+			m_ptr = other->m_ptr;
+			m_capacity = other->m_capacity;
+		}
+
+		void Zero()
+		{
+			m_ptr = nullptr;
+			m_capacity = 0;
+		}
 	};
 
 	void* AllocateMemory ( size_t bytes, size_t & new_capacity, size_t align_of = 4U );
@@ -49,6 +61,8 @@ namespace HeapMemoryManager
 
 	void InitPool ();
 	void FreePool ();
+
+	bool IsPoolFull();
 
 	template <size_t align>
 	struct OverrideNew

@@ -103,7 +103,7 @@ public:
 
 	virtual bool GotJob () const override final;
 
-	virtual PlayerRunCommandRet RT_PlayerRunCommandCallback ( PlayerHandler::iterator ph, void * const cmd, void * const old_cmd ) override final;
+	virtual PlayerRunCommandRet RT_PlayerRunCommandCallback ( PlayerHandler::iterator ph, void * const cmd, double const & curtime ) override final;
 };
 
 extern BadUserCmdTester g_BadUserCmdTester;

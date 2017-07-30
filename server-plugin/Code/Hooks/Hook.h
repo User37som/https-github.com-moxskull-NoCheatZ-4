@@ -29,6 +29,7 @@
 #	include <unistd.h>
 #	define HOOKFN_EXT
 #	define HOOKFN_INT __attribute__((cdecl))
+#	include <errno.h>
 #endif
 
 #include "SdkPreprocessors.h"
@@ -49,6 +50,25 @@ basic_string GetModuleNameFromMemoryAddress ( DWORD ptr );
 
 void MoveVirtualFunction ( DWORD const * const from, DWORD * const to );
 void ReplaceVirtualFunctionByFakeVirtual(DWORD const replace_by, DWORD * const replace_here);
+
+class RAII_MemoryProtectDword
+{
+private:
+	DWORD * m_addr;
+	DWORD m_dwold;
+	bool * m_errored;
+	static uint32_t m_pagesize;
+	void * a;
+	size_t b;
+
+#ifdef GNUC
+	void SetPagesize();
+#endif
+public:
+	RAII_MemoryProtectDword(DWORD * addr, bool * err);
+
+	~RAII_MemoryProtectDword();
+};
 
 class CBaseEntity;
 
@@ -129,87 +149,65 @@ public:
 		if (info.debugname)
 			debugname = info.debugname;
 
-		//info.oldFn = 0;
-#ifdef WIN32
-		DWORD dwOld;
-		if( !VirtualProtect ( info.vf_entry, 2 * sizeof ( DWORD* ), PAGE_EXECUTE_READWRITE, &dwOld ) )
+		bool err = false;
+		RAII_MemoryProtectDword z(info.vf_entry, &err);
+		if (!err)
 		{
-			g_Logger.Msg<MSG_ERROR> ( Helpers::format( "VirtualTableHook %s: VirtualProtect error -> Cannot hook function", debugname ) );
-			if (m_list.HasElement(info))
-				m_list.FindAndRemove(info);
-			return;
-		}
-#else // LINUX
-		uint32_t psize ( sysconf ( _SC_PAGESIZE ) );
-		void *p ( ( void * ) ( ( DWORD ) ( info.vf_entry ) & ~( psize - 1 ) ) );
-		if( mprotect ( p, ( ( 2 * sizeof ( void * ) ) + ( ( DWORD ) ( info.vf_entry ) & ( psize - 1 ) ) ), PROT_READ | PROT_WRITE | PROT_EXEC ) < 0 )
-		{
-			g_Logger.Msg<MSG_ERROR> ( Helpers::format( "VirtualTableHook %s: mprotect error -> Cannot hook function", debugname ) );
-			if (m_list.HasElement(info))
-				m_list.FindAndRemove(info);
-			return;
-		}
-#endif // WIN32
+			bool can_hook = true;
 
-		bool can_hook = true;
-
-		if( info.oldFn && info.oldFn != SafePtrDeref(info.vf_entry) )
-		{
-			g_Logger.Msg<MSG_WARNING> ( Helpers::format ( "VirtualTableHook %s: Unexpected virtual table value in VirtualTableHook. Module %s might be in conflict.", debugname, GetModuleNameFromMemoryAddress (SafePtrDeref(info.vf_entry) ).c_str () ) );
-			can_hook = force;
-		}
-		else if( info.newFn == *info.vf_entry )
-		{
-			if( !m_list.HasElement ( info ) )
+			if (info.oldFn && info.oldFn != SafePtrDeref(info.vf_entry))
 			{
-				g_Logger.Msg<MSG_WARNING> (Helpers::format("VirtualTableHook %s: Virtual function pointer 0x%X was the same but not registered as hooked ...", debugname, info.newFn ));
-				info.ishooked = true;
-				info.debugname = debugname;
-				m_list.AddToTail ( info );
-				m_list.Sort ( HookCompare );
-				can_hook = false;
+				g_Logger.Msg<MSG_WARNING>(Helpers::format("VirtualTableHook %s: Unexpected virtual table value in VirtualTableHook. Module %s might be in conflict.", debugname, GetModuleNameFromMemoryAddress(SafePtrDeref(info.vf_entry)).c_str()));
+				can_hook = force;
+			}
+			else if (info.newFn == *info.vf_entry)
+			{
+				if (!m_list.HasElement(info))
+				{
+					g_Logger.Msg<MSG_WARNING>(Helpers::format("VirtualTableHook %s: Virtual function pointer 0x%X was the same but not registered as hooked ...", debugname, info.newFn));
+					info.ishooked = true;
+					info.debugname = debugname;
+					m_list.AddToTail(info);
+					m_list.Sort(HookCompare);
+					can_hook = false;
+				}
+			}
+
+			if (can_hook)
+			{
+				info.oldFn = *info.vf_entry;
+				*info.vf_entry = info.newFn;
+				DebugMessage(Helpers::format("VirtualTableHook %s: function 0x%X at 0x%X in %s replaced by 0x%X from %s.", debugname, info.oldFn, info.vf_entry, GetModuleNameFromMemoryAddress(info.oldFn).c_str(), info.newFn, GetModuleNameFromMemoryAddress(info.newFn).c_str()));
+
+				if (!m_list.HasElement(info))
+				{
+					info.ishooked = true;
+					info.debugname = debugname;
+					m_list.AddToTail(info);
+					m_list.Sort(HookCompare);
+				}
+				else
+				{
+					info.ishooked = !info.ishooked;
+				}
 			}
 		}
-
-		if( can_hook )
-		{
-			info.oldFn = *info.vf_entry;
-			*info.vf_entry = info.newFn;
-			DebugMessage ( Helpers::format ( "VirtualTableHook %s: function 0x%X at 0x%X in %s replaced by 0x%X from %s.", debugname, info.oldFn, info.vf_entry, GetModuleNameFromMemoryAddress ( info.oldFn ).c_str (), info.newFn, GetModuleNameFromMemoryAddress ( info.newFn ).c_str () ) );
-
-			if( !m_list.HasElement ( info ) )
-			{
-				info.ishooked = true;
-				info.debugname = debugname;
-				m_list.AddToTail ( info );
-				m_list.Sort ( HookCompare );
-			}
-			else
-			{
-				info.ishooked = !info.ishooked;
-			}
-		}
-
-#ifdef WIN32
-		VirtualProtect ( info.vf_entry, 2 * sizeof ( DWORD* ), dwOld, &dwOld );
-#else // LINUX
-		mprotect ( p, ( ( 2 * sizeof ( void * ) ) + ( ( DWORD ) ( info.vf_entry ) & ( psize - 1 ) ) ), PROT_READ | PROT_EXEC );
-#endif // WIN32
-		
 	}
 
 	// Find by virtual table entry address
 	inline DWORD RT_GetOldFunction ( void* class_ptr, int vfid ) const
 	{
 		int it ( m_list.Find ( HookInfo ( class_ptr, vfid ) ) );
-		if( it != -1 )
+		return m_list[it].oldFn; // let it crash because it's not supposed to be not found anyway. just saved a tiny branch-miss.
+
+		/*if( it != -1 )
 		{
 			return m_list[ it ].oldFn;
 		}
 		else
 		{
 			return 0;
-		}
+		}*/
 	}
 
 	// Only find by virtual table base (Remove need to call ConfigManager), class_ptr is converted to virtual table base

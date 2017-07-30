@@ -104,7 +104,7 @@ void SpeedTester::RT_ProcessOnTick (double const & curtime )
 	}
 }
 
-PlayerRunCommandRet SpeedTester::RT_PlayerRunCommandCallback ( PlayerHandler::iterator ph, void* pCmd, void* old_cmd )
+PlayerRunCommandRet SpeedTester::RT_PlayerRunCommandCallback ( PlayerHandler::iterator ph, void* pCmd, double const & curtime)
 {
 	float& tl ( this->GetPlayerDataStructByIndex ( ph.GetIndex () )->ticksLeft );
 

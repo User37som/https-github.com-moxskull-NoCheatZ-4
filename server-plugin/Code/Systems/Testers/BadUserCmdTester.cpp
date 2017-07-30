@@ -64,9 +64,8 @@ bool BadUserCmdTester::GotJob () const
 	return true;
 }
 
-PlayerRunCommandRet BadUserCmdTester::RT_PlayerRunCommandCallback ( PlayerHandler::iterator ph, void* pCmd, void* old_cmd )
+PlayerRunCommandRet BadUserCmdTester::RT_PlayerRunCommandCallback ( PlayerHandler::iterator ph, void* pCmd, double const & curtime)
 {
-	SourceSdk::CUserCmd_csgo const * const k_oldcmd ( ( SourceSdk::CUserCmd_csgo const * const )old_cmd);
 	SourceSdk::CUserCmd_csgo const * const k_newcmd ( ( SourceSdk::CUserCmd_csgo const * const )pCmd);
 
 	if( k_newcmd->command_number <= 0 ) // Null cmd.
@@ -87,7 +86,7 @@ PlayerRunCommandRet BadUserCmdTester::RT_PlayerRunCommandCallback ( PlayerHandle
 		isDead = player_info->IsDead ();
 	}
 
-	if( ( isDead | pInfo->m_prev_dead ) || Tier0::Plat_FloatTime () <= pInfo->m_detected_time )
+	if( ( isDead | pInfo->m_prev_dead ) || curtime <= pInfo->m_detected_time )
 	{
 		pInfo->m_prev_dead = isDead;
 
@@ -112,15 +111,7 @@ PlayerRunCommandRet BadUserCmdTester::RT_PlayerRunCommandCallback ( PlayerHandle
 		return PlayerRunCommandRet::CONTINUE;
 	}
 	
-	if (SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive)
-	{
-		if( pInfo->prev_cmd == k_newcmd->command_number ) // Server is repeating commands, We will ignore here.
-		{
-			return PlayerRunCommandRet::CONTINUE; 
-		}
-	}
-	
-	if( pInfo->prev_cmd > k_newcmd->command_number ) // Current command is less than previous command.
+	if( pInfo->prev_cmd > k_newcmd->command_number )
 	{
 		if( pInfo->m_tick_status != TickStatus_t::OK )
 		{
@@ -129,7 +120,7 @@ PlayerRunCommandRet BadUserCmdTester::RT_PlayerRunCommandCallback ( PlayerHandle
 			return PlayerRunCommandRet::BLOCK;
 		}
 
-		pInfo->m_detected_time = Tier0::Plat_FloatTime () + 10.0f;
+		pInfo->m_detected_time = curtime + 10.0f;
 
 		// Push detection
 
@@ -138,8 +129,7 @@ PlayerRunCommandRet BadUserCmdTester::RT_PlayerRunCommandCallback ( PlayerHandle
 
 		return PlayerRunCommandRet::BLOCK;
 	}
-	
-	if( pInfo->prev_cmd < k_newcmd->command_number ) // Current command is more than previous, everything ok.
+	else if( pInfo->prev_cmd == k_newcmd->command_number )
 	{
 		if( pInfo->m_tick_status != TickStatus_t::OK )
 		{
@@ -147,34 +137,20 @@ PlayerRunCommandRet BadUserCmdTester::RT_PlayerRunCommandCallback ( PlayerHandle
 
 			return PlayerRunCommandRet::BLOCK;
 		}
-		
-		if (SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive)
+
+		bool const b1(SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive);
+		bool const b2(pInfo->prev_tick != k_newcmd->tick_count);
+		bool const b3(pInfo->prev_tick + 1 != k_newcmd->tick_count);
+		if ( b3 && ((b1 && b2) || (!b1)) )
 		{
-			if (pInfo->prev_tick == k_newcmd->tick_count) // Previous tick is equal to current tick.
-			{
-				pInfo->m_detected_time = Tier0::Plat_FloatTime() + 10.0f;
+			pInfo->m_detected_time = curtime + 10.0f;
 
-				// Push detection
+			// Push detection
 
-				BadCmdInfo detect_info(pInfo, k_newcmd);
-				ProcessDetectionAndTakeAction<BadCmdInfo>(Detection_BadUserCmd(), &detect_info, ph, this);
+			BadCmdInfo detect_info(pInfo, k_newcmd);
+			ProcessDetectionAndTakeAction<BadCmdInfo>(Detection_BadUserCmd(), &detect_info, ph, this);
 
-				return PlayerRunCommandRet::BLOCK;
-			}
-		}
-		else
-		{
-			if (k_oldcmd->tick_count + 1 != k_newcmd->tick_count)
-			{
-				pInfo->m_detected_time = Tier0::Plat_FloatTime() + 10.0f;
-
-				// Push detection
-
-				BadCmdInfo detect_info(pInfo, k_newcmd);
-				ProcessDetectionAndTakeAction<BadCmdInfo>(Detection_BadUserCmd(), &detect_info, ph, this);
-
-				return PlayerRunCommandRet::BLOCK;
-			}
+			return PlayerRunCommandRet::BLOCK;
 		}
 		
 		++(pInfo->cmd_offset);

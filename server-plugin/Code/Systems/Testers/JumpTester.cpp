@@ -154,7 +154,7 @@ void JumpTester::RT_m_hGroundEntityStateChangedCallback ( PlayerHandler::iterato
 	}
 }
 
-PlayerRunCommandRet JumpTester::RT_PlayerRunCommandCallback ( PlayerHandler::iterator ph, void* pCmd, void* old_cmd )
+PlayerRunCommandRet JumpTester::RT_PlayerRunCommandCallback ( PlayerHandler::iterator ph, void* pCmd, double const & curtime)
 {
 	PlayerRunCommandRet const constexpr drop_cmd ( PlayerRunCommandRet::CONTINUE );
 
@@ -175,31 +175,26 @@ PlayerRunCommandRet JumpTester::RT_PlayerRunCommandCallback ( PlayerHandler::ite
 		}
 	}
 
-	bool last_jump_button_state;
+	JumpInfoT * const playerData(GetPlayerDataStructByIndex(ph.GetIndex()));
 	bool cur_jump_button_state;
 
 	if( SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive )
 	{
-		last_jump_button_state = ( static_cast< SourceSdk::CUserCmd_csgo* >( old_cmd )->buttons & IN_JUMP ) != 0;
 		cur_jump_button_state = ( static_cast< SourceSdk::CUserCmd_csgo* >( pCmd )->buttons & IN_JUMP ) != 0;
 	}
 	else
 	{
-		last_jump_button_state = ( static_cast< SourceSdk::CUserCmd* >( old_cmd )->buttons & IN_JUMP ) != 0;
 		cur_jump_button_state = ( static_cast< SourceSdk::CUserCmd* >( pCmd )->buttons & IN_JUMP ) != 0;
 	}
 
-	bool const jump_button_changed ( last_jump_button_state ^ cur_jump_button_state );
+	bool const jump_button_changed (playerData->prev_jump ^ cur_jump_button_state );
 
 	if( !jump_button_changed )
 	{
-		LoggerAssert ( last_jump_button_state == cur_jump_button_state );
 		return drop_cmd;
 	}
 	else
 	{
-		LoggerAssert ( last_jump_button_state != cur_jump_button_state );
-
 		if( cur_jump_button_state )
 		{
 			OnPlayerJumpButtonDown ( ph, Helpers::GetGameTickCount () );
@@ -209,6 +204,8 @@ PlayerRunCommandRet JumpTester::RT_PlayerRunCommandCallback ( PlayerHandler::ite
 			OnPlayerJumpButtonUp ( ph, Helpers::GetGameTickCount () );
 		}
 	}
+
+	playerData->prev_jump = cur_jump_button_state;
 
 	return drop_cmd;
 }

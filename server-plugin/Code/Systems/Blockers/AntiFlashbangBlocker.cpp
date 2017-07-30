@@ -74,15 +74,10 @@ bool AntiFlashbangBlocker::GotJob () const
 
 bool AntiFlashbangBlocker::RT_SetTransmitCallback ( PlayerHandler::iterator sender, PlayerHandler::iterator receiver )
 {
-	if( !receiver )
-	{
-		return false;
-	}
-
 	SourceSdk::IPlayerInfo * const player_info ( receiver->GetPlayerInfo () );
 	if( !player_info ) return false;
 
-	if( player_info->IsFakeClient () )
+	if( player_info->IsFakeClient () || player_info->IsDead() )
 	{
 		return false;
 	}
@@ -111,7 +106,7 @@ void AntiFlashbangBlocker::FireGameEvent ( SourceSdk::IGameEvent* ev ) // player
 		return;
 	}
 
-	if( ph >= SlotStatus::PLAYER_CONNECTED )
+	if( ph >= SlotStatus::PLAYER_IN_TESTS )
 	{
 		FlashInfoT* const pInfo ( GetPlayerDataStruct ( *ph ) );
 		const float flash_alpha ( *g_EntityProps.GetPropValue<float, PROP_FLASH_MAX_ALPHA> ( ph->GetEdict () ) );
@@ -134,8 +129,11 @@ void AntiFlashbangBlocker::FireGameEvent ( SourceSdk::IGameEvent* ev ) // player
 		{
 			pInfo->flash_end_time = Tier0::Plat_FloatTime () + flash_duration / 10.0f;
 		}
-
-		Helpers::FadeUser ( ph->GetEdict (), ( short ) floorf ( flash_duration * 1000.0f ) );
+		pInfo->flash_end_time -= 0.07;
+		if (pInfo->flash_end_time > 0.0)
+		{
+			Helpers::FadeUser(ph->GetEdict(), (short)floorf(flash_duration * 1000.0f));
+		}		
 	}
 }
 
@@ -148,7 +146,7 @@ void AntiFlashbangBlocker::RT_ProcessOnTick (double const & curtime )
 
 		if( pInfo->flash_end_time != 0.0 )
 		{
-			if( pInfo->flash_end_time > Tier0::Plat_FloatTime () )
+			if( pInfo->flash_end_time > curtime)
 			{
 				Helpers::FadeUser ( ph->GetEdict (), 0 );
 			}

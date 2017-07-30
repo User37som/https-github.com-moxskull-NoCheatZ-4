@@ -95,7 +95,7 @@ private:
 
 	virtual void RT_ProcessOnTick (double const & curtime ) override final;
 
-	virtual PlayerRunCommandRet RT_PlayerRunCommandCallback ( PlayerHandler::iterator ph, void * const cmd, void * const old_cmd ) override final;
+	virtual PlayerRunCommandRet RT_PlayerRunCommandCallback ( PlayerHandler::iterator ph, void * const cmd, double const & curtime) override final;
 };
 
 extern SpeedTester g_SpeedTester;

@@ -76,6 +76,7 @@ typedef struct JumpInfo
 	int perfectBhopsCount;
 
 	bool isOnGround;
+	bool prev_jump;
 
 	JumpInfo ()
 	{
@@ -147,7 +148,7 @@ public:
 
 	virtual void RT_m_hGroundEntityStateChangedCallback ( PlayerHandler::iterator ph, bool const new_isOnGround ) override final;
 
-	virtual PlayerRunCommandRet RT_PlayerRunCommandCallback ( PlayerHandler::iterator ph, void * const cmd, void * const old_cmd ) override final;
+	virtual PlayerRunCommandRet RT_PlayerRunCommandCallback ( PlayerHandler::iterator ph, void * const cmd, double const & curtime) override final;
 
 	void OnPlayerTouchGround ( PlayerHandler::iterator ph, int game_tick );
 
