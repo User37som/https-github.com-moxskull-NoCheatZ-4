@@ -57,7 +57,7 @@ private:
 	DWORD * m_addr;
 	DWORD m_dwold;
 	bool * m_errored;
-	uint32_t m_pagesize;
+	static uint32_t m_pagesize;
 	void * a;
 	void * b;
 

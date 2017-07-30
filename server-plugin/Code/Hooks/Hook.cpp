@@ -16,21 +16,26 @@
 #include "Hook.h"
 #include "Interfaces/InterfacesProxy.h"
 
+uint32_t RAII_MemoryProtectDword::m_pagesize(0);
+
 #ifdef GNUC
 void RAII_MemoryProtectDword::SetPagesize()
 {
-	int32_t psize(sysconf(_SC_PAGESIZE));
-	if (psize < 0)
+	if (m_pagesize == 0)
 	{
-		psize = sysconf(PAGESIZE);
+		int32_t psize(sysconf(_SC_PAGESIZE));
+		if (psize < 0)
+		{
+			psize = sysconf(PAGESIZE);
+		}
+		if (psize < 0)
+		{
+			g_Logger.Msg<MSG_ERROR>(Helpers::format("sysconf error %X", errno()));
+			*m_errored = true;
+			return;
+		}
+		m_pagesize = (uint32_t)psize;
 	}
-	if (psize < 0)
-	{
-		g_Logger.Msg<MSG_ERROR>(Helpers::format("sysconf error %X", errno()));
-		*m_errored = true;
-		return;
-	}
-	m_pagesize = (uint32_t)psize;
 }
 #endif
 
@@ -38,7 +43,6 @@ RAII_MemoryProtectDword::RAII_MemoryProtectDword(DWORD * addr, bool * err) :
 	m_addr(addr),
 	m_dwold(0),
 	m_errored(err),
-	m_pagesize(0),
 	a(nullptr),
 	b(nullptr)
 {
