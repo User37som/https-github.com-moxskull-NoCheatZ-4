@@ -26,10 +26,6 @@ void RAII_MemoryProtectDword::SetPagesize()
 		int32_t psize(sysconf(_SC_PAGESIZE));
 		if (psize < 0)
 		{
-			psize = sysconf(PAGESIZE);
-		}
-		if (psize < 0)
-		{
 			g_Logger.Msg<MSG_ERROR>(Helpers::format("sysconf error %X", errno()));
 			*m_errored = true;
 			return;
@@ -44,7 +40,7 @@ RAII_MemoryProtectDword::RAII_MemoryProtectDword(DWORD * addr, bool * err) :
 	m_dwold(0),
 	m_errored(err),
 	a(nullptr),
-	b(nullptr)
+	b(0)
 {
 #ifdef WIN32
 	if (!VirtualProtect(addr, 2 * sizeof(DWORD*), PAGE_READWRITE, &m_dwold))
@@ -58,10 +54,10 @@ RAII_MemoryProtectDword::RAII_MemoryProtectDword(DWORD * addr, bool * err) :
 	if (!*m_errored)
 	{
 		a = ((void *)((DWORD)(m_addr) & ~(m_pagesize - 1)));
-		b = ((2 * sizeof(void *)) + ((DWORD)(m_addr) & (m_pagesize - 1)));
+		b = ((DWORD)(m_addr) & (m_pagesize - 1)) + ((2 * sizeof(void *)));
 		if (mprotect(a, b, PROT_READ | PROT_WRITE) < 0)
 		{
-			g_Logger.Msg<MSG_ERROR>(Helpers::format("mprotect error %X", errno()));
+			g_Logger.Msg<MSG_ERROR>(Helpers::format("mprotect error %X", errno));
 			*m_errored = true;
 			return;
 		}

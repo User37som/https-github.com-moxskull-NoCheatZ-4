@@ -59,7 +59,7 @@ private:
 	bool * m_errored;
 	static uint32_t m_pagesize;
 	void * a;
-	void * b;
+	size_t b;
 
 #ifdef GNUC
 	void SetPagesize();
