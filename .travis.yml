@@ -21,8 +21,8 @@ before_script:
   - cd ../server-plugin
   - sh ../scripts/make-protobuf.sh
 script:
-  - make debug CXX=g++-4.8 -j 3
-  - make release CXX=g++-4.8 -j 3
+  - make debug-ci
+  - make release-ci
   - cd ../scripts
   - python validate-libc-version.py 2.4.0 3.4.16 ../Builds/Debug/addons/NoCheatZ/nocheatzX.so ../Builds/Release/addons/NoCheatZ/nocheatzX.so
 before_deploy:
