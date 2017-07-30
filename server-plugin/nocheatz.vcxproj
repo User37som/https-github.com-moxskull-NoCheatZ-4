@@ -75,7 +75,7 @@
     <RunCodeAnalysis>false</RunCodeAnalysis>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Profiler|Win32'">
-    <OutDir>C:\steamcmd\CSGO\csgo\addons\NoCheatZ\</OutDir>
+    <OutDir>E:\steamcmd\CSGO\csgo\addons\NoCheatZ\</OutDir>
     <IntDir>Profiler\</IntDir>
     <PreBuildEventUseInBuild>true</PreBuildEventUseInBuild>
     <PreLinkEventUseInBuild>true</PreLinkEventUseInBuild>
@@ -253,7 +253,7 @@ copy "$(TargetPath)" ..\..\..\game\bin\"$(TargetName)".pdb
       </Version>
       <StripPrivateSymbols>
       </StripPrivateSymbols>
-      <Profile>false</Profile>
+      <Profile>true</Profile>
     </Link>
     <Manifest>
       <SuppressStartupBanner>true</SuppressStartupBanner>
@@ -572,9 +572,11 @@ copy "$(TargetPath)" ..\..\..\game\bin\"$(TargetName)".pdb
   <ItemGroup>
     <Library Include="SourceSdk\libs\libprotobuf-debug.lib">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Profiler|Win32'">true</ExcludedFromBuild>
     </Library>
     <Library Include="SourceSdk\libs\libprotobuf.lib">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Profiler|Win32'">false</ExcludedFromBuild>
     </Library>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

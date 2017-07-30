@@ -117,12 +117,18 @@ void SpamChangeNameTester::RT_ProcessOnTick (double const & curtime )
 		ChangeNameInfo* const pInfo ( GetPlayerDataStruct ( *ph ) );
 
 		{
-			if( pInfo->namechange_count >= 5 )
-				if( pInfo->next_namechange_test < curtime )
+			if (pInfo->namechange_count >= 5)
+			{
+				if (pInfo->next_namechange_test < curtime)
 				{
-					ph->Ban ( "Banned for namechange spamming", 10 );
+					g_BanRequest.BanNow(*ph, 10, "Banned for namechange spamming");
 				}
-			ResetPlayerDataStruct ( *ph );
+				else
+				{
+					ResetPlayerDataStruct(*ph);
+					pInfo->next_namechange_test = curtime + 20.0;
+				}
+			}
 		}
 	}
 }

@@ -64,23 +64,19 @@ void HOOKFN_INT SetTransmitHookListener::RT_nSetTransmit ( void * const This, vo
 {
 	SetTransmit_t gpOldFn;
 	PlayerHandler::iterator receiver_assumed_player ( Helpers::IndexOfEdict ( *pInfo ) );
+	PlayerHandler::iterator sender_assumed_client(g_NczPlayerManager.GetPlayerHandlerByBasePlayer(This));
 
-	if( !bAlways && !( m_listeners.GetFirst () == nullptr ) && receiver_assumed_player > SlotStatus::PLAYER_CONNECTING )
+	if( !bAlways && sender_assumed_client != receiver_assumed_player && receiver_assumed_player > SlotStatus::PLAYER_CONNECTING && sender_assumed_client >= SlotStatus::BOT )
 	{
-		PlayerHandler::iterator sender_assumed_client ( g_NczPlayerManager.GetPlayerHandlerByBasePlayer ( This ) );
+		TransmitListenersListT::elem_t* it ( m_listeners.GetFirst () );
 
-		if( sender_assumed_client != receiver_assumed_player && sender_assumed_client != SlotStatus::PLAYER_CONNECTING && sender_assumed_client >= SlotStatus::BOT )
+		while( it != nullptr )
 		{
-			TransmitListenersListT::elem_t* it ( m_listeners.GetFirst () );
-
-			while( it != nullptr )
+			if( it->m_value.listener->RT_SetTransmitCallback ( sender_assumed_client, receiver_assumed_player ) )
 			{
-				if( it->m_value.listener->RT_SetTransmitCallback ( sender_assumed_client, receiver_assumed_player ) )
-				{
-					return;
-				}
-				it = it->m_next;
+				return;
 			}
+			it = it->m_next;
 		}
 	}
 

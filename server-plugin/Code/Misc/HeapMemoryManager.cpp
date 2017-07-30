@@ -27,18 +27,6 @@ namespace HeapMemoryManager
 	FreeMemoryHolder m_free_memory[ HMM_MAX_FREE_OBJECTS ];
 	bool m_memory_init ( false );
 
-	inline int SortMemPool ( FreeMemoryHolder const * a, FreeMemoryHolder const * b )
-	{
-		if( a->m_capacity > b->m_capacity ) return 1;
-		else if( a->m_capacity < b->m_capacity ) return -1;
-		else return 0;
-	}
-
-	int SortMemPool_wrap ( void const * a, void const * b )
-	{
-		return SortMemPool ( static_cast< FreeMemoryHolder const * >( a ), static_cast< FreeMemoryHolder const * >( b ) );
-	}
-
 	void* AllocateMemory ( size_t bytes, size_t & new_capacity, size_t align_of /* = 4U */ )
 	{
 		if( !m_memory_init ) InitPool ();
@@ -58,10 +46,16 @@ namespace HeapMemoryManager
 					{
 						new_capacity = it->m_capacity;
 						void * ret ( it->m_ptr );
-						it->m_capacity = std::numeric_limits<size_t>::max ();
-						it->m_ptr = nullptr;
 
-						std::qsort ( m_free_memory, HMM_MAX_FREE_OBJECTS, sizeof ( FreeMemoryHolder ), SortMemPool_wrap );
+						// move other containers down by 1 index
+
+						FreeMemoryHolder* it2(it);
+						while (++it2 != it_end)
+						{
+							it->Copy(it2);
+							it2->Zero();
+							++it;
+						}
 
 						return ret;
 					}
@@ -78,22 +72,44 @@ namespace HeapMemoryManager
 		return nptr;
 	}
 
+	bool IsPoolFull()
+	{
+		return (m_free_memory + HMM_MAX_FREE_OBJECTS - 1)->m_ptr != nullptr;
+	}
+
 	void FreeMemory ( void * ptr, size_t capacity )
 	{
 		if( !m_memory_init ) InitPool ();
-		Assert ( capacity && ( capacity & 0xFF ) != 0xCC );
-		FreeMemoryHolder* it ( m_free_memory + HMM_MAX_FREE_OBJECTS - 1 );
-		if( it->m_ptr != nullptr || capacity > HMM_MAX_SINGLE_OBJECT_SIZE ) // Pool is full or memory too big
+		else if (IsPoolFull())
 		{
-			_mm_free ( ptr );
+			_mm_free(ptr);
 		}
-		else
-		{
-			it->m_ptr = ptr;
-			it->m_capacity = capacity;
 
-			std::qsort ( m_free_memory, HMM_MAX_FREE_OBJECTS, sizeof ( FreeMemoryHolder ), SortMemPool_wrap );
+		// find the best place (insertion sort)
+
+		FreeMemoryHolder* it(m_free_memory);
+		FreeMemoryHolder * const it_end(&(m_free_memory[HMM_MAX_FREE_OBJECTS]));
+		do
+		{
+			if (it->m_ptr == nullptr || it->m_capacity > capacity)
+			{
+				break;
+			}
+		} while (++it != it_end);
+
+		// move other containers up by 1 index
+
+		FreeMemoryHolder* it2(it_end);
+		FreeMemoryHolder* it3(it2 - 2);
+		while (--it2 != it)
+		{
+			it2->Copy(it3);
+			it3->Zero();
+			--it3;
 		}
+		
+		it->m_ptr = ptr;
+		it->m_capacity = capacity;
 	}
 
 	void InitPool ()
@@ -102,8 +118,7 @@ namespace HeapMemoryManager
 		FreeMemoryHolder const * const it_end ( &( m_free_memory[ HMM_MAX_FREE_OBJECTS ] ) );
 		do
 		{
-			it->m_ptr = nullptr;
-			it->m_capacity = std::numeric_limits<size_t>::max ();
+			it->Zero();
 		}
 		while( ++it != it_end );
 		m_memory_init = true;
@@ -119,8 +134,7 @@ namespace HeapMemoryManager
 			if( it->m_ptr != nullptr )
 			{
 				_mm_free ( it->m_ptr );
-				it->m_ptr = nullptr;
-				it->m_capacity = std::numeric_limits<size_t>::max ();
+				it->Zero();
 			}
 			else
 			{

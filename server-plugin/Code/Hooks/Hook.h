@@ -198,14 +198,16 @@ public:
 	inline DWORD RT_GetOldFunction ( void* class_ptr, int vfid ) const
 	{
 		int it ( m_list.Find ( HookInfo ( class_ptr, vfid ) ) );
-		if( it != -1 )
+		return m_list[it].oldFn; // let it crash because it's not supposed to be not found anyway. just saved a tiny branch-miss.
+
+		/*if( it != -1 )
 		{
 			return m_list[ it ].oldFn;
 		}
 		else
 		{
 			return 0;
-		}
+		}*/
 	}
 
 	// Only find by virtual table base (Remove need to call ConfigManager), class_ptr is converted to virtual table base

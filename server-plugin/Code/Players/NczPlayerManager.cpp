@@ -476,16 +476,12 @@ void NczPlayerManager::RT_Think (double const & curtime )
 
 PlayerHandler::iterator NczPlayerManager::GetPlayerHandlerByBasePlayer ( void * const BasePlayer ) const
 {
-	SourceSdk::edict_t * tEdict;
 	for( PlayerHandler::iterator it ( PlayerHandler::begin () ); it != PlayerHandler::end (); ++it )
 	{
-		if( it )
+		if( it >= SlotStatus::TV )
 		{
-			tEdict = it->GetEdict ();
-			if( Helpers::isValidEdict ( tEdict ) )
-			{
-				if( tEdict->GetUnknown () == BasePlayer ) return it;
-			}
+			if(it->GetEdict()->m_pUnk == BasePlayer )
+				return it;
 		}
 	}
 
