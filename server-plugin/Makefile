@@ -34,7 +34,7 @@ else
 d_CXX = g++-4.8 -m32 -std=c++11
 endif
 
-ARCH_CFLAGS =   -mtune=i486 -march=x86-64 -mmmx
+ARCH_CFLAGS =   -mtune=i686 -march=x86-64 -mmmx
 USER_CFLAGS =   -DTIXML_USE_TICPP -Dstricmp=strcasecmp -D_stricmp=strcasecmp -Dstrnicmp=strncasecmp
 BASE_CFLAGS =   -msse -D_LINUX -DLINUX -D_alloca=alloca \
 		-fPIC -Wno-deprecated -fno-exceptions -fpermissive \
