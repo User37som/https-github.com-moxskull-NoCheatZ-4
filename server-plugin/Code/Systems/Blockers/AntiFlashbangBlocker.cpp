@@ -82,7 +82,7 @@ bool AntiFlashbangBlocker::RT_SetTransmitCallback ( PlayerHandler::iterator send
 	SourceSdk::IPlayerInfo * const player_info ( receiver->GetPlayerInfo () );
 	if( !player_info ) return false;
 
-	if( player_info->IsFakeClient () )
+	if( player_info->IsFakeClient () || player_info->IsDead() )
 	{
 		return false;
 	}
@@ -111,7 +111,7 @@ void AntiFlashbangBlocker::FireGameEvent ( SourceSdk::IGameEvent* ev ) // player
 		return;
 	}
 
-	if( ph >= SlotStatus::PLAYER_CONNECTED )
+	if( ph >= SlotStatus::PLAYER_IN_TESTS )
 	{
 		FlashInfoT* const pInfo ( GetPlayerDataStruct ( *ph ) );
 		const float flash_alpha ( *g_EntityProps.GetPropValue<float, PROP_FLASH_MAX_ALPHA> ( ph->GetEdict () ) );
