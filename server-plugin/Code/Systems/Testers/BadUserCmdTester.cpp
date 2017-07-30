@@ -138,9 +138,10 @@ PlayerRunCommandRet BadUserCmdTester::RT_PlayerRunCommandCallback ( PlayerHandle
 			return PlayerRunCommandRet::BLOCK;
 		}
 
-		bool const b1(SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive && pInfo->prev_tick != k_newcmd->tick_count);
-		bool const b2(pInfo->prev_tick + 1 != k_newcmd->tick_count);
-		if (b1 || b2)
+		bool const b1(SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive);
+		bool const b2(pInfo->prev_tick != k_newcmd->tick_count);
+		bool const b3(pInfo->prev_tick + 1 != k_newcmd->tick_count);
+		if ( b3 && ((b1 && b2) || (!b1)) )
 		{
 			pInfo->m_detected_time = curtime + 10.0f;
 
