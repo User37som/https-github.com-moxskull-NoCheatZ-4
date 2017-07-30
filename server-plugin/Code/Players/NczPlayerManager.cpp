@@ -480,7 +480,7 @@ PlayerHandler::iterator NczPlayerManager::GetPlayerHandlerByBasePlayer ( void * 
 	{
 		if( it >= SlotStatus::TV )
 		{
-			if(it->GetEdict()->m_pUnk == BasePlayer )
+			if(it->GetEdict()->GetUnknown() == BasePlayer )
 				return it;
 		}
 	}

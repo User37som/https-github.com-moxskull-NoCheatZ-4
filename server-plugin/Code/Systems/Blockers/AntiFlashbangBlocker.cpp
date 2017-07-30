@@ -74,11 +74,6 @@ bool AntiFlashbangBlocker::GotJob () const
 
 bool AntiFlashbangBlocker::RT_SetTransmitCallback ( PlayerHandler::iterator sender, PlayerHandler::iterator receiver )
 {
-	if( !receiver )
-	{
-		return false;
-	}
-
 	SourceSdk::IPlayerInfo * const player_info ( receiver->GetPlayerInfo () );
 	if( !player_info ) return false;
 
