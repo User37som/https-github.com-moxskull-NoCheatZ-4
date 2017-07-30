@@ -46,7 +46,6 @@ class PlayerRunCommandHookListener
 
 private:
 	static ListenersListT m_listeners;
-	static SourceSdk::CUserCmd_csgo m_lastCUserCmd[ MAX_PLAYERS ];
 
 public:
 	PlayerRunCommandHookListener ();
@@ -57,9 +56,6 @@ protected:
 
 public:
 	static void HookPlayerRunCommand ( PlayerHandler::iterator ph );
-
-	static void* RT_GetLastUserCmd ( PlayerHandler::iterator ph );
-	static void* RT_GetLastUserCmd ( int index );
 
 protected:
 	static void RegisterPlayerRunCommandHookListener ( PlayerRunCommandHookListener const * const listener, size_t const priority = std::numeric_limits<size_t>::max (), SlotStatus filter = SlotStatus::PLAYER_IN_TESTS );

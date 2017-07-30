@@ -31,7 +31,6 @@
 /////////////////////////////////////////////////////////////////////////
 
 PlayerRunCommandHookListener::ListenersListT PlayerRunCommandHookListener::m_listeners;
-SourceSdk::CUserCmd_csgo PlayerRunCommandHookListener::m_lastCUserCmd[ MAX_PLAYERS ];
 
 HookGuard<PlayerRunCommandHookListener> g_HookGuardPlayerRunCommandHookListener;
 
@@ -44,16 +43,6 @@ PlayerRunCommandHookListener::PlayerRunCommandHookListener ()
 PlayerRunCommandHookListener::~PlayerRunCommandHookListener ()
 {
 	g_HookGuardPlayerRunCommandHookListener.UnhookAll ();
-}
-
-void* PlayerRunCommandHookListener::RT_GetLastUserCmd ( PlayerHandler::iterator ph )
-{
-	return &( m_lastCUserCmd[ ph.GetIndex () ] );
-}
-
-void* PlayerRunCommandHookListener::RT_GetLastUserCmd ( int index )
-{
-	return &( m_lastCUserCmd[ index ] );
 }
 
 void PlayerRunCommandHookListener::HookPlayerRunCommand ( PlayerHandler::iterator ph )
@@ -83,6 +72,11 @@ void HOOKFN_INT PlayerRunCommandHookListener::RT_nPlayerRunCommand ( void* This,
 {
 	PlayerHandler::iterator ph ( g_NczPlayerManager.GetPlayerHandlerByBasePlayer ( This ) );
 	PlayerRunCommandRet ret ( PlayerRunCommandRet::CONTINUE );
+
+	if (ph)
+	{
+		ph->SetEyes(reinterpret_cast<SourceSdk::CUserCmd const *>(pCmd)->viewangles);
+	}
 
 	if( ph > SlotStatus::PLAYER_CONNECTING )
 	{

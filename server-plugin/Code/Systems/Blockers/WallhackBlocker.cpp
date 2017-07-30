@@ -329,18 +329,7 @@ void WallhackBlocker::RT_ProcessOnTick (double const & curtime )
 							}
 
 
-							const int lerp_ticks ( ( int ) ( 0.5f + *g_EntityProps.GetPropValue<float, PROP_LERP_TIME> ( ph->GetEdict (), true ) / tick_interval ) );
-							const float fCorrect ( netchan->GetLatency ( FLOW_OUTGOING ) + fmodf ( lerp_ticks * tick_interval, 1.0f ) );
-
-							int target_tick ( static_cast< SourceSdk::CUserCmd_csgo* >( PlayerRunCommandHookListener::RT_GetLastUserCmd ( ph ) )->tick_count - lerp_ticks );
-
-							float diff_time ( ( game_tick - target_tick ) * tick_interval );
-
-							if( fabs ( fCorrect - diff_time ) > 0.2f )
-							{
-								target_tick = ( int ) ceil ( ( float ) game_tick - fCorrect / tick_interval );
-								diff_time = ( float ) ( game_tick - target_tick ) * tick_interval;
-							}
+							float diff_time = 0.1f;
 
 							ST_W_STATIC SourceSdk::Vector predicted_pos;
 
