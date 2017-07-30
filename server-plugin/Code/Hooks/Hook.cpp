@@ -26,7 +26,7 @@ void RAII_MemoryProtectDword::SetPagesize()
 		int32_t psize(sysconf(_SC_PAGESIZE));
 		if (psize < 0)
 		{
-			g_Logger.Msg<MSG_ERROR>(Helpers::format("sysconf error %X", errno()));
+			g_Logger.Msg<MSG_ERROR>(Helpers::format("sysconf error %X", errno));
 			*m_errored = true;
 			return;
 		}
