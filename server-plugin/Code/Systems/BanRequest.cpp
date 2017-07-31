@@ -190,26 +190,21 @@ void BanRequest::BanInternal ( int ban_time, char const * steam_id, int userid, 
 				SourceSdk::InterfacesProxy::Call_ServerCommand ( Helpers::format ( "sm_ban #%d %d \"%s\"\n", userid, m_ban_time, kick_message ) );
 			}
 		}
-		/*
-			Commenting because https://github.com/L-EARN/NoCheatZ-4/issues/64 :
-				This code do sm_ban by userid but userid can be not ready sometimes.
-				So I enforce my code to be sure the player is kicked if ever sourcemod fails.
-		*/
-		//else // 
-		//{
-
-		KickNow ( userid, kick_message );
-		if( SteamGameServer_BSecure () && steam_id != nullptr )
+		else
 		{
-			SourceSdk::InterfacesProxy::Call_ServerCommand ( Helpers::format ( "banid %d %s\n", m_ban_time, steam_id ) );
-		}
+			KickNow(userid, kick_message);
+			if (SteamGameServer_BSecure() && steam_id != nullptr)
+			{
+				SourceSdk::InterfacesProxy::Call_ServerCommand(Helpers::format("banid %d %s\n", m_ban_time, steam_id));
+			}
 
-		basic_string ip_stripped ( ip );
-		ip_stripped.replace ( ':', '\0' );
+			basic_string ip_stripped(ip);
+			ip_stripped.replace(':', '\0');
 
-		if( ip_stripped != "0" && ip_stripped != "127.0.0.1" && ip_stripped != "localhost" && ip_stripped[0] != '=' )
-		{
-			SourceSdk::InterfacesProxy::Call_ServerCommand ( Helpers::format ( "addip 1440 \"%s\"\n", ip_stripped.c_str() ) );
+			if (ip_stripped != "0" && ip_stripped != "127.0.0.1" && ip_stripped != "localhost" && ip_stripped[0] != '=')
+			{
+				SourceSdk::InterfacesProxy::Call_ServerCommand(Helpers::format("addip 1440 \"%s\"\n", ip_stripped.c_str()));
+			}
 		}
 
 		m_do_writeid = true;

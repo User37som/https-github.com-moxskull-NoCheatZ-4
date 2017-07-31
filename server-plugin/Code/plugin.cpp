@@ -211,6 +211,21 @@ bool CNoCheatZPlugin::Load ( SourceSdk::CreateInterfaceFn _interfaceFactory, Sou
 
 	g_Logger.Msg<MSG_CHAT> ( "Loaded" );
 
+	{
+		basic_string plugin_version("Loaded plugin ", NCZ_VERSION_GIT);
+#ifdef DEBUG
+		plugin_version.append("-Debug");
+#else
+		plugin_version.append("-Release");
+#endif
+#ifdef GNUC
+		plugin_version.append("-Linux");
+#else
+		plugin_version.append("-Windows");
+#endif
+		g_Logger.Msg<MSG_LOG>(plugin_version.c_str());
+	}
+
 	return true;
 }
 

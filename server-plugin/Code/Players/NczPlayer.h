@@ -144,14 +144,7 @@ inline double const NczPlayer::GetTimeConnected () const
 
 inline basic_string const NczPlayer::GetReadableIdentity () const
 {
-	if( SteamGameServer_BSecure () )
-	{
-		return Helpers::format ( "%s [%s - %s]", this->GetName (), this->GetSteamID (), this->GetIPAddress () );
-	}
-	else
-	{
-		return Helpers::format ( "%s [%s]", this->GetName (), this->GetIPAddress () );
-	}
+	return Helpers::format ( "%s %s", this->GetName (), this->GetSteamID () );
 }
 
 inline void NczPlayer::SetDetected(bool detected)

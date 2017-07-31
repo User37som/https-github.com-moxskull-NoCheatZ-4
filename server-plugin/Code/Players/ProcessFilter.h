@@ -156,6 +156,24 @@ namespace ProcessFilter
 		}
 	};
 
+	class HumanOnlyConnecting :
+		public BaseProcessFilter
+	{
+		virtual bool CanProcessThisSlot(SlotStatus const player_slot_status) const
+		{
+			return TemplatedProcessFilter::CanProcessThisSlot<STATUS_STRICT, false, SlotStatus::PLAYER_CONNECTING>(player_slot_status);
+		}
+	};
+
+	class HumanOnlyKick :
+		public BaseProcessFilter
+	{
+		virtual bool CanProcessThisSlot(SlotStatus const player_slot_status) const
+		{
+			return TemplatedProcessFilter::CanProcessThisSlot<STATUS_STRICT, false, SlotStatus::KICK>(player_slot_status);
+		}
+	};
+
 	class HumanAtLeastConnectedOrBot :
 		public BaseProcessFilter
 	{
