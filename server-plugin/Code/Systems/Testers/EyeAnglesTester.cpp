@@ -111,15 +111,18 @@ PlayerRunCommandRet EyeAnglesTester::RT_PlayerRunCommandCallback ( PlayerHandler
 		}
 		if (playerData->z.abs_value > 0.5f && playerData->past_z.abs_value > 0.5f  && playerData->z.value != playerData->past_z.value)
 		{
-			++playerData->z.detectionsCount;
-			//drop_cmd = PlayerRunCommandRet::INERT;
-			if (playerData->z.lastDetectionPrintTime + ANTIFLOOD_LOGGING_TIME < curtime)
+			if (!Helpers::IsInt(playerData->z.value)) // Don't detect ""fun"" plugins
 			{
-				playerData->z.lastDetectionPrintTime = curtime;
-
-				if (playerData->z.detectionsCount > 5)
+				++playerData->z.detectionsCount;
+				//drop_cmd = PlayerRunCommandRet::INERT;
+				if (playerData->z.lastDetectionPrintTime + ANTIFLOOD_LOGGING_TIME < curtime)
 				{
-					ProcessDetectionAndTakeAction<Detection_EyeAngleZ::data_type>(Detection_EyeAngleZ(), playerData, ph, this);
+					playerData->z.lastDetectionPrintTime = curtime;
+
+					if (playerData->z.detectionsCount > 5)
+					{
+						ProcessDetectionAndTakeAction<Detection_EyeAngleZ::data_type>(Detection_EyeAngleZ(), playerData, ph, this);
+					}
 				}
 			}
 		}
