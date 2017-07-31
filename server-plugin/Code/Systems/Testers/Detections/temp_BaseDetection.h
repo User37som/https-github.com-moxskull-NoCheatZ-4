@@ -101,7 +101,7 @@ public:
 
 	virtual void Log ()
 	{
-		basic_string msg ( Helpers::format ( "%s triggered a detection : %s is using a %s.", this->m_testerName, this->m_playerIdentity.c_str (), this->GetDetectionLogMessage ().c_str () ) );
+		basic_string msg ( Helpers::format ( "%s : %s detected", this->m_playerIdentity.c_str (), this->GetDetectionLogMessage ().c_str () ) );
 		g_Logger.Msg<MSG_LOG>(msg.c_str());
 		g_Logger.Msg<MSG_CHAT>(msg.c_str());
 
@@ -135,7 +135,7 @@ inline void ProcessDetectionAndTakeAction(LogDetection<playerDataStructT> && inf
 
 	// https://github.com/L-EARN/NoCheatZ-4/issues/151
 	// calling Helpers::format to set string X with string X also in arguments
-	basic_string kick_message(Helpers::format("Banned by NoCheatZ 4 : %s detection with %s", info.GetDetectionLogMessage().c_str(), pSystem->GetName()));
+	basic_string kick_message(Helpers::format("Banned by NoCheatZ 4 : %s", info.GetDetectionLogMessage().c_str()));
 
 	if (pSystem->GetAction() == BaseTesterSystem::DetectionAction_t::LOG)
 	{
@@ -151,7 +151,7 @@ inline void ProcessDetectionAndTakeAction(LogDetection<playerDataStructT> && inf
 	}
 	else
 	{
-		kick_message = Helpers::format("Kicked by NoCheatZ 4 : %s detection with %s", info.GetDetectionLogMessage().c_str(), pSystem->GetName());
+		kick_message = Helpers::format("Kicked by NoCheatZ 4 : %s", info.GetDetectionLogMessage().c_str());
 		g_BanRequest.KickNow(*player, kick_message.c_str());
 	}
 }
