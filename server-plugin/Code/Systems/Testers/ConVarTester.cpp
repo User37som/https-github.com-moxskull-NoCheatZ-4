@@ -61,9 +61,10 @@ void ConVarTester::RT_ProcessOnTick (double const & curtime )
 
 	if( SourceSdk::InterfacesProxy::ConVar_GetBool ( var_sv_cheats ) )
 	{
+		InitDataStruct();
 		return;
 	}
-	ProcessFilter::HumanAtLeastConnected filter_class;
+	ProcessFilter::InTestsNoBot filter_class;
 	/*m_current_player += &filter_class;
 	if( m_current_player )
 	{
@@ -96,14 +97,14 @@ void ConVarTester::RT_ProcessPlayerTest ( PlayerHandler::iterator ph, double con
 			{
 				if( curtime >= req->timeEnd )
 				{
-					if( ++(req->attempts) > 4 )
+					if (++(req->attempts) > 4)
 					{
 						req->answer = "NO ANSWER - TIMED OUT";
 						Detection_ConVarRequestTimedOut pDetection;
-						pDetection.PrepareDetectionData ( req );
-						pDetection.PrepareDetectionLog ( *ph, this );
-						pDetection.Log ();
-						ph->Kick ( "ConVar request timed out" );
+						pDetection.PrepareDetectionData(req);
+						pDetection.PrepareDetectionLog(*ph, this);
+						pDetection.Log();
+						ph->Kick("ConVar request timed out");
 					}
 					//g_Logger.Msg<MSG_WARNING> ( Helpers::format ( "ConVarTester : ConVar request timed out for %s (%s) : %d attempts (Cookie %d).", ph->GetName (), m_convars_rules[ req->ruleset ].name, req->attempts+1, req->cookie) );
 					req->SendCurrentRequest ( ph, curtime, m_convars_rules ); // Send the request again
@@ -250,7 +251,6 @@ void ConVarTester::AddConvarRuleset ( const char * name, const char * value, Con
 void ConVarTester::RT_OnQueryCvarValueFinished ( PlayerHandler::iterator ph, SourceSdk::QueryCvarCookie_t cookie, SourceSdk::EQueryCvarValueStatus eStatus, const char *pCvarName, const char *pCvarValue )
 {
 	CurrentConVarRequest* const req ( GetPlayerDataStructByIndex ( ph.GetIndex () ) );
-
 	if (req->cookie == cookie)
 	{
 		LoggerAssert(req->status == ConVarRequestStatus::SENT);
@@ -260,7 +260,7 @@ void ConVarTester::RT_OnQueryCvarValueFinished ( PlayerHandler::iterator ph, Sou
 			/* Some servers silently set sv_cheats to 1 in a short timespan to make some mods.
 			 This is where some players can get kicked without reason.
 			 We will send the same request another time. */
-			req->status = ConVarRequestStatus::NOT_PROCESSING;
+			InitDataStruct();
 
 			//g_Logger.Msg<MSG_WARNING> ( Helpers::format ( "ConVarTester : Cannot process RT_OnQueryCvarValueFinished because server-side sv_cheats is not 0", ph->GetName ()) );
 			return;

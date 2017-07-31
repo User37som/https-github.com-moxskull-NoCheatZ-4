@@ -60,6 +60,8 @@ void WallhackBlocker::Load ()
 	WeaponHookListener::RegisterWeaponHookListener ( this );
 	SetTransmitHookListener::RegisterSetTransmitHookListener ( this, SystemPriority::WallhackBlocker );
 	OnTickListener::RegisterOnTickListener ( this );
+
+	SourceSdk::InterfacesProxy::Call_ServerCommand("sv_occlude_players 0\n");
 }
 
 void WallhackBlocker::Unload ()
