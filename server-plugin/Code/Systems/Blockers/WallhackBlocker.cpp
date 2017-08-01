@@ -26,7 +26,7 @@
 #include "Misc/MathCache.h"
 
 WallhackBlocker::WallhackBlocker () :
-	BaseBlockerSystem( "WallhackBlocker", "Enable - Disable - Verbose - SetFFAMode" ),
+	BaseBlockerSystem( "WallhackBlocker" ),
 	OnTickListener (),
 	playerdatahandler_class (),
 	SetTransmitHookListener (),
@@ -36,8 +36,7 @@ WallhackBlocker::WallhackBlocker () :
 	m_viscache (),
 	m_disable_shadows ( nullptr ),
 	m_shadow_direction ( nullptr ),
-	m_shadow_maxdist ( nullptr ),
-	m_ffamode(false)
+	m_shadow_maxdist ( nullptr )
 {
 }
 
@@ -113,31 +112,6 @@ void WallhackBlocker::OnMapStart ()
 	}
 }
 
-bool WallhackBlocker::sys_cmd_fn(const SourceSdk::CCommand & args)
-{
-	if (stricmp("SetFFAMode", args.Arg(2)) == 0)
-	{
-		if (args.ArgC() >= 4)
-		{
-			if (stricmp("Yes", args.Arg(3)) == 0)
-			{
-				m_ffamode = true;
-				g_Logger.Msg<MSG_CMD_REPLY>("FFAMode is Yes");
-				return true;
-			}
-			else if (stricmp("No", args.Arg(3)) == 0)
-			{
-				m_ffamode = false;
-				g_Logger.Msg<MSG_CMD_REPLY>("FFAMode is No");
-				return true;
-			}
-		}
-		g_Logger.Msg<MSG_CMD_REPLY>("FFAMode expected Yes or No");
-		return true;
-	}
-	return false;
-}
-
 bool WallhackBlocker::RT_SetTransmitCallback ( PlayerHandler::iterator sender_player, PlayerHandler::iterator receiver_player )
 {
 	/*
@@ -159,7 +133,7 @@ bool WallhackBlocker::RT_SetTransmitCallback ( PlayerHandler::iterator sender_pl
 
 	if ( !pinfo_receiver->IsDead () )
 	{
-		if( !pinfo_sender->IsDead () && (pinfo_receiver->GetTeamIndex() != pinfo_sender->GetTeamIndex() || m_ffamode) )
+		if( !pinfo_sender->IsDead () && pinfo_receiver->GetTeamIndex() != pinfo_sender->GetTeamIndex() )
 		{
 			cache.SetVisibility(sender_player.GetIndex (), receiver_player.GetIndex (), RT_IsAbleToSee ( sender_player, receiver_player ) );
 		}
