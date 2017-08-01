@@ -137,6 +137,8 @@ private:
 	SourceSdk::Vector* m_shadow_direction;
 	float* m_shadow_maxdist;
 
+	bool m_ffamode;
+
 public:
 	WallhackBlocker ();
 	virtual ~WallhackBlocker () final;
@@ -160,10 +162,17 @@ private:
 
 	virtual void RT_WeaponDropCallback ( PlayerHandler::iterator ph, SourceSdk::edict_t const * const weapon ) override final;
 
+	virtual bool sys_cmd_fn(const SourceSdk::CCommand & args);
+
 public:
 	void ClientDisconnect ( PlayerHandler::iterator client );
 
 	void OnMapStart ();
+
+	bool GetFFAMode() const
+	{
+		return m_ffamode;
+	}
 
 private:
 	bool RT_IsAbleToSee ( PlayerHandler::iterator sender, PlayerHandler::iterator receiver );
