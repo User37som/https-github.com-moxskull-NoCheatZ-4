@@ -89,36 +89,39 @@ void ConVarTester::RT_ProcessOnTick (double const & curtime )
 
 void ConVarTester::RT_ProcessPlayerTest ( PlayerHandler::iterator ph, double const & curtime )
 {
-	CurrentConVarRequestT* const req ( GetPlayerDataStructByIndex ( ph.GetIndex () ) );
-
-	switch( req->status )
+	if (ph->GetChannelInfo()->IsTimingOut()) // Do nothing with a legit time out.
 	{
-		case ConVarRequestStatus::SENT: // Not yet replyed, check for timeout
+		ResetPlayerDataStructByIndex(ph.GetIndex());
+	}
+	else
+	{
+		CurrentConVarRequestT* const req(GetPlayerDataStructByIndex(ph.GetIndex()));
+
+		switch (req->status)
+		{
+			case ConVarRequestStatus::SENT: // Not yet replyed, check for timeout
 			{
-				if( curtime >= req->timeEnd )
+				if (curtime >= req->timeEnd)
 				{
 					if (++(req->attempts) > 4)
 					{
 						req->answer = "NO ANSWER - TIMED OUT";
-						Detection_ConVarRequestTimedOut pDetection;
-						pDetection.PrepareDetectionData(req);
-						pDetection.PrepareDetectionLog(*ph, this);
-						pDetection.Log();
-						ph->Kick("ConVar request timed out");
+
+						ProcessDetectionAndTakeAction<CurrentConVarRequestT>(Detection_ConVarRequestTimedOut(), req, ph, this);
 					}
 					//g_Logger.Msg<MSG_WARNING> ( Helpers::format ( "ConVarTester : ConVar request timed out for %s (%s) : %d attempts (Cookie %d).", ph->GetName (), m_convars_rules[ req->ruleset ].name, req->attempts+1, req->cookie) );
-					req->SendCurrentRequest ( ph, curtime, m_convars_rules ); // Send the request again
+					req->SendCurrentRequest(ph, curtime, m_convars_rules); // Send the request again
 				}
-				// else wait ...
 				break;
 			}
 
-		default: // Continue to work ...
+			default: // Continue to work ...
 			{
-				req->PrepareNextRequest ( m_convars_rules );
-				req->SendCurrentRequest ( ph, curtime, m_convars_rules );
+				req->PrepareNextRequest(m_convars_rules);
+				req->SendCurrentRequest(ph, curtime, m_convars_rules);
 				break;
 			}
+		}
 	}
 }
 
