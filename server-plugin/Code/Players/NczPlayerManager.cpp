@@ -199,11 +199,6 @@ void NczPlayerManager::ClientDisconnect ( SourceSdk::edict_t* pEntity )
 	const int index ( Helpers::IndexOfEdict ( pEntity ) );
 	LoggerAssert ( index );
 
-	if (FullHandlersList[index].playerClass->GetDetected())
-	{
-		g_AutoTVRecord.OnDetectedPlayerDisconnect();
-	}
-
 	FullHandlersList[ index ].Reset ();
 
 	ResetRange();

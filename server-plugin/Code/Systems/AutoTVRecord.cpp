@@ -148,7 +148,7 @@ bool AutoTVRecord::sys_cmd_fn(const SourceSdk::CCommand & args)
 				AddTimer(m_splittimer_seconds, "autotv");
 				return true;
 			}
-			else if (stricmp("detection", args.Arg(3)) == 0)
+			/*else if (stricmp("detection", args.Arg(3)) == 0)
 			{
 				m_splitrule = demo_split_t::SPLIT_BY_DETECTION;
 				g_Logger.Msg<MSG_CMD_REPLY>(Helpers::format("Will record only when at least one detected player is in game", m_splittimer_seconds));
@@ -159,7 +159,7 @@ bool AutoTVRecord::sys_cmd_fn(const SourceSdk::CCommand & args)
 					StartRecord();
 				}
 				return true;
-			}
+			}*/
 		}
 		g_Logger.Msg<MSG_CMD_REPLY>("SplitDemoBy Usage : Map / Detection / Rounds [optional number] / Time [seconds]");
 		return false;
