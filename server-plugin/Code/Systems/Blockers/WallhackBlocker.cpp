@@ -235,7 +235,7 @@ void WallhackBlocker::RT_ProcessOnTick (double const & curtime )
 {
 	m_viscache.Invalidate ();
 
-	ST_W_STATIC float tick_interval;
+	//ST_W_STATIC float tick_interval;
 
 	if( SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive )
 	{
