@@ -437,7 +437,8 @@ bot_takeover
 
 void NczPlayerManager::DeclareKickedPlayer ( int const slot )
 {
-	FullHandlersList[ slot ].status = SlotStatus::KICK;
+	if(slot)
+		FullHandlersList[ slot ].status = SlotStatus::KICK;
 }
 
 void NczPlayerManager::RT_Think (double const & curtime )
