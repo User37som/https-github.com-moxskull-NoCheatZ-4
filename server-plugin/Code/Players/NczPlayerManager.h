@@ -372,7 +372,7 @@ public:
 
 	inline PlayerHandler::iterator GetPlayerHandlerByIndex ( int const slot ) const;
 	inline PlayerHandler::iterator GetPlayerHandlerByUserId ( int const userid ) const;
-	PlayerHandler::iterator GetPlayerHandlerByBasePlayer ( void* BasePlayer ) const;
+	inline PlayerHandler::iterator GetPlayerHandlerByBasePlayer ( void* BasePlayer ) const;
 	PlayerHandler::iterator GetPlayerHandlerBySteamID ( const char * steamid ) const;
 	inline PlayerHandler::iterator GetPlayerHandlerByEdict ( SourceSdk::edict_t const * const pEdict ) const;
 	PlayerHandler::iterator GetPlayerHandlerByName ( const char * playerName ) const;
@@ -392,6 +392,17 @@ public:
 		return m_max_index;
 	};
 };
+
+inline PlayerHandler::iterator NczPlayerManager::GetPlayerHandlerByBasePlayer(void * const BasePlayer) const
+{
+	for (PlayerHandler::iterator it(PlayerHandler::begin()); it != PlayerHandler::end(); ++it)
+	{
+		if (it && it->GetEdict()->GetUnknown() == BasePlayer)
+			return it;
+	}
+
+	return PlayerHandler::end();
+}
 
 inline PlayerHandler::iterator NczPlayerManager::GetPlayerHandlerByIndex ( int const slot ) const
 {

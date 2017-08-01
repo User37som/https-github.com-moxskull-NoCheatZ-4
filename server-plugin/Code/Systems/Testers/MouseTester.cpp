@@ -99,9 +99,10 @@ PlayerRunCommandRet MouseTester::RT_PlayerRunCommandCallback(PlayerHandler::iter
 	tb_mouse & MouseFrames(pInfo->m_frames);
 	SourceSdk::QAngle const * userangles(&(reinterpret_cast<SourceSdk::CUserCmd*>(cmd)->viewangles));
 
-	if (!pInfo->m_pitch_set)
+	if (!pInfo->m_pitch_set && !pInfo->m_pitch_asked)
 	{
 		g_QueryCvarProvider.StartQueryCvarValue(ph->GetEdict(), "m_pitch");
+		pInfo->m_pitch_asked = true;
 		return PlayerRunCommandRet::CONTINUE;
 	}
 
@@ -139,7 +140,7 @@ void MouseTester::FindDetection(PlayerHandler::iterator ph, MouseDetectInfo* inf
 			if (it->v.m_status == SlotStatus::PLAYER_IN_TESTS && !it->v.m_frozen && !first)
 			{
 				float const delta_y(AngleDistance(it->v.m_yaw_angle, prev_yaw, unsure));
-				if (fabsf(delta_y) > 0.1f && it->v.m_x_mouse != 0 && std::signbit((float)it->v.m_x_mouse) != std::signbit(delta_y) && !(it->v.m_buttons & 3 << 7))
+				if (fabsf(delta_y) > 0.05f && it->v.m_x_mouse != 0 && std::signbit((float)it->v.m_x_mouse) != std::signbit(delta_y) && !(it->v.m_buttons & 3 << 7))
 				{
 					if (!unsure)
 					{
@@ -160,7 +161,7 @@ void MouseTester::FindDetection(PlayerHandler::iterator ph, MouseDetectInfo* inf
 				}
 
 				float const delta_x(AngleDistance(it->v.m_pitch_angle, prev_pitch, unsure));
-				if (fabsf(delta_x) > 0.1f && it->v.m_y_mouse != 0 && (std::signbit((float)it->v.m_y_mouse) == (std::signbit(delta_x) ^ info->m_inverted)))
+				if (fabsf(delta_x) > 0.05f && it->v.m_y_mouse != 0 && (std::signbit((float)it->v.m_y_mouse) == (std::signbit(delta_x) ^ info->m_inverted)))
 				{
 					if (!unsure)
 					{
@@ -191,8 +192,6 @@ void MouseTester::FindDetection(PlayerHandler::iterator ph, MouseDetectInfo* inf
 		} while (++it != it_end);
 
 		info->percent_detected = ((float)info->c / (float)TB_MOUSE_MAX_HISTORY) * 100.0f;
-		if (info->percent_detected > 100.0f)
-			info->percent_detected = 100.0f;
 
 		if (info->percent_detected >= 50.0f)
 		{
@@ -200,6 +199,7 @@ void MouseTester::FindDetection(PlayerHandler::iterator ph, MouseDetectInfo* inf
 			info->m_frames.Reset();
 			g_QueryCvarProvider.StartQueryCvarValue(ph->GetEdict(), "m_pitch");
 			info->m_pitch_set = false;
+			info->m_pitch_asked = true;
 		}
 	}
 }
@@ -211,6 +211,7 @@ void MouseTester::ProcessPitchConVar(PlayerHandler::iterator ph, char const * va
 	double m_pitch_val = atof(val);
 	pInfo->m_inverted = std::signbit(m_pitch_val);
 	pInfo->m_pitch_set = true;
+	pInfo->m_pitch_asked = false;
 }
 
 MouseTester g_MouseTester;

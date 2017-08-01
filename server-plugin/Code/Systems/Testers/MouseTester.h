@@ -69,6 +69,7 @@ struct MouseDetectInfo
 	size_t cur_consecutive_y;
 	bool m_inverted;
 	bool m_pitch_set;
+	bool m_pitch_asked;
 
 	MouseDetectInfo() :
 		m_frames(),
@@ -79,7 +80,8 @@ struct MouseDetectInfo
 		min_consecutive_y(0),
 		cur_consecutive_y(0),
 		m_inverted(false),
-		m_pitch_set(false)
+		m_pitch_set(false),
+		m_pitch_asked(false)
 	{}
 };
 
