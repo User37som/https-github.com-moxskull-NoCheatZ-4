@@ -189,10 +189,22 @@ bool AutoTVRecord::GotJob () const
 {
 	// Create a filter
 	ProcessFilter::HumanAtLeastConnected const filter_class;
-	// Initiate the iterator at the first match in the filter
-	PlayerHandler::iterator it(&filter_class);
-	// Return if we have job to do or not ...
-	return it != PlayerHandler::end();
+
+	size_t condition_count(0);
+
+	for (PlayerHandler::iterator it(&filter_class); it != PlayerHandler::end(); it+=&filter_class)
+	{
+		SourceSdk::IPlayerInfo * pInfo(it->GetPlayerInfo());
+		if (pInfo)
+		{
+			if (pInfo->GetTeamIndex() > 1)
+			{
+				++condition_count;
+			}
+		}
+	}
+
+	return condition_count != 0;
 }
 
 void AutoTVRecord::RT_TimerCallback(char const * const timer_name)
@@ -223,7 +235,7 @@ void AutoTVRecord::StartRecord ()
 
 		SourceSdk::InterfacesProxy::Call_ServerExecute ();
 		
-		basic_string demofile ( Helpers::format ( "%s%s-%s", "", mapname.c_str (), basic_string ( Helpers::getStrDateTime ( "%x_%X" ) ).replace ( "/\\:?\"<>|", '-' ).c_str () ) );
+		basic_string demofile ( Helpers::format ( "%s%s-%s", m_prefix.c_str(), mapname.c_str (), basic_string ( Helpers::getStrDateTime ( "%x_%X" ) ).replace ( "/\\:?\"<>|", '-' ).c_str () ) );
 		
 		SourceSdk::InterfacesProxy::Call_ServerCommand ( basic_string ( "tv_record " ).append ( demofile ).append ( '\n' ).c_str () );
 		SourceSdk::InterfacesProxy::Call_ServerExecute ();
