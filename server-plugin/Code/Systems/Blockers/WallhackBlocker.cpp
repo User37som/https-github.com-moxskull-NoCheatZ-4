@@ -235,17 +235,6 @@ void WallhackBlocker::RT_ProcessOnTick (double const & curtime )
 {
 	m_viscache.Invalidate ();
 
-	ST_W_STATIC float tick_interval;
-
-	if( SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive )
-	{
-		tick_interval = static_cast< SourceSdk::CGlobalVars_csgo* >( SourceSdk::InterfacesProxy::Call_GetGlobalVars () )->interval_per_tick;
-	}
-	else
-	{
-		tick_interval = static_cast< SourceSdk::CGlobalVars* >( SourceSdk::InterfacesProxy::Call_GetGlobalVars () )->interval_per_tick;
-	}
-
 	ST_W_STATIC SourceSdk::CTraceFilterWorldOnly itracefilter;
 	ST_R_STATIC SourceSdk::Vector hull_min ( -5.0f, -5.0f, -5.0f );
 	ST_R_STATIC SourceSdk::Vector hull_max ( 5.0f, 5.0f, 5.0f );
@@ -274,7 +263,7 @@ void WallhackBlocker::RT_ProcessOnTick (double const & curtime )
 						pData->bbox_min.z -= bmax2;
 						pData->abs_origin.z += bmax2;
 
-						float diff_time = ( tick_interval );
+						float diff_time = 0.25f;
 
 						ST_W_STATIC SourceSdk::Vector predicted_pos;
 
@@ -328,7 +317,7 @@ void WallhackBlocker::RT_ProcessOnTick (double const & curtime )
 							}
 
 
-							float diff_time = 0.1f;
+							float diff_time = 0.25f;
 
 							ST_W_STATIC SourceSdk::Vector predicted_pos;
 

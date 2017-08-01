@@ -189,6 +189,8 @@ void BanRequest::BanInternal ( int ban_time, char const * steam_id, int userid, 
 			{
 				SourceSdk::InterfacesProxy::Call_ServerCommand ( Helpers::format ( "sm_ban #%d %d \"%s\"\n", userid, m_ban_time, kick_message ) );
 			}
+			SourceSdk::InterfacesProxy::Call_ServerExecute();
+			KickNow(userid, kick_message);
 		}
 		else
 		{
@@ -227,8 +229,14 @@ void BanRequest::KickNow (int userid, const char * kick_message ) const
 		}
 		else
 		{
-			g_NczPlayerManager.DeclareKickedPlayer ( g_NczPlayerManager.GetPlayerHandlerByUserId( userid ).GetIndex() );
-			SourceSdk::InterfacesProxy::Call_ServerCommand ( Helpers::format ( "kickid %d [NoCheatZ 4] %s\n", userid, kick_message ) );
+			// test again the validity, because SM is supposed to kick him before
+
+			PlayerHandler::iterator ph(g_NczPlayerManager.GetPlayerHandlerByUserId(userid));
+			if (ph)
+			{
+				g_NczPlayerManager.DeclareKickedPlayer(g_NczPlayerManager.GetPlayerHandlerByUserId(userid).GetIndex());
+				SourceSdk::InterfacesProxy::Call_ServerCommand(Helpers::format("kickid %d [NoCheatZ 4] %s\n", userid, kick_message));
+			}
 		}
 	}
 }

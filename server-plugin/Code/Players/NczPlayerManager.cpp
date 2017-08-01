@@ -199,11 +199,6 @@ void NczPlayerManager::ClientDisconnect ( SourceSdk::edict_t* pEntity )
 	const int index ( Helpers::IndexOfEdict ( pEntity ) );
 	LoggerAssert ( index );
 
-	if (FullHandlersList[index].playerClass->GetDetected())
-	{
-		g_AutoTVRecord.OnDetectedPlayerDisconnect();
-	}
-
 	FullHandlersList[ index ].Reset ();
 
 	ResetRange();
@@ -437,7 +432,8 @@ bot_takeover
 
 void NczPlayerManager::DeclareKickedPlayer ( int const slot )
 {
-	FullHandlersList[ slot ].status = SlotStatus::KICK;
+	if(slot)
+		FullHandlersList[ slot ].status = SlotStatus::KICK;
 }
 
 void NczPlayerManager::RT_Think (double const & curtime )

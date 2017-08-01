@@ -283,8 +283,8 @@ void BaseDynamicSystem::SetActive ( bool active )
 	else
 	{
 		g_Logger.Msg<MSG_HINT> ( Helpers::format ( "Stoping %s", GetName () ) );
-		m_isActive = false;
 		Unload ();
+		m_isActive = false;
 	}
 }
 

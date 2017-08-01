@@ -21,58 +21,65 @@ limitations under the License.
 #include "Hooks/PlayerRunCommandHookListener.h"
 #include "Misc/temp_singleton.h"
 #include "Systems/Testers/Detections/temp_BaseDetection.h"
+#include "Misc/temp_Throwback.h"
 
-struct MouseInfo
+#define TB_MOUSE_MAX_HISTORY 64
+
+struct MouseFrame
 {
-	float m_prev_yaw_angle;
-	float m_prev_pitch_angle;
+	float m_pitch_angle;
+	float m_yaw_angle;
+	int m_buttons;
+	SlotStatus m_status;
+	short m_x_mouse;
+	short m_y_mouse;
+	bool m_frozen;
 
-	int m_pitch_dir_detect_row;
-	int m_yaw_dir_detect_row;
+	MouseFrame() :
+		m_pitch_angle(0.0f),
+		m_yaw_angle(0.0f),
+		m_buttons(0),
+		m_status(SlotStatus::INVALID),
+		m_x_mouse(0),
+		m_y_mouse(0),
+		m_frozen(false)
+	{}
 
-	bool m_prev_set;
-	bool m_pitch_set;
-	bool m_asked_m_pitch;
-	bool m_mouse_pitch_inverted;
-
-	MouseInfo() :
-		m_prev_yaw_angle(0.0f),
-		m_prev_pitch_angle(0.0f),
-		m_pitch_dir_detect_row(0),
-		m_yaw_dir_detect_row(0),
-		m_prev_set(false),
-		m_pitch_set(false),
-		m_mouse_pitch_inverted(false)
+	MouseFrame(float const * angles, short const * mouse, int const * buttons, SlotStatus status, bool frozen) :
+		m_pitch_angle(angles[0]),
+		m_yaw_angle(angles[1]),
+		m_buttons(*buttons),
+		m_status(status),
+		m_x_mouse(mouse[0]),
+		m_y_mouse(mouse[1]),
+		m_frozen(frozen)
 	{}
 };
 
+typedef Throwback<MouseFrame, double, TB_MOUSE_MAX_HISTORY> tb_mouse;
+
 struct MouseDetectInfo
 {
-	float m_prev_pitch_angle;
-	float m_cur_pitch_angle;
-	float m_pitch_delta;
-	int m_mouse_pitch_inverted;
-	short m_mouse_delta_y;
-	float m_prev_yaw_angle;
-	float m_cur_yaw_angle;
-	float m_yaw_delta;
-	short m_mouse_delta_x;
-	int m_buttons;
+	tb_mouse m_frames;
+	size_t c;
+	float percent_detected;
+	size_t min_consecutive_x;
+	size_t cur_consecutive_x;
+	size_t min_consecutive_y;
+	size_t cur_consecutive_y;
+	bool m_inverted;
+	bool m_pitch_set;
 
-	MouseDetectInfo()
-	{}
-
-	MouseDetectInfo(MouseInfo const & other, short const * md, int const * buttons, SourceSdk::QAngle const * cur_angles, float pitch_delta, float yaw_delta) :
-		m_prev_pitch_angle(other.m_prev_pitch_angle),
-		m_cur_pitch_angle(cur_angles->x),
-		m_pitch_delta(pitch_delta),
-		m_mouse_pitch_inverted(other.m_mouse_pitch_inverted),
-		m_mouse_delta_y(md[1]),
-		m_prev_yaw_angle(other.m_prev_yaw_angle),
-		m_cur_yaw_angle(cur_angles->y),
-		m_yaw_delta(yaw_delta),
-		m_mouse_delta_x(md[0]),
-		m_buttons(*buttons)
+	MouseDetectInfo() :
+		m_frames(),
+		c(0),
+		percent_detected(0.0f),
+		min_consecutive_x(0),
+		cur_consecutive_x(0),
+		min_consecutive_y(0),
+		cur_consecutive_y(0),
+		m_inverted(false),
+		m_pitch_set(false)
 	{}
 };
 
@@ -92,11 +99,11 @@ public:
 
 class MouseTester :
 	public BaseTesterSystem,
-	public PlayerDataStructHandler<MouseInfo>,
+	public PlayerDataStructHandler<MouseDetectInfo>,
 	public PlayerRunCommandHookListener,
 	public Singleton
 {
-	typedef PlayerDataStructHandler<MouseInfo> playerdatahandler_class;
+	typedef PlayerDataStructHandler<MouseDetectInfo> playerdatahandler_class;
 
 public:
 	MouseTester();
@@ -113,6 +120,8 @@ public:
 	virtual PlayerRunCommandRet RT_PlayerRunCommandCallback(PlayerHandler::iterator ph, void * const cmd, double const & curtime) override final;
 
 	void ProcessPitchConVar(PlayerHandler::iterator ph, char const * val);
+
+	void FindDetection(PlayerHandler::iterator ph, MouseDetectInfo* graph);
 };
 
 extern MouseTester g_MouseTester;

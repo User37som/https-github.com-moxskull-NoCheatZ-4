@@ -121,7 +121,7 @@ void SpamChangeNameTester::RT_ProcessOnTick (double const & curtime )
 			{
 				if (pInfo->next_namechange_test < curtime)
 				{
-					g_BanRequest.BanNow(*ph, 10, "Banned for namechange spamming");
+					g_BanRequest.KickNow(*ph, "Kicked for namechange spamming");
 				}
 				else
 				{
