@@ -470,20 +470,6 @@ void NczPlayerManager::RT_Think (double const & curtime )
 	if( in_tests_count >= g_AutoTVRecord.GetMinPlayers()) g_AutoTVRecord.StartRecord ();
 }
 
-PlayerHandler::iterator NczPlayerManager::GetPlayerHandlerByBasePlayer ( void * const BasePlayer ) const
-{
-	for( PlayerHandler::iterator it ( PlayerHandler::begin () ); it != PlayerHandler::end (); ++it )
-	{
-		if( it >= SlotStatus::TV )
-		{
-			if(it->GetEdict()->GetUnknown() == BasePlayer )
-				return it;
-		}
-	}
-
-	return PlayerHandler::end ();
-}
-
 PlayerHandler::iterator NczPlayerManager::GetPlayerHandlerBySteamID ( const char * steamid ) const
 {
 	const char * tSteamId;
