@@ -97,51 +97,54 @@ void NczPlayerManager::LoadPlayerManager ()
 
 	Helpers::m_EdictList = Helpers::PEntityOfEntIndex ( 0 );
 
-	int index(1);
-	do
+	if (Helpers::m_EdictList != nullptr)
 	{
-		SourceSdk::edict_t * pedict = Helpers::PEntityOfEntIndex(index);
-		PlayerHandler& ph(FullHandlersList[index]);
+		int index(1);
+		do
+		{
+			SourceSdk::edict_t * pedict = Helpers::PEntityOfEntIndex(index);
+			PlayerHandler& ph(FullHandlersList[index]);
 
 #undef GetClassName
-		if( Helpers::isValidEdict (pedict) && pedict->GetClassName() && strcmp(pedict->GetClassName(), "player") == 0)
-		{
-			SourceSdk::IPlayerInfo * pinfo = (SourceSdk::IPlayerInfo *)SourceSdk::InterfacesProxy::Call_GetPlayerInfo(pedict);
-			if(pinfo)
+			if (Helpers::isValidEdict(pedict) && pedict->GetClassName() && strcmp(pedict->GetClassName(), "player") == 0)
 			{
-				if (pinfo->IsConnected())
+				SourceSdk::IPlayerInfo * pinfo = (SourceSdk::IPlayerInfo *)SourceSdk::InterfacesProxy::Call_GetPlayerInfo(pedict);
+				if (pinfo)
 				{
-					m_max_index = index;
-					ph.playerClass = new NczPlayer(index);
-					ph.playerClass->m_playerinfo = pinfo;
-					if (pinfo->IsFakeClient())
+					if (pinfo->IsConnected())
 					{
-						if (pinfo->IsHLTV())
+						m_max_index = index;
+						ph.playerClass = new NczPlayer(index);
+						ph.playerClass->m_playerinfo = pinfo;
+						if (pinfo->IsFakeClient())
 						{
-							ph.status = SlotStatus::TV;
+							if (pinfo->IsHLTV())
+							{
+								ph.status = SlotStatus::TV;
+							}
+							else
+							{
+								ph.status = SlotStatus::BOT;
+							}
 						}
 						else
 						{
-							ph.status = SlotStatus::BOT;
-						}
-					}
-					else
-					{
-						ph.playerClass->OnConnect();
-						ph.status = SlotStatus::PLAYER_CONNECTED;
-						if (!pinfo->IsDead())
-						{
-							ph.in_tests_time = Tier0::Plat_FloatTime() + 1.0;
-						}
-						else
-						{
-							ph.in_tests_time = std::numeric_limits<double>::max();
+							ph.playerClass->OnConnect();
+							ph.status = SlotStatus::PLAYER_CONNECTED;
+							if (!pinfo->IsDead())
+							{
+								ph.in_tests_time = Tier0::Plat_FloatTime() + 1.0;
+							}
+							else
+							{
+								ph.in_tests_time = std::numeric_limits<double>::max();
+							}
 						}
 					}
 				}
 			}
-		}
-	} while (++index <= MAX_PLAYERS);
+		} while (++index <= MAX_PLAYERS);
+	}
 
 	ResetRange();
 
