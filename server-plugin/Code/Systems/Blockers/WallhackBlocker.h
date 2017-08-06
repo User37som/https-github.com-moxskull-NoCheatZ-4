@@ -63,10 +63,10 @@ struct VisInfo
 		m_visible ( true ),
 		m_valid ( true )
 	{};
-	inline VisInfo ( const VisInfo& other )
+	inline VisInfo ( const VisInfo& other ) :
+		m_valid(other.m_valid),
+		m_visible(other.m_visible)
 	{
-		m_valid = other.m_valid;
-		m_visible = other.m_visible;
 	};
 	inline VisInfo ( bool const visibility )
 	{
@@ -99,24 +99,24 @@ public:
 
 	inline bool IsValid ( int pa, int pb ) const
 	{
-		LoggerAssert ( pa && pb );
-		LoggerAssert ( pa != pb );
 		return m_cache[ pa ][ pb ].m_valid;
 	};
 
 	inline bool IsVisible ( int pa, int pb ) const
 	{
-		LoggerAssert ( pa && pb );
-		LoggerAssert ( pa != pb );
 		return m_cache[ pa][ pb ].m_visible;
 	};
 
 	inline void SetVisibility ( int pa, int pb, bool const visibility )
 	{
-		LoggerAssert ( pa && pb );
-		LoggerAssert ( pa != pb );
 		m_cache[ pa][ pb ] = VisInfo ( visibility );
 	};
+
+	inline bool SetVisibility_GetNotVisible(int pa, int pb, bool const visibility)
+	{
+		m_cache[pa][pb] = VisInfo(visibility);
+		return !visibility;
+	}
 };
 
 class WallhackBlocker :

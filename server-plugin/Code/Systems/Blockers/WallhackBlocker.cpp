@@ -161,73 +161,55 @@ bool WallhackBlocker::RT_SetTransmitCallback ( PlayerHandler::iterator sender_pl
 	{
 		if( !pinfo_sender->IsDead () && (pinfo_receiver->GetTeamIndex() != pinfo_sender->GetTeamIndex() || m_ffamode) )
 		{
-			cache.SetVisibility(sender_player.GetIndex (), receiver_player.GetIndex (), RT_IsAbleToSee ( sender_player, receiver_player ) );
+			return cache.SetVisibility_GetNotVisible(sender_player.GetIndex (), receiver_player.GetIndex (), RT_IsAbleToSee ( sender_player, receiver_player ) );
 		}
 		else
 		{
-			cache.SetVisibility ( sender_player.GetIndex (), receiver_player.GetIndex (), true );
+			return cache.SetVisibility_GetNotVisible(sender_player.GetIndex (), receiver_player.GetIndex (), true );
 		}
 	}
-	else if( !pinfo_sender->IsDead () )
+	else if (!pinfo_sender->IsDead())
 	{
-		SpectatorMode const receiver_spec ( *g_EntityProps.GetPropValue<SpectatorMode, PROP_OBSERVER_MODE> ( receiver_player->GetEdict (), false ) );
-		if( receiver_spec == OBS_MODE_IN_EYE )
+		SpectatorMode const receiver_spec(*g_EntityProps.GetPropValue<SpectatorMode, PROP_OBSERVER_MODE>(receiver_player->GetEdict(), false));
+		if (receiver_spec == OBS_MODE_IN_EYE)
 		{
-			SourceSdk::CBaseHandle const * const bh ( g_EntityProps.GetPropValue<SourceSdk::CBaseHandle, PROP_OBSERVER_TARGET> ( receiver_player->GetEdict (), false ) );
-			if( bh->IsValid () )
+			SourceSdk::CBaseHandle const * const bh(g_EntityProps.GetPropValue<SourceSdk::CBaseHandle, PROP_OBSERVER_TARGET>(receiver_player->GetEdict(), false));
+			if (bh->IsValid())
 			{
 				/*
 					The handle can still be invalid now https://github.com/L-EARN/NoCheatZ-4/issues/67#issuecomment-232063885
 					Perform more checks.
 				*/
 
-				int const bh_index ( bh->GetEntryIndex () );
-				if( bh_index > 0 && bh_index <= g_NczPlayerManager.GetMaxIndex () )
+				int const bh_index(bh->GetEntryIndex());
+				if (bh_index > 0 && bh_index <= g_NczPlayerManager.GetMaxIndex())
 				{
-					PlayerHandler::iterator spec_player ( bh_index );
+					PlayerHandler::iterator spec_player(bh_index);
 
-					if( spec_player && sender_player != spec_player )
+					if (spec_player && sender_player != spec_player)
 					{
-						if( !cache.IsValid ( sender_player.GetIndex (), spec_player.GetIndex () ) )
+						if (!cache.IsValid(sender_player.GetIndex(), spec_player.GetIndex()))
 						{
-							cache.SetVisibility ( sender_player.GetIndex (), spec_player.GetIndex (), RT_IsAbleToSee ( sender_player, spec_player ) );
+							return cache.SetVisibility_GetNotVisible(sender_player.GetIndex(), spec_player.GetIndex(), RT_IsAbleToSee(sender_player, spec_player));
 						}
-						cache.SetVisibility ( sender_player.GetIndex (), receiver_player.GetIndex (), cache.IsVisible ( sender_player.GetIndex (), spec_player.GetIndex () ) );
+						return cache.SetVisibility_GetNotVisible(sender_player.GetIndex(), receiver_player.GetIndex(), cache.IsVisible(sender_player.GetIndex(), spec_player.GetIndex()));
 					}
 					else
 					{
-						cache.SetVisibility ( sender_player.GetIndex (), receiver_player.GetIndex (), true );
+						return cache.SetVisibility_GetNotVisible(sender_player.GetIndex(), receiver_player.GetIndex(), true);
 					}
 				}
-				else
-				{
-					// Might flood the logs
-					DebugMessage ( Helpers::format("Cannot process vis tests : Encountered invalid index in CBaseHandle (%p -> %d) in WallhackBlocker::RT_SetTransmitCallback:154", bh, bh_index ) );
-					cache.SetVisibility ( sender_player.GetIndex (), receiver_player.GetIndex (), true );
-				}
-			}
-			else
-			{
-				cache.SetVisibility ( sender_player.GetIndex (), receiver_player.GetIndex (), true );
 			}
 		}
-		else
-		{
-			cache.SetVisibility ( sender_player.GetIndex (), receiver_player.GetIndex (), true );
-		}
-	}
-	else
-	{
-		cache.SetVisibility ( sender_player.GetIndex (), receiver_player.GetIndex (), true );
 	}
 
-	return !cache.IsVisible ( sender_player.GetIndex (), receiver_player.GetIndex () );
+	return cache.SetVisibility_GetNotVisible( sender_player.GetIndex (), receiver_player.GetIndex (), true );
 }
 
 bool WallhackBlocker::RT_SetTransmitWeaponCallback ( SourceSdk::edict_t const * const sender, PlayerHandler::iterator receiver )
 {
 	const int weapon_index ( Helpers::IndexOfEdict ( sender ) );
-	NczPlayer const * const owner_player ( g_WallhackBlocker.m_weapon_owner[ weapon_index ] );
+	NczPlayer const * const owner_player ( m_weapon_owner[ weapon_index ] );
 	if( !owner_player ) return false;
 
 	if( owner_player == *receiver ) return false;
@@ -247,14 +229,14 @@ bool WallhackBlocker::RT_SetTransmitWeaponCallback ( SourceSdk::edict_t const * 
 void WallhackBlocker::RT_WeaponEquipCallback ( PlayerHandler::iterator ph, SourceSdk::edict_t const * const weapon )
 {
 	const int weapon_index ( Helpers::IndexOfEdict ( weapon ) );
-	g_WallhackBlocker.m_weapon_owner[ weapon_index ] = *ph;
+	m_weapon_owner[ weapon_index ] = *ph;
 	SetTransmitHookListener::HookSetTransmit ( weapon, false );
 }
 
 void WallhackBlocker::RT_WeaponDropCallback ( PlayerHandler::iterator ph, SourceSdk::edict_t const * const weapon )
 {
 	const int weapon_index ( Helpers::IndexOfEdict ( weapon ) );
-	g_WallhackBlocker.m_weapon_owner[ weapon_index ] = nullptr;
+	m_weapon_owner[ weapon_index ] = nullptr;
 }
 
 void WallhackBlocker::RT_ProcessOnTick (double const & curtime )
