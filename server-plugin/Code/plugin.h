@@ -59,6 +59,8 @@ public:
 		return m_iClientCommandIndex;
 	}
 
+	void LateLoad();
+
 	static void DestroySingletons ();
 
 	CNoCheatZPlugin ();

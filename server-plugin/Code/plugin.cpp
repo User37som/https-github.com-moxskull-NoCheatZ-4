@@ -185,30 +185,7 @@ bool CNoCheatZPlugin::Load ( SourceSdk::CreateInterfaceFn _interfaceFactory, Sou
 
 	UserMessageHookListener::HookUserMessage ();
 
-	BaseSystem::InitSystems ();
-	g_BanRequest.Init ();
-
-	g_NczPlayerManager.LoadPlayerManager (); // Mark any present player as PLAYER_CONNECTED
-
-	SourceSdk::InterfacesProxy::Call_ServerExecute ();
-	SourceSdk::InterfacesProxy::Call_ServerCommand ( "exec nocheatz.cfg\n" );
-	SourceSdk::InterfacesProxy::Call_ServerCommand( "exec nocheatz-dev.cfg\n");
-	SourceSdk::InterfacesProxy::Call_ServerCommand (Helpers::format("sv_mincmdrate %f\n", g_ConfigManager.tickrate_override));
-	SourceSdk::InterfacesProxy::Call_ServerCommand(Helpers::format("sv_minupdaterate %f\n", g_ConfigManager.tickrate_override));
-	SourceSdk::InterfacesProxy::Call_ServerExecute ();
-
-	ProcessFilter::HumanAtLeastConnectedOrBot filter_class;
-	for( PlayerHandler::iterator ph ( &filter_class ); ph != PlayerHandler::end(); ph += &filter_class )
-	{
-		HookEntity ( ph->GetEdict () );
-		WeaponHookListener::HookWeapon ( ph );
-
-		if( ph >= SlotStatus::PLAYER_CONNECTED )
-		{
-			HookBasePlayer ( ph );
-		}
-	}
-	BaseSystem::ManageSystems ();
+	LateLoad();
 
 	g_Logger.Msg<MSG_CHAT> ( "Loaded" );
 
@@ -228,6 +205,35 @@ bool CNoCheatZPlugin::Load ( SourceSdk::CreateInterfaceFn _interfaceFactory, Sou
 	}
 
 	return true;
+}
+
+void CNoCheatZPlugin::LateLoad()
+{
+	BaseSystem::InitSystems();
+	g_BanRequest.Init();
+
+	g_NczPlayerManager.OnLevelInit();
+	g_NczPlayerManager.LoadPlayerManager(); // Mark any present player as PLAYER_CONNECTED
+
+	SourceSdk::InterfacesProxy::Call_ServerExecute();
+	SourceSdk::InterfacesProxy::Call_ServerCommand("exec nocheatz.cfg\n");
+	SourceSdk::InterfacesProxy::Call_ServerCommand("exec nocheatz-dev.cfg\n");
+	SourceSdk::InterfacesProxy::Call_ServerCommand(Helpers::format("sv_mincmdrate %f\n", g_ConfigManager.tickrate_override));
+	SourceSdk::InterfacesProxy::Call_ServerCommand(Helpers::format("sv_minupdaterate %f\n", g_ConfigManager.tickrate_override));
+	SourceSdk::InterfacesProxy::Call_ServerExecute();
+
+	ProcessFilter::HumanAtLeastConnectedOrBot filter_class;
+	for (PlayerHandler::iterator ph(&filter_class); ph != PlayerHandler::end(); ph += &filter_class)
+	{
+		HookEntity(ph->GetEdict());
+		WeaponHookListener::HookWeapon(ph);
+
+		if (ph >= SlotStatus::PLAYER_CONNECTED)
+		{
+			HookBasePlayer(ph);
+		}
+	}
+	BaseSystem::ManageSystems();
 }
 
 //---------------------------------------------------------------------------------
@@ -277,27 +283,8 @@ void CNoCheatZPlugin::Pause ( void )
 void CNoCheatZPlugin::UnPause ( void )
 {
 	g_Logger.Msg<MSG_CONSOLE> ( "Unpausing ..." );
-	BaseSystem::InitSystems ();
-	g_BanRequest.Init ();
 
-	g_NczPlayerManager.LoadPlayerManager (); // Mark any present player as PLAYER_CONNECTED
-
-	SourceSdk::InterfacesProxy::Call_ServerExecute ();
-	SourceSdk::InterfacesProxy::Call_ServerCommand ( "exec nocheatz.cfg\n" );
-	SourceSdk::InterfacesProxy::Call_ServerExecute ();
-
-	ProcessFilter::HumanAtLeastConnectedOrBot filter_class;
-	for( PlayerHandler::iterator ph ( &filter_class ); ph != PlayerHandler::end (); ph += &filter_class )
-	{
-		HookEntity ( ph->GetEdict () );
-		WeaponHookListener::HookWeapon ( ph );
-
-		if( ph >= SlotStatus::PLAYER_CONNECTED )
-		{
-			HookBasePlayer ( ph );
-		}
-	}
-	BaseSystem::ManageSystems ();
+	LateLoad();
 
 	g_Logger.Msg<MSG_CHAT> ( "Plugin unpaused" );
 }
