@@ -109,7 +109,7 @@ void Logger::Msg<MSG_CHAT_ADMIN>(const char * msg, int verbose /*= 0*/)
 {
 	basic_string m(chat_prolog.c_str(), msg);
 
-	if (!m_sm_chat)
+	if (!m_sm_chat || m_allow_chat == logger_chat_t::ADMIN_IDS)
 	{
 		int maxclients;
 		if (SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive)
@@ -151,7 +151,7 @@ void Logger::Msg<MSG_CHAT> ( const char * msg, int verbose /*= 0*/ )
 	{
 		Helpers::chatprintf(basic_string(chat_prolog.c_str(), msg).c_str());
 	}
-	else if (m_allow_chat == logger_chat_t::ADMIN)
+	else if (m_allow_chat == logger_chat_t::ADMIN_IDS || m_allow_chat == logger_chat_t::ADMIN_AUTO)
 	{
 		Msg<MSG_CHAT_ADMIN>(msg);
 	}
@@ -297,8 +297,14 @@ bool Logger::sys_cmd_fn ( const SourceSdk::CCommand &args )
 		}
 		else if (stricmp("admin", args.Arg(3)) == 0)
 		{
-			m_allow_chat = logger_chat_t::ADMIN;
+			m_allow_chat = logger_chat_t::ADMIN_AUTO;
 			Msg<MSG_CMD_REPLY>("Logger AllowChat is admin");
+			return true;
+		}
+		else if (stricmp("admin_ids", args.Arg(3)) == 0)
+		{
+			m_allow_chat = logger_chat_t::ADMIN_IDS;
+			Msg<MSG_CMD_REPLY>("Logger AllowChat is admin_ids");
 			return true;
 		}
 		else
