@@ -32,7 +32,6 @@ OnGroundHookListener::OnGroundHookListener ()
 
 OnGroundHookListener::~OnGroundHookListener ()
 {
-	g_HookGuardOnGroundHookListener.UnhookAll ();
 }
 
 void OnGroundHookListener::HookOnGround ( PlayerHandler::iterator ph )

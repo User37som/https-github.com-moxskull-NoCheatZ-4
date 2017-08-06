@@ -35,8 +35,6 @@ SetTransmitHookListener::SetTransmitHookListener ()
 
 SetTransmitHookListener::~SetTransmitHookListener ()
 {
-	g_HookGuardSetTransmitHookListener.UnhookAll ();
-	g_HookGuardSetTransmitHookListenerWeapon.UnhookAll();
 }
 
 void SetTransmitHookListener::HookSetTransmit ( SourceSdk::edict_t const * const ent, bool isplayer )

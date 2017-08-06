@@ -42,7 +42,6 @@ PlayerRunCommandHookListener::PlayerRunCommandHookListener ()
 
 PlayerRunCommandHookListener::~PlayerRunCommandHookListener ()
 {
-	g_HookGuardPlayerRunCommandHookListener.UnhookAll ();
 }
 
 void PlayerRunCommandHookListener::HookPlayerRunCommand ( PlayerHandler::iterator ph )

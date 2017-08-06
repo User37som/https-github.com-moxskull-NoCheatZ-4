@@ -85,6 +85,7 @@ float HOOKFN_INT GetTickInterval(void * const preserve_me)
 
 void CNoCheatZPlugin::DestroySingletons ()
 {
+	printf("%s\n", "CNoCheatZPlugin::DestroySingletons");
 	g_SourceHookSafety.ProcessRevertAll();
 	g_Logger.SetBypassServerConsoleMsg(true);
 	HeapMemoryManager::FreePool ();
@@ -104,6 +105,7 @@ CNoCheatZPlugin::CNoCheatZPlugin () :
 
 CNoCheatZPlugin::~CNoCheatZPlugin ()
 {
+	printf("%s\n", "CNoCheatZPlugin::~CNoCheatZPlugin");
 	DestroySingletons ();
 }
 
@@ -144,12 +146,12 @@ bool CNoCheatZPlugin::Load ( SourceSdk::CreateInterfaceFn _interfaceFactory, Sou
 	{
 	case 5:
 	case 6:
-		ReplaceVirtualFunctionByFakeVirtual((DWORD)GetTickInterval, &(IFACE_PTR(SourceSdk::InterfacesProxy::m_servergamedll)[9]));
+		m_oldgettickinterval = ReplaceVirtualFunctionByFakeVirtual((DWORD)GetTickInterval, &(IFACE_PTR(SourceSdk::InterfacesProxy::m_servergamedll)[9]));
 		SourceSdk::InterfacesProxy::_vfptr_GetTickInterval = (SourceSdk::InterfacesProxy::GetTickInterval_t)GetTickInterval;
 		break;
 	case 9:
 	case 10:
-		ReplaceVirtualFunctionByFakeVirtual((DWORD)GetTickInterval, &(IFACE_PTR(SourceSdk::InterfacesProxy::m_servergamedll)[10]));
+		m_oldgettickinterval = ReplaceVirtualFunctionByFakeVirtual((DWORD)GetTickInterval, &(IFACE_PTR(SourceSdk::InterfacesProxy::m_servergamedll)[10]));
 		SourceSdk::InterfacesProxy::_vfptr_GetTickInterval = (SourceSdk::InterfacesProxy::GetTickInterval_t)GetTickInterval;
 		break;
 	default:
@@ -241,14 +243,26 @@ void CNoCheatZPlugin::LateLoad()
 //---------------------------------------------------------------------------------
 void CNoCheatZPlugin::Unload ( void )
 {
-	g_BanRequest.WriteBansIfNeeded ();
+	DebugMessage("CNoCheatZPlugin::Unload");
 
-	/*PlayerRunCommandHookListener::UnhookPlayerRunCommand();
-	OnGroundHookListener::UnhookOnGround();
-	//TeleportHookListener::UnhookTeleport();
-	SetTransmitHookListener::UnhookSetTransmit();
-	WeaponHookListener::UnhookWeapon();
-	ConCommandHookListener::UnhookDispatch();*/
+	LevelShutdown();
+
+	g_SourceHookSafety.ProcessRevertAll();
+	g_SourceHookSafety.UnhookMMSourceHook();
+
+	switch (SourceSdk::InterfacesProxy::m_servergamedll_version)
+	{
+	case 5:
+	case 6:
+		ReplaceVirtualFunctionByFakeVirtual(m_oldgettickinterval, &(IFACE_PTR(SourceSdk::InterfacesProxy::m_servergamedll)[9]));
+		break;
+	case 9:
+	case 10:
+		ReplaceVirtualFunctionByFakeVirtual(m_oldgettickinterval, &(IFACE_PTR(SourceSdk::InterfacesProxy::m_servergamedll)[10]));
+		break;
+	default:
+		break;
+	};
 
 	g_Logger.Flush ();
 
@@ -262,8 +276,6 @@ void CNoCheatZPlugin::Unload ( void )
 	{
 		if( ncz_cmd_ptr ) delete static_cast< SourceSdk::ConCommand* >( ncz_cmd_ptr );
 	}
-
-	DestroySingletons ();
 }
 
 //---------------------------------------------------------------------------------

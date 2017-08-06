@@ -61,6 +61,8 @@ public:
 
 	void LateLoad();
 
+	DWORD m_oldgettickinterval;
+
 	static void DestroySingletons ();
 
 	CNoCheatZPlugin ();
