@@ -66,7 +66,7 @@ void HOOKFN_INT SetTransmitHookListener::RT_nSetTransmit ( void * const This, vo
 	PlayerHandler::iterator receiver_assumed_player ( Helpers::IndexOfEdict ( *pInfo ) );
 	PlayerHandler::iterator sender_assumed_client(g_NczPlayerManager.GetPlayerHandlerByBasePlayer(This));
 
-	if( !bAlways && sender_assumed_client != receiver_assumed_player && receiver_assumed_player > SlotStatus::PLAYER_CONNECTING && sender_assumed_client >= SlotStatus::BOT )
+	if( sender_assumed_client != receiver_assumed_player && receiver_assumed_player > SlotStatus::PLAYER_CONNECTING && sender_assumed_client >= SlotStatus::BOT )
 	{
 		TransmitListenersListT::elem_t* it ( m_listeners.GetFirst () );
 
