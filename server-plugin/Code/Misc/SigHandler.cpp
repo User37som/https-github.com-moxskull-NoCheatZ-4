@@ -90,7 +90,7 @@ static FILE * OpenStackFile ()
 	
 	printf("Opening %s\n", filename );
 
-	return fopen ( filename, "a" );
+	return fopen ( filename, "w" );
 }
 
 void abortHandler ( int signum )
