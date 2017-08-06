@@ -90,7 +90,26 @@ static FILE * OpenStackFile ()
 	
 	printf("Opening %s\n", filename );
 
-	return fopen ( filename, "w" );
+	FILE * pfile(fopen(filename, "a"));
+
+	if (pfile)
+	{
+		fprintf(pfile, "Using plugin version %s-%s-%s\n\n",
+			NCZ_VERSION_GIT,
+#ifdef DEBUG
+			"Debug",
+#else
+			"Release",
+#endif
+#ifdef GNUC
+			"Linux"
+#else
+			"Windows"
+#endif
+		);
+	}
+
+	return pfile;
 }
 
 void abortHandler ( int signum )
@@ -128,9 +147,9 @@ void abortHandler ( int signum )
 	// make the most basic call possible to the lowest level, most 
 	// standard print function.
 	if( name )
-		fprintf ( out, "Caught signal %d (%s)\n", signum, name );
+		fprintf ( out, "Caught signal %d (%s)\n\n", signum, name );
 	else
-		fprintf ( out, "Caught signal %d\n", signum );
+		fprintf ( out, "Caught signal %d\n\n", signum );
 
 	// Dump a stack trace.
 	// This is the function we will be implementing next.
@@ -181,7 +200,7 @@ void BaseFilter ( LPEXCEPTION_POINTERS info )
 
 LONG WINAPI UFilter ( LPEXCEPTION_POINTERS info )
 {
-	if( info->ExceptionRecord->ExceptionCode == DBG_PRINTEXCEPTION_C )
+	if( info->ExceptionRecord->ExceptionCode == DBG_PRINTEXCEPTION_C || info->ExceptionRecord->ExceptionCode == 0x4001000A)
 		return EXCEPTION_CONTINUE_EXECUTION;
 
 	BaseFilter ( info );
@@ -194,7 +213,7 @@ LONG WINAPI UFilter ( LPEXCEPTION_POINTERS info )
 
 LONG WINAPI VFilter ( LPEXCEPTION_POINTERS info )
 {
-	if( info->ExceptionRecord->ExceptionCode == DBG_PRINTEXCEPTION_C )
+	if( info->ExceptionRecord->ExceptionCode == DBG_PRINTEXCEPTION_C || info->ExceptionRecord->ExceptionCode == 0x4001000A)
 		return EXCEPTION_CONTINUE_EXECUTION;
 
 	BaseFilter ( info );
