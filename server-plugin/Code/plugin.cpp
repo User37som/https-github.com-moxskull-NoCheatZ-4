@@ -32,6 +32,7 @@
 #include "Systems/Blockers/AntiSmokeBlocker.h"
 #include "Systems/Testers/BadUserCmdTester.h"
 #include "Systems/Testers/MouseTester.h"
+#include "Systems/Testers/AutoStrafeTester.h"
 #include "Systems/Blockers/WallhackBlocker.h"
 #include "Systems/Blockers/RadarHackBlocker.h"
 #include "Systems/Blockers/BhopBlocker.h"
@@ -501,6 +502,7 @@ SourceSdk::PLUGIN_RESULT CNoCheatZPlugin::ClientConnect ( bool *bAllowConnect, S
 		g_RadarHackBlocker.ResetPlayerDataStruct ( player );
 		g_BhopBlocker.ResetPlayerDataStruct ( player );
 		g_MouseTester.ResetPlayerDataStruct(player);
+		g_AutoStrafeTester.ResetPlayerDataStruct(player);
 	}
 
 	return SourceSdk::PLUGIN_CONTINUE;
