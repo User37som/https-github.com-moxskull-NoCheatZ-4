@@ -163,10 +163,6 @@ bool WallhackBlocker::RT_SetTransmitCallback ( PlayerHandler::iterator sender_pl
 		{
 			return cache.SetVisibility_GetNotVisible(sender_player.GetIndex (), receiver_player.GetIndex (), RT_IsAbleToSee ( sender_player, receiver_player ) );
 		}
-		else
-		{
-			return cache.SetVisibility_GetNotVisible(sender_player.GetIndex (), receiver_player.GetIndex (), true );
-		}
 	}
 	else if (!pinfo_sender->IsDead())
 	{
@@ -190,13 +186,9 @@ bool WallhackBlocker::RT_SetTransmitCallback ( PlayerHandler::iterator sender_pl
 					{
 						if (!cache.IsValid(sender_player.GetIndex(), spec_player.GetIndex()))
 						{
-							return cache.SetVisibility_GetNotVisible(sender_player.GetIndex(), spec_player.GetIndex(), RT_IsAbleToSee(sender_player, spec_player));
+							cache.SetVisibility(sender_player.GetIndex(), spec_player.GetIndex(), RT_IsAbleToSee(sender_player, spec_player));
 						}
 						return cache.SetVisibility_GetNotVisible(sender_player.GetIndex(), receiver_player.GetIndex(), cache.IsVisible(sender_player.GetIndex(), spec_player.GetIndex()));
-					}
-					else
-					{
-						return cache.SetVisibility_GetNotVisible(sender_player.GetIndex(), receiver_player.GetIndex(), true);
 					}
 				}
 			}
