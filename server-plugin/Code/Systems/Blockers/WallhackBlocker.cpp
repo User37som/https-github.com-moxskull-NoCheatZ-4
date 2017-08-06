@@ -386,7 +386,7 @@ inline bool WallhackBlocker::RT_IsInFOV ( const SourceSdk::Vector& origin, const
 // Point
 inline bool WallhackBlocker::RT_IsVisible ( const SourceSdk::Vector& origin, const SourceSdk::Vector& target )
 {
-	ST_W_STATIC SourceSdk::CTraceFilterWorldOnly itracefilter;
+	ST_W_STATIC SourceSdk::CTraceFilterWorldAndPropsOnly itracefilter;
 
 	return SourceSdk::trace_ray_fn ( origin, target, MASK_VISIBLE, &itracefilter );
 }
