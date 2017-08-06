@@ -119,13 +119,13 @@ bool WallhackBlocker::sys_cmd_fn(const SourceSdk::CCommand & args)
 	{
 		if (args.ArgC() >= 4)
 		{
-			if (stricmp("Yes", args.Arg(3)) == 0)
+			if (Helpers::IsArgTrue(args.Arg(3)))
 			{
 				m_ffamode = true;
 				g_Logger.Msg<MSG_CMD_REPLY>("FFAMode is Yes");
 				return true;
 			}
-			else if (stricmp("No", args.Arg(3)) == 0)
+			else if (Helpers::IsArgFalse(args.Arg(3)))
 			{
 				m_ffamode = false;
 				g_Logger.Msg<MSG_CMD_REPLY>("FFAMode is No");

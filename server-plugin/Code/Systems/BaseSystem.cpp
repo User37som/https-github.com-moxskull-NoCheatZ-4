@@ -115,7 +115,7 @@ void BaseSystem::ncz_cmd_fn ( const SourceSdk::CCommand &args )
 		{
 			if( stricmp ( it->GetName (), args.Arg ( 1 ) ) == 0 )
 			{
-				if( stricmp ( "enable", args.Arg ( 2 ) ) == 0 )
+				if( Helpers::IsArgTrue(args.Arg(2)) )
 				{
 					if( it->IsStatic () )
 					{
@@ -127,31 +127,7 @@ void BaseSystem::ncz_cmd_fn ( const SourceSdk::CCommand &args )
 						it->SetActive ( true );
 					}
 				}
-				else if( stricmp ( "disable", args.Arg ( 2 ) ) == 0 )
-				{
-					if( it->IsStatic () )
-					{
-						g_Logger.Msg<MSG_CMD_REPLY> ( Helpers::format ( "System %s is static and cannot be loaded or unloaded", it->GetName () ) );
-					}
-					else
-					{
-						it->SetConfig ( false );
-						it->SetActive ( false );
-					}
-				}
-				else if( stricmp ( "on", args.Arg ( 2 ) ) == 0 )
-				{
-					if( it->IsStatic () )
-					{
-						g_Logger.Msg<MSG_CMD_REPLY> ( Helpers::format ( "System %s is static and cannot be loaded or unloaded", it->GetName () ) );
-					}
-					else
-					{
-						it->SetConfig ( true );
-						it->SetActive ( true );
-					}
-				}
-				else if( stricmp ( "off", args.Arg ( 2 ) ) == 0 )
+				else if(Helpers::IsArgFalse(args.Arg(2)))
 				{
 					if( it->IsStatic () )
 					{
@@ -195,12 +171,14 @@ void BaseSystem::ncz_cmd_fn ( const SourceSdk::CCommand &args )
 	}
 	else
 	{
-		g_Logger.Msg<MSG_CMD_REPLY> ( "Usage: ncz system arg1 arg2 ...\nSystems list :\n");
+		g_Logger.Msg<MSG_CMD_REPLY> ( "Usage: ncz system arg1 arg2 ...\nSystems list :");
 
 		BaseSystem* it ( GetFirst () );
+		basic_string prepared_message;
 		while( it != nullptr )
 		{
-			basic_string prepared_message ( it->GetName () );
+			prepared_message.append('\n');
+			prepared_message.append( it->GetName () );
 			if( it->IsStatic () )
 			{
 				prepared_message.append ( " (Static)\n" );
@@ -219,12 +197,12 @@ void BaseSystem::ncz_cmd_fn ( const SourceSdk::CCommand &args )
 			}
 			else
 			{
-				prepared_message.append ( " (Sleeping - Waiting for players)\n" );
+				prepared_message.append ( " (No task)\n" );
 			}
-			prepared_message.append ( Helpers::format( "\tCommands : %s\n", it->cmd_list () ) );
-			g_Logger.Msg<MSG_CMD_REPLY> ( prepared_message.c_str () );
+			prepared_message.append ( Helpers::format( "\tCommands : %s", it->cmd_list () ) );
 			GetNext ( it );
-		}		
+		}	
+		g_Logger.Msg<MSG_CMD_REPLY>(prepared_message.c_str());
 	}
 }
 

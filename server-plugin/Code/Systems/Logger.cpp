@@ -263,13 +263,13 @@ bool Logger::sys_cmd_fn ( const SourceSdk::CCommand &args )
 {
 	if( stricmp ( "alwaysflush", args.Arg ( 2 ) ) == 0 )
 	{
-		if( stricmp ( "on", args.Arg ( 3 ) ) == 0)
+		if( Helpers::IsArgTrue(args.Arg(3)))
 		{
 			SetAlwaysFlush ( true );
 			Msg<MSG_CMD_REPLY> ( "Logger AlwaysFlush is on" );
 			return true;
 		}
-		else if( stricmp ( "off", args.Arg ( 3 ) ) == 0)
+		else if(Helpers::IsArgFalse(args.Arg(3)))
 		{
 			SetAlwaysFlush ( false );
 			Msg<MSG_CMD_REPLY> ( "Logger AlwaysFlush is off" );
@@ -283,13 +283,13 @@ bool Logger::sys_cmd_fn ( const SourceSdk::CCommand &args )
 	}
 	else if (stricmp("allowchat", args.Arg(2)) == 0 )
 	{
-		if (stricmp("on", args.Arg(3)) == 0)
+		if (Helpers::IsArgTrue(args.Arg(3)))
 		{
 			m_allow_chat = logger_chat_t::ON;
 			Msg<MSG_CMD_REPLY>("Logger AllowChat is on");
 			return true;
 		}
-		else if (stricmp("off", args.Arg(3)) == 0)
+		else if (Helpers::IsArgFalse(args.Arg(3)))
 		{
 			m_allow_chat = logger_chat_t::OFF;
 			Msg<MSG_CMD_REPLY>("Logger AllowChat is off");

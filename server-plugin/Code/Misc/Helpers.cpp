@@ -117,6 +117,16 @@ namespace Helpers
 		}
 	}
 
+	bool IsArgTrue(char const * v)
+	{
+		return (*v == '1' || stricmp(v, "yes") == 0 || stricmp(v, "enable") == 0 || stricmp(v, "true") == 0 || stricmp(v, "on") == 0);
+	}
+
+	bool IsArgFalse(char const * v)
+	{
+		return (*v == '0' || stricmp(v, "no") == 0 || stricmp(v, "disable") == 0 || stricmp(v, "false") == 0 || stricmp(v, "off") == 0);
+	}
+
 	bool IsValidUTF8Char ( const char* const o_c, const size_t bytes )
 	{
 		const char* str ( o_c );
