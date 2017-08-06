@@ -326,9 +326,9 @@ void Logger::OnLevelInit()
 
 void Logger::SpewAssert ( char const * expr, char const * file, unsigned int line )
 {
-	char const * msg ( Helpers::format ( "ASSERTION FAILED in %s:%u : %s", file, line, expr ) );
-	g_Logger.Msg<MSG_ERROR> ( msg, 3 );
-	g_Logger.Flush ();
+	basic_string msg ( Helpers::format ( "ASSERTION FAILED in %s:%u : %s", file, line, expr ) );
+	g_Logger.m_always_flush = true;
+	g_Logger.Msg<MSG_ERROR> ( msg.c_str(), 3 );
 }
 
 void Helpers::writeToLogfile ( const basic_string &text )
