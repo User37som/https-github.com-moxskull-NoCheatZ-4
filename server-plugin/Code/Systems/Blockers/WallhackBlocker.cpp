@@ -263,7 +263,7 @@ void WallhackBlocker::RT_ProcessOnTick (double const & curtime )
 						pData->bbox_min.z -= bmax2;
 						pData->abs_origin.z += bmax2;
 
-						float diff_time = 0.25f;
+						float diff_time = 0.75f;
 
 						ST_W_STATIC SourceSdk::Vector predicted_pos;
 
@@ -317,12 +317,13 @@ void WallhackBlocker::RT_ProcessOnTick (double const & curtime )
 							}
 
 
-							float diff_time = 0.25f;
+							float diff_time = 750.0f;
 
 							ST_W_STATIC SourceSdk::Vector predicted_pos;
 
 							{
 								SourceSdk::VectorCopy ( player_maths.m_velocity, predicted_pos );
+								SourceSdk::VectorNorm(predicted_pos);
 								SourceSdk::VectorMultiply ( predicted_pos, diff_time );
 								SourceSdk::VectorAdd ( pData->abs_origin, predicted_pos );
 							}
