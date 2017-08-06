@@ -174,11 +174,9 @@ void BaseSystem::ncz_cmd_fn ( const SourceSdk::CCommand &args )
 		g_Logger.Msg<MSG_CMD_REPLY> ( "Usage: ncz system arg1 arg2 ...\nSystems list :");
 
 		BaseSystem* it ( GetFirst () );
-		basic_string prepared_message;
 		while( it != nullptr )
 		{
-			prepared_message.append('\n');
-			prepared_message.append( it->GetName () );
+			basic_string prepared_message(it->GetName());
 			if( it->IsStatic () )
 			{
 				prepared_message.append ( " (Static)\n" );
@@ -201,8 +199,8 @@ void BaseSystem::ncz_cmd_fn ( const SourceSdk::CCommand &args )
 			}
 			prepared_message.append ( Helpers::format( "\tCommands : %s", it->cmd_list () ) );
 			GetNext ( it );
+			g_Logger.Msg<MSG_CMD_REPLY>(prepared_message.c_str());
 		}	
-		g_Logger.Msg<MSG_CMD_REPLY>(prepared_message.c_str());
 	}
 }
 
