@@ -93,7 +93,7 @@ void HOOKFN_INT SetTransmitHookListener::RT_nSetTransmitWeapon(void * const This
 	SetTransmit_t gpOldFn;
 	PlayerHandler::iterator receiver_assumed_player(Helpers::IndexOfEdict(*pInfo));
 
-	if (!bAlways && !(m_listeners.GetFirst() == nullptr) && receiver_assumed_player > SlotStatus::PLAYER_CONNECTING)
+	if (!(m_listeners.GetFirst() == nullptr) && receiver_assumed_player > SlotStatus::PLAYER_CONNECTING)
 	{
 		SourceSdk::edict_t const * const pEdict_sender(Helpers::edictOfUnknown(This));
 		TransmitListenersListT::elem_t* it(m_listeners.GetFirst());
