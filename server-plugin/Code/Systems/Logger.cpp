@@ -109,7 +109,7 @@ void Logger::Msg<MSG_CHAT_ADMIN>(const char * msg, int verbose /*= 0*/)
 {
 	basic_string m(chat_prolog.c_str(), msg);
 
-	if (!m_sm_chat)
+	if (!m_sm_chat || m_allow_chat == logger_chat_t::ADMIN_IDS)
 	{
 		int maxclients;
 		if (SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive)
@@ -151,7 +151,7 @@ void Logger::Msg<MSG_CHAT> ( const char * msg, int verbose /*= 0*/ )
 	{
 		Helpers::chatprintf(basic_string(chat_prolog.c_str(), msg).c_str());
 	}
-	else if (m_allow_chat == logger_chat_t::ADMIN)
+	else if (m_allow_chat == logger_chat_t::ADMIN_IDS || m_allow_chat == logger_chat_t::ADMIN_AUTO)
 	{
 		Msg<MSG_CHAT_ADMIN>(msg);
 	}
@@ -263,13 +263,13 @@ bool Logger::sys_cmd_fn ( const SourceSdk::CCommand &args )
 {
 	if( stricmp ( "alwaysflush", args.Arg ( 2 ) ) == 0 )
 	{
-		if( stricmp ( "on", args.Arg ( 3 ) ) == 0)
+		if( Helpers::IsArgTrue(args.Arg(3)))
 		{
 			SetAlwaysFlush ( true );
 			Msg<MSG_CMD_REPLY> ( "Logger AlwaysFlush is on" );
 			return true;
 		}
-		else if( stricmp ( "off", args.Arg ( 3 ) ) == 0)
+		else if(Helpers::IsArgFalse(args.Arg(3)))
 		{
 			SetAlwaysFlush ( false );
 			Msg<MSG_CMD_REPLY> ( "Logger AlwaysFlush is off" );
@@ -283,13 +283,13 @@ bool Logger::sys_cmd_fn ( const SourceSdk::CCommand &args )
 	}
 	else if (stricmp("allowchat", args.Arg(2)) == 0 )
 	{
-		if (stricmp("on", args.Arg(3)) == 0)
+		if (Helpers::IsArgTrue(args.Arg(3)))
 		{
 			m_allow_chat = logger_chat_t::ON;
 			Msg<MSG_CMD_REPLY>("Logger AllowChat is on");
 			return true;
 		}
-		else if (stricmp("off", args.Arg(3)) == 0)
+		else if (Helpers::IsArgFalse(args.Arg(3)))
 		{
 			m_allow_chat = logger_chat_t::OFF;
 			Msg<MSG_CMD_REPLY>("Logger AllowChat is off");
@@ -297,8 +297,14 @@ bool Logger::sys_cmd_fn ( const SourceSdk::CCommand &args )
 		}
 		else if (stricmp("admin", args.Arg(3)) == 0)
 		{
-			m_allow_chat = logger_chat_t::ADMIN;
+			m_allow_chat = logger_chat_t::ADMIN_AUTO;
 			Msg<MSG_CMD_REPLY>("Logger AllowChat is admin");
+			return true;
+		}
+		else if (stricmp("admin_ids", args.Arg(3)) == 0)
+		{
+			m_allow_chat = logger_chat_t::ADMIN_IDS;
+			Msg<MSG_CMD_REPLY>("Logger AllowChat is admin_ids");
 			return true;
 		}
 		else
@@ -320,9 +326,9 @@ void Logger::OnLevelInit()
 
 void Logger::SpewAssert ( char const * expr, char const * file, unsigned int line )
 {
-	char const * msg ( Helpers::format ( "ASSERTION FAILED in %s:%u : %s", file, line, expr ) );
-	g_Logger.Msg<MSG_ERROR> ( msg, 3 );
-	g_Logger.Flush ();
+	basic_string msg ( Helpers::format ( "ASSERTION FAILED in %s:%u : %s", file, line, expr ) );
+	g_Logger.m_always_flush = true;
+	g_Logger.Msg<MSG_ERROR> ( msg.c_str(), 3 );
 }
 
 void Helpers::writeToLogfile ( const basic_string &text )

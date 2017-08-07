@@ -32,6 +32,7 @@
 #include "Systems/Blockers/AntiSmokeBlocker.h"
 #include "Systems/Testers/BadUserCmdTester.h"
 #include "Systems/Testers/MouseTester.h"
+#include "Systems/Testers/AutoStrafeTester.h"
 #include "Systems/Blockers/WallhackBlocker.h"
 #include "Systems/Blockers/RadarHackBlocker.h"
 #include "Systems/Blockers/BhopBlocker.h"
@@ -47,10 +48,10 @@
 #include "Systems/OnTickListener.h"
 #include "Systems/TimerListener.h"
 
+KxStackTrace * g_KxStackTrace = nullptr;
+
 static void* __CreatePlugin_interface ()
 {
-	static KxStackTrace g_KxStackTrace;
-
 	printf ( "__CreatePlugin_interface - HeapMemoryManager::InitPool()\n" );
 	HeapMemoryManager::InitPool ();
 	printf ( "CNoCheatZPlugin interface created with CSGO callbacks ...\n" );
@@ -60,17 +61,19 @@ static void* __CreatePlugin_interface ()
 void* CreateInterfaceInternal ( char const *pName, int *pReturnCode )
 {
 	printf ( "NoCheatZ plugin.cpp : CreateInterfaceInternal - Game engine asking for %s\n", pName );
-	/*if( CNoCheatZPlugin::IsCreated () )
+	if (!g_KxStackTrace)
 	{
-		printf ( "NoCheatZ plugin.cpp : CreateInterfaceInternal - ERROR : Plugin already loaded\n" );
-		if( pReturnCode ) *pReturnCode = SourceSdk::IFACE_FAILED;
+		g_KxStackTrace = new KxStackTrace;
+	}
+	else
+	{
+		printf("NoCheatZ plugin.cpp : CreateInterfaceInternal - ERROR : Plugin already loaded\n");
+		if (pReturnCode) *pReturnCode = SourceSdk::IFACE_FAILED;
 		return nullptr;
 	}
-	else*/
-	{
-		if( pReturnCode ) *pReturnCode = SourceSdk::IFACE_OK;
-		return __CreatePlugin_interface ();
-	}
+
+	if( pReturnCode ) *pReturnCode = SourceSdk::IFACE_OK;
+	return __CreatePlugin_interface ();
 }
 
 void* SourceSdk::CreateInterface ( char const * pName, int * pReturnCode )
@@ -85,9 +88,12 @@ float HOOKFN_INT GetTickInterval(void * const preserve_me)
 
 void CNoCheatZPlugin::DestroySingletons ()
 {
+	printf("%s\n", "CNoCheatZPlugin::DestroySingletons");
 	g_SourceHookSafety.ProcessRevertAll();
 	g_Logger.SetBypassServerConsoleMsg(true);
 	HeapMemoryManager::FreePool ();
+
+	delete g_KxStackTrace;
 }
 
 //---------------------------------------------------------------------------------
@@ -104,6 +110,7 @@ CNoCheatZPlugin::CNoCheatZPlugin () :
 
 CNoCheatZPlugin::~CNoCheatZPlugin ()
 {
+	printf("%s\n", "CNoCheatZPlugin::~CNoCheatZPlugin");
 	DestroySingletons ();
 }
 
@@ -138,18 +145,20 @@ bool CNoCheatZPlugin::Load ( SourceSdk::CreateInterfaceFn _interfaceFactory, Sou
 		return false;
 	}
 
+	raise(SIGILL);
+
 	// replace tickinterval
 
 	switch (SourceSdk::InterfacesProxy::m_servergamedll_version)
 	{
 	case 5:
 	case 6:
-		ReplaceVirtualFunctionByFakeVirtual((DWORD)GetTickInterval, &(IFACE_PTR(SourceSdk::InterfacesProxy::m_servergamedll)[9]));
+		m_oldgettickinterval = ReplaceVirtualFunctionByFakeVirtual((DWORD)GetTickInterval, &(IFACE_PTR(SourceSdk::InterfacesProxy::m_servergamedll)[9]));
 		SourceSdk::InterfacesProxy::_vfptr_GetTickInterval = (SourceSdk::InterfacesProxy::GetTickInterval_t)GetTickInterval;
 		break;
 	case 9:
 	case 10:
-		ReplaceVirtualFunctionByFakeVirtual((DWORD)GetTickInterval, &(IFACE_PTR(SourceSdk::InterfacesProxy::m_servergamedll)[10]));
+		m_oldgettickinterval = ReplaceVirtualFunctionByFakeVirtual((DWORD)GetTickInterval, &(IFACE_PTR(SourceSdk::InterfacesProxy::m_servergamedll)[10]));
 		SourceSdk::InterfacesProxy::_vfptr_GetTickInterval = (SourceSdk::InterfacesProxy::GetTickInterval_t)GetTickInterval;
 		break;
 	default:
@@ -185,30 +194,7 @@ bool CNoCheatZPlugin::Load ( SourceSdk::CreateInterfaceFn _interfaceFactory, Sou
 
 	UserMessageHookListener::HookUserMessage ();
 
-	BaseSystem::InitSystems ();
-	g_BanRequest.Init ();
-
-	g_NczPlayerManager.LoadPlayerManager (); // Mark any present player as PLAYER_CONNECTED
-
-	SourceSdk::InterfacesProxy::Call_ServerExecute ();
-	SourceSdk::InterfacesProxy::Call_ServerCommand ( "exec nocheatz.cfg\n" );
-	SourceSdk::InterfacesProxy::Call_ServerCommand( "exec nocheatz-dev.cfg\n");
-	SourceSdk::InterfacesProxy::Call_ServerCommand (Helpers::format("sv_mincmdrate %f\n", g_ConfigManager.tickrate_override));
-	SourceSdk::InterfacesProxy::Call_ServerCommand(Helpers::format("sv_minupdaterate %f\n", g_ConfigManager.tickrate_override));
-	SourceSdk::InterfacesProxy::Call_ServerExecute ();
-
-	ProcessFilter::HumanAtLeastConnectedOrBot filter_class;
-	for( PlayerHandler::iterator ph ( &filter_class ); ph != PlayerHandler::end(); ph += &filter_class )
-	{
-		HookEntity ( ph->GetEdict () );
-		WeaponHookListener::HookWeapon ( ph );
-
-		if( ph >= SlotStatus::PLAYER_CONNECTED )
-		{
-			HookBasePlayer ( ph );
-		}
-	}
-	BaseSystem::ManageSystems ();
+	LateLoad();
 
 	g_Logger.Msg<MSG_CHAT> ( "Loaded" );
 
@@ -230,19 +216,60 @@ bool CNoCheatZPlugin::Load ( SourceSdk::CreateInterfaceFn _interfaceFactory, Sou
 	return true;
 }
 
+void CNoCheatZPlugin::LateLoad()
+{
+	BaseSystem::InitSystems();
+	g_BanRequest.Init();
+
+	g_NczPlayerManager.OnLevelInit();
+	g_NczPlayerManager.LoadPlayerManager(); // Mark any present player as PLAYER_CONNECTED
+
+	SourceSdk::InterfacesProxy::Call_ServerExecute();
+	SourceSdk::InterfacesProxy::Call_ServerCommand("exec nocheatz.cfg\n");
+	SourceSdk::InterfacesProxy::Call_ServerCommand("exec nocheatz-dev.cfg\n");
+	SourceSdk::InterfacesProxy::Call_ServerCommand(Helpers::format("sv_mincmdrate %f\n", g_ConfigManager.tickrate_override));
+	SourceSdk::InterfacesProxy::Call_ServerCommand(Helpers::format("sv_minupdaterate %f\n", g_ConfigManager.tickrate_override));
+	SourceSdk::InterfacesProxy::Call_ServerExecute();
+
+	ProcessFilter::HumanAtLeastConnectedOrBot filter_class;
+	for (PlayerHandler::iterator ph(&filter_class); ph != PlayerHandler::end(); ph += &filter_class)
+	{
+		HookEntity(ph->GetEdict());
+		WeaponHookListener::HookWeapon(ph);
+
+		if (ph >= SlotStatus::PLAYER_CONNECTED)
+		{
+			HookBasePlayer(ph);
+		}
+	}
+	BaseSystem::ManageSystems();
+}
+
 //---------------------------------------------------------------------------------
 // Purpose: called when the plugin is unloaded (turned off)
 //---------------------------------------------------------------------------------
 void CNoCheatZPlugin::Unload ( void )
 {
-	g_BanRequest.WriteBansIfNeeded ();
+	DebugMessage("CNoCheatZPlugin::Unload");
 
-	/*PlayerRunCommandHookListener::UnhookPlayerRunCommand();
-	OnGroundHookListener::UnhookOnGround();
-	//TeleportHookListener::UnhookTeleport();
-	SetTransmitHookListener::UnhookSetTransmit();
-	WeaponHookListener::UnhookWeapon();
-	ConCommandHookListener::UnhookDispatch();*/
+	LevelShutdown();
+
+	g_SourceHookSafety.ProcessRevertAll();
+	g_SourceHookSafety.UnhookMMSourceHook();
+
+	switch (SourceSdk::InterfacesProxy::m_servergamedll_version)
+	{
+	case 5:
+	case 6:
+		ReplaceVirtualFunctionByFakeVirtual(m_oldgettickinterval, &(IFACE_PTR(SourceSdk::InterfacesProxy::m_servergamedll)[9]));
+		break;
+	case 9:
+	case 10:
+		ReplaceVirtualFunctionByFakeVirtual(m_oldgettickinterval, &(IFACE_PTR(SourceSdk::InterfacesProxy::m_servergamedll)[10]));
+		break;
+	default:
+		break;
+	};
 
 	g_Logger.Flush ();
 
@@ -256,8 +283,6 @@ void CNoCheatZPlugin::Unload ( void )
 	{
 		if( ncz_cmd_ptr ) delete static_cast< SourceSdk::ConCommand* >( ncz_cmd_ptr );
 	}
-
-	DestroySingletons ();
 }
 
 //---------------------------------------------------------------------------------
@@ -277,27 +302,8 @@ void CNoCheatZPlugin::Pause ( void )
 void CNoCheatZPlugin::UnPause ( void )
 {
 	g_Logger.Msg<MSG_CONSOLE> ( "Unpausing ..." );
-	BaseSystem::InitSystems ();
-	g_BanRequest.Init ();
 
-	g_NczPlayerManager.LoadPlayerManager (); // Mark any present player as PLAYER_CONNECTED
-
-	SourceSdk::InterfacesProxy::Call_ServerExecute ();
-	SourceSdk::InterfacesProxy::Call_ServerCommand ( "exec nocheatz.cfg\n" );
-	SourceSdk::InterfacesProxy::Call_ServerExecute ();
-
-	ProcessFilter::HumanAtLeastConnectedOrBot filter_class;
-	for( PlayerHandler::iterator ph ( &filter_class ); ph != PlayerHandler::end (); ph += &filter_class )
-	{
-		HookEntity ( ph->GetEdict () );
-		WeaponHookListener::HookWeapon ( ph );
-
-		if( ph >= SlotStatus::PLAYER_CONNECTED )
-		{
-			HookBasePlayer ( ph );
-		}
-	}
-	BaseSystem::ManageSystems ();
+	LateLoad();
 
 	g_Logger.Msg<MSG_CHAT> ( "Plugin unpaused" );
 }
@@ -502,6 +508,7 @@ SourceSdk::PLUGIN_RESULT CNoCheatZPlugin::ClientConnect ( bool *bAllowConnect, S
 		g_RadarHackBlocker.ResetPlayerDataStruct ( player );
 		g_BhopBlocker.ResetPlayerDataStruct ( player );
 		g_MouseTester.ResetPlayerDataStruct(player);
+		g_AutoStrafeTester.ResetPlayerDataStruct(player);
 	}
 
 	return SourceSdk::PLUGIN_CONTINUE;

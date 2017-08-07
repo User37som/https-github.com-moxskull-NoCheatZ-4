@@ -59,6 +59,10 @@ public:
 		return m_iClientCommandIndex;
 	}
 
+	void LateLoad();
+
+	DWORD m_oldgettickinterval;
+
 	static void DestroySingletons ();
 
 	CNoCheatZPlugin ();

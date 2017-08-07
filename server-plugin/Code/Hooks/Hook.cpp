@@ -135,13 +135,16 @@ void MoveVirtualFunction ( DWORD const * const from, DWORD * const to )
 	}
 }
 
-void ReplaceVirtualFunctionByFakeVirtual(DWORD const replace_by, DWORD * const replace_here)
+DWORD ReplaceVirtualFunctionByFakeVirtual(DWORD const replace_by, DWORD * const replace_here)
 {
 	bool err = false;
 	RAII_MemoryProtectDword z(replace_here, &err);
+	DWORD old(0);
 	if (!err)
 	{
 		DebugMessage(Helpers::format("ReplaceVirtualFunctionByFakeVirtual : function 0x%X replaced by 0x%X.", replace_by, *replace_here));
+		old = *replace_here;
 		*replace_here = replace_by;
 	}
+	return old;
 }

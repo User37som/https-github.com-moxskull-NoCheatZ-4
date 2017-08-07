@@ -168,7 +168,7 @@ public:
 			Convert the iterator to the dereferenced NczPlayer pointer in the handler (might be null)
 		*/
 		inline NczPlayer* operator->() const;
-	} ALIGN4_POST;
+	};
 
 private:
 

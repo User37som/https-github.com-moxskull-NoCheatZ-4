@@ -42,12 +42,12 @@ bool BanRequest::sys_cmd_fn ( const SourceSdk::CCommand &args )
 {
 	if( stricmp ( "CanKick", args.Arg ( 2 ) ) == 0 )
 	{
-		if( stricmp ( "Yes", args.Arg ( 3 )) == 0  )
+		if(Helpers::IsArgTrue(args.Arg(3)))
 		{
 			m_can_kick = true;
 			g_Logger.Msg<MSG_CMD_REPLY> ( Helpers::format ( "NoCheatZ is: Able to kick (%s), Able to ban (%s)", Helpers::boolToString ( m_can_kick ), Helpers::boolToString ( m_can_ban ) ) );
 		}
-		else if (stricmp ( "No", args.Arg ( 3 )) == 0 )
+		else if (Helpers::IsArgFalse(args.Arg(3)))
 		{
 			m_can_kick = false;
 			m_can_ban = false;
@@ -63,13 +63,13 @@ bool BanRequest::sys_cmd_fn ( const SourceSdk::CCommand &args )
 	}
 	else if( stricmp ( "CanBan", args.Arg ( 2 ) ) == 0 )
 	{
-		if( stricmp ( "Yes", args.Arg ( 3 ) ) == 0 )
+		if(Helpers::IsArgTrue(args.Arg(3)))
 		{
 			m_can_kick = true;
 			m_can_ban = true;
 			g_Logger.Msg<MSG_CMD_REPLY> ( Helpers::format ( "NoCheatZ is: Able to kick (%s), Able to ban (%s)", Helpers::boolToString ( m_can_kick ), Helpers::boolToString ( m_can_ban ) ) );
 		}
-		else if( stricmp ( "No", args.Arg ( 3 ) ) == 0 )
+		else if(Helpers::IsArgFalse(args.Arg(3)))
 		{
 			m_can_ban = false;
 			g_Logger.Msg<MSG_CMD_REPLY> ( Helpers::format ( "NoCheatZ is: Able to kick (%s), Able to ban (%s)", Helpers::boolToString ( m_can_kick ), Helpers::boolToString ( m_can_ban ) ) );
@@ -97,13 +97,13 @@ bool BanRequest::sys_cmd_fn ( const SourceSdk::CCommand &args )
 	{
 		if (args.ArgC() >= 4)
 		{
-			if (stricmp("Yes", args.Arg(3)) == 0)
+			if (Helpers::IsArgTrue(args.Arg(3)))
 			{
 				m_can_write_ids = true;
 				g_Logger.Msg<MSG_CMD_REPLY>("AllowWriteBans is Yes");
 				return true;
 			}
-			else if (stricmp("No", args.Arg(3)) == 0)
+			else if (Helpers::IsArgFalse(args.Arg(3)))
 			{
 				m_can_write_ids = false;
 				g_Logger.Msg<MSG_CMD_REPLY>("AllowWriteBans is No");

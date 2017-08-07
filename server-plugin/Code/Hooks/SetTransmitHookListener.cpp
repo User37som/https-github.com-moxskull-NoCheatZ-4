@@ -35,8 +35,6 @@ SetTransmitHookListener::SetTransmitHookListener ()
 
 SetTransmitHookListener::~SetTransmitHookListener ()
 {
-	g_HookGuardSetTransmitHookListener.UnhookAll ();
-	g_HookGuardSetTransmitHookListenerWeapon.UnhookAll();
 }
 
 void SetTransmitHookListener::HookSetTransmit ( SourceSdk::edict_t const * const ent, bool isplayer )
@@ -66,7 +64,7 @@ void HOOKFN_INT SetTransmitHookListener::RT_nSetTransmit ( void * const This, vo
 	PlayerHandler::iterator receiver_assumed_player ( Helpers::IndexOfEdict ( *pInfo ) );
 	PlayerHandler::iterator sender_assumed_client(g_NczPlayerManager.GetPlayerHandlerByBasePlayer(This));
 
-	if( !bAlways && sender_assumed_client != receiver_assumed_player && receiver_assumed_player > SlotStatus::PLAYER_CONNECTING && sender_assumed_client >= SlotStatus::BOT )
+	if( sender_assumed_client != receiver_assumed_player && receiver_assumed_player > SlotStatus::PLAYER_CONNECTING && sender_assumed_client >= SlotStatus::BOT )
 	{
 		TransmitListenersListT::elem_t* it ( m_listeners.GetFirst () );
 
@@ -93,7 +91,7 @@ void HOOKFN_INT SetTransmitHookListener::RT_nSetTransmitWeapon(void * const This
 	SetTransmit_t gpOldFn;
 	PlayerHandler::iterator receiver_assumed_player(Helpers::IndexOfEdict(*pInfo));
 
-	if (!bAlways && !(m_listeners.GetFirst() == nullptr) && receiver_assumed_player > SlotStatus::PLAYER_CONNECTING)
+	if (!(m_listeners.GetFirst() == nullptr) && receiver_assumed_player > SlotStatus::PLAYER_CONNECTING)
 	{
 		SourceSdk::edict_t const * const pEdict_sender(Helpers::edictOfUnknown(This));
 		TransmitListenersListT::elem_t* it(m_listeners.GetFirst());

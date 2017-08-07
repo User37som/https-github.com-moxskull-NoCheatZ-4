@@ -59,6 +59,10 @@ namespace Helpers
 	/* Retourne vrai si value est un entier ... (140.000, 1587.000 etc) */
 	bool IsInt ( float const value );
 
+	bool IsArgTrue(char const * v);
+
+	bool IsArgFalse(char const * v);
+
 	/* Envoie un message chat à tous les clients sauf pEntity */
 	void noTell ( const SourceSdk::edict_t * const pEntity, const basic_string& msg );
 

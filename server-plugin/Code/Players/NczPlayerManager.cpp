@@ -95,48 +95,56 @@ void NczPlayerManager::LoadPlayerManager ()
 	SourceSdk::InterfacesProxy::GetGameEventManager ()->AddListener ( this, "round_freeze_end", true );
 	//SourceSdk::InterfacesProxy::GetGameEventManager ()->AddListener ( this, "bot_takeover", true );
 
-	//Helpers::FastScan_EntList();
 	Helpers::m_EdictList = Helpers::PEntityOfEntIndex ( 0 );
 
-	//if(Helpers::m_EdictList)
-	//{
-	//int maxcl = Helpers::GetMaxClients();
-
-	for( PlayerHandler::iterator ph ( PlayerHandler::begin () ); ph != PlayerHandler::end (); ++ph )
+	if (Helpers::m_EdictList != nullptr)
 	{
-		SourceSdk::edict_t* const pEntity ( Helpers::PEntityOfEntIndex ( ph.GetIndex () ) );
-		if( Helpers::isValidEdict ( pEntity ) )
+		int index(1);
+		do
 		{
-			void * playerinfo ( SourceSdk::InterfacesProxy::Call_GetPlayerInfo ( pEntity ) );
-			if( playerinfo )
+			SourceSdk::edict_t * pedict = Helpers::PEntityOfEntIndex(index);
+			PlayerHandler& ph(FullHandlersList[index]);
+
+#undef GetClassName
+			if (Helpers::isValidEdict(pedict) && pedict->GetClassName() && strcmp(pedict->GetClassName(), "player") == 0)
 			{
-				bool isfakeclient;
-				if( SourceSdk::InterfacesProxy::m_game == SourceSdk::CounterStrikeGlobalOffensive )
+				SourceSdk::IPlayerInfo * pinfo = (SourceSdk::IPlayerInfo *)SourceSdk::InterfacesProxy::Call_GetPlayerInfo(pedict);
+				if (pinfo)
 				{
-					isfakeclient = static_cast< SourceSdk::IPlayerInfo_csgo* >( playerinfo )->IsFakeClient ();
-				}
-				else
-				{
-					isfakeclient = static_cast< SourceSdk::IPlayerInfo* >( playerinfo )->IsFakeClient ();
-				}
-				if( isfakeclient )
-				{
-					ph.GetHandler ()->status = SlotStatus::BOT;
-					ph.GetHandler ()->playerClass = new NczPlayer ( ph.GetIndex () );
-					m_max_index = ph.GetIndex ();
-				}
-				else if( static_cast< SourceSdk::IPlayerInfo* >( playerinfo )->IsConnected () )
-				{
-					ph.GetHandler ()->status = SlotStatus::PLAYER_CONNECTED;
-					ph.GetHandler ()->playerClass = new NczPlayer ( ph.GetIndex () );
-					ph.GetHandler ()->playerClass->OnConnect ();
-					m_max_index = ph.GetIndex ();
+					if (pinfo->IsConnected())
+					{
+						m_max_index = index;
+						ph.playerClass = new NczPlayer(index);
+						ph.playerClass->m_playerinfo = pinfo;
+						if (pinfo->IsFakeClient())
+						{
+							if (pinfo->IsHLTV())
+							{
+								ph.status = SlotStatus::TV;
+							}
+							else
+							{
+								ph.status = SlotStatus::BOT;
+							}
+						}
+						else
+						{
+							ph.playerClass->OnConnect();
+							ph.status = SlotStatus::PLAYER_CONNECTED;
+							if (!pinfo->IsDead())
+							{
+								ph.in_tests_time = Tier0::Plat_FloatTime() + 1.0;
+							}
+							else
+							{
+								ph.in_tests_time = std::numeric_limits<double>::max();
+							}
+						}
+					}
 				}
 			}
-		}
+		} while (++index <= MAX_PLAYERS);
 	}
-
-	//}
 
 	ResetRange();
 

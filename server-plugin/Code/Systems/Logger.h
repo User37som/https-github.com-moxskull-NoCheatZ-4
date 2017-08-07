@@ -62,7 +62,8 @@ enum msg_type
 typedef enum logger_chat : size_t
 {
 	ON = 0,
-	ADMIN,
+	ADMIN_AUTO,
+	ADMIN_IDS,
 	OFF
 } logger_chat_t;
 

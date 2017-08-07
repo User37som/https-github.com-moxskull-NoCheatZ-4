@@ -402,6 +402,7 @@ copy "$(TargetPath)" ..\..\..\game\bin\"$(TargetName)".pdb
     </ClCompile>
     <ClCompile Include="Code\Systems\Testers\AimTester.cpp" />
     <ClCompile Include="Code\Systems\Testers\AutoAttackTester.cpp" />
+    <ClCompile Include="Code\Systems\Testers\AutoStrafeTester.cpp" />
     <ClCompile Include="Code\Systems\Testers\BadUserCmdTester.cpp" />
     <ClCompile Include="Code\Systems\Testers\MouseTester.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
@@ -477,6 +478,7 @@ copy "$(TargetPath)" ..\..\..\game\bin\"$(TargetName)".pdb
     <ClInclude Include="Code\Systems\i18nManager.h" />
     <ClInclude Include="Code\Systems\Testers\AimTester.h" />
     <ClInclude Include="Code\Systems\Testers\AutoAttackTester.h" />
+    <ClInclude Include="Code\Systems\Testers\AutoStrafeTester.h" />
     <ClInclude Include="Code\Systems\Testers\BadUserCmdTester.h" />
     <ClInclude Include="Code\Systems\Testers\MouseTester.h" />
     <ClInclude Include="Code\version.h" />

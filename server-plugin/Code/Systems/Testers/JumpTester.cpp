@@ -73,13 +73,13 @@ bool JumpTester::sys_cmd_fn(const SourceSdk::CCommand & args)
 		{
 			if (stricmp(args.Arg(2), "detectscripts") == 0)
 			{
-				if (stricmp(args.Arg(3), "yes") == 0)
+				if (Helpers::IsArgTrue(args.Arg(3)))
 				{
 					detect_scripts = true;
 					g_Logger.Msg<MSG_CMD_REPLY>("DetectScripts is Yes");
 					return true;
 				}
-				else if (stricmp(args.Arg(3), "no") == 0)
+				else if (Helpers::IsArgFalse(args.Arg(3)))
 				{
 					detect_scripts = false;
 					g_Logger.Msg<MSG_CMD_REPLY>("DetectScripts is No");

@@ -267,6 +267,9 @@
     <ClCompile Include="Code\Misc\Tier0Linker.cpp">
       <Filter>Code\Misc</Filter>
     </ClCompile>
+    <ClCompile Include="Code\Systems\Testers\AutoStrafeTester.cpp">
+      <Filter>Code\Systems\Testers</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Code\plugin.h">
@@ -595,6 +598,9 @@
     </ClInclude>
     <ClInclude Include="Code\Misc\Tier0Linker.h">
       <Filter>Code\Misc</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Systems\Testers\AutoStrafeTester.h">
+      <Filter>Code\Systems\Testers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

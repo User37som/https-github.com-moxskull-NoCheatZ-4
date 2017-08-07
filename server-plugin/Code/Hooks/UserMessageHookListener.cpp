@@ -31,7 +31,6 @@ UserMessageHookListener::UserMessageHookListener ()
 
 UserMessageHookListener::~UserMessageHookListener ()
 {
-	g_HookGuardUserMessageHookListener.UnhookAll ();
 }
 
 void UserMessageHookListener::HookUserMessage ()

@@ -33,7 +33,6 @@ WeaponHookListener::WeaponHookListener ()
 
 WeaponHookListener::~WeaponHookListener ()
 {
-	g_HookGuardWeaponHookListener.UnhookAll ();
 }
 
 void WeaponHookListener::HookWeapon ( PlayerHandler::iterator ph )

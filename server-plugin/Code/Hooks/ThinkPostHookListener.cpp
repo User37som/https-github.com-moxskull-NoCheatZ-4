@@ -29,7 +29,6 @@ ThinkPostHookListener::ThinkPostHookListener ()
 
 ThinkPostHookListener::~ThinkPostHookListener ()
 {
-	g_HookGuardThinkPostHookListener.UnhookAll ();
 }
 
 void ThinkPostHookListener::HookThinkPost ( SourceSdk::edict_t const * const entity )

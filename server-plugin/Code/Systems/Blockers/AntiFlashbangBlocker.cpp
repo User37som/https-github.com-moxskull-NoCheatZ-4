@@ -52,14 +52,22 @@ void AntiFlashbangBlocker::Load ()
 
 	SourceSdk::InterfacesProxy::GetGameEventManager ()->AddListener ( this, "player_blind", true );
 	SetTransmitHookListener::RegisterSetTransmitHookListener ( this, SystemPriority::AntiFlashbangBlocker );
-	OnTickListener::RegisterOnTickListener ( this );
+
+	if (SourceSdk::InterfacesProxy::m_game != SourceSdk::CounterStrikeGlobalOffensive)
+	{
+		OnTickListener::RegisterOnTickListener(this);
+	}
 }
 
 void AntiFlashbangBlocker::Unload ()
 {
 	SetTransmitHookListener::RemoveSetTransmitHookListener ( this );
 	SourceSdk::InterfacesProxy::GetGameEventManager ()->RemoveListener ( this );
-	OnTickListener::RemoveOnTickListener ( this );
+
+	if (SourceSdk::InterfacesProxy::m_game != SourceSdk::CounterStrikeGlobalOffensive)
+	{
+		OnTickListener::RemoveOnTickListener(this);
+	}
 }
 
 bool AntiFlashbangBlocker::GotJob () const
@@ -91,7 +99,10 @@ bool AntiFlashbangBlocker::RT_SetTransmitCallback ( PlayerHandler::iterator send
 			return true;
 		}
 
-		Helpers::FadeUser ( receiver->GetEdict (), 0 );
+		if (SourceSdk::InterfacesProxy::m_game != SourceSdk::CounterStrikeGlobalOffensive)
+		{
+			Helpers::FadeUser(receiver->GetEdict(), 0);
+		}
 		ResetPlayerDataStruct ( *receiver );
 	}
 
@@ -116,7 +127,10 @@ void AntiFlashbangBlocker::FireGameEvent ( SourceSdk::IGameEvent* ev ) // player
 
 		if( flash_alpha < 255.0f )
 		{
-			Helpers::FadeUser ( ph->GetEdict (), 0 );
+			if (SourceSdk::InterfacesProxy::m_game != SourceSdk::CounterStrikeGlobalOffensive)
+			{
+				Helpers::FadeUser(ph->GetEdict(), 0);
+			}
 			ResetPlayerDataStruct ( *ph );
 			return;
 		}
@@ -129,16 +143,18 @@ void AntiFlashbangBlocker::FireGameEvent ( SourceSdk::IGameEvent* ev ) // player
 		{
 			pInfo->flash_end_time = Tier0::Plat_FloatTime () + flash_duration / 10.0f;
 		}
-		pInfo->flash_end_time -= 0.07;
-		if (pInfo->flash_end_time > 0.0)
+
+		if (SourceSdk::InterfacesProxy::m_game != SourceSdk::CounterStrikeGlobalOffensive)
 		{
 			Helpers::FadeUser(ph->GetEdict(), (short)floorf(flash_duration * 1000.0f));
-		}		
+		}
 	}
 }
 
 void AntiFlashbangBlocker::RT_ProcessOnTick (double const & curtime )
 {
+	// not called with CSGO
+
 	ProcessFilter::HumanAtLeastConnected filter_class;
 	for( PlayerHandler::iterator ph ( &filter_class ); ph != PlayerHandler::end (); ph += &filter_class )
 	{

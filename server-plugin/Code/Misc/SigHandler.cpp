@@ -64,9 +64,6 @@ static inline void printStackTrace ( FILE * out )
 
 	// create readable strings to each frame.
 	backtrace_symbols_fd ( addrlist, addrlen, fileno(out) );
-#else
-	StackWalker_OutFile sw(out);
-	sw.ShowCallstack ();
 #endif
 }
 
@@ -90,11 +87,31 @@ static FILE * OpenStackFile ()
 	
 	printf("Opening %s\n", filename );
 
-	return fopen ( filename, "a" );
+	FILE * pfile(fopen(filename, "a"));
+
+	if (pfile)
+	{
+		fprintf(pfile, "Using plugin version %s-%s-%s\n\n",
+			NCZ_VERSION_GIT,
+#ifdef DEBUG
+			"Debug",
+#else
+			"Release",
+#endif
+#ifdef GNUC
+			"Linux"
+#else
+			"Windows"
+#endif
+		);
+	}
+
+	return pfile;
 }
 
 void abortHandler ( int signum )
 {
+#ifdef GNUC
 	FILE* outfile = OpenStackFile ();
 
 	FILE* out;
@@ -114,9 +131,7 @@ void abortHandler ( int signum )
 	{
 		case SIGABRT: name = "SIGABRT";  break;
 		case SIGSEGV: name = "SIGSEGV";  break;
-#ifdef GNUC
 		case SIGBUS:  name = "SIGBUS";   break;
-#endif
 		case SIGILL:  name = "SIGILL";   break;
 		case SIGFPE:  name = "SIGFPE";   break;
 		default:  name = "Unknown signum"; break;
@@ -128,9 +143,9 @@ void abortHandler ( int signum )
 	// make the most basic call possible to the lowest level, most 
 	// standard print function.
 	if( name )
-		fprintf ( out, "Caught signal %d (%s)\n", signum, name );
+		fprintf ( out, "Caught signal %d (%s)\n\n", signum, name );
 	else
-		fprintf ( out, "Caught signal %d\n", signum );
+		fprintf ( out, "Caught signal %d\n\n", signum );
 
 	// Dump a stack trace.
 	// This is the function we will be implementing next.
@@ -142,17 +157,24 @@ void abortHandler ( int signum )
 	if( outfile )
 		fclose ( outfile );
 
-	exit ( signum );
+	exit(signum);
+#else
+	throw signum; // Just use C++ UnhandledException filters on windows.
+				 // This allows us to get current thread context without
+				 // the need to use assembly code.
+#endif
 }
 
 void TermFn ()
 {
+#ifdef GNUC
 	raise ( SIGABRT );
+#else
+	throw SIGABRT;
+#endif
 }
 
 #ifdef WIN32
-static LPTOP_LEVEL_EXCEPTION_FILTER old_filter;
-
 void BaseFilter ( LPEXCEPTION_POINTERS info )
 {
 	FILE* outfile = OpenStackFile ();
@@ -167,10 +189,30 @@ void BaseFilter ( LPEXCEPTION_POINTERS info )
 		out = outfile;
 	}
 
-	fprintf ( out, "Caught Unhandled Exception code %X :\nFlags : %X\nAddress : %X\n", 
+	fprintf ( out,  "Caught Unhandled Exception code 0x%X :\n"
+					"Flags : 0x%X\n"
+					"Address : 0x%X\n"
+					"Dr0 : 0x%X, Dr1 : 0x%X, Dr2 : 0x%X, Dr3 : 0x%X, Dr6 : 0x%X, Dr7 : 0x%X\n"
+					"eax : 0x%X, ebp : 0x%X, ecx : 0x%X, edi : 0x%X\n"
+					"edx : 0x%X, eip : 0x%X, esi : 0x%X, esp : 0x%X\n",
 			  info->ExceptionRecord->ExceptionCode,
 			  info->ExceptionRecord->ExceptionFlags,
-			  (DWORD)info->ExceptionRecord->ExceptionAddress );
+			  (DWORD)info->ExceptionRecord->ExceptionAddress,
+				info->ContextRecord->Dr0,
+				info->ContextRecord->Dr1,
+				info->ContextRecord->Dr2,
+				info->ContextRecord->Dr3,
+				info->ContextRecord->Dr6,
+				info->ContextRecord->Dr7,
+				info->ContextRecord ->Eax,
+				info->ContextRecord ->Ebp,
+				info->ContextRecord ->Ecx,
+				info->ContextRecord ->Edi,
+				info->ContextRecord ->Edx,
+				info->ContextRecord ->Eip,
+				info->ContextRecord ->Esi,
+				info->ContextRecord ->Esp
+		);
 
 	StackWalker_OutFile sw ( out );
 	sw.ShowCallstack (GetCurrentThread(), info->ContextRecord);
@@ -181,20 +223,20 @@ void BaseFilter ( LPEXCEPTION_POINTERS info )
 
 LONG WINAPI UFilter ( LPEXCEPTION_POINTERS info )
 {
-	if( info->ExceptionRecord->ExceptionCode == DBG_PRINTEXCEPTION_C )
+	if( info->ExceptionRecord->ExceptionCode == DBG_PRINTEXCEPTION_C || info->ExceptionRecord->ExceptionCode == 0x4001000A)
 		return EXCEPTION_CONTINUE_EXECUTION;
 
 	BaseFilter ( info );
 
-	if( old_filter )
-		return old_filter ( info );
+	if( KxStackTrace::old_ufilter )
+		return KxStackTrace::old_ufilter ( info );
 	else
 		return EXCEPTION_CONTINUE_SEARCH;
 }
 
 LONG WINAPI VFilter ( LPEXCEPTION_POINTERS info )
 {
-	if( info->ExceptionRecord->ExceptionCode == DBG_PRINTEXCEPTION_C )
+	if( info->ExceptionRecord->ExceptionCode == DBG_PRINTEXCEPTION_C || info->ExceptionRecord->ExceptionCode == 0x4001000A)
 		return EXCEPTION_CONTINUE_EXECUTION;
 
 	BaseFilter ( info );
@@ -204,12 +246,19 @@ LONG WINAPI VFilter ( LPEXCEPTION_POINTERS info )
 
 #endif
 
+std::unexpected_handler KxStackTrace::old_unexp = 0;
+#ifdef WIN32
+LPTOP_LEVEL_EXCEPTION_FILTER KxStackTrace::old_ufilter = 0;
+LPTOP_LEVEL_EXCEPTION_FILTER KxStackTrace::old_vfilter = 0;
+#endif
+
 KxStackTrace::KxStackTrace ()
 {
 #ifdef WIN32
 	if (!IsDebuggerPresent())
 #endif
 	{
+
 		signal(SIGABRT, abortHandler);
 		signal(SIGSEGV, abortHandler);
 		signal(SIGILL, abortHandler);
@@ -217,11 +266,34 @@ KxStackTrace::KxStackTrace ()
 #ifdef GNUC
 		signal(SIGBUS, abortHandler);
 #endif
-		std::set_terminate(TermFn);
-		std::set_unexpected(TermFn);
+
+		//old_term = std::set_terminate(TermFn);
+		old_unexp = std::set_unexpected(TermFn);
 #ifdef WIN32
-		old_filter = SetUnhandledExceptionFilter(UFilter);
+		old_ufilter = SetUnhandledExceptionFilter(UFilter);
 		AddVectoredExceptionHandler(0, VFilter);
+#endif
+	}
+}
+
+KxStackTrace::~KxStackTrace()
+{
+#ifdef WIN32
+	if (!IsDebuggerPresent())
+#endif
+	{
+		signal(SIGABRT, SIG_DFL);
+		signal(SIGSEGV, SIG_DFL);
+		signal(SIGILL, SIG_DFL);
+		signal(SIGFPE, SIG_DFL);
+#ifdef GNUC
+		signal(SIGBUS, SIG_DFL);
+#endif
+		//std::set_terminate(old_term);
+		std::set_unexpected(nullptr);
+#ifdef WIN32
+		SetUnhandledExceptionFilter(nullptr);
+		RemoveVectoredExceptionHandler(VFilter);
 #endif
 	}
 }

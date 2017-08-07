@@ -24,7 +24,6 @@ SourceHookSafety::SourceHookSafety() :
 
 SourceHookSafety::~SourceHookSafety()
 {
-	local_HookGuardSourceHookSafety.UnhookAll();
 }
 
 void SourceHookSafety::TryHookMMSourceHook()

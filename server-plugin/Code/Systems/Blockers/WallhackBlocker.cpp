@@ -26,7 +26,7 @@
 #include "Misc/MathCache.h"
 
 WallhackBlocker::WallhackBlocker () :
-	BaseBlockerSystem( "WallhackBlocker" ),
+	BaseBlockerSystem( "WallhackBlocker", "Enable - Disable - Verbose - SetFFAMode" ),
 	OnTickListener (),
 	playerdatahandler_class (),
 	SetTransmitHookListener (),
@@ -36,7 +36,8 @@ WallhackBlocker::WallhackBlocker () :
 	m_viscache (),
 	m_disable_shadows ( nullptr ),
 	m_shadow_direction ( nullptr ),
-	m_shadow_maxdist ( nullptr )
+	m_shadow_maxdist ( nullptr ),
+	m_ffamode(false)
 {
 }
 
@@ -112,6 +113,31 @@ void WallhackBlocker::OnMapStart ()
 	}
 }
 
+bool WallhackBlocker::sys_cmd_fn(const SourceSdk::CCommand & args)
+{
+	if (stricmp("SetFFAMode", args.Arg(2)) == 0)
+	{
+		if (args.ArgC() >= 4)
+		{
+			if (Helpers::IsArgTrue(args.Arg(3)))
+			{
+				m_ffamode = true;
+				g_Logger.Msg<MSG_CMD_REPLY>("FFAMode is Yes");
+				return true;
+			}
+			else if (Helpers::IsArgFalse(args.Arg(3)))
+			{
+				m_ffamode = false;
+				g_Logger.Msg<MSG_CMD_REPLY>("FFAMode is No");
+				return true;
+			}
+		}
+		g_Logger.Msg<MSG_CMD_REPLY>("FFAMode expected Yes or No");
+		return true;
+	}
+	return false;
+}
+
 bool WallhackBlocker::RT_SetTransmitCallback ( PlayerHandler::iterator sender_player, PlayerHandler::iterator receiver_player )
 {
 	/*
@@ -133,75 +159,49 @@ bool WallhackBlocker::RT_SetTransmitCallback ( PlayerHandler::iterator sender_pl
 
 	if ( !pinfo_receiver->IsDead () )
 	{
-		if( !pinfo_sender->IsDead () && pinfo_receiver->GetTeamIndex() != pinfo_sender->GetTeamIndex() )
+		if( !pinfo_sender->IsDead () && (pinfo_receiver->GetTeamIndex() != pinfo_sender->GetTeamIndex() || m_ffamode) )
 		{
-			cache.SetVisibility(sender_player.GetIndex (), receiver_player.GetIndex (), RT_IsAbleToSee ( sender_player, receiver_player ) );
-		}
-		else
-		{
-			cache.SetVisibility ( sender_player.GetIndex (), receiver_player.GetIndex (), true );
+			return cache.SetVisibility_GetNotVisible(sender_player.GetIndex (), receiver_player.GetIndex (), RT_IsAbleToSee ( sender_player, receiver_player ) );
 		}
 	}
-	else if( !pinfo_sender->IsDead () )
+	else if (!pinfo_sender->IsDead())
 	{
-		SpectatorMode const receiver_spec ( *g_EntityProps.GetPropValue<SpectatorMode, PROP_OBSERVER_MODE> ( receiver_player->GetEdict (), false ) );
-		if( receiver_spec == OBS_MODE_IN_EYE )
+		SpectatorMode const receiver_spec(*g_EntityProps.GetPropValue<SpectatorMode, PROP_OBSERVER_MODE>(receiver_player->GetEdict(), false));
+		if (receiver_spec == OBS_MODE_IN_EYE)
 		{
-			SourceSdk::CBaseHandle const * const bh ( g_EntityProps.GetPropValue<SourceSdk::CBaseHandle, PROP_OBSERVER_TARGET> ( receiver_player->GetEdict (), false ) );
-			if( bh->IsValid () )
+			SourceSdk::CBaseHandle const * const bh(g_EntityProps.GetPropValue<SourceSdk::CBaseHandle, PROP_OBSERVER_TARGET>(receiver_player->GetEdict(), false));
+			if (bh->IsValid())
 			{
 				/*
 					The handle can still be invalid now https://github.com/L-EARN/NoCheatZ-4/issues/67#issuecomment-232063885
 					Perform more checks.
 				*/
 
-				int const bh_index ( bh->GetEntryIndex () );
-				if( bh_index > 0 && bh_index <= g_NczPlayerManager.GetMaxIndex () )
+				int const bh_index(bh->GetEntryIndex());
+				if (bh_index > 0 && bh_index <= g_NczPlayerManager.GetMaxIndex())
 				{
-					PlayerHandler::iterator spec_player ( bh_index );
+					PlayerHandler::iterator spec_player(bh_index);
 
-					if( spec_player && sender_player != spec_player )
+					if (spec_player && sender_player != spec_player)
 					{
-						if( !cache.IsValid ( sender_player.GetIndex (), spec_player.GetIndex () ) )
+						if (!cache.IsValid(sender_player.GetIndex(), spec_player.GetIndex()))
 						{
-							cache.SetVisibility ( sender_player.GetIndex (), spec_player.GetIndex (), RT_IsAbleToSee ( sender_player, spec_player ) );
+							cache.SetVisibility(sender_player.GetIndex(), spec_player.GetIndex(), RT_IsAbleToSee(sender_player, spec_player));
 						}
-						cache.SetVisibility ( sender_player.GetIndex (), receiver_player.GetIndex (), cache.IsVisible ( sender_player.GetIndex (), spec_player.GetIndex () ) );
-					}
-					else
-					{
-						cache.SetVisibility ( sender_player.GetIndex (), receiver_player.GetIndex (), true );
+						return cache.SetVisibility_GetNotVisible(sender_player.GetIndex(), receiver_player.GetIndex(), cache.IsVisible(sender_player.GetIndex(), spec_player.GetIndex()));
 					}
 				}
-				else
-				{
-					// Might flood the logs
-					DebugMessage ( Helpers::format("Cannot process vis tests : Encountered invalid index in CBaseHandle (%p -> %d) in WallhackBlocker::RT_SetTransmitCallback:154", bh, bh_index ) );
-					cache.SetVisibility ( sender_player.GetIndex (), receiver_player.GetIndex (), true );
-				}
-			}
-			else
-			{
-				cache.SetVisibility ( sender_player.GetIndex (), receiver_player.GetIndex (), true );
 			}
 		}
-		else
-		{
-			cache.SetVisibility ( sender_player.GetIndex (), receiver_player.GetIndex (), true );
-		}
-	}
-	else
-	{
-		cache.SetVisibility ( sender_player.GetIndex (), receiver_player.GetIndex (), true );
 	}
 
-	return !cache.IsVisible ( sender_player.GetIndex (), receiver_player.GetIndex () );
+	return cache.SetVisibility_GetNotVisible( sender_player.GetIndex (), receiver_player.GetIndex (), true );
 }
 
 bool WallhackBlocker::RT_SetTransmitWeaponCallback ( SourceSdk::edict_t const * const sender, PlayerHandler::iterator receiver )
 {
 	const int weapon_index ( Helpers::IndexOfEdict ( sender ) );
-	NczPlayer const * const owner_player ( g_WallhackBlocker.m_weapon_owner[ weapon_index ] );
+	NczPlayer const * const owner_player ( m_weapon_owner[ weapon_index ] );
 	if( !owner_player ) return false;
 
 	if( owner_player == *receiver ) return false;
@@ -221,14 +221,14 @@ bool WallhackBlocker::RT_SetTransmitWeaponCallback ( SourceSdk::edict_t const * 
 void WallhackBlocker::RT_WeaponEquipCallback ( PlayerHandler::iterator ph, SourceSdk::edict_t const * const weapon )
 {
 	const int weapon_index ( Helpers::IndexOfEdict ( weapon ) );
-	g_WallhackBlocker.m_weapon_owner[ weapon_index ] = *ph;
+	m_weapon_owner[ weapon_index ] = *ph;
 	SetTransmitHookListener::HookSetTransmit ( weapon, false );
 }
 
 void WallhackBlocker::RT_WeaponDropCallback ( PlayerHandler::iterator ph, SourceSdk::edict_t const * const weapon )
 {
 	const int weapon_index ( Helpers::IndexOfEdict ( weapon ) );
-	g_WallhackBlocker.m_weapon_owner[ weapon_index ] = nullptr;
+	m_weapon_owner[ weapon_index ] = nullptr;
 }
 
 void WallhackBlocker::RT_ProcessOnTick (double const & curtime )
@@ -263,7 +263,7 @@ void WallhackBlocker::RT_ProcessOnTick (double const & curtime )
 						pData->bbox_min.z -= bmax2;
 						pData->abs_origin.z += bmax2;
 
-						float diff_time = 0.25f;
+						float diff_time = 0.75f;
 
 						ST_W_STATIC SourceSdk::Vector predicted_pos;
 
@@ -317,12 +317,13 @@ void WallhackBlocker::RT_ProcessOnTick (double const & curtime )
 							}
 
 
-							float diff_time = 0.25f;
+							float diff_time = 750.0f;
 
 							ST_W_STATIC SourceSdk::Vector predicted_pos;
 
 							{
 								SourceSdk::VectorCopy ( player_maths.m_velocity, predicted_pos );
+								SourceSdk::VectorNorm(predicted_pos);
 								SourceSdk::VectorMultiply ( predicted_pos, diff_time );
 								SourceSdk::VectorAdd ( pData->abs_origin, predicted_pos );
 							}
@@ -386,7 +387,7 @@ inline bool WallhackBlocker::RT_IsInFOV ( const SourceSdk::Vector& origin, const
 // Point
 inline bool WallhackBlocker::RT_IsVisible ( const SourceSdk::Vector& origin, const SourceSdk::Vector& target )
 {
-	ST_W_STATIC SourceSdk::CTraceFilterWorldOnly itracefilter;
+	ST_W_STATIC SourceSdk::CTraceFilterWorldAndPropsOnly itracefilter;
 
 	return SourceSdk::trace_ray_fn ( origin, target, MASK_VISIBLE, &itracefilter );
 }

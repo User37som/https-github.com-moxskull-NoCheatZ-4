@@ -31,7 +31,6 @@ ConCommandHookListener::ConCommandHookListener ()
 
 ConCommandHookListener::~ConCommandHookListener ()
 {
-	g_HookGuardConCommandHookListener.UnhookAll ();
 }
 
 void ConCommandHookListener::HookDispatch ( void* cmd )

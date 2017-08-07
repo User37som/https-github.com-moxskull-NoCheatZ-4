@@ -295,11 +295,13 @@ public:
     symOptions = this->pSSO(symOptions);
 
     char buf[StackWalker::STACKWALK_MAX_NAMELEN] = {0};
+	char buf2[StackWalker::STACKWALK_MAX_NAMELEN] = { 0 };
     if (this->pSGSP != NULL)
     {
       if (this->pSGSP(m_hProcess, buf, StackWalker::STACKWALK_MAX_NAMELEN) == FALSE)
         this->m_parent->OnDbgHelpErr("SymGetSearchPath", GetLastError(), 0);
     }
+
     char szUserName[1024] = {0};
     DWORD dwSize = 1024;
     GetUserNameA(szUserName, &dwSize);
@@ -801,6 +803,8 @@ BOOL StackWalker::LoadModules()
 
     strcat_s(szSymPath, nSymPathLen, ".;");
 
+	strcat_s(szSymPath, nSymPathLen, ".\\csgo\\addons\\NoCheatZ\\;.\\cstrike\\addons\\NoCheatZ\\;");
+
     const size_t nTempLen = 1024;
     char szTemp[nTempLen];
     // Now add the current directory:
@@ -861,10 +865,10 @@ BOOL StackWalker::LoadModules()
         strcat_s(szSymPath, nSymPathLen, "SRV*");
         strcat_s(szSymPath, nSymPathLen, szTemp);
         strcat_s(szSymPath, nSymPathLen, "\\websymbols");
-        strcat_s(szSymPath, nSymPathLen, "*http://msdl.microsoft.com/download/symbols;");
+        strcat_s(szSymPath, nSymPathLen, "*http://msdl.microsoft.com/download/symbols*https://mms.alliedmods.net/symbols*https://sm.alliedmods.net/symbols;");
       }
       else
-        strcat_s(szSymPath, nSymPathLen, "SRV*c:\\websymbols*http://msdl.microsoft.com/download/symbols;");
+        strcat_s(szSymPath, nSymPathLen, "SRV*c:\\websymbols*http://msdl.microsoft.com/download/symbols*https://mms.alliedmods.net/symbols*https://sm.alliedmods.net/symbols;");
     }
   }
 
@@ -914,7 +918,7 @@ BOOL StackWalker::ShowCallstack(HANDLE hThread, const CONTEXT *context, PReadPro
   s_readMemoryFunction = readMemoryFunction;
   s_readMemoryFunction_UserData = pUserData;
 
-  if (context == NULL)
+ /* if (context == NULL)
   {
     // If no context is provided, capture the context
     if (hThread == GetCurrentThread())
@@ -934,14 +938,14 @@ BOOL StackWalker::ShowCallstack(HANDLE hThread, const CONTEXT *context, PReadPro
       }
     }
   }
-  else
+  else*/
     c = *context;
 
   // init STACKFRAME for first call
   STACKFRAME64 s; // in/out stackframe
-  memset(&s, 0, sizeof(s));
+  memset(&s, 0, sizeof(STACKFRAME64));
   DWORD imageType;
-#ifdef _M_IX86
+
   // normally, call ImageNtHeader() and use machine info from PE header
   imageType = IMAGE_FILE_MACHINE_I386;
   s.AddrPC.Offset = c.Eip;
@@ -950,27 +954,6 @@ BOOL StackWalker::ShowCallstack(HANDLE hThread, const CONTEXT *context, PReadPro
   s.AddrFrame.Mode = AddrModeFlat;
   s.AddrStack.Offset = c.Esp;
   s.AddrStack.Mode = AddrModeFlat;
-#elif _M_X64
-  imageType = IMAGE_FILE_MACHINE_AMD64;
-  s.AddrPC.Offset = c.Rip;
-  s.AddrPC.Mode = AddrModeFlat;
-  s.AddrFrame.Offset = c.Rsp;
-  s.AddrFrame.Mode = AddrModeFlat;
-  s.AddrStack.Offset = c.Rsp;
-  s.AddrStack.Mode = AddrModeFlat;
-#elif _M_IA64
-  imageType = IMAGE_FILE_MACHINE_IA64;
-  s.AddrPC.Offset = c.StIIP;
-  s.AddrPC.Mode = AddrModeFlat;
-  s.AddrFrame.Offset = c.IntSp;
-  s.AddrFrame.Mode = AddrModeFlat;
-  s.AddrBStore.Offset = c.RsBSP;
-  s.AddrBStore.Mode = AddrModeFlat;
-  s.AddrStack.Offset = c.IntSp;
-  s.AddrStack.Mode = AddrModeFlat;
-#else
-#error "Platform not supported!"
-#endif
 
   pSym = (IMAGEHLP_SYMBOL64 *) malloc(sizeof(IMAGEHLP_SYMBOL64) + STACKWALK_MAX_NAMELEN);
   if( !pSym )
@@ -1035,7 +1018,7 @@ BOOL StackWalker::ShowCallstack(HANDLE hThread, const CONTEXT *context, PReadPro
       }
       else
       {
-        this->OnDbgHelpErr("SymGetSymFromAddr64", GetLastError(), s.AddrPC.Offset);
+        //this->OnDbgHelpErr("SymGetSymFromAddr64", GetLastError(), s.AddrPC.Offset);
       }
 
       // show line number info, NT5.0-method (SymGetLineFromAddr64())
@@ -1049,7 +1032,7 @@ BOOL StackWalker::ShowCallstack(HANDLE hThread, const CONTEXT *context, PReadPro
         }
         else
         {
-          this->OnDbgHelpErr("SymGetLineFromAddr64", GetLastError(), s.AddrPC.Offset);
+          //this->OnDbgHelpErr("SymGetLineFromAddr64", GetLastError(), s.AddrPC.Offset);
         }
       } // yes, we have SymGetLineFromAddr64()
 
@@ -1149,7 +1132,7 @@ BOOL __stdcall StackWalker::myReadProcMem(
 void StackWalker::OnLoadModule(LPCSTR img, LPCSTR mod, DWORD64 baseAddr, DWORD size, DWORD result, LPCSTR symType, LPCSTR pdbName, ULONGLONG fileVersion)
 {
   CHAR buffer[STACKWALK_MAX_NAMELEN];
-  if (fileVersion == 0)
+  /*if (fileVersion == 0)
     _snprintf_s(buffer, STACKWALK_MAX_NAMELEN, "%s:%s (%p), size: %d (result: %d), SymType: '%s', PDB: '%s'\n", img, mod, (LPVOID) baseAddr, size, result, symType, pdbName);
   else
   {
@@ -1158,6 +1141,20 @@ void StackWalker::OnLoadModule(LPCSTR img, LPCSTR mod, DWORD64 baseAddr, DWORD s
     DWORD v2 = (DWORD) (fileVersion>>32) & 0xFFFF;
     DWORD v1 = (DWORD) (fileVersion>>48) & 0xFFFF;
     _snprintf_s(buffer, STACKWALK_MAX_NAMELEN, "%s:%s (%p), size: %d (result: %d), SymType: '%s', PDB: '%s', fileVersion: %d.%d.%d.%d\n", img, mod, (LPVOID) baseAddr, size, result, symType, pdbName, v1, v2, v3, v4);
+  }*/
+
+
+  if (fileVersion == 0)
+  {
+	  _snprintf_s(buffer, STACKWALK_MAX_NAMELEN, "%s :::: start : 0x%I64X, end : 0x%I64X, size: 0x%lX\n", mod, baseAddr, baseAddr + size, size);
+  }
+  else
+  {
+	  DWORD v4 = (DWORD)fileVersion & 0xFFFF;
+	  DWORD v3 = (DWORD)(fileVersion >> 16) & 0xFFFF;
+	  DWORD v2 = (DWORD)(fileVersion >> 32) & 0xFFFF;
+	  DWORD v1 = (DWORD)(fileVersion >> 48) & 0xFFFF;
+	  _snprintf_s(buffer, STACKWALK_MAX_NAMELEN, "%s :::: start : 0x%I64X, end : 0x%I64X, size: 0x%lX, ver: %d.%d.%d.%d\n", mod, baseAddr, baseAddr + size, size, v1, v2, v3, v4);
   }
   OnOutput(buffer);
 }
@@ -1167,7 +1164,7 @@ void StackWalker::OnCallstackEntry(CallstackEntryType eType, CallstackEntry &ent
   CHAR buffer[STACKWALK_MAX_NAMELEN];
   if ( (eType != lastEntry) && (entry.offset != 0) )
   {
-    if (entry.name[0] == 0)
+    /*if (entry.name[0] == 0)
       strcpy_s(entry.name, "(function-name not available)");
     if (entry.undName[0] != 0)
       strcpy_s(entry.name, entry.undName);
@@ -1182,6 +1179,10 @@ void StackWalker::OnCallstackEntry(CallstackEntryType eType, CallstackEntry &ent
     }
     else
       _snprintf_s(buffer, STACKWALK_MAX_NAMELEN, "%s (%d): %s\n", entry.lineFileName, entry.lineNumber, entry.name);
+
+	  */
+
+	_snprintf_s(buffer, STACKWALK_MAX_NAMELEN, "%s + 0x%I64X\t\t\t%s\n", entry.moduleName, entry.offset - entry.baseOfImage, entry.name);
     OnOutput(buffer);
   }
 }
@@ -1196,9 +1197,11 @@ void StackWalker::OnDbgHelpErr(LPCSTR szFuncName, DWORD gle, DWORD64 addr)
 void StackWalker::OnSymInit(LPCSTR szSearchPath, DWORD symOptions, LPCSTR szUserName)
 {
   CHAR buffer[STACKWALK_MAX_NAMELEN];
-  _snprintf_s(buffer, STACKWALK_MAX_NAMELEN, "SymInit: Symbol-SearchPath: '%s', symOptions: %d, UserName: '%s'\n", szSearchPath, symOptions, szUserName);
+  _snprintf_s(buffer, STACKWALK_MAX_NAMELEN, "SymInit: Symbol-SearchPath: '%s', symOptions: %d\n", szSearchPath, symOptions);
   OnOutput(buffer);
   // Also display the OS-version
+
+  /* or not 
 #if _MSC_VER <= 1200
   OSVERSIONINFOA ver;
   ZeroMemory(&ver, sizeof(OSVERSIONINFOA));
@@ -1221,7 +1224,7 @@ void StackWalker::OnSymInit(LPCSTR szSearchPath, DWORD symOptions, LPCSTR szUser
       ver.szCSDVersion, ver.wSuiteMask, ver.wProductType);
     OnOutput(buffer);
   }
-#endif
+#endif */
 }
 
 void StackWalker::OnOutput(LPCSTR buffer)
