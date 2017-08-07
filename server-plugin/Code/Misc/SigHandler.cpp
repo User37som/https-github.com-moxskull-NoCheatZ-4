@@ -256,8 +256,9 @@ KxStackTrace::KxStackTrace ()
 {
 #ifdef WIN32
 	if (!IsDebuggerPresent())
-	{
 #endif
+	{
+
 		signal(SIGABRT, abortHandler);
 		signal(SIGSEGV, abortHandler);
 		signal(SIGILL, abortHandler);
