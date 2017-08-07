@@ -83,6 +83,9 @@
     <Filter Include="Link Libraries\Release">
       <UniqueIdentifier>{79efeca6-bba5-4b31-bf75-4bc114130d82}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Code\Systems\Solvers">
+      <UniqueIdentifier>{a3accb0e-5e15-43b8-af90-3d2111fb4088}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="Makefile">
@@ -601,6 +604,9 @@
     </ClInclude>
     <ClInclude Include="Code\Systems\Testers\AutoStrafeTester.h">
       <Filter>Code\Systems\Testers</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Systems\Solvers\Events.h">
+      <Filter>Code\Systems\Solvers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
