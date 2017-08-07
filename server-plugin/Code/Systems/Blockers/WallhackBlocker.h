@@ -64,8 +64,8 @@ struct VisInfo
 		m_valid ( true )
 	{};
 	inline VisInfo ( const VisInfo& other ) :
-		m_valid(other.m_valid),
-		m_visible(other.m_visible)
+		m_visible(other.m_visible),
+		m_valid(other.m_valid)
 	{
 	};
 	inline VisInfo ( bool const visibility )

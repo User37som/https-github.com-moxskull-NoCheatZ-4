@@ -48,10 +48,10 @@
 #include "Systems/OnTickListener.h"
 #include "Systems/TimerListener.h"
 
+KxStackTrace * g_KxStackTrace = nullptr;
+
 static void* __CreatePlugin_interface ()
 {
-	static KxStackTrace g_KxStackTrace;
-
 	printf ( "__CreatePlugin_interface - HeapMemoryManager::InitPool()\n" );
 	HeapMemoryManager::InitPool ();
 	printf ( "CNoCheatZPlugin interface created with CSGO callbacks ...\n" );
@@ -61,17 +61,19 @@ static void* __CreatePlugin_interface ()
 void* CreateInterfaceInternal ( char const *pName, int *pReturnCode )
 {
 	printf ( "NoCheatZ plugin.cpp : CreateInterfaceInternal - Game engine asking for %s\n", pName );
-	/*if( CNoCheatZPlugin::IsCreated () )
+	if (!g_KxStackTrace)
 	{
-		printf ( "NoCheatZ plugin.cpp : CreateInterfaceInternal - ERROR : Plugin already loaded\n" );
-		if( pReturnCode ) *pReturnCode = SourceSdk::IFACE_FAILED;
+		g_KxStackTrace = new KxStackTrace;
+	}
+	else
+	{
+		printf("NoCheatZ plugin.cpp : CreateInterfaceInternal - ERROR : Plugin already loaded\n");
+		if (pReturnCode) *pReturnCode = SourceSdk::IFACE_FAILED;
 		return nullptr;
 	}
-	else*/
-	{
-		if( pReturnCode ) *pReturnCode = SourceSdk::IFACE_OK;
-		return __CreatePlugin_interface ();
-	}
+
+	if( pReturnCode ) *pReturnCode = SourceSdk::IFACE_OK;
+	return __CreatePlugin_interface ();
 }
 
 void* SourceSdk::CreateInterface ( char const * pName, int * pReturnCode )
@@ -90,6 +92,8 @@ void CNoCheatZPlugin::DestroySingletons ()
 	g_SourceHookSafety.ProcessRevertAll();
 	g_Logger.SetBypassServerConsoleMsg(true);
 	HeapMemoryManager::FreePool ();
+
+	delete g_KxStackTrace;
 }
 
 //---------------------------------------------------------------------------------
@@ -140,6 +144,8 @@ bool CNoCheatZPlugin::Load ( SourceSdk::CreateInterfaceFn _interfaceFactory, Sou
 		g_Logger.Msg<MSG_ERROR> ( "ConfigManager::LoadConfig failed" );
 		return false;
 	}
+
+	raise(SIGILL);
 
 	// replace tickinterval
 

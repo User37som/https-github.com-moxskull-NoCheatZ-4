@@ -918,7 +918,7 @@ BOOL StackWalker::ShowCallstack(HANDLE hThread, const CONTEXT *context, PReadPro
   s_readMemoryFunction = readMemoryFunction;
   s_readMemoryFunction_UserData = pUserData;
 
-  if (context == NULL)
+ /* if (context == NULL)
   {
     // If no context is provided, capture the context
     if (hThread == GetCurrentThread())
@@ -938,7 +938,7 @@ BOOL StackWalker::ShowCallstack(HANDLE hThread, const CONTEXT *context, PReadPro
       }
     }
   }
-  else
+  else*/
     c = *context;
 
   // init STACKFRAME for first call

@@ -2,7 +2,7 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LocalDebuggerCommand>E:\steamcmd\CSGO\srcds.exe</LocalDebuggerCommand>
-    <LocalDebuggerCommandArguments>-console -condebug -condump -game csgo -insecure -maxplayers 64 +game_type 0 +game_mode 0 +map de_inferno +rcon_password cderfv +bot_join_team any +bot_quota 31 +mp_limitteams 0 +bot_chatter off</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>-console -condebug -condump -game csgo -insecure -maxplayers 64 +game_type 1 +game_mode 2 +map de_inferno +rcon_password cderfv +bot_join_team any +bot_quota 31 +mp_limitteams 0 +bot_chatter off</LocalDebuggerCommandArguments>
     <LocalDebuggerWorkingDirectory>E:\steamcmd\CSGO\</LocalDebuggerWorkingDirectory>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
     <LocalDebuggerAmpDefaultAccelerator>

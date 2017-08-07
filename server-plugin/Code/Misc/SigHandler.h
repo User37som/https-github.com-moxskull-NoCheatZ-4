@@ -9,6 +9,7 @@
 
 #include <stdio.h>
 #include <signal.h>
+#include <exception>
 
 #ifdef WIN32
 
@@ -36,7 +37,15 @@ public:
 class KxStackTrace
 {
 public:
+	//static std::terminate_handler old_term;
+	static std::unexpected_handler old_unexp;
+#ifdef WIN32
+	static LPTOP_LEVEL_EXCEPTION_FILTER old_ufilter;
+	static LPTOP_LEVEL_EXCEPTION_FILTER old_vfilter;
+#endif
+
 	KxStackTrace ();
+	~KxStackTrace();
 };
 
 #endif // SIGHANDLER_H
