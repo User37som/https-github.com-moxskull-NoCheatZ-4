@@ -336,7 +336,7 @@ void WallhackBlocker::RT_ProcessOnTick (double const & curtime )
 
 								if (fabsf(fCorrect - (tick_count - tick) * tick_interval) > 0.2f)
 								{
-									tick = tick_count - fCorrect * inv_tick_interval;
+									tick = tick_count - (int)((fCorrect * inv_tick_interval) + 0.5f);
 								}
 
 								SourceSdk::VectorCopy(player_maths.m_velocity, predicted_pos);
@@ -384,6 +384,8 @@ PlayerRunCommandRet WallhackBlocker::RT_PlayerRunCommandCallback(PlayerHandler::
 	auto pdata(GetPlayerDataStructByIndex(ph.GetIndex()));
 
 	pdata->cmd_tickcount = ((SourceSdk::CUserCmd const * const)cmd)->tick_count;
+
+	return PlayerRunCommandRet::CONTINUE;
 }
 
 void WallhackBlocker::ClientDisconnect ( PlayerHandler::iterator ph )
