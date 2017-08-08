@@ -237,7 +237,7 @@ void WallhackBlocker::RT_ProcessOnTick (double const & curtime )
 {
 	m_viscache.Invalidate ();
 
-	ST_W_STATIC SourceSdk::CTraceFilterWorldOnly itracefilter;
+	ST_W_STATIC SourceSdk::CTraceFilterWorldAndPropsOnly itracefilter;
 	ST_R_STATIC SourceSdk::Vector hull_min ( -5.0f, -5.0f, -5.0f );
 	ST_R_STATIC SourceSdk::Vector hull_max ( 5.0f, 5.0f, 5.0f );
 
@@ -327,6 +327,7 @@ void WallhackBlocker::RT_ProcessOnTick (double const & curtime )
 							if (!SourceSdk::VectorIsZero(player_maths.m_velocity))
 							{
 								ST_W_STATIC SourceSdk::Vector predicted_pos;
+								ST_W_STATIC SourceSdk::Vector vel_scale;
 								
 								float const lerptime = (*g_EntityProps.GetPropValue<float, PROP_LERP_TIME>(ph->GetEdict(), true));
 								int const lerpticks = (int)((lerptime * inv_tick_interval) + 0.5f);
@@ -339,14 +340,15 @@ void WallhackBlocker::RT_ProcessOnTick (double const & curtime )
 									tick = tick_count - (int)((fCorrect * inv_tick_interval) + 0.5f);
 								}
 
-								SourceSdk::VectorCopy(player_maths.m_velocity, predicted_pos);
-								SourceSdk::VectorMultiply(predicted_pos, tick_interval * (tick_count - tick));
+								SourceSdk::VectorCopy(player_maths.m_velocity, vel_scale);
+								SourceSdk::VectorMultiply(vel_scale, tick_interval * (tick_count - tick));
+								SourceSdk::VectorCopy(vel_scale, predicted_pos);
 								SourceSdk::VectorAdd(player_maths.m_abs_origin, predicted_pos);
 
 								if (!SourceSdk::trace_hull_fn(predicted_pos, hull_min, hull_max, MASK_PLAYERSOLID_BRUSHONLY, &itracefilter))
 								{
 									SourceSdk::VectorCopy(predicted_pos, pData->abs_origin);
-									SourceSdk::VectorAdd(player_maths.m_velocity, pData->ear_pos);
+									SourceSdk::VectorAdd(vel_scale, pData->ear_pos);
 								}
 
 								{
@@ -538,12 +540,8 @@ bool WallhackBlocker::RT_IsAbleToSee ( PlayerHandler::iterator sender, PlayerHan
 		if( RT_IsVisible ( receiver_ear_pos, sender_origin ) )
 			return true;
 
-		// Only test weapon tip if it's not in the wall
-		if( RT_IsVisible ( sender_data->ear_pos, g_MathCache.RT_GetCachedMaths ( sender->GetIndex () ).m_eyeangles, sender_data->ear_pos ) )
-		{
-			if( RT_IsVisible ( receiver_ear_pos, g_MathCache.RT_GetCachedMaths ( sender->GetIndex () ).m_eyeangles, sender_data->ear_pos ) )
-				return true;
-		}
+		if( RT_IsVisible ( receiver_ear_pos, g_MathCache.RT_GetCachedMaths ( sender->GetIndex () ).m_eyeangles, sender_data->ear_pos ) )
+			return true;
 
 		// Test shadow, if any
 		if( m_disable_shadows != nullptr /* https://github.com/L-EARN/NoCheatZ-4/issues/65 */
