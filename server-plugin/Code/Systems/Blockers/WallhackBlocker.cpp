@@ -61,6 +61,7 @@ void WallhackBlocker::Load ()
 	WeaponHookListener::RegisterWeaponHookListener ( this );
 	SetTransmitHookListener::RegisterSetTransmitHookListener ( this, SystemPriority::WallhackBlocker );
 	OnTickListener::RegisterOnTickListener ( this );
+	PlayerRunCommandHookListener::RegisterPlayerRunCommandHookListener(this, SystemPriority::WallhackBlocker, SlotStatus::PLAYER_CONNECTED);
 
 	SourceSdk::InterfacesProxy::Call_ServerCommand("sv_occlude_players 0\n");
 }
@@ -70,6 +71,7 @@ void WallhackBlocker::Unload ()
 	SetTransmitHookListener::RemoveSetTransmitHookListener ( this );
 	WeaponHookListener::RemoveWeaponHookListener ( this );
 	OnTickListener::RemoveOnTickListener ( this );
+	PlayerRunCommandHookListener::RemovePlayerRunCommandHookListener(this);
 
 	memset ( m_weapon_owner, 0, MAX_EDICTS * sizeof ( NczPlayer* ) );
 	m_viscache.Invalidate ();
@@ -240,18 +242,28 @@ void WallhackBlocker::RT_ProcessOnTick (double const & curtime )
 	ST_R_STATIC SourceSdk::Vector hull_max ( 5.0f, 5.0f, 5.0f );
 
 	ProcessFilter::HumanAtLeastConnectedOrBot filter_class;
+	float const tick_interval(SourceSdk::InterfacesProxy::Call_GetTickInterval());
+	float const inv_tick_interval(1.0f / tick_interval);
+	int const tick_count(Helpers::GetGameTickCount());
+
 	for( PlayerHandler::iterator ph ( &filter_class ); ph != PlayerHandler::end (); ph += &filter_class )
 	{
 		SourceSdk::IPlayerInfo * const playerinfo ( ph->GetPlayerInfo () );
+		int const ph_index(ph.GetIndex());
 		if( playerinfo != nullptr )
 		{
+			if (playerinfo->IsDead() || playerinfo->IsObserver())
+			{
+				continue;
+			}
+
 			switch( ph.operator SlotStatus() )
 			{
 				case SlotStatus::BOT: // predict without tracing hull
 					{
-						MathInfo const & player_maths ( g_MathCache.RT_GetCachedMaths ( ph.GetIndex () ) );
+						MathInfo const & player_maths ( g_MathCache.RT_GetCachedMaths (ph_index) );
 
-						ClientDataS* const pData ( GetPlayerDataStructByIndex ( ph.GetIndex () ) );
+						ClientDataS* const pData ( GetPlayerDataStructByIndex (ph_index) );
 
 						SourceSdk::VectorCopy ( player_maths.m_mins, pData->bbox_min );
 						SourceSdk::VectorCopy ( player_maths.m_maxs, pData->bbox_max );
@@ -263,34 +275,32 @@ void WallhackBlocker::RT_ProcessOnTick (double const & curtime )
 						pData->bbox_min.z -= bmax2;
 						pData->abs_origin.z += bmax2;
 
-						float diff_time = 0.75f;
-
-						ST_W_STATIC SourceSdk::Vector predicted_pos;
-
-						SourceSdk::VectorCopy ( player_maths.m_velocity, predicted_pos );
-						SourceSdk::VectorMultiply ( predicted_pos, diff_time );
-						SourceSdk::VectorAdd ( pData->abs_origin, predicted_pos );
-
-						SourceSdk::VectorCopy ( predicted_pos, pData->abs_origin );
-						SourceSdk::VectorAdd ( player_maths.m_velocity, pData->ear_pos );
-
-						SourceSdk::vec_t const vx ( player_maths.m_abs_velocity.x );
-						SourceSdk::vec_t const vy ( player_maths.m_abs_velocity.y );
-						SourceSdk::vec_t const vz ( player_maths.m_abs_velocity.z );
-						if( vx > 1.0f )
+						if (!SourceSdk::VectorIsZero(player_maths.m_velocity))
 						{
-							pData->bbox_min.x *= vx;
-							pData->bbox_max.x *= vx;
-						}
-						if( vy > 1.0f )
-						{
-							pData->bbox_min.y *= vy;
-							pData->bbox_max.y *= vy;
-						}
-						if( vz > 1.0f )
-						{
-							pData->bbox_min.z *= vz;
-							pData->bbox_max.z *= vz;
+							ST_W_STATIC SourceSdk::Vector predicted_pos;
+							
+							SourceSdk::VectorCopy(player_maths.m_velocity, predicted_pos);
+							SourceSdk::VectorMultiply(predicted_pos, tick_interval);
+							SourceSdk::VectorAdd(player_maths.m_abs_origin, predicted_pos);
+
+							SourceSdk::vec_t const & vx(player_maths.m_abs_velocity.x);
+							SourceSdk::vec_t const & vy(player_maths.m_abs_velocity.y);
+							SourceSdk::vec_t const & vz(player_maths.m_abs_velocity.z);
+							if (vx > 1.0f)
+							{
+								pData->bbox_min.x *= vx;
+								pData->bbox_max.x *= vx;
+							}
+							if (vy > 1.0f)
+							{
+								pData->bbox_min.y *= vy;
+								pData->bbox_max.y *= vy;
+							}
+							if (vz > 1.0f)
+							{
+								pData->bbox_min.z *= vz;
+								pData->bbox_max.z *= vz;
+							}
 						}
 
 						break;
@@ -304,54 +314,60 @@ void WallhackBlocker::RT_ProcessOnTick (double const & curtime )
 
 							ClientDataS* const pData ( GetPlayerDataStructByIndex ( ph.GetIndex () ) );
 
-							SourceSdk::VectorCopy ( player_maths.m_mins, pData->bbox_min );
-							SourceSdk::VectorCopy ( player_maths.m_maxs, pData->bbox_max );
-							SourceSdk::VectorCopy ( player_maths.m_abs_origin, pData->abs_origin );
-							SourceSdk::VectorCopy ( player_maths.m_eyepos, pData->ear_pos );
+							SourceSdk::VectorCopy(player_maths.m_mins, pData->bbox_min);
+							SourceSdk::VectorCopy(player_maths.m_maxs, pData->bbox_max);
+							SourceSdk::VectorCopy(player_maths.m_abs_origin, pData->abs_origin);
+							SourceSdk::VectorCopy(player_maths.m_eyepos, pData->ear_pos);
 
+							SourceSdk::vec_t& bmax2(pData->bbox_max.z);
+							bmax2 *= 0.5f;
+							pData->bbox_min.z -= bmax2;
+							pData->abs_origin.z += bmax2;
+
+							if (!SourceSdk::VectorIsZero(player_maths.m_velocity))
 							{
-								SourceSdk::vec_t& bmax2 ( pData->bbox_max.z );
-								bmax2 *= 0.5f;
-								pData->bbox_min.z -= bmax2;
-								pData->abs_origin.z += bmax2;
-							}
+								ST_W_STATIC SourceSdk::Vector predicted_pos;
+								
+								float const lerptime = (*g_EntityProps.GetPropValue<float, PROP_LERP_TIME>(ph->GetEdict(), true));
+								int const lerpticks = (int)((lerptime * inv_tick_interval) + 0.5f);
+								float fCorrect = fabsf(fmodf(netchan->GetLatency(FLOW_OUTGOING) + lerptime, 1.0f));
 
+								int tick = pData->cmd_tickcount - lerpticks;
 
-							float diff_time = 750.0f;
-
-							ST_W_STATIC SourceSdk::Vector predicted_pos;
-
-							{
-								SourceSdk::VectorCopy ( player_maths.m_velocity, predicted_pos );
-								SourceSdk::VectorNorm(predicted_pos);
-								SourceSdk::VectorMultiply ( predicted_pos, diff_time );
-								SourceSdk::VectorAdd ( pData->abs_origin, predicted_pos );
-							}
-
-							if( SourceSdk::trace_hull_fn ( predicted_pos, hull_min, hull_max, MASK_PLAYERSOLID_BRUSHONLY, &itracefilter ) )
-							{
-								SourceSdk::VectorCopy ( predicted_pos, pData->abs_origin );
-								SourceSdk::VectorAdd ( player_maths.m_velocity, pData->ear_pos );
-							}
-
-							{
-								SourceSdk::vec_t const vx ( player_maths.m_abs_velocity.x );
-								SourceSdk::vec_t const vy ( player_maths.m_abs_velocity.y );
-								SourceSdk::vec_t const vz ( player_maths.m_abs_velocity.z );
-								if( vx > 1.0f )
+								if (fabsf(fCorrect - (tick_count - tick) * tick_interval) > 0.2f)
 								{
-									pData->bbox_min.x *= vx;
-									pData->bbox_max.x *= vx;
+									tick = tick_count - (int)((fCorrect * inv_tick_interval) + 0.5f);
 								}
-								if( vy > 1.0f )
+
+								SourceSdk::VectorCopy(player_maths.m_velocity, predicted_pos);
+								SourceSdk::VectorMultiply(predicted_pos, tick_interval * (tick_count - tick));
+								SourceSdk::VectorAdd(player_maths.m_abs_origin, predicted_pos);
+
+								if (!SourceSdk::trace_hull_fn(predicted_pos, hull_min, hull_max, MASK_PLAYERSOLID_BRUSHONLY, &itracefilter))
 								{
-									pData->bbox_min.y *= vy;
-									pData->bbox_max.y *= vy;
+									SourceSdk::VectorCopy(predicted_pos, pData->abs_origin);
+									SourceSdk::VectorAdd(player_maths.m_velocity, pData->ear_pos);
 								}
-								if( vz > 1.0f )
+
 								{
-									pData->bbox_min.z *= vz;
-									pData->bbox_max.z *= vz;
+									SourceSdk::vec_t const & vx(player_maths.m_abs_velocity.x);
+									SourceSdk::vec_t const & vy(player_maths.m_abs_velocity.y);
+									SourceSdk::vec_t const & vz(player_maths.m_abs_velocity.z);
+									if (vx > 1.0f)
+									{
+										pData->bbox_min.x *= vx;
+										pData->bbox_max.x *= vx;
+									}
+									if (vy > 1.0f)
+									{
+										pData->bbox_min.y *= vy;
+										pData->bbox_max.y *= vy;
+									}
+									if (vz > 1.0f)
+									{
+										pData->bbox_min.z *= vz;
+										pData->bbox_max.z *= vz;
+									}
 								}
 							}
 						}
@@ -361,6 +377,15 @@ void WallhackBlocker::RT_ProcessOnTick (double const & curtime )
 			}
 		}
 	}
+}
+
+PlayerRunCommandRet WallhackBlocker::RT_PlayerRunCommandCallback(PlayerHandler::iterator ph, void * const cmd, double const & curtime)
+{
+	auto pdata(GetPlayerDataStructByIndex(ph.GetIndex()));
+
+	pdata->cmd_tickcount = ((SourceSdk::CUserCmd const * const)cmd)->tick_count;
+
+	return PlayerRunCommandRet::CONTINUE;
 }
 
 void WallhackBlocker::ClientDisconnect ( PlayerHandler::iterator ph )

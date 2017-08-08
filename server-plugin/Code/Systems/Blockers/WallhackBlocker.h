@@ -22,6 +22,7 @@
 #include "Players/temp_PlayerDataStruct.h"
 #include "Hooks/SetTransmitHookListener.h"
 #include "Hooks/WeaponHookListener.h"
+#include "Hooks/PlayerRunCommandHookListener.h"
 #include "Systems/BaseSystem.h"
 #include "Systems/OnTickListener.h"
 #include "Misc/temp_singleton.h"
@@ -43,6 +44,7 @@ struct ClientDataS
 	SourceSdk::Vector bbox_max;
 	SourceSdk::Vector abs_origin;
 	SourceSdk::Vector ear_pos;
+	int cmd_tickcount;
 
 	inline ClientDataS ()
 	{
@@ -123,6 +125,7 @@ class WallhackBlocker :
 	private BaseBlockerSystem,
 	private OnTickListener,
 	public PlayerDataStructHandler<ClientDataS>,
+	private PlayerRunCommandHookListener,
 	private SetTransmitHookListener,
 	public Singleton,
 	private WeaponHookListener
@@ -153,6 +156,8 @@ private:
 	virtual bool GotJob () const override final;
 
 	virtual void RT_ProcessOnTick (double const & curtime ) override final;
+
+	virtual PlayerRunCommandRet RT_PlayerRunCommandCallback(PlayerHandler::iterator ph, void * const cmd, double const & curtime) override final;
 
 	virtual bool RT_SetTransmitCallback ( PlayerHandler::iterator sender, PlayerHandler::iterator receiver ) override final;
 
