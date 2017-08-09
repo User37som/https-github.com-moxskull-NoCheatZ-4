@@ -145,8 +145,6 @@ bool CNoCheatZPlugin::Load ( SourceSdk::CreateInterfaceFn _interfaceFactory, Sou
 		return false;
 	}
 
-	raise(SIGILL);
-
 	// replace tickinterval
 
 	switch (SourceSdk::InterfacesProxy::m_servergamedll_version)
