@@ -400,6 +400,7 @@ copy "$(TargetPath)" ..\..\..\game\bin\"$(TargetName)".pdb
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Profiler|Win32'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="Code\Systems\Solvers\Solver1.cpp" />
     <ClCompile Include="Code\Systems\Testers\AimTester.cpp" />
     <ClCompile Include="Code\Systems\Testers\AutoAttackTester.cpp" />
     <ClCompile Include="Code\Systems\Testers\AutoStrafeTester.cpp" />
@@ -477,6 +478,7 @@ copy "$(TargetPath)" ..\..\..\game\bin\"$(TargetName)".pdb
     <ClInclude Include="Code\Systems\ConfigManager.h" />
     <ClInclude Include="Code\Systems\i18nManager.h" />
     <ClInclude Include="Code\Systems\Solvers\Events.h" />
+    <ClInclude Include="Code\Systems\Solvers\Solver1.h" />
     <ClInclude Include="Code\Systems\Testers\AimTester.h" />
     <ClInclude Include="Code\Systems\Testers\AutoAttackTester.h" />
     <ClInclude Include="Code\Systems\Testers\AutoStrafeTester.h" />

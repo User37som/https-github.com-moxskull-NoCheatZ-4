@@ -21,6 +21,8 @@ limitations under the License.
 #include "Systems/Logger.h"
 #include "Systems/BanRequest.h"
 
+#include "Systems/Solvers/Solver1.h"
+
 AutoAttackTester::AutoAttackTester ( void ) :
 	BaseTesterSystem( "AutoAttackTester" ),
 	playerdata_class (),
@@ -125,6 +127,8 @@ void AutoAttackTester::OnAttack1Up ( PlayerHandler::iterator ph, int game_tick )
 void AutoAttackTester::OnAttack1Down ( PlayerHandler::iterator ph, int game_tick )
 {
 	AttackTriggerStats * const pdata ( GetPlayerDataStructByIndex ( ph.GetIndex () ) );
+
+	g_Solver1.DeclareEventForPlayer(SolverEvents::SHOOT, ph);
 
 	pdata->attack1_down_tick = game_tick;
 }

@@ -136,6 +136,16 @@ public:
 		while( m_current != cp_current );
 	}
 
+	inner_type * ModCurrent()
+	{
+		return m_current;
+	}
+
+	inner_type const * GetCurrent() const
+	{
+		return m_current;
+	}
+
 	Throwback () : m_current ( &( m_stack[ 0 ] ) )
 	{
 		static_assert ( std::is_copy_constructible< value_type>::value, "value_type is not copy constructible" );

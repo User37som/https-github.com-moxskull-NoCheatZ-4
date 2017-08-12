@@ -58,14 +58,17 @@ struct ClientDataS
 
 struct VisInfo
 {
+	double m_visibletime;
 	bool m_visible;
 	bool m_valid;
 
 	inline VisInfo () :
+		m_visibletime(0.0),
 		m_visible ( true ),
 		m_valid ( true )
 	{};
 	inline VisInfo ( const VisInfo& other ) :
+		m_visibletime(other.m_visibletime),
 		m_visible(other.m_visible),
 		m_valid(other.m_valid)
 	{
@@ -74,6 +77,11 @@ struct VisInfo
 	{
 		m_valid = true;
 		m_visible = visibility;
+
+		if (m_visible)
+		{
+			m_visibletime = Tier0::Plat_FloatTime();
+		}
 	};
 };
 
@@ -119,6 +127,11 @@ public:
 		m_cache[pa][pb] = VisInfo(visibility);
 		return !visibility;
 	}
+
+	inline double GetVisibleTime(int pa, int pb) const
+	{
+		return m_cache[pa][pb].m_visibletime;
+	}
 };
 
 class WallhackBlocker :
@@ -132,7 +145,7 @@ class WallhackBlocker :
 {
 	typedef PlayerDataStructHandler<ClientDataS> playerdatahandler_class;
 
-private:
+public:
 	NczPlayer* m_weapon_owner[ MAX_EDICTS ];
 	VisCache m_viscache;
 

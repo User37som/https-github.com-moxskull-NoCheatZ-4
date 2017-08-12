@@ -273,6 +273,7 @@
     <ClCompile Include="Code\Systems\Testers\AutoStrafeTester.cpp">
       <Filter>Code\Systems\Testers</Filter>
     </ClCompile>
+    <ClCompile Include="Code\Systems\Solvers\Solver1.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Code\plugin.h">
@@ -606,6 +607,9 @@
       <Filter>Code\Systems\Testers</Filter>
     </ClInclude>
     <ClInclude Include="Code\Systems\Solvers\Events.h">
+      <Filter>Code\Systems\Solvers</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Systems\Solvers\Solver1.h">
       <Filter>Code\Systems\Solvers</Filter>
     </ClInclude>
   </ItemGroup>

@@ -26,7 +26,9 @@
 
 #include <cstdint>
 
-enum SolverEvents : uint64_t
+typedef uint64_t solver_event_enum_type;
+
+enum SolverEvents : solver_event_enum_type
 {
 	NOTHING = 0, // This is not gonna be used, will kind of break signatures
 
@@ -53,3 +55,47 @@ enum SolverEvents : uint64_t
 	DETECT_TAMPERING_USERCMD = 16384
 
 };
+
+/* Game events stacktraces
+
+CGameClient::ProcessMove
+	CServerGameClients::ProcessUsercmds
+		CBasePlayer::ProcessUsercmds
+			CBasePlayer::PhysicsSimulate
+				CCSPlayer::PlayerRunCommand
+					CBasePlayer::PlayerRunCommand
+						CPlayerMove::RunCommand
+							CGameMovement::ProcessMovement
+								CGameMovement::PlayerMove
+									CCSGameMovement::CheckParameters
+										CCSGameMovement::DecayPunchAngle
+							CPlayerMove::RunPostThink
+								CBasePlayer::PostThink
+									CBasePlayer::ItemPostFrame
+										Weapon::ItemPostFrame
+											weapon_fire
+											weapon_fire_on_empty
+											Weapon::PrimaryAttack()
+												CWeaponCSBaseGun::CSBaseGunFire
+													FX_FireBullets
+														StartLagCompensation
+														CCSPlayer::FireBullet
+															bullet_impact
+															CBaseEntity::DispatchTraceAttack
+																CBaseEntity::TraceAttack
+																	AddMultiDamage
+																		ApplyMultiDamage
+																			CBaseEntity::TakeDamage
+																				CCSPlayer::OnTakeDamage
+																					CBaseCombatCharacter::OnTakeDamage
+																						CCSPlayer::OnTakeDamage_Alive
+																							player_hurt
+																						CBaseCombatCharacter::Event_Killed
+																							UTIL_Remove
+																								CBaseCombatCharacter::UpdateOnRemove
+																									CCSGameRules::DeathNotice
+																										payer_death
+														FinishLagCompensation
+												CCSPlayer::KickBack
+													CBasePlayer::SetPunchAngle
+*/
